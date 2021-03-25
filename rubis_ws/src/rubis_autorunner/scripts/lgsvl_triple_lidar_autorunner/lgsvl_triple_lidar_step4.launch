@@ -1,0 +1,13 @@
+<launch>
+  <!-- vision_darknet_detect -->
+  <include file="$(find vision_darknet_detect)/launch/vision_yolo3_detect.launch">
+    <arg name="gpu_device_id" value="0"/>
+    <arg name="score_threshold" value="0.5"/>
+    <arg name="nms_threshold" value="0.45"/>
+    <arg name="network_definition_file" value="$(env HOME)/autoware.ai/autoware_files/vision/yolov3-320.cfg"/>
+    <arg name="pretrained_model_file" value="$(env HOME)/autoware.ai/autoware_files/vision/yolov3-320.weights"/>
+    <arg name="names_file" value="$(find vision_darknet_detect)/darknet/cfg/coco.names"/>
+    <arg name="camera_id" value="/"/>
+    <arg name="image_src" value="/image_raw"/>
+  </include>
+</launch>

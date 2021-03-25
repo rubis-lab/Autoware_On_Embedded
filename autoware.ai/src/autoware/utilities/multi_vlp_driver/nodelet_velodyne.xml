@@ -1,0 +1,9 @@
+<library path="lib/libdriver_nodelet">
+  <class name="multi_vlp_driver/DriverNodelet"
+         type="multi_vlp_driver::DriverNodelet"
+         base_class_type="nodelet::Nodelet">
+    <description> 
+      Publish raw Velodyne data packets.
+    </description>
+  </class>
+</library>

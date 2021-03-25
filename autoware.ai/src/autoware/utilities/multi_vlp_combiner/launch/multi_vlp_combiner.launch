@@ -1,0 +1,39 @@
+<launch>
+  <arg name="rpm" default="600.0" />
+  <arg name="points_topic_1" default="/points_raw_1" />
+  <arg name="points_topic_2" default="/points_raw_2" />
+  <arg name="output_topic" default="/points_raw" />
+  <arg name="output_frame_id" default="velodyne" />
+  <arg name="tf1_x" default="0" />
+  <arg name="tf1_y" default="0" />
+  <arg name="tf1_z" default="0" />
+  <arg name="tf1_roll" default="0" />
+  <arg name="tf1_pitch" default="0" />
+  <arg name="tf1_yaw" default="0" />
+  <arg name="tf2_x" default="0" />
+  <arg name="tf2_y" default="0" />
+  <arg name="tf2_z" default="0" />
+  <arg name="tf2_roll" default="0" />
+  <arg name="tf2_pitch" default="0" />
+  <arg name="tf2_yaw" default="0" />
+
+  <node name="multi_vlp_combiner" pkg="multi_vlp_combiner" type="multi_vlp_combiner" output="screen">
+    <param name="rpm" value="$(arg rpm)" />
+    <param name="points_topic_1" value="$(arg points_topic_1)" />
+    <param name="points_topic_2" value="$(arg points_topic_2)" />
+    <param name="output_topic" value="$(arg output_topic)" />
+    <param name="output_frame_id" value="$(arg output_frame_id)" />
+    <param name="tf1_x" value="$(arg tf1_x)" />
+    <param name="tf1_y" value="$(arg tf1_y)" />
+    <param name="tf1_z" value="$(arg tf1_z)" />
+    <param name="tf1_roll" value="$(arg tf1_roll)" />
+    <param name="tf1_pitch" value="$(arg tf1_pitch)" />
+    <param name="tf1_yaw" value="$(arg tf1_yaw)" />
+    <param name="tf2_x" value="$(arg tf2_x)" />
+    <param name="tf2_y" value="$(arg tf2_y)" />
+    <param name="tf2_z" value="$(arg tf2_z)" />
+    <param name="tf2_roll" value="$(arg tf2_roll)" />
+    <param name="tf2_pitch" value="$(arg tf2_pitch)" />
+    <param name="tf2_yaw" value="$(arg tf2_yaw)" />
+  </node>
+</launch>

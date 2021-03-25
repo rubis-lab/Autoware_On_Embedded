@@ -1,0 +1,34 @@
+<launch>  
+  
+  <arg name="max_distance_to_lane"   default="1.0"/>
+  <arg name="prediction_distance"   default="25.0"/>
+  <arg name="enableGenrateBranches"   default="false"/>
+  <arg name="enableCurbObstacles"   default="false" />
+  <arg name="distanceBetweenCurbs"   default="1.5" />
+  <arg name="visualizationTime"     default="0.25" />
+  <arg name="enableStepByStepSignal"   default="false" />
+  <arg name="enableParticleFilterPrediction"   default="false" />
+  <arg name="input_object_list" default="[/tracked_objects]" />
+  <arg name="object_tf_list" default="[/velodyne]" />
+  
+  
+  <node pkg="op_local_planner" type="op_motion_predictor" name="op_motion_predictor" output="screen">    
+    <param name="max_distance_to_lane"     value="$(arg max_distance_to_lane)"/>
+    <param name="prediction_distance"     value="$(arg prediction_distance)"/>
+    <param name="enableGenrateBranches"   value="$(arg enableGenrateBranches)"/>
+    <param name="enableCurbObstacles"     value="$(arg enableCurbObstacles)" />
+    <param name="distanceBetweenCurbs"     value="$(arg distanceBetweenCurbs)" />
+    <param name="visualizationTime"     value="$(arg visualizationTime)" />
+    <param name="enableStepByStepSignal"   value="$(arg enableStepByStepSignal)" />
+    <param name="enableParticleFilterPrediction"   value="$(arg enableParticleFilterPrediction)" />
+    <param name="input_object_list" value="$(arg input_object_list)" />
+    <param name="object_tf_list" value="$(arg object_tf_list)" />
+  </node>
+
+  <node pkg="detected_objects_visualizer" type="visualize_detected_objects" name="predicted_objects_visualizer"
+        output="screen">
+    <param name="objects_src_topic" value="/predicted_objects"/>
+    <param name="label" value="total" />
+  </node>
+
+</launch>

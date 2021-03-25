@@ -1,0 +1,64 @@
+<!-- -*- mode: XML -*- -->
+<!-- start multi_vlp_driver/DriverNodelet in a nodelet manager -->
+
+<launch>
+
+  <arg name="device_ip_1" default="192.168.1.201" />
+  <arg name="frame_id_1" default="velodyne" />
+  <arg name="device_ip_2" default="192.168.1.202" />
+  <arg name="frame_id_2" default="velodyne" />
+  <arg name="packets_topic_1" default="velodyne_packets_1"/>
+  <arg name="packets_topic_2" default="velodyne_packets_2"/>
+
+  <arg name="manager" default="velodyne_nodelet_manager" />
+  <arg name="model" default="64E" />
+  <arg name="pcap" default="" />
+  <arg name="port" default="2368" />
+  <arg name="read_fast" default="false" />
+  <arg name="read_once" default="false" />
+  <arg name="repeat_delay" default="0.0" />
+  <arg name="rpm" default="600.0" />
+  <arg name="gps_time" default="false" />
+  <arg name="cut_angle" default="-0.01" />
+  <arg name="timestamp_first_packet" default="false" />
+
+  <!-- start nodelet manager -->
+  <node pkg="nodelet" type="nodelet" name="$(arg manager)_1" args="manager" output="screen"/>
+
+  <node pkg="nodelet" type="nodelet" name="$(arg manager)_2" args="manager" output="screen"/>
+
+  <node pkg="nodelet" type="nodelet" name="$(arg manager)_driver_1"
+        args="load multi_vlp_driver/DriverNodelet $(arg manager)_1" >
+    <param name="packets_topic" value="$(arg packets_topic_1)" />
+    <param name="device_ip" value="$(arg device_ip_1)" />
+    <param name="frame_id" value="$(arg frame_id_1)"/>
+    <param name="model" value="$(arg model)"/>
+    <param name="pcap" value="$(arg pcap)"/>
+    <param name="port" value="$(arg port)" />
+    <param name="read_fast" value="$(arg read_fast)"/>
+    <param name="read_once" value="$(arg read_once)"/>
+    <param name="repeat_delay" value="$(arg repeat_delay)"/>
+    <param name="rpm" value="$(arg rpm)"/>
+    <param name="gps_time" value="$(arg gps_time)"/>
+    <param name="cut_angle" value="$(arg cut_angle)"/>
+    <param name="timestamp_first_packet" value="$(arg timestamp_first_packet)"/>
+  </node>
+
+  <node pkg="nodelet" type="nodelet" name="$(arg manager)_driver_2"
+        args="load multi_vlp_driver/DriverNodelet $(arg manager)_2" >
+    <param name="packets_topic" value="$(arg packets_topic_2)" />
+    <param name="device_ip" value="$(arg device_ip_2)" />
+    <param name="frame_id" value="$(arg frame_id_2)"/>
+    <param name="model" value="$(arg model)"/>
+    <param name="pcap" value="$(arg pcap)"/>
+    <param name="port" value="2369" />
+    <param name="read_fast" value="$(arg read_fast)"/>
+    <param name="read_once" value="$(arg read_once)"/>
+    <param name="repeat_delay" value="$(arg repeat_delay)"/>
+    <param name="rpm" value="$(arg rpm)"/>
+    <param name="gps_time" value="$(arg gps_time)"/>
+    <param name="cut_angle" value="$(arg cut_angle)"/>
+    <param name="timestamp_first_packet" value="$(arg timestamp_first_packet)"/>
+  </node>
+
+</launch>

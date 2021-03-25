@@ -1,0 +1,35 @@
+<class_libraries>
+
+  <library path="lib/libcloud_nodelet">
+    <class name="multi_vlp_converter/CloudNodelet"
+           type="multi_vlp_converter::CloudNodelet"
+           base_class_type="nodelet::Nodelet">
+      <description>
+        Aggregates points from multiple packets, publishing PointCloud2.
+      </description>
+    </class>
+  </library>
+
+  <library path="lib/libringcolors_nodelet">
+    <class name="multi_vlp_converter/RingColorsNodelet"
+           type="multi_vlp_converter::RingColorsNodelet"
+           base_class_type="nodelet::Nodelet">
+      <description>
+        Converts a Velodyne PointCloud2 to PointXYZRGB, assigning colors
+        for visualization of the laser rings.
+      </description>
+    </class>
+  </library>
+
+  <library path="lib/libtransform_nodelet">
+    <class name="multi_vlp_converter/TransformNodelet"
+           type="multi_vlp_converter::TransformNodelet"
+           base_class_type="nodelet::Nodelet">
+      <description>
+        Transforms packets into /map frame, publishing multiple packets
+        as PointCloud2.
+      </description>
+    </class>
+  </library>
+
+</class_libraries>

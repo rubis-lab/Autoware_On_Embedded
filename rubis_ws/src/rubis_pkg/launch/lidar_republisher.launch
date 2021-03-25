@@ -1,0 +1,9 @@
+<launch>
+    <arg name="input_topic" default="/points_raw_origin"/>
+    <arg name="output_topic" default="/points_raw"/>
+    <arg name="node_name" default="lidar_republisher"/>
+    <node pkg="rubis_pkg" type="lidar_republisher" name="$(arg node_name)" output="screen">
+        <param name="/input_topic" value="$(arg input_topic)" />
+        <param name="/output_topic" value="$(arg output_topic)" />
+    </node>
+</launch>

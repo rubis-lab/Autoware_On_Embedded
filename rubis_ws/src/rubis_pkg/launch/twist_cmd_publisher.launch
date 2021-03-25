@@ -1,0 +1,11 @@
+<launch>
+    <arg name="target_velocity" default="2.0"/>
+    <node pkg="rubis_pkg" type="twist_cmd_publisher" name="twist_cmd_publisher" output="screen">
+        <param name="target_velocity" value="$(arg target_velocity)" />
+    </node>
+
+  <node pkg="twist_gate" type="twist_gate" name="twist_gate" output="log">
+    <param name="loop_rate" value="30.0" />
+    <param name="use_decision_maker" value="false" />
+  </node>
+</launch>

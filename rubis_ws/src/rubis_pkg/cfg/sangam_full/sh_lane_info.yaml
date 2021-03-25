@@ -1,0 +1,4813 @@
+lane_info_list:
+  # lain 1+
+  -
+    id : 1
+    start_idx : 2
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2051.3
+        y : -1030.6
+        z : 0.0
+      -
+        x : 1986.7
+        y : -1004.1
+        z : 0.0
+  -
+    id : 2
+    start_idx : 3
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1986.7
+        y : -1004.1
+        z : 0.0
+      -
+        x : 1950.8
+        y : -990.4
+        z : 0.0
+  -
+    id : 3
+    start_idx : 3
+    end_idx : 4
+    left_turn : 0
+    right_turn : 1
+    pose :
+      -
+        x : 2019.9
+        y : -1017.6
+        z : 0.0
+      -
+        x : 2005.2
+        y : -1007.3
+        z : 0.0
+  -
+    id : 4
+    start_idx : 3
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2005.2
+        y : -1007.3
+        z : 0.0
+      -
+        x : 1987.6
+        y : -1001.1
+        z : 0.0
+  -
+    id : 5
+    start_idx : 4
+    end_idx : 4
+    left_turn : 0
+    right_turn : 1
+    pose :
+      -
+        x : 1987.6
+        y : -1001.1
+        z : 0.0
+      -
+        x : 1972.5
+        y : -990.9
+        z : 0.0        
+  -
+    id : 6
+    start_idx : 4
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1972.5
+        y : -990.9
+        z : 0.0
+      -
+        x : 1949.4
+        y : -982.1
+        z : 0.0
+  -
+    id : 7
+    start_idx : 3
+    end_idx : 5
+    left_turn : 1
+    right_turn : 0
+    pose :
+      -
+        x : 2019.9
+        y : -1017.6
+        z : 0.0
+      -
+        x : 2004.2
+        y : -1015.0
+        z : 0.0
+  -
+    id : 8
+    start_idx : 3
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2004.2
+        y : -1015.0
+        z : 0.0 
+      -
+        x : 1988.6
+        y : -1008.0
+        z : 0.0 
+  -
+    id : 9
+    start_idx : 4
+    end_idx : 4
+    left_turn : 1
+    right_turn : 0
+    pose :
+      -
+        x : 1988.6
+        y : -1008.0
+        z : 0.0 
+      -
+        x : 1967.0
+        y : -1003.4
+        z : 0.0 
+  -
+    id : 10
+    start_idx : 4
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1967.0
+        y : -1003.4
+        z : 0.0 
+      -
+        x : 1942.8
+        y : -993.3
+        z : 0.0
+  # lain 1-
+  -
+    id : 11
+    start_idx : 4
+    end_idx : 6
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1958.1
+        y : -1004.4
+        z : 0.0
+      -
+        x : 2047.2
+        y : -1040.1
+        z : 0.0  
+  -
+    id : 12
+    start_idx : 1
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1962.4
+        y : -1017.0
+        z : 0.0
+      -
+        x : 1998.9
+        y : -1032.2
+        z : 0.0
+  -
+    id : 13
+    start_idx : 2
+    end_idx : 4
+    left_turn : 1
+    right_turn : 0
+    pose :
+      -
+        x : 1998.9
+        y : -1032.2
+        z : 0.0 
+      -
+        x : 2021.0
+        y : -1035.6
+        z : 0.0
+  -
+    id : 14
+    start_idx : 2
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2021.0
+        y : -1035.6
+        z : 0.0
+      -
+        x : 2042.5
+        y : -1045.2
+        z : 0.0 
+  # lain 2+
+  -
+    id : 15
+    start_idx : 3
+    end_idx : 6
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1896.2
+        y : -972.8
+        z : 0.0
+      -
+        x : 1676.6
+        y : -921.0
+        z : 0.0
+  -
+    id : 16
+    start_idx : 3
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1776.1
+        y : -941.3
+        z : 0.0
+      -
+        x : 1735.4
+        y : -931.7
+        z : 0.0
+  -
+    id : 17
+    start_idx : 2
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1892.0
+        y : -931.8
+        z : 0.0
+      -
+        x : 1683.7
+        y : -916.3
+        z : 0.0
+  -
+    id : 18
+    start_idx : 4
+    end_idx : 7
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1898.1
+        y : -975.9
+        z : 0.0
+      -
+        x : 1860.0
+        y : -967.5
+        z : 0.0
+  -
+    id : 19
+    start_idx : 4
+    end_idx : 6
+    left_turn : 0
+    right_turn : 1
+    pose :
+      -
+        x : 1860.0
+        y : -967.5
+        z : 0.0
+      -
+        x : 1837.1
+        y : -958.0
+        z : 0.0
+  -
+    id : 20
+    start_idx : 3
+    end_idx : 5
+    left_turn : 0
+    right_turn : 1
+    pose :
+      -
+        x : 1810.4
+        y : -951.8
+        z : 0.0
+      -
+        x : 1776.7
+        y : -941.1
+        z : 0.0
+  -
+    id : 21
+    start_idx : 3
+    end_idx : 5
+    left_turn : 0
+    right_turn : 1
+    pose :
+      -
+        x : 1735.0
+        y : -941.6
+        z : 0.0
+      -
+        x : 1698.4
+        y : -920.2
+        z : 0.0
+  -
+    id : 22
+    start_idx : 3
+    end_idx : 4
+    left_turn : 1
+    right_turn : 0
+    pose :
+      -
+        x : 1805.0
+        y : -944.5
+        z : 0.0
+      -
+        x : 1778.8
+        y : -941.9
+        z : 0.0
+  -
+    id : 23
+    start_idx : 3
+    end_idx : 5
+    left_turn : 1
+    right_turn : 0
+    pose :
+      -
+        x : 1734.9
+        y : -931.9
+        z : 0.0
+      -
+        x : 1714.3
+        y : -930.0
+        z : 0.0
+  # lain 2+        
+  -
+    id : 24
+    start_idx : 3
+    end_idx : 7
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1675.1
+        y : -934.8
+        z : 0.0
+      -
+        x : 1896.3
+        y : -983.1
+        z : 0.0
+  -
+    id : 25
+    start_idx : 4
+    end_idx : 6
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1739.2
+        y : -946.1
+        z : 0.0
+      -
+        x : 1896.2
+        y : -979.5
+        z : 0.0
+  -
+    id : 26
+    start_idx : 3
+    end_idx : 6
+    left_turn : 0
+    right_turn : 1
+    pose :
+      -
+        x : 1714.5
+        y : -944.0
+        z : 0.0
+      -
+        x : 1730.5
+        y : -951.9
+        z : 0.0        
+  -
+    id : 27
+    start_idx : 3
+    end_idx : 6
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1730.5
+        y : -951.9
+        z : 0.0 
+      -
+        x : 1746.4
+        y : -954.7
+        z : 0.0
+  -
+    id : 28
+    start_idx : 3
+    end_idx : 5
+    left_turn : 0
+    right_turn : 1
+    pose :
+      -
+        x : 1746.4
+        y : -954.7
+        z : 0.0 
+      -
+        x : 1761.5
+        y : -961.4
+        z : 0.0
+  -
+    id : 29
+    start_idx : 3
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1761.5
+        y : -961.4
+        z : 0.0 
+      -
+        x : 1774.4
+        y : -963.7
+        z : 0.0
+  -
+    id : 30
+    start_idx : 3
+    end_idx : 4
+    left_turn : 0
+    right_turn : 1
+    pose :
+      -
+        x : 1774.4
+        y : -963.7
+        z : 0.0 
+      -
+        x : 1793.0
+        y : -972.2
+        z : 0.0
+  -
+    id : 31
+    start_idx : 3
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1793.0
+        y : -972.2
+        z : 0.0
+      -
+        x : 1820.1
+        y : -978.1
+        z : 0.0
+  -
+    id : 32
+    start_idx : 4
+    end_idx : 4
+    left_turn : 0
+    right_turn : 1
+    pose :
+      -
+        x : 1820.1
+        y : -978.1
+        z : 0.0 
+      -
+        x : 1856.4
+        y : -990.9
+        z : 0.0
+  -
+    id : 33
+    start_idx : 4
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1856.4
+        y : -990.9
+        z : 0.0 
+      -
+        x : 1894.1
+        y : -999.6
+        z : 0.0
+  -
+    id : 34
+    start_idx : 4
+    end_idx : 6
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1712.6
+        y : -943.6
+        z : 0.0 
+      -
+        x : 1736.7
+        y : -945.4
+        z : 0.0
+  # lain 3+        
+  -
+    id : 35
+    start_idx : 3
+    end_idx : 6
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1617.8
+        y : -906.4
+        z : 0.0
+      -
+        x : 1541.5
+        y : -889.4
+        z : 0.0
+  -
+    id : 36
+    start_idx : 2 
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1614.9
+        y : -898.5
+        z : 0.0
+      -
+        x : 1544.9
+        y : -883.6
+        z : 0.0
+  # lain 3-    
+  -
+    id : 37
+    start_idx : 3
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1536.7
+        y : -905.1
+        z : 0.0
+      -
+        x : 1616.2
+        y : -922.7
+        z : 0.0
+  -
+    # left turn needed
+    id : 38
+    start_idx : 4
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 0000.0
+        y : 0000.0
+        z : 0.0
+      -
+        x : 0000.0
+        y : 0000.0
+        z : 0.0        
+  # lain 4+   
+  -
+    id : 39
+    start_idx : 4
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2006.8
+        y : -665.5
+        z : 0.0
+      -
+        x : 1962.2
+        y : -662.4
+        z : 0.0
+  -
+    id : 40
+    start_idx : 4
+    end_idx : 4
+    left_turn : 1
+    right_turn : 0
+    pose :
+      -
+        x : 2003.1
+        y : -665.5
+        z : 0.0
+      -
+        x : 1973.5
+        y : -670.1
+        z : 0.0
+  -
+    id : 41
+    start_idx : 4
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1973.5
+        y : -670.1
+        z : 0.0
+      -
+        x : 1961.6
+        y : -668.4
+        z : 0.0
+  # lain 4-   
+  -
+    id : 42
+    start_idx : 4
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1962.4
+        y : -672.2
+        z : 0.0
+      -
+        x : 2005.9
+        y : -675.6
+        z : 0.0
+  # lain 5+   
+  -
+    id : 43
+    start_idx : 3
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1900.8
+        y : -657.0
+        z : 0.0
+      -
+        x : 1772.1
+        y : -646.7
+        z : 0.0
+  -
+    id : 44
+    start_idx : 4
+    end_idx : 6
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1902.6
+        y : -659.6
+        z : 0.0
+      -
+        x : 1886.1
+        y : -658.7
+        z : 0.0
+  -
+    id : 45
+    start_idx : 4
+    end_idx : 5
+    left_turn : 0
+    right_turn : 1
+    pose :
+      -
+        x : 1886.1
+        y : -658.7
+        z : 0.0
+      -
+        x : 1889.9
+        y : -654.5
+        z : 0.0
+  -
+    id : 46
+    start_idx : 2
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1902.3
+        y : -653.8
+        z : 0.0
+      -
+        x : 1836.0
+        y : -648.2
+        z : 0.0
+  -
+    id : 47
+    start_idx : 3
+    end_idx : 4
+    left_turn : 1
+    right_turn : 0
+    pose :
+      -
+        x : 1836.0
+        y : -648.2
+        z : 0.0
+      -
+        x : 1807.0
+        y : -649.3
+        z : 0.0
+  # lain 5-   
+  -
+    id : 48
+    start_idx : 3
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1780.9
+        y : -660.2
+        z : 0.0
+      -
+        x : 1902.0
+        y : -668.7
+        z : 0.0
+  -
+    id : 49
+    start_idx : 4
+    end_idx : 6
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1780.0
+        y : -657.2
+        z : 0.0
+      -
+        x : 1868.8
+        y : -663.4
+        z : 0.0
+  -
+    id : 50
+    start_idx : 4
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1868.8
+        y : -663.4
+        z : 0.0
+      -
+        x : 1901.7
+        y : -665.0
+        z : 0.0
+  -
+    id : 51
+    start_idx : 2
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1841.0
+        y : -667.7
+        z : 0.0
+      -
+        x : 1870.2
+        y : -669.8
+        z : 0.0
+  -
+    id : 52
+    start_idx : 4
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1870.2
+        y : -669.8
+        z : 0.0
+      -
+        x : 1902.2
+        y : -671.9
+        z : 0.0
+  -
+    id : 53
+    start_idx : 3
+    end_idx : 4
+    left_turn : 0
+    right_turn : 1
+    pose :
+      -
+        x : 1810.2
+        y : -662.6
+        z : 0.0
+      -
+        x : 1838.6
+        y : -667.5
+        z : 0.0
+  -
+    id : 54
+    start_idx : 4
+    end_idx : 5
+    left_turn : 0
+    right_turn : 1
+    pose :
+      -
+        x : 1810.6
+        y : -659.5
+        z : 0.0
+      -
+        x : 1841.7
+        y : -664.5
+        z : 0.0
+  -
+    id : 55
+    start_idx : 4
+    end_idx : 5
+    left_turn : 1
+    right_turn : 0
+    pose :
+      -
+        x : 1810.2
+        y : -662.6
+        z : 0.0
+      -
+        x : 1841.5
+        y : -661.5
+        z : 0.0
+  # lain 6+   
+  -
+    id : 56
+    start_idx : 3
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1729.4
+        y : -646.7
+        z : 0.0
+      -
+        x : 1683.7
+        y : -642.9
+        z : 0.0
+  -
+    id : 57
+    start_idx : 3
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1683.7
+        y : -642.9
+        z : 0.0
+      -
+        x : 1657.9
+        y : -640.25
+        z : 0.0
+  -
+    id : 58
+    start_idx : 3
+    end_idx : 4
+    left_turn : 0
+    right_turn : 1
+    pose :
+      -
+        x : 1700.2
+        y : -644.4
+        z : 0.0
+      -
+        x : 1681.9
+        y : -639.5
+        z : 0.0
+  -
+    id : 59
+    start_idx : 4
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1681.9
+        y : -639.5
+        z : 0.0
+      -
+        x : 1655.6
+        y : -637.2
+        z : 0.0
+  # lain 6-
+  -
+    id : 60
+    start_idx : 3
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1667.4
+        y : -651.0
+        z : 0.0
+      -
+        x : 1732.7
+        y : -656.8
+        z : 0.0
+  -
+    id : 61
+    start_idx : 4
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1667.0
+        y : -647.8
+        z : 0.0
+      -
+        x : 1735.5
+        y : -653.8
+        z : 0.0
+  # lain 7+
+  -
+    id : 62
+    start_idx : 4
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2028.6
+        y : -343.9
+        z : 0.0
+      -
+        x : 1974.0
+        y : -342.0
+        z : 0.0
+  # lain 7-        
+  -
+    id : 63
+    start_idx : 4
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1971.3
+        y : -349.6
+        z : 0.0
+      -
+        x : 2029.4
+        y : -351.4
+        z : 0.0
+  # lain 8+  8~9 vectormap change needed 
+  -
+    id : 64
+    start_idx : 3
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1911.7
+        y : -337.5
+        z : 0.0
+      -
+        x : 1746.8
+        y : -325.5
+        z : 0.0
+  -
+    id : 65
+    start_idx : 4
+    end_idx : 6
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1914.3
+        y : -340.8
+        z : 0.0
+      -
+        x : 1890.1
+        y : -339.4
+        z : 0.0
+  -
+    id : 66
+    start_idx : 2
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1912.4
+        y : -334.2
+        z : 0.0
+      -
+        x : 1813.5
+        y : -326.7
+        z : 0.0
+  -
+    id : 67
+    start_idx : 4
+    end_idx : 5
+    left_turn : 0
+    right_turn : 1
+    pose :
+      -
+        x : 1911.7
+        y : -340.1
+        z : 0.0
+      -
+        x : 1870.0
+        y : -334.4
+        z : 0.0
+  -
+    id : 68
+    start_idx : 3
+    end_idx : 4
+    left_turn : 1
+    right_turn : 0
+    pose :
+      -
+        x : 1816.0
+        y : -326.8
+        z : 0.0
+      -
+        x : 1786.1
+        y : -328.3
+        z : 0.0
+  # lain 8-
+  -
+    id : 69
+    start_idx : 4
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1750.4
+        y : -335.5
+        z : 0.0
+      -
+        x : 1871.3
+        y : -344.4
+        z : 0.0
+  -
+    id : 70
+    start_idx : 3
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1871.3
+        y : -344.4
+        z : 0.0
+      -
+        x : 1911.2
+        y : -347.3
+        z : 0.0
+  -
+    id : 71
+    start_idx : 3
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1754.9
+        y : -339.0
+        z : 0.0
+      -
+        x : 1878.3
+        y : -347.9
+        z : 0.0
+  -
+    id : 72
+    start_idx : 4
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1878.3
+        y : -347.9
+        z : 0.0
+      -
+        x : 1910.7
+        y : -350.4
+        z : 0.0
+  -
+    id : 73
+    start_idx : 4
+    end_idx : 5
+    left_turn : 1
+    right_turn : 0
+    pose :
+      -
+        x : 1846.2
+        y : -342.4
+        z : 0.0
+      -
+        x : 1878.5
+        y : -341.6
+        z : 0.0
+  -
+    id : 74
+    start_idx : 4
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1878.5
+        y : -341.6
+        z : 0.0
+      -
+        x : 1911.7
+        y : -344.6
+        z : 0.0
+  # lain 9+
+  -
+    id : 75
+    start_idx : 3
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1717.3
+        y : -323.2
+        z : 0.0
+      -
+        x : 1639.7
+        y : -317.6
+        z : 0.0
+  -
+    id : 76
+    start_idx : 3
+    end_idx : 4
+    left_turn : 0
+    right_turn : 1
+    pose :
+      -
+        x : 1676.4
+        y : -320.2
+        z : 0.0
+      -
+        x : 1650.8
+        y : -315.4
+        z : 0.0
+  -
+    id : 77
+    start_idx : 4
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1650.8
+        y : -315.4
+        z : 0.0
+      -
+        x : 1632.7
+        y : -314.6
+        z : 0.0
+  -
+    id : 78
+    start_idx : 4
+    end_idx : 5
+    left_turn : 1
+    right_turn : 0
+    pose :
+      -
+        x : 1676.4
+        y : -320.2
+        z : 0.0
+      -
+        x : 1654.9
+        y : -321.9
+        z : 0.0
+  -
+    id : 79
+    start_idx : 4
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1654.9
+        y : -321.9
+        z : 0.0
+      -
+        x : 1637.2
+        y : -320.5
+        z : 0.0
+  # lain 9-
+  -
+    id : 80
+    start_idx : 4
+    end_idx : 6
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1640.4
+        y : -324.1
+        z : 0.0
+      -
+        x : 1699.1
+        y : -328.2
+        z : 0.0
+  -
+    id : 81
+    start_idx : 2
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1640.1
+        y : -329.8
+        z : 0.0
+      -
+        x : 1654.1
+        y : -331.2
+        z : 0.0
+  -
+    id : 82
+    start_idx : 3
+    end_idx : 4
+    left_turn : 1
+    right_turn : 0
+    pose :
+      -
+        x : 1654.1
+        y : -331.2
+        z : 0.0
+      -
+        x : 1685.7
+        y : -330.1
+        z : 0.0
+  -
+    id : 83
+    start_idx : 3
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1685.7
+        y : -330.1
+        z : 0.0
+      -
+        x : 1703.6
+        y : -331.7
+        z : 0.0
+  # lain 10+
+  -
+    id : 84
+    start_idx : 2
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2336.8
+        y : -67.1
+        z : 0.0
+      -
+        x : 2307.7
+        y : -65.0
+        z : 0.0
+  -
+    id : 85
+    start_idx : 2
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2307.7
+        y : -65.0
+        z : 0.0 
+      -
+        x : 2287.0
+        y : -63.5
+        z : 0.0
+  -
+    id : 86
+    start_idx : 3
+    end_idx : 4
+    left_turn : 0
+    right_turn : 1
+    pose :
+      -
+        x : 2323.5
+        y : -66.4
+        z : 0.0 
+      -
+        x : 2305.0
+        y : -61.4
+        z : 0.0 
+  -
+    id : 87
+    start_idx : 4
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2305.0
+        y : -61.4
+        z : 0.0
+      -
+        x : 2288.1
+        y : -60.5
+        z : 0.0
+  -
+    id : 88
+    start_idx : 3
+    end_idx : 4
+    left_turn : 1
+    right_turn : 0
+    pose :
+      -
+        x : 2334.4
+        y : -67.1
+        z : 0.0
+      -
+        x : 2321.8
+        y : -69.2
+        z : 0.0
+  -
+    id : 89
+    start_idx : 4
+    end_idx : 5
+    left_turn : 1
+    right_turn : 0
+    pose :
+      -
+        x : 2321.8
+        y : -69.2
+        z : 0.0
+      -
+        x : 2301.8
+        y : -71.2
+        z : 0.0
+  -
+    id : 90
+    start_idx : 4
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2301.8
+        y : -71.2
+        z : 0.0
+      -
+        x : 2286.4
+        y : -69.4
+        z : 0.0
+  # lain 10-
+  -
+    id : 91
+    start_idx : 3
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2286.2
+        y : -75.9
+        z : 0.0
+      -
+        x : 2307.7
+        y : -77.4
+        z : 0.0
+  -
+    id : 92
+    start_idx : 3
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2307.7
+        y : -77.4
+        z : 0.0
+      -
+        x : 2336.9
+        y : -79.7
+        z : 0.0
+  -
+    id : 93
+    start_idx : 4
+    end_idx : 6
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2287.7
+        y : -69.8
+        z : 0.0
+      -
+        x : 2308.9
+        y : -74.4
+        z : 0.0
+  -
+    id : 94
+    start_idx : 4
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2308.9
+        y : -74.4
+        z : 0.0
+      -
+        x : 2377.8
+        y : -76.6
+        z : 0.0
+  -
+    id : 95
+    start_idx : 2
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2286.2
+        y : -79.4
+        z : 0.0
+      -
+        x : 2305.3
+        y : -80.7
+        z : 0.0
+  -
+    id : 96
+    start_idx : 3
+    end_idx : 4
+    left_turn : 1
+    right_turn : 0
+    pose :
+      -
+        x : 2305.3
+        y : -80.7
+        z : 0.0
+      -
+        x : 2326.3
+        y : -78.9
+        z : 0.0
+  # lain 11+
+  -
+    id : 97
+    start_idx : 3
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2286.2
+        y : -75.9
+        z : 0.0
+      -
+        x : 2194.3
+        y : -56.9
+        z : 0.0
+  -
+    id : 98
+    start_idx : 3
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2194.3
+        y : -56.9
+        z : 0.0
+      -
+        x : 2158.3
+        y : -56.9
+        z : 0.0
+  -
+    id : 99
+    start_idx : 3
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2158.3
+        y : -56.9
+        z : 0.0
+      -
+        x : 2051.4
+        y : -49.2
+        z : 0.0
+  -
+    id : 100
+    start_idx : 3
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2051.4
+        y : -49.2
+        z : 0.0
+      -
+        x : 1983.9
+        y : -44.3
+        z : 0.0
+  -
+    id : 101
+    start_idx : 2
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2243.3
+        y : -57.4
+        z : 0.0
+      -
+        x : 2161.4
+        y : -54.3
+        z : 0.0
+  -
+    id : 102
+    start_idx : 2
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2161.4
+        y : -54.3
+        z : 0.0
+      -
+        x : 2079.2
+        y : -48.3
+        z : 0.0
+  -
+    id : 103
+    start_idx : 3
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2079.2
+        y : -48.3
+        z : 0.0
+      -
+        x : 2044.5
+        y : -42.5
+        z : 0.0
+  -
+    id : 104
+    start_idx : 3
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2044.5
+        y : -42.5
+        z : 0.0
+      -
+        x : 2011.5
+        y : -40.3
+        z : 0.0
+  -
+    id : 105
+    start_idx : 4
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2011.5
+        y : -40.3
+        z : 0.0
+      -
+        x : 1983.9
+        y : -38.7
+        z : 0.0
+  -
+    id : 106
+    start_idx : 4
+    end_idx : 6
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2241.2
+        y : -62.9
+        z : 0.0
+      -
+        x : 2217.6
+        y : -61.2
+        z : 0.0
+  -
+    id : 107
+    start_idx : 4
+    end_idx : 5
+    left_turn : 0
+    right_turn : 1
+    pose :
+      -
+        x : 2217.6
+        y : -61.2
+        z : 0.0
+      -
+        x : 2195.7
+        y : -56.7
+        z : 0.0
+  -
+    id : 108
+    start_idx : 3
+    end_idx : 4
+    left_turn : 0
+    right_turn : 1
+    pose :
+      -
+        x : 2195.7
+        y : -56.7
+        z : 0.0
+      -
+        x : 2161.8
+        y : -54.1
+        z : 0.0
+  -
+    id : 109
+    start_idx : 3
+    end_idx : 4
+    left_turn : 1
+    right_turn : 0
+    pose :
+      -
+        x : 2158.6
+        y : -54.1
+        z : 0.0
+      -
+        x : 2136.2
+        y : -55.8
+        z : 0.0
+  -
+    id : 110
+    start_idx : 4
+    end_idx : 5
+    left_turn : 1
+    right_turn : 0
+    pose :
+      -
+        x : 2050.9
+        y : -49.2
+        z : 0.0
+      -
+        x : 2024.9
+        y : -50.5
+        z : 0.0
+  -
+    id : 111
+    start_idx : 4
+    end_idx : 4
+    left_turn : 1
+    right_turn : 0
+    pose :
+      -
+        x : 2024.9
+        y : -50.5
+        z : 0.0
+      -
+        x : 2000.6
+        y : -48.6
+        z : 0.0
+  # lain 11-
+  -
+    id : 112
+    start_idx : 3
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1982.7
+        y : -54.0
+        z : 0.0
+      -
+        x : 2035.0
+        y : -57.8
+        z : 0.0
+  -
+    id : 113
+    start_idx : 3
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2035.0
+        y : -57.8
+        z : 0.0
+      -
+        x : 2161.5
+        y : -66.7
+        z : 0.0
+  -
+    id : 114
+    start_idx : 3
+    end_idx : 6
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2161.5
+        y : -66.7
+        z : 0.0
+      -
+        x : 2223.7
+        y : -71.0
+        z : 0.0
+  -
+    id : 115
+    start_idx : 4
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2223.7
+        y : -71.0
+        z : 0.0
+      -
+        x : 2242.6
+        y : -72.3
+        z : 0.0
+  -
+    id : 116
+    start_idx : 4
+    end_idx : 6
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1989.8
+        y : -51.7
+        z : 0.0
+      -
+        x : 2183.0
+        y : -65.5
+        z : 0.0
+  -
+    id : 117
+    start_idx : 4
+    end_idx : 5
+    left_turn : 1
+    right_turn : 0
+    pose :
+      -
+        x : 2183.0
+        y : -65.5
+        z : 0.0  
+      -
+        x : 2219.2
+        y : -64.6
+        z : 0.0 
+  -
+    id : 118
+    start_idx : 4
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2219.2
+        y : -64.6
+        z : 0.0 
+      -
+        x : 2238.7
+        y : -66.7
+        z : 0.0
+  -
+    id : 119
+    start_idx : 4
+    end_idx : 2
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1986.5
+        y : -57.1
+        z : 0.0 
+      -
+        x : 2009.2
+        y : -59.3
+        z : 0.0
+  -
+    id : 120
+    start_idx : 4
+    end_idx : 3
+    left_turn : 1
+    right_turn : 0
+    pose :
+      -
+        x : 2009.2
+        y : -59.3
+        z : 0.0   
+      -
+        x : 2037.9
+        y : -58.1
+        z : 0.0
+  -
+    id : 121
+    start_idx : 4
+    end_idx : 3
+    left_turn : 0
+    right_turn : 1
+    pose :
+      -
+        x : 2144.7
+        y : -65.8
+        z : 0.0   
+      -
+        x : 2172.9
+        y : -71.3
+        z : 0.0   
+  -
+    id : 122
+    start_idx : 4
+    end_idx : 3
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2172.9
+        y : -71.3
+        z : 0.0  
+      -
+        x : 2215.0
+        y : -73.8
+        z : 0.0
+  -
+    id : 123
+    start_idx : 4
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2215.0
+        y : -73.8
+        z : 0.0 
+      -
+        x : 2237.3
+        y : -75.1
+        z : 0.0
+  -
+    id : 124
+    start_idx : 4
+    end_idx : 4
+    left_turn : 1
+    right_turn : 0
+    pose :
+      -
+        x : 2063.0
+        y : -59.7
+        z : 0.0 
+      -
+        x : 2090.2
+        y : -58.6
+        z : 0.0
+  -
+    id : 125
+    start_idx : 4
+    end_idx : 4
+    left_turn : 0
+    right_turn : 1
+    pose :
+      -
+        x : 2064.8
+        y : -56.6
+        z : 0.0 
+      -
+        x : 2084.1
+        y : -61.4
+        z : 0.0
+  # lain 12+
+  -
+    id : 126
+    start_idx : 3
+    end_idx : 6
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1925.1
+        y : -40.1
+        z : 0.0
+      -
+        x : 1888.5
+        y : -37.5
+        z : 0.0
+  -
+    id : 127
+    start_idx : 3
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1888.5
+        y : -37.5
+        z : 0.0
+      -
+        x : 1777.5
+        y : -29.5
+        z : 0.0
+  -
+    id : 128
+    start_idx : 3
+    end_idx : 6
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1777.5
+        y : -29.5
+        z : 0.0
+      -
+        x : 1682.5
+        y : -22.7
+        z : 0.0
+  -
+    id : 129
+    start_idx : 4
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1682.5
+        y : -22.7
+        z : 0.0
+      -
+        x : 1655.2
+        y : -20.4
+        z : 0.0
+  -
+    id : 130
+    start_idx : 4
+    end_idx : 7
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1924.8
+        y : -42.6
+        z : 0.0
+      -
+        x : 1892.8
+        y : -40.8
+        z : 0.0
+  -
+    id : 131
+    start_idx : 4
+    end_idx : 6
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1924.8
+        y : -42.6
+        z : 0.0
+      -
+        x : 1777.1
+        y : -32.3
+        z : 0.0
+  -
+    id : 132
+    start_idx : 4
+    end_idx : 7
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1777.1
+        y : -32.3
+        z : 0.0
+      -
+        x : 1699.3
+        y : -26.7
+        z : 0.0
+  -
+    id : 133
+    start_idx : 4
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1699.3
+        y : -26.7
+        z : 0.0
+      -
+        x : 1679.7
+        y : -25.5
+        z : 0.0
+  -
+    id : 134
+    start_idx : 4
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1679.7
+        y : -25.5
+        z : 0.0
+      -
+        x : 1654.8
+        y : -23.4
+        z : 0.0
+  -
+    id : 135
+    start_idx : 1
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1925.3
+        y : -34.7
+        z : 0.0
+      -
+        x : 1896.5
+        y : -32.4
+        z : 0.0
+  -
+    id : 136
+    start_idx : 2
+    end_idx : 4
+    left_turn : 1
+    right_turn : 0
+    pose :
+      -
+        x : 1896.5
+        y : -32.4
+        z : 0.0
+      -
+        x : 1861.8
+        y : -32.8
+        z : 0.0
+  -
+    id : 137
+    start_idx : 2
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1861.8
+        y : -32.8
+        z : 0.0
+      -
+        x : 1776.4
+        y : -26.1
+        z : 0.0
+  -
+    id : 138
+    start_idx : 3
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1776.4
+        y : -26.1
+        z : 0.0
+      -
+        x : 1684.8
+        y : -19.8
+        z : 0.0
+  -
+    id : 139
+    start_idx : 4
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1684.8
+        y : -19.8
+        z : 0.0
+      -
+        x : 1655.0
+        y : -17.3
+        z : 0.0
+  -
+    id : 140
+    start_idx : 4
+    end_idx : 5
+    left_turn : 0
+    right_turn : 1
+    pose :
+      -
+        x : 1894.4
+        y : -40.9
+        z : 0.0
+      -
+        x : 1871.0
+        y : -36.3
+        z : 0.0
+  -
+    id : 141
+    start_idx : 3
+    end_idx : 5
+    left_turn : 0
+    right_turn : 1
+    pose :
+      -
+        x : 1782.3
+        y : -29.7
+        z : 0.0
+      -
+        x : 1750.9
+        y : -24.1
+        z : 0.0
+  -
+    id : 142
+    start_idx : 3
+    end_idx : 5
+    left_turn : 1
+    right_turn : 0
+    pose :
+      -
+        x : 1781.3
+        y : -26.4
+        z : 0.0
+      -
+        x : 1751.1
+        y : -27.5
+        z : 0.0
+  -
+    id : 143
+    start_idx : 4
+    end_idx : 5
+    left_turn : 1
+    right_turn : 0
+    pose :
+      -
+        x : 1719.4
+        y : -25.3
+        z : 0.0
+      -
+        x : 1696.2
+        y : -26.5
+        z : 0.0
+  # lain 12-
+  -
+    id : 144
+    start_idx : 3
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1655.6
+        y : -29.7
+        z : 0.0
+      -
+        x : 1824.6
+        y : -42.2
+        z : 0.0
+  -
+    id : 144
+    start_idx : 3
+    end_idx : 6
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1824.6
+        y : -42.2
+        z : 0.0
+      -
+        x : 1901.7
+        y : -47.8
+        z : 0.0
+  -
+    id : 145
+    start_idx : 4
+    end_idx : 6
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1647.0
+        y : -26.3
+        z : 0.0
+      -
+        x : 1852.3
+        y : -47.8
+        z : 0.0
+  -
+    id : 146
+    start_idx : 4
+    end_idx : 7
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1852.3
+        y : -47.8
+        z : 0.0
+      -
+        x : 1876.6
+        y : -42.9
+        z : 0.0
+  -
+    id : 147
+    start_idx : 4
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1876.6
+        y : -42.9
+        z : 0.0
+      -
+        x : 1890.1
+        y : -44.0
+        z : 0.0
+  -
+    id : 148
+    start_idx : 4
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1890.1
+        y : -44.0
+        z : 0.0
+      -
+        x : 1920.5
+        y : -46.3
+        z : 0.0
+  -
+    id : 149
+    start_idx : 2
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1640.0
+        y : -31.8
+        z : 0.0
+      -
+        x : 1655.3
+        y : -32.8
+        z : 0.0
+  -
+    id : 150
+    start_idx : 3
+    end_idx : 4
+    left_turn : 1
+    right_turn : 0
+    pose :
+      -
+        x : 1655.3
+        y : -32.8
+        z : 0.0
+      -
+        x : 1676.3
+        y : -31.5
+        z : 0.0
+  -
+    id : 151
+    start_idx : 3
+    end_idx : 4
+    left_turn : 0
+    right_turn : 1
+    pose :
+      -
+        x : 1816.9
+        y : -41.8
+        z : 0.0
+      -
+        x : 1852.2
+        y : -47.3
+        z : 0.0
+  -
+    id : 152
+    start_idx : 3
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1852.2
+        y : -47.3
+        z : 0.0
+      -
+        x : 1876.6
+        y : -49.1
+        z : 0.0
+  -
+    id : 153
+    start_idx : 4
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1876.6
+        y : -49.1
+        z : 0.0
+      -
+        x : 1918.9
+        y : -52.2
+        z : 0.0
+  -
+    id : 154
+    start_idx : 4
+    end_idx : 5
+    left_turn : 0
+    right_turn : 1
+    pose :
+      -
+        x : 1703.4
+        y : -30.1
+        z : 0.0
+      -
+        x : 1731.7
+        y : -35.5
+        z : 0.0
+  -
+    id : 155
+    start_idx : 4
+    end_idx : 5
+    left_turn : 1
+    right_turn : 0
+    pose :
+      -
+        x : 1707.8
+        y : -33.4
+        z : 0.0
+      -
+        x : 1731.8
+        y : -32.5
+        z : 0.0
+  # lain 13+
+  -
+    id : 156
+    start_idx : 3
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2351.1
+        y : 123.3
+        z : 0.0
+      -
+        x : 2317.6
+        y : 125.9
+        z : 0.0
+  -
+    id : 157
+    start_idx : 4
+    end_idx : 6
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2317.6
+        y : 125.9
+        z : 0.0
+      -
+        x : 2299.3
+        y : 127.6
+        z : 0.0
+  -
+    id : 158
+    start_idx : 3
+    end_idx : 4
+    left_turn : 0
+    right_turn : 1
+    pose :
+      -
+        x : 2351.1
+        y : 123.3
+        z : 0.0
+      -
+        x : 2334.4
+        y : 128.1
+        z : 0.0
+  -
+    id : 159
+    start_idx : 3
+    end_idx : 4
+    left_turn : 0
+    right_turn : 1
+    pose :
+      -
+        x : 2334.4
+        y : 128.1
+        z : 0.0 
+      -
+        x : 2315.5
+        y : 132.4
+        z : 0.0
+  -
+    id : 160
+    start_idx : 4
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2315.5
+        y : 132.4
+        z : 0.0    
+      -
+        x : 2303.0
+        y : 133.5
+        z : 0.0
+  -
+    id : 161
+    start_idx : 4
+    end_idx : 5
+    left_turn : 1
+    right_turn : 0
+    pose :
+      -
+        x : 2340.5
+        y : 124.1
+        z : 0.0    
+      -
+        x : 2324.8
+        y : 122.6
+        z : 0.0
+  -
+    id : 162
+    start_idx : 4
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2324.8
+        y : 122.6
+        z : 0.0
+      -
+        x : 2305.5
+        y : 123.9
+        z : 0.0
+  # lain 13-
+  -
+    id : 163
+    start_idx : 3
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2305.3
+        y : 117.5
+        z : 0.0
+      -
+        x : 2346.7
+        y : 114.2
+        z : 0.0
+  -
+    id : 164
+    start_idx : 4
+    end_idx : 6
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2305.0
+        y : 120.6
+        z : 0.0
+      -
+        x : 2347.7
+        y : 117.4
+        z : 0.0
+  -
+    id : 165
+    start_idx : 2
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2305.1
+        y : 114.7
+        z : 0.0
+      -
+        x : 2348.2
+        y : 117.3
+        z : 0.0
+  # lain 14+
+  -
+    id : 166
+    start_idx : 4
+    end_idx : 6
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2253.2
+        y : 130.7
+        z : 0.0
+      -
+        x : 2178.1
+        y : 135.9
+        z : 0.0
+  -
+    id : 167
+    start_idx : 4
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2178.1
+        y : 135.9
+        z : 0.0
+      -
+        x : 1989.4
+        y : 150.4
+        z : 0.0
+  -
+    id : 168
+    start_idx : 2
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2257.5
+        y : 135.9
+        z : 0.0
+      -
+        x : 2181.4
+        y : 142.3
+        z : 0.0
+  -
+    id : 169
+    start_idx : 3
+    end_idx : 4
+    left_turn : 1
+    right_turn : 0
+    pose :
+      -
+        x : 2181.4
+        y : 142.3
+        z : 0.0
+      -
+        x : 2151.7
+        y : 140.6
+        z : 0.0
+  -
+    id : 170
+    start_idx : 3
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2151.7
+        y : 140.6
+        z : 0.0  
+      -
+        x : 2027.6
+        y : 150.3
+        z : 0.0
+  -
+    id : 171
+    start_idx : 3
+    end_idx : 4
+    left_turn : 0
+    right_turn : 1
+    pose :
+      -
+        x : 2027.6
+        y : 150.3
+        z : 0.0  
+      -
+        x : 2009.5
+        y : 155.2
+        z : 0.0
+  -
+    id : 172
+    start_idx : 4
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2009.5
+        y : 155.2
+        z : 0.0
+      -
+        x : 1989.8
+        y : 156.3
+        z : 0.0
+  -
+    id : 173
+    start_idx : 4
+    end_idx : 5
+    left_turn : 1
+    right_turn : 0
+    pose :
+      -
+        x : 2045.7
+        y : 145.6
+        z : 0.0
+      -
+        x : 2023.0
+        y : 144.4
+        z : 0.0
+  -
+    id : 174
+    start_idx : 4
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2023.0
+        y : 144.4
+        z : 0.0
+      -
+        x : 1990.5
+        y : 146.9
+        z : 0.0
+  -
+    id : 175
+    start_idx : 4
+    end_idx : 5
+    left_turn : 0
+    right_turn : 1
+    pose :
+      -
+        x : 2082.3
+        y : 143.3
+        z : 0.0
+      -
+        x : 2048.5
+        y : 149.0
+        z : 0.0
+  -
+    id : 176
+    start_idx : 4
+    end_idx : 5
+    left_turn : 1
+    right_turn : 0
+    pose :
+      -
+        x : 2098.4
+        y : 145.4
+        z : 0.0
+      -
+        x : 2067.6
+        y : 144.2
+        z : 0.0
+  # lain 14-
+  -
+    id : 177
+    start_idx : 3
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1988.5
+        y : 140.9
+        z : 0.0
+      -
+        x : 2047.2
+        y : 136.2
+        z : 0.0
+  -
+    id : 178
+    start_idx : 3
+    end_idx : 6
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2047.2
+        y : 136.2
+        z : 0.0
+      -
+        x : 2069.1
+        y : 134.8
+        z : 0.0
+  -
+    id : 179
+    start_idx : 3
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2069.1
+        y : 134.8
+        z : 0.0
+      -
+        x : 2093.5
+        y : 132.7
+        z : 0.0
+  -
+    id : 180
+    start_idx : 3
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2093.5
+        y : 132.7
+        z : 0.0
+      -
+        x : 2175.9
+        y : 126.6
+        z : 0.0
+  -
+    id : 181
+    start_idx : 2
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2175.9
+        y : 126.6
+        z : 0.0
+      -
+        x : 2222.5
+        y : 123.3
+        z : 0.0
+  -
+    id : 182
+    start_idx : 3
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2222.5
+        y : 123.3
+        z : 0.0
+      -
+        x : 2257.1
+        y : 121.0
+        z : 0.0
+  -
+    id : 183
+    start_idx : 4
+    end_idx : 6
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1994.6
+        y : 143.1
+        z : 0.0
+      -
+        x : 2092.2
+        y : 136.4
+        z : 0.0
+  -
+    id : 184
+    start_idx : 4
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2092.2
+        y : 136.4
+        z : 0.0
+      -
+        x : 2182.2
+        y : 129.5
+        z : 0.0
+  -
+    id : 185
+    start_idx : 4
+    end_idx : 5
+    left_turn : 1
+    right_turn : 0
+    pose :
+      -
+        x : 2182.2
+        y : 129.5
+        z : 0.0
+      -
+        x : 2206.0
+        y : 130.8
+        z : 0.0
+  -
+    id : 186
+    start_idx : 4
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2206.0
+        y : 130.8
+        z : 0.0
+      -
+        x : 2228.2
+        y : 129.0
+        z : 0.0
+  -
+    id : 187
+    start_idx : 4
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2228.2
+        y : 129.0
+        z : 0.0
+      -
+        x : 2256.5
+        y : 127.0
+        z : 0.0
+  -
+    id : 188
+    start_idx : 2
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1990.5
+        y : 137.7
+        z : 0.0
+      -
+        x : 2017.8
+        y : 135.6
+        z : 0.0
+  -
+    id : 189
+    start_idx : 3
+    end_idx : 4
+    left_turn : 1
+    right_turn : 0
+    pose :
+      -
+        x : 2017.8
+        y : 135.6
+        z : 0.0
+      -
+        x : 2048.3
+        y : 136.1
+        z : 0.0
+  -
+    id : 190
+    start_idx : 3
+    end_idx : 4
+    left_turn : 0
+    right_turn : 1
+    pose :
+      -
+        x : 2201.3
+        y : 125.2
+        z : 0.0
+      -
+        x : 2226.8
+        y : 120.0
+        z : 0.0
+  -
+    id : 191
+    start_idx : 4
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2201.3
+        y : 125.2
+        z : 0.0
+      -
+        x : 2226.8
+        y : 120.0
+        z : 0.0
+  -
+    id : 192
+    start_idx : 4
+    end_idx : 5
+    left_turn : 0
+    right_turn : 1
+    pose :
+      -
+        x : 2071.0
+        y : 137.8
+        z : 0.0
+      -
+        x : 2094.7
+        y : 132.9
+        z : 0.0
+  -
+    id : 193
+    start_idx : 4
+    end_idx : 5
+    left_turn : 1
+    right_turn : 0
+    pose :
+      -
+        x : 2074.3
+        y : 134.4
+        z : 0.0
+      -
+        x : 2093.2
+        y : 136.2
+        z : 0.0
+  # lain 15+
+  -
+    id : 194
+    start_idx : 4
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1928.0
+        y : 154.6
+        z : 0.0
+      -
+        x : 1800.7
+        y : 164.2
+        z : 0.0
+  -
+    id : 195
+    start_idx : 4
+    end_idx : 6
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1800.7
+        y : 164.2
+        z : 0.0
+      -
+        x : 1752.7
+        y : 167.5
+        z : 0.0
+  -
+    id : 196
+    start_idx : 4
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1752.7
+        y : 167.5
+        z : 0.0
+      -
+        x : 1674.7
+        y : 173.1
+        z : 0.0
+  -
+    id : 197
+    start_idx : 4
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1674.7
+        y : 173.1
+        z : 0.0
+      -
+        x : 1656.1
+        y : 175.0
+        z : 0.0
+  -
+    id : 198
+    start_idx : 3
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1931.5
+        y : 157.2
+        z : 0.0
+      -
+        x : 1803.9
+        y : 167.0
+        z : 0.0
+  -
+    id : 199
+    start_idx : 3
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1803.9
+        y : 167.0
+        z : 0.0
+      -
+        x : 1756.8
+        y : 170.4
+        z : 0.0
+  -
+    id : 200
+    start_idx : 3
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1756.8
+        y : 170.4
+        z : 0.0
+      -
+        x : 1688.7
+        y : 176.1
+        z : 0.0
+  -
+    id : 201
+    start_idx : 4
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1688.7
+        y : 176.1
+        z : 0.0
+      -
+        x : 1655.5
+        y : 177.4
+        z : 0.0
+  -
+    id : 202
+    start_idx : 4
+    end_idx : 4
+    left_turn : 0
+    right_turn : 1
+    pose :
+      -
+        x : 1755.9
+        y : 167.4
+        z : 0.0
+      -
+        x : 1732.5
+        y : 172.2
+        z : 0.0
+  -
+    id : 203
+    start_idx : 4
+    end_idx : 4
+    left_turn : 1
+    right_turn : 0
+    pose :
+      -
+        x : 1756.5
+        y : 170.2
+        z : 0.0
+      -
+        x : 1734.0
+        y : 168.7
+        z : 0.0
+  # lain 15-   lane change needed
+  -
+    id : 204
+    start_idx : 4
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1663.1
+        y : 168.5
+        z : 0.0
+      -
+        x : 1773.3
+        y : 160.7
+        z : 0.0
+  -
+    id : 205
+    start_idx : 4
+    end_idx : 6
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1773.3
+        y : 160.7
+        z : 0.0
+      -
+        x : 1792.1
+        y : 159.0
+        z : 0.0
+  -
+    id : 206
+    start_idx : 3
+    end_idx : 6
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1792.1
+        y : 159.0
+        z : 0.0
+      -
+        x : 1825.3
+        y : 156.3
+        z : 0.0
+  -
+    id : 207
+    start_idx : 3
+    end_idx : 4
+    left_turn : 0
+    right_turn : 1
+    pose :
+      -
+        x : 1825.3
+        y : 156.3
+        z : 0.0
+      -
+        x : 1880.2
+        y : 149.1
+        z : 0.0
+  -
+    id : 208
+    start_idx : 2
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1880.2
+        y : 149.1
+        z : 0.0
+      -
+        x : 1906.2
+        y : 147.0
+        z : 0.0
+  -
+    id : 209
+    start_idx : 3
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1906.2
+        y : 147.0
+        z : 0.0
+      -
+        x : 1929.9
+        y : 145.2
+        z : 0.0
+  -
+    id : 210
+    start_idx : 4
+    end_idx : 4
+    left_turn : 0
+    right_turn : 1
+    pose :
+      -
+        x : 1906.2
+        y : 147.0
+        z : 0.0
+      -
+        x : 1929.6
+        y : 141.8
+        z : 0.0
+  -
+    id : 211
+    start_idx : 4
+    end_idx : 5
+    left_turn : 1
+    right_turn : 0
+    pose :
+      -
+        x : 1850.4
+        y : 154.3
+        z : 0.0
+      -
+        x : 1878.9
+        y : 155.2
+        z : 0.0
+  -
+    id : 212
+    start_idx : 4
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1878.9
+        y : 155.2
+        z : 0.0
+      -
+        x : 1908.1
+        y : 152.8
+        z : 0.0
+  -
+    id : 213
+    start_idx : 4
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1908.1
+        y : 152.8
+        z : 0.0
+      -
+        x : 1930.6
+        y : 151.6
+        z : 0.0
+  -
+    id : 214
+    start_idx : 3
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1660.2
+        y : 165.2
+        z : 0.0
+      -
+        x : 1773.1
+        y : 156.7
+        z : 0.0
+  -
+    id : 215
+    start_idx : 3
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1773.1
+        y : 156.7
+        z : 0.0
+      -
+        x : 1791.9
+        y : 155.4
+        z : 0.0
+  -
+    id : 216
+    start_idx : 2
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1791.9
+        y : 155.4
+        z : 0.0
+      -
+        x : 1825.2
+        y : 153.2
+        z : 0.0
+  -
+    id : 217
+    start_idx : 2
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1825.2
+        y : 153.2
+        z : 0.0
+      -
+        x : 1883.6
+        y : 148.5
+        z : 0.0
+  # lain 16+   near "That" Section
+  -
+    id : 218
+    start_idx : 4
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1942.9
+        y : 706.2
+        z : 0.0
+      -
+        x : 1922.4
+        y : 709.3
+        z : 0.0
+  -
+    id : 219
+    start_idx : 3
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1922.4
+        y : 709.3
+        z : 0.0
+      -
+        x : 1752.7
+        y : 723.6
+        z : 0.0
+  -
+    id : 220
+    start_idx : 4
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1752.7
+        y : 723.6
+        z : 0.0
+      -
+        x : 1704.5
+        y : 727.5
+        z : 0.0
+  -
+    id : 221
+    start_idx : 4
+    end_idx : 4
+    left_turn : 1
+    right_turn : 0
+    pose :
+      -
+        x : 1752.7
+        y : 723.6
+        z : 0.0
+      -
+        x : 1728.1
+        y : 722.7
+        z : 0.0
+  -
+    id : 222
+    start_idx : 4
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1728.1
+        y : 722.7
+        z : 0.0
+      -
+        x : 1702.5
+        y : 725.5
+        z : 0.0
+  # lain 16-   near "That" Section
+  -
+    id : 223
+    start_idx : 3
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1703.2
+        y : 719.1
+        z : 0.0
+      -
+        x : 1910.0
+        y : 700.5
+        z : 0.0
+  -
+    id : 224
+    start_idx : 4
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1910.0
+        y : 700.5
+        z : 0.0
+      -
+        x : 1938.3
+        y : 698.4
+        z : 0.0
+  -
+    id : 225
+    start_idx : 4
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1704.2
+        y : 721.4
+        z : 0.0
+      -
+        x : 1714.7
+        y : 720.9
+        z : 0.0
+  -
+    id : 226
+    start_idx : 4
+    end_idx : 4
+    left_turn : 0
+    right_turn : 1
+    pose :
+      -
+        x : 1714.7
+        y : 720.9
+        z : 0.0
+      -
+        x : 1730.5
+        y : 716.3
+        z : 0.0
+  # lain 17 "That" Section
+  # lain 18 "That" Section
+  # lain 19+
+  -
+    id : 227
+    start_idx : 3
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1923.8
+        y : -1104.0
+        z : 0.0
+      -
+        x : 1926.3
+        y : -1040.5
+        z : 0.0
+  -
+    id : 228
+    start_idx : 2
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1926.3
+        y : -1040.5
+        z : 0.0
+      -
+        x : 1927.4
+        y : -1004.6
+        z : 0.0
+  -
+    id : 229
+    start_idx : 3
+    end_idx : 4
+    left_turn : 0
+    right_turn : 1
+    pose :
+      -
+        x : 1924.6
+        y : -1084.5
+        z : 0.0
+      -
+        x : 1928.6
+        y : -1067.1
+        z : 0.0
+  -
+    id : 230
+    start_idx : 4
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1928.6
+        y : -1067.1
+        z : 0.0
+      -
+        x : 1929.0
+        y : -1041.4
+        z : 0.0
+  -
+    id : 231
+    start_idx : 4
+    end_idx : 5
+    left_turn : 1
+    right_turn : 0
+    pose :
+      -
+        x : 1924.6
+        y : -1084.1
+        z : 0.0
+      -
+        x : 1922.0
+        y : -1066.5
+        z : 0.0
+  -
+    id : 232
+    start_idx : 4
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1922.0
+        y : -1066.5
+        z : 0.0
+      -
+        x : 1922.8
+        y : -1055.8
+        z : 0.0
+  -
+    id : 233
+    start_idx : 4
+    end_idx : 5
+    left_turn : 1
+    right_turn : 0
+    pose :
+      -
+        x : 1922.8
+        y : -1055.8
+        z : 0.0
+      -
+        x : 1919.6
+        y : -1038.3
+        z : 0.0
+  -
+    id : 234
+    start_idx : 4
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1919.6
+        y : -1038.3
+        z : 0.0
+      -
+        x : 1921.2
+        y : -1010.0
+        z : 0.0
+  # lain 19-
+  -
+    id : 235
+    start_idx : 4
+    end_idx : 6
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1917.4
+        y : -1018.3
+        z : 0.0
+      -
+        x : 1915.9
+        y : -1067.3
+        z : 0.0
+  -
+    id : 236
+    start_idx : 4
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1915.9
+        y : -1067.3
+        z : 0.0
+      -
+        x : 1914.4
+        y : -1104.4
+        z : 0.0
+  -
+    id : 237
+    start_idx : 2
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1911.9
+        y : -1021.2
+        z : 0.0
+      -
+        x : 1909.8
+        y : -1049.3
+        z : 0.0
+  -
+    id : 238
+    start_idx : 3
+    end_idx : 4
+    left_turn : 1
+    right_turn : 0
+    pose :
+      -
+        x : 1909.8
+        y : -1049.3
+        z : 0.0
+      -
+        x : 1912.4
+        y : -1069.9
+        z : 0.0
+  -
+    id : 239
+    start_idx : 3
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1912.4
+        y : -1069.9
+        z : 0.0
+      -
+        x : 1911.3
+        y : -1103.3
+        z : 0.0
+  # lain 20+
+  -
+    id : 240
+    start_idx : 3
+    end_idx : 6
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1929.7
+        y : -936.0
+        z : 0.0
+      -
+        x : 1937.1
+        y : -694.1
+        z : 0.0
+  -
+    id : 241
+    start_idx : 1
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1935.8
+        y : -936.0
+        z : 0.0
+      -
+        x : 1940.5
+        y : -801.6
+        z : 0.0
+  -
+    id : 242
+    start_idx : 2
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1940.5
+        y : -801.6
+        z : 0.0
+      -
+        x : 1942.0
+        y : -729.0
+        z : 0.0
+  -
+    id : 243
+    start_idx : 3
+    end_idx : 4
+    left_turn : 0
+    right_turn : 1
+    pose :
+      -
+        x : 1942.0
+        y : -729.0
+        z : 0.0
+      -
+        x : 1946.1
+        y : -707.5
+        z : 0.0
+  -
+    id : 244
+    start_idx : 4
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1946.1
+        y : -707.5
+        z : 0.0
+      -
+        x : 1946.2
+        y : -688.9
+        z : 0.0
+  -
+    id : 245
+    start_idx : 4
+    end_idx : 7
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1926.3
+        y : -937.6
+        z : 0.0
+      -
+        x : 1926.5
+        y : -922.5
+        z : 0.0
+  -
+    id : 246
+    start_idx : 4
+    end_idx : 6
+    left_turn : 0
+    right_turn : 1
+    pose :
+      -
+        x : 1926.5
+        y : -922.5
+        z : 0.0
+      -
+        x : 1930.5
+        y : -902.9
+        z : 0.0
+  -
+    id : 247
+    start_idx : 4
+    end_idx : 5
+    left_turn : 1
+    right_turn : 0
+    pose :
+      -
+        x : 1935.2
+        y : -751.3
+        z : 0.0
+      -
+        x : 1932.1
+        y : -723.8
+        z : 0.0
+  -
+    id : 248
+    start_idx : 4
+    end_idx : 5
+    left_turn : 1
+    right_turn : 0
+    pose :
+      -
+        x : 1932.1
+        y : -723.8
+        z : 0.0
+      -
+        x : 1934.0
+        y : -695.7
+        z : 0.0
+  -
+    id : 249
+    start_idx : 3
+    end_idx : 4
+    left_turn : 0
+    right_turn : 1
+    pose :
+      -
+        x : 1931.5
+        y : -876.8
+        z : 0.0
+      -
+        x : 1939.8
+        y : -811.7
+        z : 0.0
+  -
+    id : 250
+    start_idx : 3
+    end_idx : 4
+    left_turn : 1
+    right_turn : 0
+    pose :
+      -
+        x : 1937.7
+        y : -876.3
+        z : 0.0
+      -
+        x : 1933.0
+        y : -813.2
+        z : 0.0
+  # lain 20-
+  -
+    id : 251
+    start_idx : 3
+    end_idx : 7
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1927.3
+        y : -698.8
+        z : 0.0
+      -
+        x : 1920.3
+        y : -905.1
+        z : 0.0
+  -
+    id : 252
+    start_idx : 5
+    end_idx : 6
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1920.3
+        y : -905.1
+        z : 0.0
+      -
+        x : 1919.2
+        y : -948.7
+        z : 0.0
+  -
+    id : 253
+    start_idx : 0
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :        
+      -
+        x : 1918.2
+        y : -698.6
+        z : 0.0
+      -
+        x : 1916.1
+        y : -753.5
+        z : 0.0
+  -
+    id : 254
+    start_idx : 1
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :        
+      -
+        x : 1916.1
+        y : -753.5
+        z : 0.0
+      -
+        x : 1914.1
+        y : -824.5
+        z : 0.0
+  -
+    id : 255
+    start_idx : 2
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :        
+      -
+        x : 1914.1
+        y : -824.5
+        z : 0.0
+      -
+        x : 1912.9
+        y : -862.1
+        z : 0.0
+  -
+    id : 256
+    start_idx : 3
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :        
+      -
+        x : 1912.9
+        y : -862.1
+        z : 0.0
+      -
+        x : 1912.1
+        y : -903.7
+        z : 0.0
+  -
+    id : 257
+    start_idx : 4
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :        
+      -
+        x : 1912.1
+        y : -903.7
+        z : 0.0
+      -
+        x : 1911.3
+        y : -947.7
+        z : 0.0
+  -
+    id : 258
+    start_idx : 4
+    end_idx : 8
+    left_turn : 0
+    right_turn : 0
+    pose :        
+      -
+        x : 1930.3
+        y : -694.7
+        z : 0.0
+      -
+        x : 1930.4
+        y : -706.4
+        z : 0.0
+  -
+    id : 259
+    start_idx : 4
+    end_idx : 7
+    left_turn : 0
+    right_turn : 1
+    pose :        
+      -
+        x : 1930.4
+        y : -706.4
+        z : 0.0
+      -
+        x : 1926.6
+        y : -728.7
+        z : 0.0
+  -
+    id : 260
+    start_idx : 4
+    end_idx : 5
+    left_turn : 1
+    right_turn : 0
+    pose :        
+      -
+        x : 1921.9
+        y : -880.9
+        z : 0.0
+      -
+        x : 1924.2
+        y : -903.9
+        z : 0.0
+  -
+    id : 261
+    start_idx : 4
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :        
+      -
+        x : 1924.2
+        y : -903.9
+        z : 0.0
+      -
+        x : 1922.2
+        y : -949.6
+        z : 0.0
+  -
+    id : 262
+    start_idx : 3
+    end_idx : 6
+    left_turn : 0
+    right_turn : 1
+    pose :        
+      -
+        x : 1926.1
+        y : -731.1
+        z : 0.0
+      -
+        x : 1922.2
+        y : -755.4
+        z : 0.0
+  -
+    id : 263
+    start_idx : 3
+    end_idx : 6
+    left_turn : 0
+    right_turn : 0
+    pose :        
+      -
+        x : 1922.2
+        y : -755.4
+        z : 0.0
+      -
+        x : 1921.5
+        y : -796.9
+        z : 0.0
+  -
+    id : 264
+    start_idx : 3
+    end_idx : 5
+    left_turn : 0
+    right_turn : 1
+    pose :        
+      -
+        x : 1921.5
+        y : -796.9
+        z : 0.0
+      -
+        x : 1917.2
+        y : -831.5
+        z : 0.0
+  -
+    id : 265
+    start_idx : 3
+    end_idx : 4
+    left_turn : 0
+    right_turn : 1
+    pose :        
+      -
+        x : 1917.2
+        y : -831.5
+        z : 0.0
+      -
+        x : 1913.3
+        y : -859.3
+        z : 0.0
+  -
+    id : 266
+    start_idx : 2
+    end_idx : 4
+    left_turn : 1
+    right_turn : 0
+    pose :        
+      -
+        x : 1917.0
+        y : -732.3
+        z : 0.0
+      -
+        x : 1919.9
+        y : -753.1
+        z : 0.0
+  -
+    id : 267
+    start_idx : 2
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :        
+      -
+        x : 1919.9
+        y : -753.1
+        z : 0.0
+      -
+        x : 1917.8
+        y : -797.4
+        z : 0.0
+  -
+    id : 268
+    start_idx : 3
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :        
+      -
+        x : 1917.8
+        y : -797.4
+        z : 0.0
+      -
+        x : 1920.0
+        y : -832.4
+        z : 0.0
+  -
+    id : 268
+    start_idx : 3
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :        
+      -
+        x : 1920.0
+        y : -832.4
+        z : 0.00
+      -
+        x : 1922.3
+        y : -861.0
+        z : 0.0
+  -
+    id : 1000
+    start_idx : 4
+    end_idx : 7
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1948.4
+        y : -319.2
+        z : 0.0
+      -
+        x : 1949.9
+        y : -276.9
+        z : 0.0
+  -
+    id : 1001
+    start_idx : 4
+    end_idx : 6
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1949.9
+        y : -276.9
+        z : 0.0
+      -
+        x : 1956.4
+        y : -73.4
+        z : 0.0
+  -
+    id : 1002
+    start_idx : 1
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1957.9
+        y : -321.1
+        z : 0.0
+      -
+        x : 1958.9
+        y : -299.2
+        z : 0.0
+  -
+    id : 1003
+    start_idx : 2
+    end_idx : 4
+    left_turn : 1
+    right_turn : 0
+    pose :
+      -
+        x : 1958.9
+        y : -299.2
+        z : 0.0
+      -
+        x : 1956.0
+        y : -270.7
+        z : 0.0
+  -
+    id : 1003
+    start_idx : 2
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1956.0
+        y : -270.7
+        z : 0.0
+      -
+        x : 1959.4
+        y : -163.3
+        z : 0.0
+  -
+    id : 1004
+    start_idx : 3
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1959.4
+        y : -163.3
+        z : 0.0
+      -
+        x : 1960.5
+        y : -123.9
+        z : 0.0
+  -
+    id : 1005
+    start_idx : 4
+    end_idx : 4
+    left_turn : 1
+    right_turn : 0
+    pose :
+      -
+        x : 1960.5
+        y : -123.9
+        z : 0.0
+      -
+        x : 1965.0
+        y : -90.5
+        z : 0.0
+  -
+    id : 1006
+    start_idx : 4
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1965.0
+        y : -90.5
+        z : 0.0
+      -
+        x : 1965.5
+        y : -78.4
+        z : 0.0
+  -
+    id : 1007
+    start_idx : 4
+    end_idx : 5
+    left_turn : 1
+    right_turn : 0
+    pose :
+      -
+        x : 1953.8
+        y : -144.7
+        z : 0.0
+      -
+        x : 1951.2
+        y : -116.7
+        z : 0.0
+  -
+    id : 1008
+    start_idx : 4
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1951.2
+        y : -116.7
+        z : 0.0
+      -
+        x : 1952.7
+        y : -85.4
+        z : 0.0
+  -
+    id : 1009
+    start_idx : 4
+    end_idx : 5
+    left_turn : 0
+    right_turn : 1
+    pose :
+      -
+        x : 1950.8
+        y : -244.3
+        z : 0.0
+      -
+        x : 1954.5
+        y : -222.2
+        z : 0.0
+  -
+    id : 1009
+    start_idx : 3
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1954.5
+        y : -222.2
+        z : 0.0
+      -
+        x : 1955.5
+        y : -186.5
+        z : 0.0
+  -
+    id : 1010
+    start_idx : 3 
+    end_idx : 4
+    left_turn : 0
+    right_turn : 1
+    pose :
+      -
+        x : 1955.5
+        y : -186.5
+        z : 0.0
+      -
+        x : 1959.4
+        y : -163.3
+        z : 0.0
+  -
+    id : 1011
+    start_idx : 3 
+    end_idx : 4
+    left_turn : 1
+    right_turn : 0
+    pose :
+      -
+        x : 1956.8
+        y : -243.3
+        z : 0.0
+      -
+        x : 1954.5
+        y : -222.2
+        z : 0.0
+  -
+    id : 1011
+    start_idx : 4 
+    end_idx : 5
+    left_turn : 1
+    right_turn : 0
+    pose :
+      -
+        x : 1955.5
+        y : -186.5
+        z : 0.0
+      -
+        x : 1953.4
+        y : -161.1
+        z : 0.0
+  # lain 36+
+  -
+    id : 1012
+    start_idx : 3
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2271.8
+        y : -45.0
+        z : 0.0
+      -
+        x : 2277.1
+        y : 20.4
+        z : 0.0
+  -
+    id : 1013
+    start_idx : 3
+    end_idx : 6
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2277.1
+        y : 20.4
+        z : 0.0
+      -
+        x : 2278.6
+        y : 39.3
+        z : 0.0
+  -
+    id : 1014
+    start_idx : 3
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2277.1
+        y : 20.4
+        z : 0.0
+      -
+        x : 2280.9
+        y : 68.4
+        z : 0.0
+  -
+    id : 1015
+    start_idx : 4
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2280.9
+        y : 68.4
+        z : 0.0
+      -
+        x : 2283.2
+        y : 97.6
+        z : 0.0
+  -
+    id : 1016
+    start_idx : 4
+    end_idx : 6
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2269.9
+        y : -37.1
+        z : 0.0
+      -
+        x : 2273.5
+        y : 17.8
+        z : 0.0
+  -
+    id : 1017
+    start_idx : 4
+    end_idx : 7
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2273.5
+        y : 17.8
+        z : 0.0
+      -
+        x : 2275.5
+        y : 41.1
+        z : 0.0
+  -
+    id : 1018
+    start_idx : 4
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2275.5
+        y : 41.1
+        z : 0.0
+      -
+        x : 2277.6
+        y : 68.6
+        z : 0.0
+  -
+    id : 1018
+    start_idx : 4
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2277.6
+        y : 68.6
+        z : 0.0
+      -
+        x : 2280.3
+        y : 95.0
+        z : 0.0
+  -
+    id : 1019
+    start_idx : 2
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2275.1
+        y : -43.5
+        z : 0.0
+      -
+        x : 2280.5
+        y : 17.2
+        z : 0.0
+  -
+    id : 1020
+    start_idx : 2
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2280.5
+        y : 17.2
+        z : 0.0
+      -
+        x : 2282.1
+        y : 40.8
+        z : 0.0
+  -
+    id : 1021
+    start_idx : 3
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2282.1
+        y : 40.8
+        z : 0.0
+      -
+        x : 2284.2
+        y : 70.2
+        z : 0.0
+  -
+    id : 1022
+    start_idx : 4
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2284.2
+        y : 70.2
+        z : 0.0
+      -
+        x : 2285.6
+        y : 93.2
+        z : 0.0
+  -
+    id : 1023
+    start_idx : 4
+    end_idx : 5
+    left_turn : 0
+    right_turn : 1
+    pose :
+      -
+        x : 2271.6
+        y : -8.0
+        z : 0.0
+      -
+        x : 2276.6
+        y : 15.7
+        z : 0.0
+  -
+    id : 1024
+    start_idx : 3
+    end_idx : 4
+    left_turn : 0
+    right_turn : 1
+    pose :
+      -
+        x : 2279.4
+        y : 48.5
+        z : 0.0
+      -
+        x : 2283.9
+        y : 68.8
+        z : 0.0
+  -
+    id : 1025
+    start_idx : 3
+    end_idx : 4
+    left_turn : 1
+    right_turn : 0
+    pose :
+      -
+        x : 2278.1
+        y : -10.0
+        z : 0.0
+      -
+        x : 2276.6
+        y : 15.7
+        z : 0.0
+  -
+    id : 1026
+    start_idx : 4
+    end_idx : 5
+    left_turn : 1
+    right_turn : 0
+    pose :
+      -
+        x : 2279.4
+        y : 48.5
+        z : 0.0
+      -
+        x : 2277.6
+        y : 67.8
+        z : 0.0
+  # lain 37+
+  -
+    id : 1027
+    start_idx : 3
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2287.5
+        y : 153.0
+        z : 0.0
+      -
+        x : 2289.0
+        y : 170.0
+        z : 0.0
+  -
+    id : 1028
+    start_idx : 3
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2289.0
+        y : 170.0
+        z : 0.0
+      -
+        x : 1994.6
+        y : 417.5
+        z : 0.0
+  -
+    id : 1029
+    start_idx : 4
+    end_idx : 6
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2284.2
+        y : 152.3
+        z : 0.0
+      -
+        x : 2285.7
+        y : 169.6
+        z : 0.0
+  -
+    id : 1030
+    start_idx : 4
+    end_idx : 4
+    left_turn : 0
+    right_turn : 1
+    pose :
+      -
+        x : 2285.7
+        y : 169.6
+        z : 0.0
+      -
+        x : 2290.4
+        y : 189.1
+        z : 0.0
+  -
+    id : 1031
+    start_idx : 2
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2290.2
+        y : 151.0
+        z : 0.0
+      -
+        x : 2291.9
+        y : 170.1
+        z : 0.0
+  -
+    id : 1032
+    start_idx : 3
+    end_idx : 4
+    left_turn : 1
+    right_turn : 0
+    pose :
+      -
+        x : 2291.9
+        y : 170.1
+        z : 0.0
+      -
+        x : 2290.4
+        y : 189.1
+        z : 0.0
+  -
+    id : 1033
+    start_idx : 3
+    end_idx : 4
+    left_turn : 0
+    right_turn : 1
+    pose :
+      -
+        x : 2033.1
+        y : 414.6
+        z : 0.0
+      -
+        x : 2016.0
+        y : 419.4
+        z : 0.0
+  -
+    id : 1034
+    start_idx : 4
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 2016.0
+        y : 419.4
+        z : 0.0
+      -
+        x : 1989.4
+        y : 420.9
+        z : 0.0
+  # lain 25+
+  -
+    id : 1035
+    start_idx : 4
+    end_idx : 6
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1972.2
+        y : 438.4
+        z : 0.0
+      -
+        x : 1976.1
+        y : 665.3
+        z : 0.0
+  -
+    id : 1036
+    start_idx : 2
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1978.4
+        y : 439.2
+        z : 0.0
+      -
+        x : 1980.5
+        y : 520.5
+        z : 0.0
+  -
+    id : 1037
+    start_idx : 2
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1980.5
+        y : 520.5
+        z : 0.0
+      -
+        x : 1980.7
+        y : 531.4
+        z : 0.0
+  -
+    id : 1038
+    start_idx : 2
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1980.7
+        y : 531.4
+        z : 0.0
+      -
+        x : 1982.5
+        y : 665.6
+        z : 0.0
+  -
+    id : 1039
+    start_idx : 3
+    end_idx : 5
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1976.7
+        y : 488.5
+        z : 0.0
+      -
+        x : 1977.4
+        y : 537.4
+        z : 0.0
+  -
+    id : 1040
+    start_idx : 4
+    end_idx : 5
+    left_turn : 0
+    right_turn : 1
+    pose :
+      -
+        x : 1972.4
+        y : 454.8
+        z : 0.0
+      -
+        x : 1976.8
+        y : 487.7
+        z : 0.0
+  -
+    id : 1041
+    start_idx : 3
+    end_idx : 4
+    left_turn : 0
+    right_turn : 1
+    pose :
+      -
+        x : 1977.3
+        y : 537.6
+        z : 0.0
+      -
+        x : 1981.2
+        y : 559.0
+        z : 0.0
+  -
+    id : 1042
+    start_idx : 3
+    end_idx : 4
+    left_turn : 1
+    right_turn : 0
+    pose :
+      -
+        x : 1978.6
+        y : 458.2
+        z : 0.0
+      -
+        x : 1976.8
+        y : 487.7
+        z : 0.0
+  -
+    id : 1043
+    start_idx : 4
+    end_idx : 5
+    left_turn : 1
+    right_turn : 0
+    pose :
+      -
+        x : 1977.3
+        y : 537.6
+        z : 0.0
+      -
+        x : 1974.9
+        y : 559.4
+        z : 0.0
