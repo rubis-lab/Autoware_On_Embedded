@@ -222,7 +222,7 @@ static cv::Mat signalDetect_inROI(const cv::Mat& roi, const cv::Mat& src_img, co
       candidates.push_back(cnd);
     }
 
-    drawContours(bright_mask, bright_contours, contours_idx, rangeColor, CV_FILLED, 8, bright_hierarchy, 0);
+    drawContours(bright_mask, bright_contours, contours_idx, rangeColor, cv::FILLED, 8, bright_hierarchy, 0);
 
     /* only contours on toplevel are considered */
     contours_idx = bright_hierarchy[contours_idx][0];
@@ -268,7 +268,7 @@ static cv::Mat signalDetect_inROI(const cv::Mat& roi, const cv::Mat& src_img, co
       if (!likeGreen && !likeYellow && !likeRed) /* this region may not be traffic light */
       {
         candidates_num--;
-        drawContours(bright_mask, bright_contours, candidates.at(i).idx, BLACK, CV_FILLED, 8, bright_hierarchy, 0);
+        drawContours(bright_mask, bright_contours, candidates.at(i).idx, BLACK, cv::FILLED, 8, bright_hierarchy, 0);
         candidates.at(i).isBlacked = true;
       }
     }
@@ -310,7 +310,7 @@ static cv::Mat signalDetect_inROI(const cv::Mat& roi, const cv::Mat& src_img, co
         candidates.at(i).isBlacked = false;
       }
 
-      drawContours(bright_mask, bright_contours, candidates.at(i).idx, regionColor, CV_FILLED, 8, bright_hierarchy, 0);
+      drawContours(bright_mask, bright_contours, candidates.at(i).idx, regionColor, cv::FILLED, 8, bright_hierarchy, 0);
     }
   }
 

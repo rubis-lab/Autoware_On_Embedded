@@ -156,7 +156,7 @@ static void putResult_inText(cv::Mat* image, const std::vector<Context>& context
 
     textOrg = cv::Point(ctx.topLeft.x, ctx.botRight.y + baseline);
 
-    putText(*image, label, textOrg, fontFace, fontScale, textColor, fontThickness, CV_AA);
+    putText(*image, label, textOrg, fontFace, fontScale, textColor, fontThickness, cv::LINE_AA);
   }
 } /* static void putResult_inText() */
 

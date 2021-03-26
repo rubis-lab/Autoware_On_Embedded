@@ -30,11 +30,12 @@
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/calib3d/calib3d.hpp"
 
-#if (CV_MAJOR_VERSION == 3)
-  #include <opencv2/imgcodecs.hpp>
-#else
-  #include <opencv2/contrib/contrib.hpp>
-#endif
+#include <opencv2/imgcodecs.hpp>
+
+#define CV_ITERATIVE 0
+#define CV_EPNP 1
+#define CV_P3P 2
+#define CV_DLS 3
 
 #define __APP_NAME__ "autoware_camera_lidar_calibration_node"
 

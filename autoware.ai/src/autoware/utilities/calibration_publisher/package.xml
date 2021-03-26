@@ -18,4 +18,5 @@
   <depend>sensor_msgs</depend>
   <depend>std_msgs</depend>
   <depend>tf</depend>
+  <depend>libopencv-dev</depend>
 </package>

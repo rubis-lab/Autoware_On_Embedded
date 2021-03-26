@@ -181,7 +181,7 @@ namespace object_map
 
         if (data > fill_circle_cost_thresh_)
         {
-          cv::circle(filled_image, cv::Point(x, y), in_radius, cv::Scalar(OCCUPANCY_CIRCLE), -1, CV_AA);
+          cv::circle(filled_image, cv::Point(x, y), in_radius, cv::Scalar(OCCUPANCY_CIRCLE), -1, cv::LINE_AA);
         }
       }
     }

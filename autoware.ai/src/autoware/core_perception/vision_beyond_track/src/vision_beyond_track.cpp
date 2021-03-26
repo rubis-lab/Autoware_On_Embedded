@@ -34,13 +34,8 @@
 
 #include "vision_beyond_track.h"
 
-#if (CV_MAJOR_VERSION <= 2)
-#include <opencv2/contrib/contrib.hpp>
-#else
-
 #include "gencolors.cpp"
 
-#endif
 
 const static double MAX_VALUE = 10000;
 const static double THRES_SCORE = 1000;
@@ -379,11 +374,8 @@ void BeyondTrackerNode::Run()
   objects_publisher_ = node_handle_.advertise<autoware_msgs::DetectedObjectArray>("/detection/image_tracker/objects",
                                                                                   1);
 
-#if (CV_MAJOR_VERSION <= 2)
-  cv::generateColors(colors_, 20);
-#else
   generateColors(colors_, 20);
-#endif
+
 
   ground_angle_ = cv::Mat::zeros(1, 3, CV_64FC1);
   ground_angle_.at<double>(0, 1) = 1;

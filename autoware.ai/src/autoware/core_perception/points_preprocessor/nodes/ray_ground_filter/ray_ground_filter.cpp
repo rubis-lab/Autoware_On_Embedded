@@ -32,11 +32,8 @@
 #include "autoware_config_msgs/ConfigRayGroundFilter.h"
 
 #include <opencv2/core/version.hpp>
-#if (CV_MAJOR_VERSION == 3)
+
 #include "gencolors.cpp"
-#else
-#include <opencv2/contrib/contrib.hpp>
-#endif
 
 #include "points_preprocessor/ray_ground_filter/ray_ground_filter.h"
 
@@ -420,11 +417,9 @@ void RayGroundFilter::Run()
   node_handle_.param("reclass_distance_threshold", reclass_distance_threshold_, 0.2);  // 0.5 meters default
   ROS_INFO("reclass_distance_threshold[meters]: %f", reclass_distance_threshold_);
 
-#if (CV_MAJOR_VERSION == 3)
+
   generateColors(colors_, color_num_);
-#else
-  cv::generateColors(colors_, color_num_);
-#endif
+
 
   radial_dividers_num_ = ceil(360 / radial_divider_angle_);
   ROS_INFO("Radial Divisions: %d", (int)radial_dividers_num_);

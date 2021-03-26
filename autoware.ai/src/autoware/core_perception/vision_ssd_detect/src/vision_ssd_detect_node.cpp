@@ -27,13 +27,7 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
-#if (CV_MAJOR_VERSION <= 2)
-
-#include <opencv2/contrib/contrib.hpp>
-
-#else
 #include "gencolors.cpp"
-#endif
 
 #include "vision_ssd_detect.h"
 
@@ -188,11 +182,8 @@ public:
     }
     ROS_INFO("SSD Detector initialized.");
 
-#if (CV_MAJOR_VERSION <= 2)
-    cv::generateColors(colors_, 20);
-#else
     generateColors(colors_, 20);
-#endif
+
 
     publisher_detected_objects_ = node_handle_.advertise<autoware_msgs::DetectedObjectArray>(
       "/detection/image_detector/objects", 1);

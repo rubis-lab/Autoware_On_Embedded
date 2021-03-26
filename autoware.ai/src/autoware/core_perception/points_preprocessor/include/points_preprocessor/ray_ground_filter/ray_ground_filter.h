@@ -42,11 +42,9 @@
 #include <autoware_health_checker/health_checker/health_checker.h>
 
 #include <opencv2/core/version.hpp>
-#if (CV_MAJOR_VERSION == 3)
+
 #include "gencolors.cpp"
-#else
-#include <opencv2/contrib/contrib.hpp>
-#endif
+
 
 class RayGroundFilter
 {

@@ -16,4 +16,5 @@
   <depend>pcl_ros</depend>
   <depend>roscpp</depend>
   <depend>std_msgs</depend>
+  <depend>libopencv-dev</depend>
 </package>

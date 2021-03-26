@@ -42,8 +42,8 @@
 #include <grid_map_msgs/GridMap.h>
 #include <grid_map_cv/grid_map_cv.hpp>
 
-#include <opencv/cv.h>
-#include <opencv/highgui.h>
+#include <opencv2/opencv.hpp>
+#include <opencv2/highgui.hpp>
 #include <opencv2/core/version.hpp>
 
 #include <Eigen/Core>

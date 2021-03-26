@@ -24,9 +24,21 @@ include_directories(
 add_executable(get_Image nodes/get_Image/get_Image.cpp)
 add_executable(get_PCD nodes/get_PCD/get_PCD.cpp)
 add_executable(get_Depth nodes/get_Depth/get_Depth.cpp)
-target_link_libraries(get_Depth ${catkin_LIBRARIES})
-target_link_libraries(get_PCD ${catkin_LIBRARIES})
-target_link_libraries(get_Image ${catkin_LIBRARIES})
+
+target_link_libraries(get_Depth 
+  ${catkin_LIBRARIES}
+  ${OpenCV_LIBS}
+)
+
+target_link_libraries(get_PCD 
+  ${catkin_LIBRARIES}
+  ${OpenCV_LIBS}
+)
+
+target_link_libraries(get_Image 
+  ${catkin_LIBRARIES}
+  ${OpenCV_LIBS}
+)
 
 install(TARGETS get_Image get_PCD get_Depth
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}

@@ -11,7 +11,7 @@
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl/point_types.h>
 #include <velodyne_pointcloud/point_types.h>
-#include <opencv/cv.h>
+#include <opencv2/opencv.hpp>
 
 enum Label
 {

@@ -24,8 +24,10 @@
  */
 
 #include <stdio.h>
-#include <opencv/cv.h>
-#include <opencv/highgui.h>
+#include <opencv2/opencv.hpp>
+#include <opencv2/highgui.hpp>
+#include <opencv2/core/types_c.h>
+#include <opencv2/imgproc/imgproc_c.h>
 #include <math.h>
 #include <list>
 #include "utils.h"
@@ -543,7 +545,7 @@ static void lane_cannyhough_callback(const sensor_msgs::Image& image_source)
   cv_bridge::CvImagePtr cv_image = cv_bridge::toCvCopy(image_source, sensor_msgs::image_encodings::BGR8);
   IplImage frame = cv_image->image;
   process_image_common(&frame);
-  cvWaitKey(2);
+  cv::waitKey(2);
 }
 #endif
 

@@ -1,7 +1,7 @@
 #ifndef DRAW_POINTS_H
 #define DRAW_POINTS_H
 
-#include <opencv/cv.h>
+#include <opencv2/opencv.hpp>
 #include "autoware_msgs/PointsImage.h"
 
 namespace integrated_viewer {

@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   std_msgs
 )
+find_package(OpenCV REQUIRED)
 
 set(CMAKE_CXX_FLAGS "-Wall ${CMAKE_CXX_FLAGS}")
 
@@ -58,6 +59,7 @@ include_directories(
   ${CMAKE_CURRENT_BINARY_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${catkin_INCLUDE_DIRS}
+  ${OpenCV_INCLUDE_DIRS}
   include
   lib/
 )
@@ -103,6 +105,7 @@ set_target_properties(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
   ${QT_LIBRARIES}
   ${catkin_LIBRARIES}
+  ${OpenCV_LIBS}
 )
 
 add_dependencies(${PROJECT_NAME}

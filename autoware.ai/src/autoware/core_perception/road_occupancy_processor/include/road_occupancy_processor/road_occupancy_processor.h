@@ -54,11 +54,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/calib3d/calib3d.hpp>
 
-#if (CV_MAJOR_VERSION == 3)
 #include <opencv2/imgcodecs.hpp>
-#else
-#include <opencv2/contrib/contrib.hpp>
-#endif
 
 #define __APP_NAME__ "road_occupancy_processor"
 

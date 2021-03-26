@@ -876,25 +876,25 @@ int main(int argc, char **argv)
         if(options.color || options.all_data)
         {
             ROS_DEBUG_STREAM("color||all " << options.color << " " << options.all_data);
-            cv::namedWindow("CameraSimulator Color Viewer",CV_WINDOW_AUTOSIZE);
+            cv::namedWindow("CameraSimulator Color Viewer",cv::WindowFlags::WINDOW_AUTOSIZE);
             full_filename_image02 = dir_image02 + boost::str(boost::format("%010d") % 0 ) + ".png";
-            cv_image02 = cv::imread(full_filename_image02, CV_LOAD_IMAGE_UNCHANGED);
+            cv_image02 = cv::imread(full_filename_image02, cv::IMREAD_UNCHANGED);
             cv::waitKey(5);
         }
         if(options.grayscale || options.all_data)
         {
             ROS_DEBUG_STREAM("grayscale||all " << options.grayscale << " " << options.all_data);
-            cv::namedWindow("CameraSimulator Grayscale Viewer",CV_WINDOW_AUTOSIZE);
+            cv::namedWindow("CameraSimulator Grayscale Viewer",cv::WindowFlags::WINDOW_AUTOSIZE);
             full_filename_image00 = dir_image00 + boost::str(boost::format("%010d") % 0 ) + ".png";
-            cv_image00 = cv::imread(full_filename_image00, CV_LOAD_IMAGE_UNCHANGED);
+            cv_image00 = cv::imread(full_filename_image00, cv::IMREAD_UNCHANGED);
             cv::waitKey(5);
         }
         if (options.viewDisparities || options.all_data)
         {
             ROS_DEBUG_STREAM("viewDisparities||all " << options.grayscale << " " << options.all_data);
-            cv::namedWindow("Reprojection of Detected Lines",CV_WINDOW_AUTOSIZE);
+            cv::namedWindow("Reprojection of Detected Lines",cv::WindowFlags::WINDOW_AUTOSIZE);
             full_filename_laneProjected = dir_laneProjected + boost::str(boost::format("%010d") % 0 ) + ".png";
-            cv_laneProjected = cv::imread(full_filename_laneProjected, CV_LOAD_IMAGE_UNCHANGED);
+            cv_laneProjected = cv::imread(full_filename_laneProjected, cv::IMREAD_UNCHANGED);
             cv::waitKey(5);
         }
         ROS_INFO_STREAM("Opening CV viewer(s)... OK");
@@ -943,7 +943,7 @@ int main(int argc, char **argv)
         }
         //Assume same height/width for the camera pair
         full_filename_image02 = dir_image02 + boost::str(boost::format("%010d") % 0 ) + ".png";
-        cv_image02 = cv::imread(full_filename_image02, CV_LOAD_IMAGE_UNCHANGED);
+        cv_image02 = cv::imread(full_filename_image02, cv::IMREAD_UNCHANGED);
         cv::waitKey(5);
         ros_cameraInfoMsg_camera03.height = ros_cameraInfoMsg_camera02.height = cv_image02.rows;// -1;TODO: CHECK, qui potrebbe essere -1
         ros_cameraInfoMsg_camera03.width  = ros_cameraInfoMsg_camera02.width  = cv_image02.cols;// -1;
@@ -962,7 +962,7 @@ int main(int argc, char **argv)
         }
         //Assume same height/width for the camera pair
         full_filename_image00 = dir_image00 + boost::str(boost::format("%010d") % 0 ) + ".png";
-        cv_image00 = cv::imread(full_filename_image00, CV_LOAD_IMAGE_UNCHANGED);
+        cv_image00 = cv::imread(full_filename_image00, cv::IMREAD_UNCHANGED);
         cv::waitKey(5);
         ros_cameraInfoMsg_camera01.height = ros_cameraInfoMsg_camera00.height = cv_image00.rows;// -1; TODO: CHECK -1?
         ros_cameraInfoMsg_camera01.width  = ros_cameraInfoMsg_camera00.width  = cv_image00.cols;// -1;
@@ -983,7 +983,7 @@ int main(int argc, char **argv)
             stereo_msgs::DisparityImagePtr disp_msg = boost::make_shared<stereo_msgs::DisparityImage>();
 
             full_filename_image04 = dir_image04 + boost::str(boost::format("%010d") % entries_played ) + ".png";
-            cv_image04 = cv::imread(full_filename_image04, CV_LOAD_IMAGE_GRAYSCALE);
+            cv_image04 = cv::imread(full_filename_image04, cv::IMREAD_GRAYSCALE);
 
             cv::minMaxLoc(cv_image04,&cv_min,&cv_max);
 
@@ -1030,7 +1030,7 @@ int main(int argc, char **argv)
             if (options.viewDisparities)
             {
                 full_filename_laneProjected = dir_laneProjected + boost::str(boost::format("%010d") % entries_played ) + ".png";
-                cv_laneProjected = cv::imread(full_filename_laneProjected, CV_LOAD_IMAGE_UNCHANGED);
+                cv_laneProjected = cv::imread(full_filename_laneProjected, cv::IMREAD_UNCHANGED);
                 cv::imshow("Reprojection of Detected Lines",cv_laneProjected);
                 cv::waitKey(5);
             }
@@ -1042,8 +1042,8 @@ int main(int argc, char **argv)
             full_filename_image03 = dir_image03 + boost::str(boost::format("%010d") % entries_played ) + ".png";
             ROS_DEBUG_STREAM ( full_filename_image02 << endl << full_filename_image03 << endl << endl);
 
-            cv_image02 = cv::imread(full_filename_image02, CV_LOAD_IMAGE_UNCHANGED);
-            cv_image03 = cv::imread(full_filename_image03, CV_LOAD_IMAGE_UNCHANGED);
+            cv_image02 = cv::imread(full_filename_image02, cv::IMREAD_UNCHANGED);
+            cv_image03 = cv::imread(full_filename_image03, cv::IMREAD_UNCHANGED);
 
             if ( (cv_image02.data == NULL) || (cv_image03.data == NULL) ){
                 ROS_ERROR_STREAM("Error reading color images (02 & 03)");
@@ -1127,8 +1127,8 @@ int main(int argc, char **argv)
             full_filename_image01 = dir_image01 + boost::str(boost::format("%010d") % entries_played ) + ".png";
             ROS_DEBUG_STREAM ( full_filename_image00 << endl << full_filename_image01 << endl << endl);
 
-            cv_image00 = cv::imread(full_filename_image00, CV_LOAD_IMAGE_UNCHANGED);
-            cv_image01 = cv::imread(full_filename_image01, CV_LOAD_IMAGE_UNCHANGED);
+            cv_image00 = cv::imread(full_filename_image00, cv::IMREAD_UNCHANGED);
+            cv_image01 = cv::imread(full_filename_image01, cv::IMREAD_UNCHANGED);
 
             if ( (cv_image00.data == NULL) || (cv_image01.data == NULL) ){
                 ROS_ERROR_STREAM("Error reading color images (00 & 01)");

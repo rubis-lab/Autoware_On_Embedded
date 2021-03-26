@@ -57,20 +57,14 @@
 
 #include <yaml-cpp/yaml.h>
 
-#include <opencv/cv.h>
-#include <opencv/highgui.h>
+#include <opencv2/opencv.hpp>
+#include <opencv2/highgui.hpp>
 #include <opencv2/core/version.hpp>
-
-#if (CV_MAJOR_VERSION == 3)
 
 #include "gencolors.cpp"
 
-#else
-
-#include <opencv2/contrib/contrib.hpp>
 #include <autoware_msgs/DetectedObjectArray.h>
 
-#endif
 
 #include "cluster.h"
 
@@ -944,11 +938,8 @@ int main(int argc, char **argv)
   _transform = &transform;
   _transform_listener = &listener;
 
-#if (CV_MAJOR_VERSION == 3)
   generateColors(_colors, 255);
-#else
-  cv::generateColors(_colors, 255);
-#endif
+
 
 
 

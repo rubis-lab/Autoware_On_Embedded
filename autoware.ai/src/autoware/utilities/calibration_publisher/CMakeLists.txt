@@ -31,6 +31,7 @@ add_dependencies(calibration_publisher
 
 target_link_libraries(calibration_publisher
   ${catkin_LIBRARIES}
+  ${OpenCV_LIBS}
 )
 
 install(TARGETS calibration_publisher
