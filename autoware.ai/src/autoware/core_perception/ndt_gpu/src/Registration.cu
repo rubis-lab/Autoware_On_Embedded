@@ -20,7 +20,12 @@ GRegistration::GRegistration()
 	target_points_number_ = 0;
 
 	target_x_ = target_y_ = target_z_ = NULL;
-	is_copied_ = false;
+	is_copied_ = false;	
+
+	if(GPU_PROFILING == 1){
+		cudaEventCreate(&event_start);
+		cudaEventCreate(&event_stop);
+	}
 
 }
 
@@ -173,8 +178,9 @@ void GRegistration::setInputSource(pcl::PointCloud<pcl::PointXYZI>::Ptr input)
 #ifndef __aarch64__
 		checkCudaErrors(cudaHostRegister(host_tmp, sizeof(pcl::PointXYZI) * points_number_, cudaHostRegisterDefault));
 #endif
-
+		start_profiling();
 		checkCudaErrors(cudaMemcpy(tmp, host_tmp, sizeof(pcl::PointXYZI) * points_number_, cudaMemcpyHostToDevice));
+		stop_profiling(HTOD);
 
 		if (x_ != NULL) {
 			checkCudaErrors(cudaFree(x_));
@@ -198,9 +204,11 @@ void GRegistration::setInputSource(pcl::PointCloud<pcl::PointXYZI>::Ptr input)
 		int block_x = (points_number_ > BLOCK_SIZE_X) ? BLOCK_SIZE_X : points_number_;
 		int grid_x = (points_number_ - 1) / block_x + 1;
 
+		start_profiling();
 		convertInput<pcl::PointXYZI><<<grid_x, block_x>>>(tmp, x_, y_, z_, points_number_);
 		checkCudaErrors(cudaGetLastError());
 		checkCudaErrors(cudaDeviceSynchronize());
+		stop_profiling(LAUNCH);
 
 
 		if (trans_x_ != NULL) {
@@ -223,9 +231,17 @@ void GRegistration::setInputSource(pcl::PointCloud<pcl::PointXYZI>::Ptr input)
 		checkCudaErrors(cudaMalloc(&trans_z_, sizeof(float) * points_number_));
 
 		// Initially, also copy scanned points to transformed buffers
+		start_profiling();
 		checkCudaErrors(cudaMemcpy(trans_x_, x_, sizeof(float) * points_number_, cudaMemcpyDeviceToDevice));
+		stop_profiling(DTOH);
+
+		start_profiling();
 		checkCudaErrors(cudaMemcpy(trans_y_, y_, sizeof(float) * points_number_, cudaMemcpyDeviceToDevice));
+		stop_profiling(DTOH);
+
+		start_profiling();
 		checkCudaErrors(cudaMemcpy(trans_z_, z_, sizeof(float) * points_number_, cudaMemcpyDeviceToDevice));
+		stop_profiling(DTOH);
 
 		checkCudaErrors(cudaFree(tmp));
 
@@ -251,9 +267,10 @@ void GRegistration::setInputSource(pcl::PointCloud<pcl::PointXYZ>::Ptr input)
 		// Pin the host buffer for accelerating the memory copy
 #ifndef __aarch64__
 		checkCudaErrors(cudaHostRegister(host_tmp, sizeof(pcl::PointXYZ) * points_number_, cudaHostRegisterDefault));
-#endif
-
+#endif	
+		start_profiling();
 		checkCudaErrors(cudaMemcpy(tmp, host_tmp, sizeof(pcl::PointXYZ) * points_number_, cudaMemcpyHostToDevice));
+		stop_profiling(HTOD);
 
 		if (x_ != NULL) {
 			checkCudaErrors(cudaFree(x_));
@@ -277,9 +294,11 @@ void GRegistration::setInputSource(pcl::PointCloud<pcl::PointXYZ>::Ptr input)
 		int block_x = (points_number_ > BLOCK_SIZE_X) ? BLOCK_SIZE_X : points_number_;
 		int grid_x = (points_number_ - 1) / block_x + 1;
 
+		start_profiling();
 		convertInput<pcl::PointXYZ><<<grid_x, block_x>>>(tmp, x_, y_, z_, points_number_);
 		checkCudaErrors(cudaGetLastError());
 		checkCudaErrors(cudaDeviceSynchronize());
+		stop_profiling(LAUNCH);
 
 		if (trans_x_ != NULL) {
 			checkCudaErrors(cudaFree(trans_x_));
@@ -300,9 +319,18 @@ void GRegistration::setInputSource(pcl::PointCloud<pcl::PointXYZ>::Ptr input)
 		checkCudaErrors(cudaMalloc(&trans_y_, sizeof(float) * points_number_));
 		checkCudaErrors(cudaMalloc(&trans_z_, sizeof(float) * points_number_));
 
-		checkCudaErrors(cudaMemcpy(trans_x_, x_, sizeof(float) * points_number_, cudaMemcpyDeviceToDevice));
+		start_profiling();
+		checkCudaErrors(cudaMemcpy(trans_x_, x_, sizeof(float) * points_number_, cudaMemcpyDeviceToDevice));		
+		stop_profiling(DTOH);
+
+		start_profiling();
 		checkCudaErrors(cudaMemcpy(trans_y_, y_, sizeof(float) * points_number_, cudaMemcpyDeviceToDevice));
+		stop_profiling(DTOH);
+
+		start_profiling();
 		checkCudaErrors(cudaMemcpy(trans_z_, z_, sizeof(float) * points_number_, cudaMemcpyDeviceToDevice));
+		stop_profiling(DTOH);
+		
 
 		checkCudaErrors(cudaFree(tmp));
 #ifndef __aarch64__
@@ -329,7 +357,9 @@ void GRegistration::setInputTarget(pcl::PointCloud<pcl::PointXYZI>::Ptr input)
 		checkCudaErrors(cudaHostRegister(host_tmp, sizeof(pcl::PointXYZI) * target_points_number_, cudaHostRegisterDefault));
 #endif
 
+		start_profiling();
 		checkCudaErrors(cudaMemcpy(tmp, host_tmp, sizeof(pcl::PointXYZI) * target_points_number_, cudaMemcpyHostToDevice));
+		stop_profiling(HTOD);
 
 		if (target_x_ != NULL) {
 			checkCudaErrors(cudaFree(target_x_));
@@ -353,9 +383,11 @@ void GRegistration::setInputTarget(pcl::PointCloud<pcl::PointXYZI>::Ptr input)
 		int block_x = (target_points_number_ > BLOCK_SIZE_X) ? BLOCK_SIZE_X : target_points_number_;
 		int grid_x = (target_points_number_ - 1) / block_x + 1;
 
+		start_profiling();
 		convertInput<pcl::PointXYZI><<<grid_x, block_x>>>(tmp, target_x_, target_y_, target_z_, target_points_number_);
 		checkCudaErrors(cudaGetLastError());
 		checkCudaErrors(cudaDeviceSynchronize());
+		stop_profiling(LAUNCH);
 
 #ifndef __aarch64__
 		checkCudaErrors(cudaHostUnregister(host_tmp));
@@ -378,8 +410,9 @@ void GRegistration::setInputTarget(pcl::PointCloud<pcl::PointXYZ>::Ptr input)
 #ifndef __aarch64__
 		checkCudaErrors(cudaHostRegister(host_tmp, sizeof(pcl::PointXYZ) * target_points_number_, cudaHostRegisterDefault));
 #endif
-
+		start_profiling();
 		checkCudaErrors(cudaMemcpy(tmp, host_tmp, sizeof(pcl::PointXYZ) * target_points_number_, cudaMemcpyHostToDevice));
+		stop_profiling(HTOD);
 
 		if (target_x_ != NULL) {
 			checkCudaErrors(cudaFree(target_x_));
@@ -403,9 +436,11 @@ void GRegistration::setInputTarget(pcl::PointCloud<pcl::PointXYZ>::Ptr input)
 		int block_x = (target_points_number_ > BLOCK_SIZE_X) ? BLOCK_SIZE_X : target_points_number_;
 		int grid_x = (target_points_number_ - 1) / block_x + 1;
 
-		convertInput<pcl::PointXYZ><<<grid_x, block_x>>>(tmp, target_x_, target_y_, target_z_, target_points_number_);
+		start_profiling();
+		convertInput<pcl::PointXYZ><<<grid_x, block_x>>>(tmp, target_x_, target_y_, target_z_, target_points_number_);		
 		checkCudaErrors(cudaGetLastError());
 		checkCudaErrors(cudaDeviceSynchronize());
+		stop_profiling(LAUNCH);
 
 		checkCudaErrors(cudaFree(tmp));
 #ifndef __aarch64__
@@ -425,6 +460,50 @@ void GRegistration::align(const Eigen::Matrix<float, 4, 4> &guess)
 
 void GRegistration::computeTransformation(const Eigen::Matrix<float, 4, 4> &guess) {
 	printf("Unsupported by Registration\n");
+}
+
+void GRegistration::start_profiling(){
+	if(GPU_PROFILING == 1)
+		cudaEventRecord(event_start, 0);
+}
+
+void GRegistration::stop_profiling(int type){
+	if(GPU_PROFILING == 1){		
+		float time;
+		cudaEventRecord(event_stop, 0);
+		cudaEventSynchronize(event_stop);
+		cudaEventElapsedTime(&time, event_start, event_stop);
+		write_data(gid, time, type);
+		gid++;
+	}
+}
+
+void GRegistration::write_data(int id, float time, int type){
+	if(GPU_PROFILING == 1){
+		fprintf(fp, "%d, %f, %d\n", id, time, type);				
+	}
+}
+
+void GRegistration::write_dummy_line(){
+	if(GPU_PROFILING == 1){
+		fprintf(fp, "-1, -1, -1\n");						
+		fflush(fp);
+		gid = 0;
+	}
+}
+
+void GRegistration::initialize_file(const char name[]){
+	if(GPU_PROFILING == 1){
+		fp = fopen(name, "w+");
+		fprintf(fp, "ID, TIME, TYPE\n");		
+	}
+}
+
+
+
+void GRegistration::close_file(){
+	if(GPU_PROFILING == 1)
+		fclose(fp);
 }
 
 }

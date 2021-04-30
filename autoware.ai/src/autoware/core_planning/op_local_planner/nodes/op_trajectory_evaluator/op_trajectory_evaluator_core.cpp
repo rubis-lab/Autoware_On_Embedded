@@ -243,7 +243,7 @@ void TrajectoryEval::callbackGetLocalPlannerPath(const autoware_msgs::LaneArrayC
 }
 
 void TrajectoryEval::callbackGetPredictedObjects(const autoware_msgs::DetectedObjectArrayConstPtr& msg)
-{
+{  
   m_PredictedObjects.clear();
   bPredictedObjects = true;
   double distance_to_pedestrian = 1000;
@@ -263,28 +263,29 @@ void TrajectoryEval::callbackGetPredictedObjects(const autoware_msgs::DetectedOb
     if(msg->objects.at(i).pose.position.z > 1 || msg->objects.at(i).pose.position.z < -1.5)
       continue;
 
-    autoware_msgs::DetectedObject msg_obj = msg->objects.at(i); 
+    autoware_msgs::DetectedObject msg_obj = msg->objects.at(i);     
 
     if(msg_obj.id > 0) // If fusion object is detected
     {
       // calculate distance to person first
-      if(msg_obj.label == "person"){
-        geometry_msgs::PoseStamped pose;
-        pose.header = msg_obj.header;
-        pose.pose = msg_obj.pose;
-        try{
-          m_vtob_listener.transformPose("/base_link", pose, pose);
-          double temp_x_distance = pose.pose.position.x;
-          double temp_y_distance = pose.pose.position.y;
-          // y-axis: Left + / Right -          
-          if(temp_y_distance > m_PedestrianLeftThreshold || temp_y_distance < m_PedestrianRightThreshold ) continue;
-          if(abs(temp_x_distance) < abs(distance_to_pedestrian)) distance_to_pedestrian = temp_x_distance;          
-        }
-        catch(tf::TransformException& ex){
-          // ROS_ERROR("Cannot transform person pose: %s", ex.what());
+      // if(msg_obj.label == "person"){        
+      //   std::cout<<"Pedestrian box size(width x height):"<<msg_obj.width<<" "<<msg_obj.height<<std::endl;
+      //   geometry_msgs::PoseStamped pose;
+      //   pose.header = msg_obj.header;
+      //   pose.pose = msg_obj.pose;
+      //   try{
+      //     m_vtob_listener.transformPose("/base_link", pose, pose);
+      //     double temp_x_distance = pose.pose.position.x;
+      //     double temp_y_distance = pose.pose.position.y;
+      //     // y-axis: Left + / Right -          
+      //     if(temp_y_distance > m_PedestrianLeftThreshold || temp_y_distance < m_PedestrianRightThreshold ) continue;
+      //     if(abs(temp_x_distance) < abs(distance_to_pedestrian)) distance_to_pedestrian = temp_x_distance;          
+      //   }
+      //   catch(tf::TransformException& ex){
+      //     // ROS_ERROR("Cannot transform person pose: %s", ex.what());
 
-        }
-      }
+      //   }
+      // }
 
       if(msg_obj.label == "car" || msg_obj.label == "truck" || msg_obj.label == "bus"){
         vehicle_cnt += 1;
@@ -338,17 +339,16 @@ void TrajectoryEval::callbackGetPredictedObjects(const autoware_msgs::DetectedOb
 
       m_PredictedObjects.push_back(obj);
     }
-    else{
+    else{ // If object is only detected at vision
       int image_obj_center_x = msg_obj.x+msg_obj.width/2;
       int image_obj_center_y = msg_obj.y+msg_obj.height/2;
       
       if (msg_obj.label == "person"){// If person is detected only in image
         if(image_obj_center_x >= image_person_detection_range_left && image_obj_center_x <= image_person_detection_range_right){ 
           double temp_x_distance = 1000;
-          if(msg_obj.height>=178) temp_x_distance = 10.0;
-          else if(msg_obj.height>=112) temp_x_distance = 15.0;
-          else if(msg_obj.height>=95) temp_x_distance = 20.0;      
-          else if(msg_obj.height>=70) temp_x_distance = 25.0;   
+          if(msg_obj.height>=195) temp_x_distance = 10.0;
+          else if(msg_obj.height>=125) temp_x_distance = 15.0;
+          else if(msg_obj.height>=105) temp_x_distance = 20.0;                
           if(abs(temp_x_distance) < abs(distance_to_pedestrian)) distance_to_pedestrian = temp_x_distance;
         }
       }                    

@@ -133,6 +133,10 @@ tf::StampedTransform *_velodyne_output_transform;
 tf::TransformListener *_transform_listener;
 tf::TransformListener *_vectormap_transform_listener;
 
+/* For GPU Profiling */
+static std::string _filename;
+static GpuEuclideanCluster _gecl_cluster;  
+
 tf::StampedTransform findTransform(const std::string &in_target_frame, const std::string &in_source_frame)
 {
   tf::StampedTransform transform;
@@ -369,16 +373,15 @@ std::vector<ClusterPtr> clusterAndColorGpu(const pcl::PointCloud<pcl::PointXYZ>:
     tmp_x[i] = tmp_point.x;
     tmp_y[i] = tmp_point.y;
     tmp_z[i] = tmp_point.z;
-  }
+  }  
 
-  GpuEuclideanCluster gecl_cluster;
-
-  gecl_cluster.setInputPoints(tmp_x, tmp_y, tmp_z, size);
-  gecl_cluster.setThreshold(in_max_cluster_distance);
-  gecl_cluster.setMinClusterPts(_cluster_size_min);
-  gecl_cluster.setMaxClusterPts(_cluster_size_max);
-  gecl_cluster.extractClusters();
-  std::vector<GpuEuclideanCluster::GClusterIndex> cluster_indices = gecl_cluster.getOutput();
+  _gecl_cluster.setInputPoints(tmp_x, tmp_y, tmp_z, size);
+  _gecl_cluster.setThreshold(in_max_cluster_distance);
+  _gecl_cluster.setMinClusterPts(_cluster_size_min);
+  _gecl_cluster.setMaxClusterPts(_cluster_size_max);
+  _gecl_cluster.extractClusters();
+  std::vector<GpuEuclideanCluster::GClusterIndex> cluster_indices = _gecl_cluster.getOutput();
+  _gecl_cluster.write_dummy_line();
 
   unsigned int k = 0;
 
@@ -1037,6 +1040,12 @@ int main(int argc, char **argv)
   private_nh.param("clustering_ranges", str_ranges, std::string("[15,30,45,60]"));
     ROS_INFO("[%s] clustering_ranges: %s", __APP_NAME__, str_ranges.c_str());
 
+  if(_use_gpu == true){
+    private_nh.param<std::string>("profiling_file_name", _filename, "~/GPU_profiling/lidar_euclidean_cluster_detect.csv");
+    ROS_INFO("[%s] profiling_file_name: %s", __APP_NAME__, _filename.c_str());    
+    _gecl_cluster.initialize_file(_filename.c_str());
+  }
+
   if (_use_multiple_thres)
   {
     YAML::Node distances = YAML::Load(str_distances);
@@ -1072,4 +1081,5 @@ int main(int argc, char **argv)
 
   // Spin
   ros::spin();
+  // _gecl_cluster.close_file();
 }

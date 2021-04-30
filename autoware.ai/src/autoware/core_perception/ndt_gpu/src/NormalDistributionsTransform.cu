@@ -802,6 +802,7 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 
 	dim3 grid;
 
+	start_profiling();
 	computePointGradients0<<<grid_x, block_x>>>(x_, y_, z_, points_number_,
 												valid_points, valid_points_num,
 												dj_ang_.buffer(),
@@ -813,7 +814,10 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 												point_gradients + valid_points_num * 4,
 												point_gradients + valid_points_num * 10);
 	checkCudaErrors(cudaGetLastError());
+	stop_profiling(LAUNCH);
+	
 
+	start_profiling();
 	computePointGradients1<<<grid_x, block_x>>>(x_, y_, z_, points_number_,
 												valid_points, valid_points_num,
 												dj_ang_.buffer(),
@@ -822,8 +826,10 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 												point_gradients + valid_points_num * 11,
 												point_gradients + valid_points_num * 17);
 	checkCudaErrors(cudaGetLastError());
+	stop_profiling(LAUNCH);
 
 	if (compute_hessian) {
+		start_profiling();
 		computePointHessian0<<<grid_x, block_x>>>(x_, y_, z_, points_number_,
 												valid_points, valid_points_num,
 												dh_ang_.buffer(),
@@ -834,7 +840,9 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 												point_hessians + valid_points_num * 65, point_hessians + valid_points_num * 105, point_hessians + valid_points_num * 71);
 
 		checkCudaErrors(cudaGetLastError());
+		stop_profiling(LAUNCH);
 
+		start_profiling();
 		computePointHessian1<<<grid_x, block_x>>>(x_, y_, z_, points_number_,
 												valid_points, valid_points_num,
 												dh_ang_.buffer(),
@@ -842,12 +850,15 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 												point_hessians + valid_points_num * 94, point_hessians + valid_points_num * 77, point_hessians + valid_points_num * 100,
 												point_hessians + valid_points_num * 83, point_hessians + valid_points_num * 106, point_hessians + valid_points_num * 89);
 		checkCudaErrors(cudaGetLastError());
+		stop_profiling(LAUNCH);
 
+		start_profiling();
 		computePointHessian2<<<grid_x, block_x>>>(x_, y_, z_, points_number_,
 												valid_points, valid_points_num,
 												dh_ang_.buffer(),
 												point_hessians + valid_points_num * 95, point_hessians + valid_points_num * 101, point_hessians + valid_points_num * 107);
 		checkCudaErrors(cudaGetLastError());
+		stop_profiling(LAUNCH);
 
 	}
 
@@ -866,6 +877,7 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 
 	checkCudaErrors(cudaMalloc(&cov_dxd_pi, sizeof(double) * valid_voxel_num * 3 * 6));
 
+	start_profiling();
 	computeExCovX<<<grid_x, block_x>>>(trans_x, trans_y, trans_z, valid_points,
 										starting_voxel_id, voxel_id, valid_points_num,
 										centroid, centroid + voxel_num, centroid + 2 * voxel_num,
@@ -875,30 +887,38 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 										inverse_covariance + 3 * voxel_num, inverse_covariance + 4 * voxel_num, inverse_covariance + 5 * voxel_num,
 										inverse_covariance + 6 * voxel_num, inverse_covariance + 7 * voxel_num, inverse_covariance + 8 * voxel_num);
 	checkCudaErrors(cudaGetLastError());
+	stop_profiling(LAUNCH);
 
+	start_profiling();
 	computeScoreList<<<grid_x, block_x>>>(starting_voxel_id, voxel_id, valid_points_num, e_x_cov_x, gauss_d1_, score);
 	checkCudaErrors(cudaGetLastError());
+	stop_profiling(LAUNCH);
 
 	int block_x2 = (valid_voxel_num > BLOCK_SIZE_X) ? BLOCK_SIZE_X : valid_voxel_num;
 	int grid_x2 = (valid_voxel_num - 1) / block_x2 + 1;
 
+	start_profiling();
 	updateExCovX<<<grid_x2, block_x2>>>(e_x_cov_x, gauss_d2_, valid_voxel_num);
 	checkCudaErrors(cudaGetLastError());
+	stop_profiling(LAUNCH);
 
 	grid.x = grid_x;
 	grid.y = 3;
 	grid.z = 6;
 
+	start_profiling();
 	computeCovDxdPi<<<grid, block_x>>>(valid_points, starting_voxel_id, voxel_id, valid_points_num,
 											inverse_covariance, voxel_num,
 											gauss_d1_, gauss_d2_, point_gradients,
 											cov_dxd_pi, valid_voxel_num);
 	checkCudaErrors(cudaGetLastError());
+	stop_profiling(LAUNCH);
 
 	grid.x = grid_x;
 	grid.y = 6;
 	grid.z = 1;
 
+	start_profiling();
 	computeScoreGradientList<<<grid, block_x>>>(trans_x, trans_y, trans_z, valid_points,
 													starting_voxel_id, voxel_id, valid_points_num,
 													centroid, centroid + voxel_num, centroid + 2 * voxel_num,
@@ -906,7 +926,7 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 													cov_dxd_pi, gauss_d1_, valid_voxel_num, gradients);
 
 	checkCudaErrors(cudaGetLastError());
-
+	stop_profiling(LAUNCH);
 
 	if (compute_hessian) {
 
@@ -914,6 +934,7 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 		grid.z = 1;
 
 
+		start_profiling();
 		computeHessianListS0<<<grid, block_x>>>(trans_x, trans_y, trans_z, valid_points,
 												starting_voxel_id, voxel_id, valid_points_num,
 												centroid, centroid + voxel_num, centroid + 2 * voxel_num,
@@ -923,8 +944,10 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 												point_gradients,
 												tmp_hessian, valid_voxel_num);
 		checkCudaErrors(cudaGetLastError());
+		stop_profiling(LAUNCH);
 		grid.z = 6;
 
+		start_profiling();
 		computeHessianListS1<<<grid, block_x>>>(trans_x, trans_y, trans_z, valid_points,
 													starting_voxel_id, voxel_id, valid_points_num,
 													centroid, centroid + voxel_num, centroid + 2 * voxel_num,
@@ -933,7 +956,9 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 													point_gradients,
 													valid_voxel_num);
 		checkCudaErrors(cudaGetLastError());
+		stop_profiling(LAUNCH);
 
+		start_profiling();
 		computeHessianListS2<<<grid, block_x>>>(trans_x, trans_y, trans_z, valid_points,
 													starting_voxel_id, voxel_id, valid_points_num,
 													centroid, centroid + voxel_num, centroid + 2 * voxel_num,
@@ -943,6 +968,7 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 													inverse_covariance + 6 * voxel_num, inverse_covariance + 7 * voxel_num, inverse_covariance + 8 * voxel_num,
 													point_hessians, hessians, valid_voxel_num);
 		checkCudaErrors(cudaGetLastError());
+		stop_profiling(LAUNCH);
 
 	}
 
@@ -956,15 +982,21 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 		grid.x = grid_x;
 		grid.y = 1;
 		grid.z = 6;
+		start_profiling();
 		matrixSum<<<grid, block_x>>>(gradients, full_size, half_size, 1, 6, valid_points_num);
 		checkCudaErrors(cudaGetLastError());
+		stop_profiling(LAUNCH);
 
 		grid.y = 6;
+		start_profiling();
 		matrixSum<<<grid, block_x>>>(hessians, full_size, half_size, 6, 6, valid_points_num);
 		checkCudaErrors(cudaGetLastError());
+		stop_profiling(LAUNCH);
 
+		start_profiling();
 		sumScore<<<grid_x, block_x>>>(score, full_size, half_size);
 		checkCudaErrors(cudaGetLastError());
+		stop_profiling(LAUNCH);
 
 		full_size = half_size;
 		half_size = (full_size - 1) / 2 + 1;
@@ -975,8 +1007,10 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 	MatrixDevice dgrad(1, 6, valid_points_num, gradients), dhess(6, 6, valid_points_num, hessians);
 	MatrixHost hgrad(1, 6), hhess(6, 6);
 
+	start_profiling();
 	hgrad.moveToHost(dgrad);
 	hhess.moveToHost(dhess);
+	stop_profiling(DTOH);
 
 	for (int i = 0; i < 6; i++) {
 		score_gradient(i) = hgrad(i);
@@ -990,7 +1024,10 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 
 	double score_inc;
 
+	start_profiling();
 	checkCudaErrors(cudaMemcpy(&score_inc, score, sizeof(double), cudaMemcpyDeviceToHost));
+	stop_profiling(DTOH);
+	
 
 	checkCudaErrors(cudaFree(gradients));
 	checkCudaErrors(cudaFree(hessians));
@@ -1076,7 +1113,9 @@ void GNormalDistributionsTransform::computeAngleDerivatives(MatrixHost pose, boo
 	j_ang_(22) = cx * sy * cz - sx * sz;
 	j_ang_(23) = 0;
 
+	start_profiling();
 	j_ang_.moveToGpu(dj_ang_);
+	stop_profiling(HTOD);
 
 	if (compute_hessian) {
 
@@ -1140,7 +1179,9 @@ void GNormalDistributionsTransform::computeAngleDerivatives(MatrixHost pose, boo
 		h_ang_(43) = -cx * sy * sz - sx * cz;
 		h_ang_(44) = 0;
 
+		start_profiling();
 		h_ang_.moveToGpu(dh_ang_);
+		stop_profiling(HTOD);
 	}
 
 }
@@ -1183,15 +1224,19 @@ void GNormalDistributionsTransform::transformPointCloud(float *in_x, float *in_y
 		}
 	}
 
+	start_profiling();
 	htrans.moveToGpu(dtrans);
+	stop_profiling(HTOD);
 
 	if (points_number > 0) {
 		int block_x = (points_number <= BLOCK_SIZE_X) ? points_number : BLOCK_SIZE_X;
 		int grid_x = (points_number - 1) / block_x + 1;
 
+		start_profiling();
 		gpuTransform<<<grid_x, block_x >>>(in_x, in_y, in_z, trans_x, trans_y, trans_z, points_number, dtrans);
 		checkCudaErrors(cudaGetLastError());
 		checkCudaErrors(cudaDeviceSynchronize());
+		stop_profiling(LAUNCH);
 	}
 
 	dtrans.memFree();
@@ -1441,9 +1486,9 @@ void GNormalDistributionsTransform::computeHessian(Eigen::Matrix<double, 6, 6> &
 
 	//Update score gradient and hessian matrix
 	double *hessians, *point_gradients, *point_hessians;
-
+	
 	checkCudaErrors(cudaMalloc(&hessians, sizeof(double) * valid_points_num * 6 * 6));
-
+	
 	checkCudaErrors(cudaMalloc(&point_gradients, sizeof(double) * valid_points_num * 3 * 6));
 
 	checkCudaErrors(cudaMalloc(&point_hessians, sizeof(double) * valid_points_num * 18 * 6));
@@ -1456,6 +1501,7 @@ void GNormalDistributionsTransform::computeHessian(Eigen::Matrix<double, 6, 6> &
 	int grid_x = (valid_points_num - 1) / block_x + 1;
 	dim3 grid;
 
+	start_profiling();
 	computePointGradients0<<<grid_x, block_x>>>(x_, y_, z_, points_number_,
 												valid_points, valid_points_num,
 												dj_ang_.buffer(),
@@ -1467,7 +1513,9 @@ void GNormalDistributionsTransform::computeHessian(Eigen::Matrix<double, 6, 6> &
 												point_gradients + valid_points_num * 4,
 												point_gradients + valid_points_num * 10);
 	checkCudaErrors(cudaGetLastError());
+	stop_profiling(LAUNCH);
 
+	start_profiling();
 	computePointGradients1<<<grid_x, block_x>>>(x_, y_, z_, points_number_,
 												valid_points, valid_points_num,
 												dj_ang_.buffer(),
@@ -1476,8 +1524,9 @@ void GNormalDistributionsTransform::computeHessian(Eigen::Matrix<double, 6, 6> &
 												point_gradients + valid_points_num * 11,
 												point_gradients + valid_points_num * 17);
 	checkCudaErrors(cudaGetLastError());
+	stop_profiling(LAUNCH);
 
-
+	start_profiling();
 	computePointHessian0<<<grid_x, block_x>>>(x_, y_, z_, points_number_,
 												valid_points, valid_points_num,
 												dh_ang_.buffer(),
@@ -1487,7 +1536,9 @@ void GNormalDistributionsTransform::computeHessian(Eigen::Matrix<double, 6, 6> &
 												point_hessians + valid_points_num * 93, point_hessians + valid_points_num * 59, point_hessians + valid_points_num * 99,
 												point_hessians + valid_points_num * 65, point_hessians + valid_points_num * 105, point_hessians + valid_points_num * 71);
 	checkCudaErrors(cudaGetLastError());
+	stop_profiling(LAUNCH);
 
+	start_profiling();
 	computePointHessian1<<<grid_x, block_x>>>(x_, y_, z_, points_number_,
 												valid_points, valid_points_num,
 												dh_ang_.buffer(),
@@ -1495,12 +1546,15 @@ void GNormalDistributionsTransform::computeHessian(Eigen::Matrix<double, 6, 6> &
 												point_hessians + valid_points_num * 94, point_hessians + valid_points_num * 77, point_hessians + valid_points_num * 100,
 												point_hessians + valid_points_num * 83, point_hessians + valid_points_num * 106, point_hessians + valid_points_num * 89);
 	checkCudaErrors(cudaGetLastError());
+	stop_profiling(LAUNCH);
 
+	start_profiling();
 	computePointHessian2<<<grid_x, block_x>>>(x_, y_, z_, points_number_,
 												valid_points, valid_points_num,
 												dh_ang_.buffer(),
 												point_hessians + valid_points_num * 95, point_hessians + valid_points_num * 101, point_hessians + valid_points_num * 107);
 	checkCudaErrors(cudaGetLastError());
+	stop_profiling(LAUNCH);
 
 	double *tmp_hessian;
 
@@ -1514,6 +1568,7 @@ void GNormalDistributionsTransform::computeHessian(Eigen::Matrix<double, 6, 6> &
 
 	checkCudaErrors(cudaMalloc(&cov_dxd_pi, sizeof(double) * valid_voxel_num * 3 * 6));
 
+	start_profiling();
 	computeExCovX<<<grid_x, block_x>>>(trans_x, trans_y, trans_z, valid_points,
 										starting_voxel_id, voxel_id, valid_points_num,
 										centroid, centroid + voxel_num, centroid + 2 * voxel_num,
@@ -1524,26 +1579,32 @@ void GNormalDistributionsTransform::computeHessian(Eigen::Matrix<double, 6, 6> &
 										inverse_covariance + 6 * voxel_num, inverse_covariance + 7 * voxel_num, inverse_covariance + 8 * voxel_num);
 
 	checkCudaErrors(cudaGetLastError());
+	stop_profiling(LAUNCH);
 
 	grid.x = grid_x;
 	grid.y = 3;
 	grid.z = 6;
+	start_profiling();
 	computeCovDxdPi<<<grid, block_x>>>(valid_points, starting_voxel_id, voxel_id, valid_points_num,
 											inverse_covariance, voxel_num,
 											gauss_d1_, gauss_d2_, point_gradients,
 											cov_dxd_pi, valid_voxel_num);
 	checkCudaErrors(cudaGetLastError());
+	stop_profiling(LAUNCH);
 
 	int block_x2 = (valid_voxel_num > BLOCK_SIZE_X) ? BLOCK_SIZE_X : valid_voxel_num;
 	int grid_x2 = (valid_voxel_num - 1) / block_x2 + 1;
 
 
+	start_profiling();
 	updateExCovX<<<grid_x2, block_x2>>>(e_x_cov_x, gauss_d2_, valid_voxel_num);
 	checkCudaErrors(cudaGetLastError());
+	stop_profiling(LAUNCH);
 
 	grid.y = 6;
 	grid.z = 1;
 
+	start_profiling();
 	computeHessianListS0<<<grid, block_x>>>(trans_x, trans_y, trans_z, valid_points,
 												starting_voxel_id, voxel_id, valid_points_num,
 												centroid, centroid + voxel_num, centroid + 2 * voxel_num,
@@ -1553,9 +1614,11 @@ void GNormalDistributionsTransform::computeHessian(Eigen::Matrix<double, 6, 6> &
 												point_gradients,
 												tmp_hessian, valid_voxel_num);
 	checkCudaErrors(cudaGetLastError());
+	stop_profiling(LAUNCH);
 
 	grid.z = 6;
 
+	start_profiling();
 	computeHessianListS1<<<grid, block_x>>>(trans_x, trans_y, trans_z, valid_points,
 												starting_voxel_id, voxel_id, valid_points_num,
 												centroid, centroid + voxel_num, centroid + 2 * voxel_num,
@@ -1564,7 +1627,10 @@ void GNormalDistributionsTransform::computeHessian(Eigen::Matrix<double, 6, 6> &
 												point_gradients,
 												valid_voxel_num);
 	checkCudaErrors(cudaGetLastError());
+	stop_profiling(LAUNCH);
 
+
+	start_profiling();
 	computeHessianListS2<<<grid, block_x>>>(trans_x, trans_y, trans_z, valid_points,
 												starting_voxel_id, voxel_id, valid_points_num,
 												centroid, centroid + voxel_num, centroid + 2 * voxel_num,
@@ -1574,6 +1640,7 @@ void GNormalDistributionsTransform::computeHessian(Eigen::Matrix<double, 6, 6> &
 												inverse_covariance + 6 * voxel_num, inverse_covariance + 7 * voxel_num, inverse_covariance + 8 * voxel_num,
 												point_hessians, hessians, valid_voxel_num);
 	checkCudaErrors(cudaGetLastError());
+	stop_profiling(LAUNCH);
 
 
 	int full_size = valid_points_num;
@@ -1586,7 +1653,9 @@ void GNormalDistributionsTransform::computeHessian(Eigen::Matrix<double, 6, 6> &
 		grid.x = grid_x;
 		grid.y = 6;
 		grid.z = 6;
+		start_profiling();
 		matrixSum<<<grid_x, block_x>>>(hessians, full_size, half_size, 6, 6, valid_points_num);
+		stop_profiling(LAUNCH);
 
 		full_size = half_size;
 		half_size = (full_size - 1) / 2 + 1;
@@ -1699,5 +1768,4 @@ double GNormalDistributionsTransform::getFitnessScore(double max_range)
 
 	return DBL_MAX;
 }
-
 }

@@ -3,9 +3,6 @@
   <arg name="lidar_output_topic" default="/points_raw"/>
   <arg name="image_input_topic" default="/image_raw_origin"/>
 
-  <!-- ROS-Bridge node for Simulator connection -->
-  <node name="websocket_bridge" pkg="rosbridge_server" type="rosbridge_websocket" output="screen" clear_params="true" required="true" />
-
   <!-- Re-publishing simulator/camera_node/image/compressed topic to /image_raw as expected by Autoware -->
   <node name="republish" type="republish" pkg="image_transport" output="screen" args="compressed in:=/simulator/camera_node/image raw out:=/image_raw_origin"  />
 
@@ -32,11 +29,11 @@
   <include file="$(find points_preprocessor)/launch/ray_ground_filter.launch">
     <arg name="input_point_topic" value="/points_raw" />  <!-- input_point_topic, ground filtering will be performed over the pointcloud in this topic. -->
     <arg name="base_frame" value="base_link" />  <!-- Coordinate system to perform transform (default base_link) -->
-    <arg name="max_clipping_height" value="5.0" />  <!-- Remove Points above this height value (default 2.0 meters) -->
-    <arg name="min_clipping_height" value="-0.5" />  <!-- Remove Points below this height value (default -0.5 meters) -->
+    <arg name="max_clipping_height" value="1.5" />  <!-- Remove Points above this height value (default 2.0 meters) -->
+    <arg name="min_clipping_height" value="0.0" />  <!-- Remove Points below this height value (default -0.5 meters) -->
     <arg name="min_point_distance" value="2.9" />  <!-- Removes Points closer than this distance from the sensor origin (default 1.85 meters) -->
     <arg name="radial_divider_angle" value="0.08" />  <!-- Angle of each Radial division on the XY Plane (default 0.08 degrees)-->
-    <arg name="concentric_divider_distance" value="0.71" />  <!-- Distance of each concentric division on the XY Plane (default 0.0 meters) -->
+    <arg name="concentric_divider_distance" value="0.0" />  <!-- Distance of each concentric division on the XY Plane (default 0.0 meters) -->
     <arg name="local_max_slope" value="3" />  <!-- Max Slope of the ground between Points (default 8 degrees) -->
     <arg name="general_max_slope" value="9" />  <!-- Max Slope of the ground in the entire PointCloud, used when reclassification occurs (default 5 degrees)-->
     <arg name="min_height_threshold" value="0.4" />  <!-- Minimum height threshold between points (default 0.05 meters)-->

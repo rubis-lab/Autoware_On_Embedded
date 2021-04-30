@@ -9,6 +9,7 @@
 #include "Eigen/Geometry"
 
 namespace gpu {
+
 class GNormalDistributionsTransform: public GRegistration {
 public:
   GNormalDistributionsTransform();
@@ -39,6 +40,7 @@ public:
   double getFitnessScore(double max_range = DBL_MAX);
 
   ~GNormalDistributionsTransform();
+
 
 protected:
   void computeTransformation(const Eigen::Matrix<float, 4, 4> &guess);

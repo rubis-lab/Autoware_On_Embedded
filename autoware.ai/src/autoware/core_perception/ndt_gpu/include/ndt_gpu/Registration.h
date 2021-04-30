@@ -11,6 +11,14 @@
 #include <eigen3/Eigen/Geometry>
 #include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
+#include <stdio.h>
+
+#define HTOD 0
+#define DTOH 1
+#define LAUNCH 2
+#define GPU_PROFILING 1
+
+static FILE* fp;
 
 namespace gpu {
 class GRegistration {
@@ -45,6 +53,19 @@ public:
   bool hasConverged() const;
 
   virtual ~GRegistration();
+
+  /* Added for GPU profiling */
+  cudaEvent_t event_start, event_stop;
+  
+  int gid = 0;
+
+  void start_profiling();
+  void stop_profiling(int type);
+  void write_data(int id, float time, int type);
+  void write_dummy_line();
+  void initialize_file(const char name[]);
+  void close_file();
+
 protected:
 
   virtual void computeTransformation(const Eigen::Matrix<float, 4, 4> &guess);

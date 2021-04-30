@@ -248,6 +248,8 @@ pthread_mutex_t mutex;
 
 static bool _is_init_match_finished = false;
 
+static std::string _profiling_file_name;
+
 static pose convertPoseIntoRelativeCoordinate(const pose &target_pose, const pose &reference_pose)
 {
     tf::Quaternion target_q;
@@ -297,7 +299,7 @@ static void param_callback(const autoware_config_msgs::ConfigNDT::ConstPtr& inpu
     else if (_method_type == MethodType::PCL_ANH)
       anh_ndt.setResolution(ndt_res);
 #ifdef CUDA_FOUND
-    else if (_method_type == MethodType::PCL_ANH_GPU)
+    else if (_method_type == MethodType::PCL_ANH_GPU)      
       anh_gpu_ndt_ptr->setResolution(ndt_res);
 #endif
 #ifdef USE_PCL_OPENMP
@@ -1059,6 +1061,8 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
       getFitnessScore_end = std::chrono::system_clock::now();
 
       trans_probability = anh_gpu_ndt_ptr->getTransformationProbability();
+      
+      anh_gpu_ndt_ptr->write_dummy_line();
     }
 #endif
 #ifdef USE_PCL_OPENMP
@@ -1427,27 +1431,27 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
             << std::endl;
       }
     }
-
-    std::cout << "-----------------------------------------------------------------" << std::endl;
-    std::cout << "Sequence: " << input->header.seq << std::endl;
-    std::cout << "Timestamp: " << input->header.stamp << std::endl;
-    std::cout << "Frame ID: " << input->header.frame_id << std::endl;
-    //    std::cout << "Number of Scan Points: " << scan_ptr->size() << " points." << std::endl;
-    std::cout << "Number of Filtered Scan Points: " << scan_points_num << " points." << std::endl;
-    std::cout << "NDT has converged: " << has_converged << std::endl;
-    std::cout << "Fitness Score: " << fitness_score << std::endl;
-    std::cout << "Transformation Probability: " << trans_probability << std::endl;
-    std::cout << "Execution Time: " << exe_time << " ms." << std::endl;
-    std::cout << "Number of Iterations: " << iteration << std::endl;
-    std::cout << "NDT Reliability: " << ndt_reliability.data << std::endl;
-    std::cout << "(x,y,z,roll,pitch,yaw): " << std::endl;
-    std::cout << "(" << current_pose.x << ", " << current_pose.y << ", " << current_pose.z << ", " << current_pose.roll
-              << ", " << current_pose.pitch << ", " << current_pose.yaw << ")" << std::endl;
-    std::cout << "Transformation Matrix: " << std::endl;
-    std::cout << t << std::endl;
-    std::cout << "Align time: " << align_time << std::endl;
-    std::cout << "Get fitness score time: " << getFitnessScore_time << std::endl;
-    std::cout << "-----------------------------------------------------------------" << std::endl;
+    
+    // std::cout << "-----------------------------------------------------------------" << std::endl;
+    // std::cout << "Sequence: " << input->header.seq << std::endl;
+    // std::cout << "Timestamp: " << input->header.stamp << std::endl;
+    // std::cout << "Frame ID: " << input->header.frame_id << std::endl;
+    // //    std::cout << "Number of Scan Points: " << scan_ptr->size() << " points." << std::endl;
+    // std::cout << "Number of Filtered Scan Points: " << scan_points_num << " points." << std::endl;
+    // std::cout << "NDT has converged: " << has_converged << std::endl;
+    // std::cout << "Fitness Score: " << fitness_score << std::endl;
+    // std::cout << "Transformation Probability: " << trans_probability << std::endl;
+    // std::cout << "Execution Time: " << exe_time << " ms." << std::endl;
+    // std::cout << "Number of Iterations: " << iteration << std::endl;
+    // std::cout << "NDT Reliability: " << ndt_reliability.data << std::endl;
+    // std::cout << "(x,y,z,roll,pitch,yaw): " << std::endl;
+    // std::cout << "(" << current_pose.x << ", " << current_pose.y << ", " << current_pose.z << ", " << current_pose.roll
+    //           << ", " << current_pose.pitch << ", " << current_pose.yaw << ")" << std::endl;
+    // std::cout << "Transformation Matrix: " << std::endl;
+    // std::cout << t << std::endl;
+    // std::cout << "Align time: " << align_time << std::endl;
+    // std::cout << "Get fitness score time: " << getFitnessScore_time << std::endl;
+    // std::cout << "-----------------------------------------------------------------" << std::endl;
 
     offset_imu_x = 0.0;
     offset_imu_y = 0.0;
@@ -1547,6 +1551,11 @@ int main(int argc, char** argv)
   private_nh.getParam("imu_upside_down", _imu_upside_down);
   private_nh.getParam("imu_topic", _imu_topic);
   private_nh.param<double>("gnss_reinit_fitness", _gnss_reinit_fitness, 500.0);
+  
+  if(_method_type == MethodType::PCL_ANH_GPU){    
+    private_nh.param<std::string>("profiling_file_name", _profiling_file_name, "~/GPU_profiling/ndt_matching.csv");    
+    anh_gpu_ndt_ptr->initialize_file(_profiling_file_name.c_str());    
+  }
 
 
   if (nh.getParam("localizer", _localizer) == false)
@@ -1666,5 +1675,6 @@ int main(int argc, char** argv)
 
   ros::spin();
 
+  anh_gpu_ndt_ptr->close_file();
   return 0;
 }

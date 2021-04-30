@@ -21,10 +21,8 @@
 
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "gnss_localizer");
-  std::cout << "hi1" << std::endl;
-  gnss_localizer::Nmea2TFPoseNode ntpn;
-  std::cout << "hi2" << std::endl;
+  ros::init(argc, argv, "gnss_localizer");  
+  gnss_localizer::Nmea2TFPoseNode ntpn;  
   ntpn.run();
 
   return 0;
