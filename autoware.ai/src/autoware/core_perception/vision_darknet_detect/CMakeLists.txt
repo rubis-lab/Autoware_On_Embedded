@@ -125,6 +125,8 @@ if(USE_CUDA)
     src/vision_darknet_detect_node.cpp
     src/vision_darknet_detect.cpp
     src/vision_darknet_detect.h
+    darknet/src/cuda.h
+    darknet/src/cuda.c
   )
 
   target_compile_definitions(vision_darknet_detect PUBLIC -DGPU)
@@ -230,6 +232,8 @@ else()
     src/vision_darknet_detect_node.cpp
     src/vision_darknet_detect.cpp
     src/vision_darknet_detect.h
+    darknet/src/cuda.h
+    darknet/src/cuda.c
   )
 
   target_include_directories(vision_darknet_detect PRIVATE

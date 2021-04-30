@@ -11,7 +11,11 @@ extern "C" {
 #include "col2im.h"
 #include "utils.h"
 #include "cuda.h"
+
+// extern int glob_id;
+// extern FILE* fp;
 }
+
 
 __global__ void binarize_kernel(float *x, int n, float *binary)
 {
@@ -187,6 +191,7 @@ void backward_convolutional_layer_gpu(convolutional_layer l, network net)
         backward_bias_gpu(l.bias_updates_gpu, l.delta_gpu, l.batch, l.n, l.out_w*l.out_h);
     }
     float *original_input = net.input_gpu;
+
 
     if(l.xnor) net.input_gpu = l.binary_input_gpu;
 #ifdef CUDNN

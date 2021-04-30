@@ -5,7 +5,17 @@
 extern "C" {
 #include "maxpool_layer.h"
 #include "cuda.h"
+#include <sys/types.h>
+#include <unistd.h>
+#include <sys/syscall.h>
+int count_max = 0;
+// extern int glob_id;
+// extern FILE* fp;
 }
+
+// cudaEvent_t start4, stop4;
+// float gpu_elapsed_time_ms5;
+
 
 __global__ void forward_maxpool_layer_kernel(int n, int in_h, int in_w, int in_c, int stride, int size, int pad, float *input, float *output, int *indexes)
 {
@@ -92,7 +102,29 @@ extern "C" void forward_maxpool_layer_gpu(maxpool_layer layer, network net)
 
     size_t n = h*w*c*layer.batch;
 
+    count_max += 1;
+
+    start_profiling();
+
     forward_maxpool_layer_kernel<<<cuda_gridsize(n), BLOCK>>>(n, layer.h, layer.w, layer.c, layer.stride, layer.size, layer.pad, net.input_gpu, layer.output_gpu, layer.indexes_gpu);
+
+    stop_profiling(LAUNCH,"maxpool",count_max);
+
+    // if(count_max >= 3){
+    //     char filename[100];
+    //     sprintf(filename, "~/prof_data/yolo_exec_%d.csv", tid);
+    //     FILE *f = fopen(filename, "a+");
+    //     if(f == NULL){
+    //         printf("Cannot open file!\n");
+    //         return;
+    //     } 
+    //     fprintf(f, "execution_time_max,%f\n", execution_time_max/1000);
+    //     fclose(f);
+    //     execution_time_max = 0;
+    //     count_max = 0;
+    // }
+
+
     check_error(cudaPeekAtLastError());
 }
 

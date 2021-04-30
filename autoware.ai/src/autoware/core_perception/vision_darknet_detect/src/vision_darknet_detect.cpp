@@ -20,8 +20,34 @@
  *  Created on: April 4th, 2018
  */
 #include "vision_darknet_detect.h"
-
+#include <sys/types.h>
+#include <unistd.h>
+#include <sys/syscall.h>
+#include "../darknet/src/cuda.h"
+//#include "../darknet/src/cuda.c"
+#if (CV_MAJOR_VERSION <= 2)
+#include <opencv2/contrib/contrib.hpp>
+#else
 #include "gencolors.cpp"
+#endif
+
+// extern"C" FILE* fp;
+// extern"C" int glob_id;
+//int count_exec;
+extern"C" float htod_time;
+extern"C" float dtoh_time;
+extern"C" float launch_time;  
+extern"C" cudaEvent_t event_start, event_stop;
+//extern"C" int gid = 0;
+extern"C" void start_profiling();
+extern"C" void stop_profiling(int type, char* ker_name, int count);
+extern"C" void write_data(int id, float time, int type, char* ker_name, int count);
+extern"C" void write_dummy_line();
+//extern"C" void initialize_file();
+extern"C" void initialize_file(const char name[]);
+extern"C" void close_file();
+
+static std::string _profiling_file_name;
 
 namespace darknet
 {
@@ -91,8 +117,22 @@ namespace darknet
     std::vector< RectClassScore<float> > Yolo3Detector::forward(image& in_darknet_image)
     {
         float * in_data = in_darknet_image.data;
+        
+        double time = what_time_is_it_now();
+        
         float *prediction = network_predict(darknet_network_, in_data);
+
+
         layer output_layer = darknet_network_->layers[darknet_network_->n - 1];
+
+        char filename[100];
+        sprintf(filename, "/home/bkpark/prof_data/yolo_res.csv");
+        FILE *f = fopen(filename, "a+");        
+        if(f == NULL){
+            fprintf(stderr,"Cannot open file!\n");
+        } 
+        fprintf(f, "res_time,%f\n", what_time_is_it_now() - time);
+        fclose(f);
 
         output_layer.output = prediction;
         int nboxes = 0;
@@ -172,10 +212,6 @@ void Yolo3DetectorNode::convert_rect_to_image_obj(std::vector< RectClassScore<fl
                     obj.label = "unknown";
             }
             obj.valid = true;
-            obj.pose.orientation.x = 0;
-            obj.pose.orientation.y = 0;
-            obj.pose.orientation.z = 0;
-            obj.pose.orientation.w = 1;
 
             out_message.objects.push_back(obj);
 
@@ -251,6 +287,7 @@ void Yolo3DetectorNode::image_callback(const sensor_msgs::ImageConstPtr& in_imag
 {
     std::vector< RectClassScore<float> > detections;
 
+    
     darknet_image_ = convert_ipl_to_image(in_image_message);
 
     detections = yolo_detector_.detect(darknet_image_);
@@ -264,6 +301,8 @@ void Yolo3DetectorNode::image_callback(const sensor_msgs::ImageConstPtr& in_imag
     publisher_objects_.publish(output_message);
 
     free(darknet_image_.data);
+
+    write_dummy_line();//
 }
 
 void Yolo3DetectorNode::config_cb(const autoware_config_msgs::ConfigSSD::ConstPtr& param)
@@ -285,10 +324,17 @@ std::vector<std::string> Yolo3DetectorNode::read_custom_names_file(const std::st
 }
 
 void Yolo3DetectorNode::Run()
-{
+{    
+
     //ROS STUFF
     ros::NodeHandle private_node_handle("~");//to receive args
 
+    private_node_handle.param<std::string>("profiling_file_name",_profiling_file_name,"/home/bkpark/prof_data/yolo_prof.csv");
+    //private_node_handle.getParam("profiling_file_name", _profiling_file_name);
+    fprintf(stderr,"%s\n", _profiling_file_name.c_str());
+    initialize_file(_profiling_file_name.c_str());    
+    
+    
     //RECEIVE IMAGE TOPIC NAME
     std::string image_raw_topic_str;
     if (private_node_handle.getParam("image_raw_node", image_raw_topic_str))
@@ -345,14 +391,16 @@ void Yolo3DetectorNode::Run()
     yolo_detector_.load(network_definition_file, pretrained_model_file, score_threshold_, nms_threshold_);
     ROS_INFO("Initialization complete.");
 
-    generateColors(colors_, 80);
-
+    #if (CV_MAJOR_VERSION <= 2)
+        cv::generateColors(colors_, 80);
+    #else
+        generateColors(colors_, 80);
+    #endif
 
     publisher_objects_ = node_handle_.advertise<autoware_msgs::DetectedObjectArray>("/detection/image_detector/objects", 1);
 
     ROS_INFO("Subscribing to... %s", image_raw_topic_str.c_str());
-    subscriber_image_raw_ = node_handle_.subscribe(image_raw_topic_str, 1, &Yolo3DetectorNode::image_callback, this);
-
+    subscriber_image_raw_ = node_handle_.subscribe(image_raw_topic_str, 1, &Yolo3DetectorNode::image_callback, this);    
     std::string config_topic("/config");
     config_topic += "/Yolo3";
     subscriber_yolo_config_ = node_handle_.subscribe(config_topic, 1, &Yolo3DetectorNode::config_cb, this);
@@ -360,6 +408,7 @@ void Yolo3DetectorNode::Run()
     ROS_INFO_STREAM( __APP_NAME__ << "" );
 
     ros::spin();
+    close_file();
     ROS_INFO("END Yolo");
 
 }
