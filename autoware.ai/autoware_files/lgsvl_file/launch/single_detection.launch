@@ -9,12 +9,12 @@
   <arg name="camera_calib" default="$(env HOME)/autoware.ai/autoware_files/data/calibration/single_lidar/Lexus2016RXHybrid.yaml"/>
 
   <!-- calibration_publisher -->
-  <include file="$(find runtime_manager)/launch_files/calibration_publisher.launch">
+  <!-- <include file="$(find runtime_manager)/launch_files/calibration_publisher.launch">
     <arg name="file" value="$(arg camera_calib)" />
     <arg name="register_lidar2camera_tf" value="$(arg is_register_lidar2camera_tf)" />
     <arg name="publish_extrinsic_mat" value="$(arg is_publish_projection_matrix)" />
     <arg name="publish_camera_info" value="$(arg is_publish_camera_info)" />
-  </include>
+  </include> -->
 
   <!-- vision_darknet_detect -->
   <!-- <include file="$(find vision_darknet_detect)/launch/vision_yolo3_detect.launch">
@@ -55,7 +55,7 @@
     <arg name="clustering_ranges" value="[15,30,45,60]"/><!-- Distances to segment pointcloud -->
     <arg name="clustering_distances"
          value="[0.5,1.1,1.6,2.1,2.6]"/><!-- Euclidean Clustering threshold distance for each segment -->
-    <arg name="profiling_file_name" value="$(env HOME)/GPU_profiling/210427_euclidean_cluster_detect_alone.csv" />
+    <arg name="profiling_file_name" value="$(env HOME)/GPU_profiling/210430_euclidean_cluster_detect_alone.csv" />
   </include>
 
   <!-- imm_ukf_pda_track -->
@@ -80,7 +80,7 @@
   </include>
 
   <!-- range_fusion -->
-  <include file="$(find range_vision_fusion)/launch/range_vision_fusion.launch">
+  <!-- <include file="$(find range_vision_fusion)/launch/range_vision_fusion.launch">
     <arg name="detected_objects_range" default="/detection/object_tracker/objects_center"/>
     <arg name="detected_objects_vision" default="/detection/image_detector/objects"/>
     <arg name="camera_info_src" default="/camera_info"/>
@@ -91,6 +91,6 @@
     <arg name="overlap_threshold" default="0"/>
     <arg name="use_vector_map" default="false"/>
     <arg name="namespace" default="/detection/fusion_tools"/>
-  </include>
+  </include> -->
 
 </launch>

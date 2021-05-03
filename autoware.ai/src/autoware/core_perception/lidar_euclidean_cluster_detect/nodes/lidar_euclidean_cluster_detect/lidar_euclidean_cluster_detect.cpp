@@ -68,6 +68,8 @@
 
 #include "cluster.h"
 
+#define GPU_CLUSTERING
+
 #ifdef GPU_CLUSTERING
 
 #include "gpu_euclidean_clustering.h"
@@ -133,9 +135,11 @@ tf::StampedTransform *_velodyne_output_transform;
 tf::TransformListener *_transform_listener;
 tf::TransformListener *_vectormap_transform_listener;
 
-/* For GPU Profiling */
 static std::string _filename;
+/* For GPU Profiling */
+#ifdef GPU_CLUSTERING
 static GpuEuclideanCluster _gecl_cluster;  
+#endif
 
 tf::StampedTransform findTransform(const std::string &in_target_frame, const std::string &in_source_frame)
 {
@@ -927,6 +931,13 @@ void velodyne_callback(const sensor_msgs::PointCloud2ConstPtr& in_sensor_cloud)
 }
 int main(int argc, char **argv)
 {
+  /* For GPU scheduling */
+  #ifdef GPU_CLUSTERING
+  int key_id = 1;  
+
+  init_scheduling("/tmp/euclidean_cluster_detect", key_id);
+  #endif
+
   // Initialize ROS
   ros::init(argc, argv, "euclidean_cluster");
 
@@ -1040,11 +1051,13 @@ int main(int argc, char **argv)
   private_nh.param("clustering_ranges", str_ranges, std::string("[15,30,45,60]"));
     ROS_INFO("[%s] clustering_ranges: %s", __APP_NAME__, str_ranges.c_str());
 
+  #ifdef GPU_CLUSTERING
   if(_use_gpu == true){
     private_nh.param<std::string>("profiling_file_name", _filename, "~/GPU_profiling/lidar_euclidean_cluster_detect.csv");
-    ROS_INFO("[%s] profiling_file_name: %s", __APP_NAME__, _filename.c_str());    
+    ROS_INFO("[%s] profiling_file_name: %s", __APP_NAME__, _filename.c_str());        
     _gecl_cluster.initialize_file(_filename.c_str());
   }
+  #endif
 
   if (_use_multiple_thres)
   {
