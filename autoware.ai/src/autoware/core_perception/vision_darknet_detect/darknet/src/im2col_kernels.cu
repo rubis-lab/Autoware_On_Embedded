@@ -5,6 +5,7 @@
 extern "C" {
 #include "im2col.h"
 #include "cuda.h"
+int count_im2col = 0;
 }
 
 // src: https://github.com/BVLC/caffe/blob/master/src/caffe/util/im2col.cu
@@ -53,9 +54,14 @@ void im2col_gpu(float *im,
     int height_col = (height + 2 * pad - ksize) / stride + 1;
     int width_col = (width + 2 * pad - ksize) / stride + 1;
     int num_kernels = channels * height_col * width_col;
+    count_im2col += 1;
+    start_profiling();//
+
     im2col_gpu_kernel<<<(num_kernels+BLOCK-1)/BLOCK,
         BLOCK>>>(
                 num_kernels, im, height, width, ksize, pad,
                 stride, height_col,
                 width_col, data_col);
+    
+    stop_profiling(LAUNCH,"im2col",count_im2col);
 }

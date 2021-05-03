@@ -97,13 +97,15 @@ class Yolo3DetectorNode {
 
     float                           score_threshold_;
     float                           nms_threshold_;
-    double                          image_ratio_;//resize ratio used to fit input image to network input size
+    double                          image_ratio_;//resize ratio used to fit input image to network input size    
     uint32_t                        image_top_bottom_border_;//black strips added to the input image to maintain aspect ratio while resizing it to fit the network input size
     uint32_t                        image_left_right_border_;
     std::vector<cv::Scalar>         colors_;
 
     std::vector<std::string>        custom_names_;
     bool                            use_coco_names_;
+
+    //std::string                     profiling_file_name;
 
 
     void                            convert_rect_to_image_obj(std::vector< RectClassScore<float> >& in_objects,
