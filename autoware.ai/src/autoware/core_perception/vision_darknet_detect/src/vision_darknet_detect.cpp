@@ -24,24 +24,18 @@
 #include <unistd.h>
 #include <sys/syscall.h>
 #include "../darknet/src/cuda.h"
-//#include "../darknet/src/cuda.c"
 #if (CV_MAJOR_VERSION <= 2)
 #include <opencv2/contrib/contrib.hpp>
 #else
 #include "gencolors.cpp"
 #endif
-
-// extern"C" FILE* fp;
-// extern"C" int glob_id;
-//int count_exec;
 extern"C" float htod_time;
 extern"C" float dtoh_time;
-extern"C" float launch_time;  
+extern"C" float launch_time;
 extern"C" cudaEvent_t event_start, event_stop;
-//extern"C" int gid = 0;
 extern"C" void start_profiling();
-extern"C" void stop_profiling(int type, char* ker_name, int count);
-extern"C" void write_data(int id, float time, int type, char* ker_name, int count);
+extern"C" void stop_profiling(int type, char* ker_name, int id);
+extern"C" void write_data(int id, float time, int type, char* ker_name);
 extern"C" void write_dummy_line();
 //extern"C" void initialize_file();
 extern"C" void initialize_file(const char name[]);
@@ -125,14 +119,14 @@ namespace darknet
 
         layer output_layer = darknet_network_->layers[darknet_network_->n - 1];
 
-        char filename[100];
-        sprintf(filename, "/home/bkpark/prof_data/yolo_res.csv");
-        FILE *f = fopen(filename, "a+");        
-        if(f == NULL){
-            fprintf(stderr,"Cannot open file!\n");
-        } 
-        fprintf(f, "res_time,%f\n", what_time_is_it_now() - time);
-        fclose(f);
+        // char filename[100];
+        // sprintf(filename, "~/GPU_profiling/yolo_res.csv");
+        // FILE *f = fopen(filename, "a+");        
+        // if(f == NULL){
+        //     fprintf(stderr,"Cannot open file!\n");
+        // } 
+        // fprintf(f, "res_time,%f\n", what_time_is_it_now() - time);
+        // fclose(f);
 
         output_layer.output = prediction;
         int nboxes = 0;

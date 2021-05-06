@@ -9,15 +9,15 @@
   <arg name="camera_calib" default="$(env HOME)/autoware.ai/autoware_files/data/calibration/single_lidar/Lexus2016RXHybrid.yaml"/>
 
   <!-- calibration_publisher -->
-  <!-- <include file="$(find runtime_manager)/launch_files/calibration_publisher.launch">
+  <include file="$(find runtime_manager)/launch_files/calibration_publisher.launch">
     <arg name="file" value="$(arg camera_calib)" />
     <arg name="register_lidar2camera_tf" value="$(arg is_register_lidar2camera_tf)" />
     <arg name="publish_extrinsic_mat" value="$(arg is_publish_projection_matrix)" />
     <arg name="publish_camera_info" value="$(arg is_publish_camera_info)" />
-  </include> -->
+  </include>
 
   <!-- vision_darknet_detect -->
-  <!-- <include file="$(find vision_darknet_detect)/launch/vision_yolo3_detect.launch">
+  <include file="$(find vision_darknet_detect)/launch/vision_yolo3_detect.launch">
     <arg name="gpu_device_id" value="0"/>
     <arg name="score_threshold" value="0.5"/>
     <arg name="nms_threshold" value="0.45"/>
@@ -26,9 +26,10 @@
     <arg name="names_file" value="$(find vision_darknet_detect)/darknet/cfg/coco.names"/>
     <arg name="camera_id" value="/"/>
     <arg name="image_src" value="/image_raw"/>
-  </include> -->
+    <arg name="profiling_file_name" value="$(env HOME)/GPU_profiling/X2.csv"/>
+  </include>
 
-  <!-- lidar_euclidean_cluster_detect-->
+<!-- lidar_euclidean_cluster_detect-->
   <include file="$(find lidar_euclidean_cluster_detect)/launch/lidar_euclidean_cluster_detect.launch">
     <arg name="points_node" value="/points_no_ground_center" /><!--CHANGE THIS TO READ WHETHER FROM VSCAN OR POINTS_RAW -->
     <arg name="remove_ground" value="true" />
@@ -55,11 +56,11 @@
     <arg name="clustering_ranges" value="[15,30,45,60]"/><!-- Distances to segment pointcloud -->
     <arg name="clustering_distances"
          value="[0.5,1.1,1.6,2.1,2.6]"/><!-- Euclidean Clustering threshold distance for each segment -->
-    <arg name="profiling_file_name" value="$(env HOME)/GPU_profiling/210430_euclidean_cluster_detect_alone.csv" />
+    <arg name="profiling_file_name" value="$(env HOME)/GPU_profiling/X.csv" />
   </include>
-
+  
   <!-- imm_ukf_pda_track -->
-  <include file="$(find imm_ukf_pda_track)/launch/imm_ukf_pda_track.launch">
+  <!-- <include file="$(find imm_ukf_pda_track)/launch/imm_ukf_pda_track.launch">
     <arg name="namespace" default="/detection/object_tracker"/>
     <arg name="tracker_input_topic" default="/detection/lidar_detector/objects_center" />
     <arg name="tracker_output_topic" default="/detection/object_tracker/objects_center" />
@@ -77,7 +78,7 @@
     <arg name="lane_direction_chi_threshold" default="2.71" />
     <arg name="nearest_lane_distance_threshold" default="1.0" />
     <arg name="vectormap_frame" default="/map" />
-  </include>
+  </include> -->
 
   <!-- range_fusion -->
   <!-- <include file="$(find range_vision_fusion)/launch/range_vision_fusion.launch">

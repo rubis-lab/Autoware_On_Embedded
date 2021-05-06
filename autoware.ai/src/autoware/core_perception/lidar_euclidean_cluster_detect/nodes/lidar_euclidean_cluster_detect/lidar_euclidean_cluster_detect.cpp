@@ -935,7 +935,7 @@ int main(int argc, char **argv)
   #ifdef GPU_CLUSTERING
   int key_id = 1;  
 
-  init_scheduling("/tmp/euclidean_cluster_detect", key_id);
+  // init_scheduling("/tmp/euclidean_cluster_detect", key_id);
   #endif
 
   // Initialize ROS

@@ -55,7 +55,7 @@
   <include file="$(find lidar_localizer)/launch/ndt_matching.launch">
     <arg name="method_type" value="2" /> <!-- pcl_generic=0, pcl_anh=1, pcl_anh_gpu=2, pcl_openmp=3 -->
     <arg name="get_height" value="true" />
-    <arg name="profiling_file_name" value="$(env HOME)/GPU_profiling/210427_ndt_matching_alone.csv"/>
+    <arg name="profiling_file_name" value="$(env HOME)/GPU_profiling/X.csv"/>
   </include>
 
   <!-- ndt config -->

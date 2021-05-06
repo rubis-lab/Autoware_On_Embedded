@@ -180,7 +180,7 @@ void GRegistration::setInputSource(pcl::PointCloud<pcl::PointXYZI>::Ptr input)
 #endif
 		start_profiling();
 		checkCudaErrors(cudaMemcpy(tmp, host_tmp, sizeof(pcl::PointXYZI) * points_number_, cudaMemcpyHostToDevice));
-		stop_profiling(HTOD);
+		stop_profiling(35, HTOD);
 
 		if (x_ != NULL) {
 			checkCudaErrors(cudaFree(x_));
@@ -208,7 +208,7 @@ void GRegistration::setInputSource(pcl::PointCloud<pcl::PointXYZI>::Ptr input)
 		convertInput<pcl::PointXYZI><<<grid_x, block_x>>>(tmp, x_, y_, z_, points_number_);
 		checkCudaErrors(cudaGetLastError());
 		checkCudaErrors(cudaDeviceSynchronize());
-		stop_profiling(LAUNCH);
+		stop_profiling(36, LAUNCH);
 
 
 		if (trans_x_ != NULL) {
@@ -233,15 +233,15 @@ void GRegistration::setInputSource(pcl::PointCloud<pcl::PointXYZI>::Ptr input)
 		// Initially, also copy scanned points to transformed buffers
 		start_profiling();
 		checkCudaErrors(cudaMemcpy(trans_x_, x_, sizeof(float) * points_number_, cudaMemcpyDeviceToDevice));
-		stop_profiling(DTOH);
+		stop_profiling(37, DTOH);
 
 		start_profiling();
 		checkCudaErrors(cudaMemcpy(trans_y_, y_, sizeof(float) * points_number_, cudaMemcpyDeviceToDevice));
-		stop_profiling(DTOH);
+		stop_profiling(38,DTOH);
 
 		start_profiling();
 		checkCudaErrors(cudaMemcpy(trans_z_, z_, sizeof(float) * points_number_, cudaMemcpyDeviceToDevice));
-		stop_profiling(DTOH);
+		stop_profiling(39, DTOH);
 
 		checkCudaErrors(cudaFree(tmp));
 
@@ -268,9 +268,13 @@ void GRegistration::setInputSource(pcl::PointCloud<pcl::PointXYZ>::Ptr input)
 #ifndef __aarch64__
 		checkCudaErrors(cudaHostRegister(host_tmp, sizeof(pcl::PointXYZ) * points_number_, cudaHostRegisterDefault));
 #endif	
+		// long long int relative_deadline;
+		// relative_deadline = MS2US(20);
+		// fprintf(stderr, "sched1!!\n");
+		// request_scheduling(relative_deadline);
 		start_profiling();
 		checkCudaErrors(cudaMemcpy(tmp, host_tmp, sizeof(pcl::PointXYZ) * points_number_, cudaMemcpyHostToDevice));
-		stop_profiling(HTOD);
+		stop_profiling(40, HTOD);
 
 		if (x_ != NULL) {
 			checkCudaErrors(cudaFree(x_));
@@ -298,7 +302,7 @@ void GRegistration::setInputSource(pcl::PointCloud<pcl::PointXYZ>::Ptr input)
 		convertInput<pcl::PointXYZ><<<grid_x, block_x>>>(tmp, x_, y_, z_, points_number_);
 		checkCudaErrors(cudaGetLastError());
 		checkCudaErrors(cudaDeviceSynchronize());
-		stop_profiling(LAUNCH);
+		stop_profiling(41, LAUNCH);
 
 		if (trans_x_ != NULL) {
 			checkCudaErrors(cudaFree(trans_x_));
@@ -321,15 +325,15 @@ void GRegistration::setInputSource(pcl::PointCloud<pcl::PointXYZ>::Ptr input)
 
 		start_profiling();
 		checkCudaErrors(cudaMemcpy(trans_x_, x_, sizeof(float) * points_number_, cudaMemcpyDeviceToDevice));		
-		stop_profiling(DTOH);
+		stop_profiling(42, DTOH);
 
 		start_profiling();
 		checkCudaErrors(cudaMemcpy(trans_y_, y_, sizeof(float) * points_number_, cudaMemcpyDeviceToDevice));
-		stop_profiling(DTOH);
+		stop_profiling(43, DTOH);
 
 		start_profiling();
 		checkCudaErrors(cudaMemcpy(trans_z_, z_, sizeof(float) * points_number_, cudaMemcpyDeviceToDevice));
-		stop_profiling(DTOH);
+		stop_profiling(44, DTOH);
 		
 
 		checkCudaErrors(cudaFree(tmp));
@@ -359,7 +363,7 @@ void GRegistration::setInputTarget(pcl::PointCloud<pcl::PointXYZI>::Ptr input)
 
 		start_profiling();
 		checkCudaErrors(cudaMemcpy(tmp, host_tmp, sizeof(pcl::PointXYZI) * target_points_number_, cudaMemcpyHostToDevice));
-		stop_profiling(HTOD);
+		stop_profiling(45, HTOD);
 
 		if (target_x_ != NULL) {
 			checkCudaErrors(cudaFree(target_x_));
@@ -387,7 +391,7 @@ void GRegistration::setInputTarget(pcl::PointCloud<pcl::PointXYZI>::Ptr input)
 		convertInput<pcl::PointXYZI><<<grid_x, block_x>>>(tmp, target_x_, target_y_, target_z_, target_points_number_);
 		checkCudaErrors(cudaGetLastError());
 		checkCudaErrors(cudaDeviceSynchronize());
-		stop_profiling(LAUNCH);
+		stop_profiling(46, LAUNCH);
 
 #ifndef __aarch64__
 		checkCudaErrors(cudaHostUnregister(host_tmp));
@@ -412,7 +416,7 @@ void GRegistration::setInputTarget(pcl::PointCloud<pcl::PointXYZ>::Ptr input)
 #endif
 		start_profiling();
 		checkCudaErrors(cudaMemcpy(tmp, host_tmp, sizeof(pcl::PointXYZ) * target_points_number_, cudaMemcpyHostToDevice));
-		stop_profiling(HTOD);
+		stop_profiling(47, HTOD);
 
 		if (target_x_ != NULL) {
 			checkCudaErrors(cudaFree(target_x_));
@@ -440,7 +444,7 @@ void GRegistration::setInputTarget(pcl::PointCloud<pcl::PointXYZ>::Ptr input)
 		convertInput<pcl::PointXYZ><<<grid_x, block_x>>>(tmp, target_x_, target_y_, target_z_, target_points_number_);		
 		checkCudaErrors(cudaGetLastError());
 		checkCudaErrors(cudaDeviceSynchronize());
-		stop_profiling(LAUNCH);
+		stop_profiling(48, LAUNCH);
 
 		checkCudaErrors(cudaFree(tmp));
 #ifndef __aarch64__
@@ -467,14 +471,15 @@ void GRegistration::start_profiling(){
 		cudaEventRecord(event_start, 0);
 }
 
-void GRegistration::stop_profiling(int type){
+void GRegistration::stop_profiling(int id, int type){
 	if(GPU_PROFILING == 1){		
 		float time;
 		cudaEventRecord(event_stop, 0);
 		cudaEventSynchronize(event_stop);
 		cudaEventElapsedTime(&time, event_start, event_stop);
-		write_data(gid, time, type);
-		gid++;
+		// write_data(gid, time, type);
+    write_data(id, time, type);
+		// gid++;
 	}
 }
 
@@ -506,4 +511,129 @@ void GRegistration::close_file(){
 		fclose(fp);
 }
 
+}
+void sig_handler(int signum){
+	if(signum == SIGUSR1 || signum == SIGUSR2)
+		return;
+	else
+		termination();    
+}
+  
+  void termination(){
+	sched_info_->state = STOP;
+	shmdt(sched_info_);
+	if(remove(task_filename_)){
+		printf("Cannot remove file %s\n", task_filename_);
+		exit(1);
+	}
+	exit(0);
+}
+  
+  unsigned long long get_current_time_us(){
+	struct timespec ts;
+	unsigned long long current_time;
+	clock_gettime(CLOCK_REALTIME, &ts);
+	current_time = ts.tv_sec%10000 * 1000000 + ts.tv_nsec/1000;
+	return current_time;
+}
+  
+  void us_sleep(unsigned long long us){
+	struct timespec ts;
+	ts.tv_sec = us/1000000;
+	ts.tv_nsec = us%1000000*1000;
+	nanosleep(&ts, NULL);
+	return;
+}
+  
+  void initialize_signal_handler(){
+	signal(SIGINT, sig_handler);
+	signal(SIGTSTP, sig_handler);
+	signal(SIGQUIT, sig_handler);
+	signal(SIGUSR1, sig_handler);
+	signal(SIGUSR2, sig_handler);
+}
+  
+  void create_task_file(){        
+	FILE* task_fp;
+	task_fp = fopen(task_filename_, "w");
+	if(task_fp == NULL){
+		printf("Cannot create task file at %s\n", task_filename_);
+		exit(1);
+	}
+	fprintf(task_fp, "%d\n", getpid());
+	fprintf(task_fp, "%d", key_id_);
+	fclose(task_fp);
+}
+  
+void get_scheduler_pid(){
+	FILE* scheduler_fp;
+	printf("Wait the scheduler...\n");
+	while(1){
+		scheduler_fp = fopen("/tmp/np_edf_scheduler", "r");
+		if(scheduler_fp) break;
+	}
+	while(1){
+		fscanf(scheduler_fp, "%d", &scheduler_pid_);
+		if(scheduler_pid_ != 0) break;
+	}
+	printf("Scheduler pid: %d\n", scheduler_pid_);
+	fclose(scheduler_fp);
+}
+  
+void initialize_sched_info(){
+	FILE* sm_key_fp;
+	sm_key_fp = fopen("/tmp/sm_key", "r");
+	if(sm_key_fp == NULL){
+		printf("Cannot open /tmp/sm_key\n");
+		termination();
+	}
+  
+	key_ = ftok("/tmp/sm_key", key_id_);
+	shmid_ = shmget(key_, sizeof(SchedInfo), 0666|IPC_CREAT);
+	sched_info_ = (SchedInfo*)shmat(shmid_, 0, 0);
+	sched_info_->pid = getpid();
+	sched_info_->state = NONE;
+}
+  
+void init_scheduling(char* task_filename, int key_id){
+	// Initialize key id for shared memory
+	key_id_ = key_id;
+  
+	// Initialize signal handler
+	initialize_signal_handler();
+  
+	// Create task file
+  
+	sprintf(task_filename_, "%s", task_filename);
+	create_task_file();    
+  
+	// Get scheduler pid
+	get_scheduler_pid();
+  
+	// Initialize scheduling information (shared memory data)
+	initialize_sched_info();
+  
+	sigemptyset(&sigset_);
+	sigaddset(&sigset_, SIGUSR1);
+	sigaddset(&sigset_, SIGUSR2);
+	sigprocmask(SIG_BLOCK, &sigset_, NULL);    
+  
+	// sigwait(&sigset_, &sig_);    
+	// kill(scheduler_pid_, SIGUSR2);
+	// sigprocmask(SIG_UNBLOCK, &sigset_, NULL);
+	
+	printf("Task [%d] is ready to work\n", getpid());
+	// sigaddset(&sigset_, SIGUSR1);
+	// sigprocmask(SIG_BLOCK, &sigset_, NULL);    
+  
+}
+  
+void request_scheduling(unsigned long long relative_deadline){
+	sched_info_->deadline = get_current_time_us() + relative_deadline;  
+	sched_info_->state = WAIT;        
+	// printf("Request schedule - deadline: %llu\n", sched_info_->deadline);
+	while(1){
+		kill(scheduler_pid_, SIGUSR1);
+		if(!sigwait(&sigset_, &sig_)) break;
+	}
 }

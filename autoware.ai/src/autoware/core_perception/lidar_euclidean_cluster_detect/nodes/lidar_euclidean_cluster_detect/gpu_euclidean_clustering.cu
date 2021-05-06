@@ -679,9 +679,8 @@ void GpuEuclideanCluster::extractClusters()
   int *cluster_offset;
   int cluster_num, old_cluster_num;
 
-  long long int relative_deadline=MS2US(10);
-  request_scheduling(relative_deadline);
-  fprintf(stderr,"Scheduled!\n");
+  // long long int relative_deadline=MS2US(10);
+  // request_scheduling(relative_deadline);
 
   start_profiling();
   pclEuclideanInitialize << < grid_x, block_x >> > (cluster_indices_, size_);
@@ -1120,7 +1119,7 @@ void init_scheduling(char* task_filename, int key_id){
 void request_scheduling(unsigned long long relative_deadline){
   sched_info_->deadline = get_current_time_us() + relative_deadline;  
   sched_info_->state = WAIT;        
-  printf("Request schedule - deadline: %llu\n", sched_info_->deadline);
+  // printf("Request schedule - deadline: %llu\n", sched_info_->deadline);
   while(1){
       kill(scheduler_pid_, SIGUSR1);
       if(!sigwait(&sigset_, &sig_)) break;

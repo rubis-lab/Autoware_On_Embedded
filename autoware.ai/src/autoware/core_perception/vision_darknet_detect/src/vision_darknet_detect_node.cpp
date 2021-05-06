@@ -23,6 +23,8 @@
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "vision_darknet_detect");
+    int key_id = 2;
+    init_scheduling("/tmp/yolo", key_id);
 
     Yolo3DetectorNode app;
 

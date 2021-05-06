@@ -43,7 +43,6 @@
 
 #include <opencv2/opencv.hpp>
 
-
 extern "C"
 {
 #undef __cplusplus
@@ -55,6 +54,7 @@ extern "C"
 #include "region_layer.h"
 #include "utils.h"
 #include "image.h"
+#include "../darknet/src/cuda.h"
 #define __cplusplus
 }
 
