@@ -378,7 +378,7 @@ std::vector<ClusterPtr> clusterAndColorGpu(const pcl::PointCloud<pcl::PointXYZ>:
     tmp_y[i] = tmp_point.y;
     tmp_z[i] = tmp_point.z;
   }  
-
+  set_absolute_deadline();
   _gecl_cluster.setInputPoints(tmp_x, tmp_y, tmp_z, size);
   _gecl_cluster.setThreshold(in_max_cluster_distance);
   _gecl_cluster.setMinClusterPts(_cluster_size_min);
@@ -852,7 +852,7 @@ void removePointsUpTo(const pcl::PointCloud<pcl::PointXYZ>::Ptr in_cloud_ptr,
 
 void velodyne_callback(const sensor_msgs::PointCloud2ConstPtr& in_sensor_cloud)
 {
-  //_start = std::chrono::system_clock::now();
+  //_start = std::chrono::system_clock::now();  
 
   if (!_using_sensor_cloud)
   {
@@ -950,10 +950,13 @@ int main(int argc, char **argv)
 
   /* For GPU scheduling */
   #ifdef GPU_CLUSTERING
-  int key_id = 1;  
+  int key_id = 1;    
+  int identical_deadline;
   private_nh.param("gpu_scheduling_flag", gpu_scheduling_flag_, 0);
+  private_nh.param("identical_deadline", identical_deadline, 0);
+  set_identical_deadline((unsigned long long)identical_deadline);
   if(gpu_scheduling_flag_ == 1)
-    init_scheduling("/tmp/euclidean_cluster_detect", "/home/hypark/GPU_profiling/deadline/euclidean_cluster_detect_deadline.csv",key_id);
+    init_scheduling("/tmp/euclidean_cluster_detect", "/home/hypark/GPU_profiling/deadline/euclidean_cluster_detect_deadline.csv",key_id);    
   #endif
 
 

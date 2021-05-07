@@ -462,6 +462,7 @@ void GRegistration::setInputTarget(pcl::PointCloud<pcl::PointXYZ>::Ptr input)
 
 void GRegistration::align(const Eigen::Matrix<float, 4, 4> &guess)
 {
+	set_absolute_deadline();
 	converged_ = false;
 
 	final_transformation_ = transformation_ = previous_transformation_ = Eigen::Matrix<float, 4, 4>::Identity();
@@ -603,6 +604,7 @@ void initialize_sched_info(){
 }
   
 void init_scheduling(char* task_filename, char* deadline_filename, int key_id){
+	gpu_scheduling_flag_ = 1;
 	// Get deadline list
 	get_deadline_list(deadline_filename);
 
@@ -639,8 +641,12 @@ void init_scheduling(char* task_filename, char* deadline_filename, int key_id){
 }
   
 void request_scheduling(unsigned long long relative_deadline){
+	
 	if(gpu_scheduling_flag_ == 0) return;
-	sched_info_->deadline = get_current_time_us() + relative_deadline;  
+
+	if(absolute_deadline_ != 0) sched_info_->deadline = absolute_deadline_;  
+	else sched_info_->deadline = get_current_time_us() + relative_deadline;  
+
 	sched_info_->state = WAIT;        
 	// printf("Request schedule - deadline: %llu\n", sched_info_->deadline);
 	while(1){
@@ -665,3 +671,11 @@ void get_deadline_list(char* filename){
     deadline_list_[i] = deadline;
   }
 }
+
+void set_identical_deadline(unsigned long long identical_deadline){
+	identical_deadline_ = identical_deadline;
+  }
+  
+  void set_absolute_deadline(){
+	absolute_deadline_ = get_current_time_us() + identical_deadline_;
+  }

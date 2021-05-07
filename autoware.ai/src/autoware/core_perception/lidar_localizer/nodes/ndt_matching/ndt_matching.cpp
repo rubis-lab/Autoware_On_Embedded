@@ -906,7 +906,7 @@ static void imu_callback(const sensor_msgs::Imu::Ptr& input)
 }
 
 static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
-{
+{  
   // Check inital matching is success or not
   if(_is_init_match_finished == false && previous_score < USING_GPS_THRESHOLD && previous_score != 0.0)
     _is_init_match_finished = true;
@@ -1525,7 +1525,10 @@ int main(int argc, char** argv)
 
   #ifdef CUDA_FOUND
   int key_id = 0;  
+  int identical_deadline;
   private_nh.param("gpu_scheduling_flag", gpu_scheduling_flag_, 0);
+  private_nh.param("identical_deadline", identical_deadline, 0);
+  set_identical_deadline((unsigned long long)identical_deadline);
   if(gpu_scheduling_flag_ == 1)
     init_scheduling("/tmp/ndt_matching", "/home/hypark/GPU_profiling/deadline/ndt_matching_deadline.csv", key_id);
   #endif

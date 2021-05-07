@@ -284,6 +284,7 @@ void Yolo3DetectorNode::image_callback(const sensor_msgs::ImageConstPtr& in_imag
     
     darknet_image_ = convert_ipl_to_image(in_image_message);
 
+    set_absolute_deadline();
     detections = yolo_detector_.detect(darknet_image_);
 
     //Prepare Output message
@@ -321,8 +322,11 @@ void Yolo3DetectorNode::Run()
 {    
     //ROS STUFF
     ros::NodeHandle private_node_handle("~");//to receive args    
+    int identical_deadline;
     private_node_handle.param<std::string>("profiling_file_name",_profiling_file_name,"/home/bkpark/prof_data/yolo_prof.csv");
     private_node_handle.param("gpu_scheduling_flag", gpu_scheduling_flag_, 0);
+    private_node_handle.param("identical_deadline", identical_deadline, 0);
+    set_identical_deadline((unsigned long long)identical_deadline);
     //private_node_handle.getParam("profiling_file_name", _profiling_file_name);
     fprintf(stderr,"%s\n", _profiling_file_name.c_str());
     initialize_file(_profiling_file_name.c_str());    

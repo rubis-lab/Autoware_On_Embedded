@@ -41,8 +41,10 @@ static key_t key_;
 static int shmid_;
 static sigset_t sigset_;
 static int sig_;
-static long long int deadline_list_[35];
+static unsigned long long deadline_list_[35];
 static int gpu_scheduling_flag_;
+static unsigned long long absolute_deadline_;
+static unsigned long long identical_deadline_;
 
 void sig_handler(int signum);
 void termination();
@@ -54,6 +56,8 @@ void get_scheduler_pid();
 void init_scheduling(char* task_filename, char* deadline_filename, int key_id);
 void request_scheduling(unsigned long long relative_deadline);
 void get_deadline_list(char* filename);
+void set_identical_deadline(unsigned long long identical_deadline);
+void set_absolute_deadline();
 /* ========================================*/
 
 #define HTOD 0

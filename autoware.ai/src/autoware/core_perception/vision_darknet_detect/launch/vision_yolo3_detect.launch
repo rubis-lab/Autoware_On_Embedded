@@ -10,6 +10,7 @@
   <arg name="image_src" default="/image_raw"/>  
   <arg name="profiling_file_name" default="$(env HOME)/prof_data/yolo_prof.csv"/>
   <arg name="gpu_scheduling_flag" default="0" />
+  <arg name="identical_deadline" default="0" />
 
   <node pkg="vision_darknet_detect" name="vision_darknet_detect" type="vision_darknet_detect" output="screen">
     <param name="network_definition_file" type="str" value="$(arg network_definition_file)"/>
@@ -21,6 +22,7 @@
     <param name="names_file" type="str" value="$(arg names_file)"/>
     <param name="profiling_file_name" type="str" value="$(arg profiling_file_name)"/>
     <param name="gpu_scheduling_flag" value="$(arg gpu_scheduling_flag)" />
+    <param name="identical_deadline" value="$(arg identical_deadline)" />
   </node>
 
   <node pkg="detected_objects_visualizer" type="visualize_rects" name="yolo3_rects"

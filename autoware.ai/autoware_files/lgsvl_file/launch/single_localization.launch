@@ -55,8 +55,9 @@
   <include file="$(find lidar_localizer)/launch/ndt_matching.launch">
     <arg name="method_type" value="2" /> <!-- pcl_generic=0, pcl_anh=1, pcl_anh_gpu=2, pcl_openmp=3 -->
     <arg name="get_height" value="true" />
-    <arg name="profiling_file_name" value="$(env HOME)/GPU_profiling/210507_ndt_matching_wo_scheduling.csv"/>
-    <arg name="gpu_scheduling_flag" value="0" />
+    <arg name="profiling_file_name" value="$(env HOME)/GPU_profiling/210507_ndt_matching_temp.csv"/>
+    <arg name="gpu_scheduling_flag" value="1" />
+    <arg name="identical_deadline" value="5000000" />
   </include>
 
   <!-- ndt config -->
@@ -71,7 +72,7 @@
     pitch: $(arg init_pitch),
     yaw: $(arg init_yaw),
     use_predict_pose: 1,
-    error_threshold: 20.0,
+    error_threshold: 50.0,
     resolution: 3.0,
     step_size: 0.5,
     trans_epsilon: 0.01,
