@@ -1,0 +1,8 @@
+prefix=/home/hypark/git/Autoware_On_Embedded/install/lidar_euclidean_cluster_detect
+
+Name: lidar_euclidean_cluster_detect
+Description: Description of lidar_euclidean_cluster_detect
+Version: 1.12.0
+Cflags: -I${prefix}/include
+Libs: -L${prefix}/lib 
+Requires: vector_map_server grid_map_ros grid_map_cv grid_map_msgs jsk_rviz_plugins

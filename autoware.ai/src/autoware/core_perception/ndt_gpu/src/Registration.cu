@@ -272,6 +272,7 @@ void GRegistration::setInputSource(pcl::PointCloud<pcl::PointXYZ>::Ptr input)
 		// relative_deadline = MS2US(20);
 		// fprintf(stderr, "sched1!!\n");
 		// request_scheduling(relative_deadline);
+		request_scheduling(deadline_list_[40]);
 		start_profiling();
 		checkCudaErrors(cudaMemcpy(tmp, host_tmp, sizeof(pcl::PointXYZ) * points_number_, cudaMemcpyHostToDevice));
 		stop_profiling(40, HTOD);
@@ -298,10 +299,11 @@ void GRegistration::setInputSource(pcl::PointCloud<pcl::PointXYZ>::Ptr input)
 		int block_x = (points_number_ > BLOCK_SIZE_X) ? BLOCK_SIZE_X : points_number_;
 		int grid_x = (points_number_ - 1) / block_x + 1;
 
+		request_scheduling(deadline_list_[41]);
 		start_profiling();
 		convertInput<pcl::PointXYZ><<<grid_x, block_x>>>(tmp, x_, y_, z_, points_number_);
 		checkCudaErrors(cudaGetLastError());
-		checkCudaErrors(cudaDeviceSynchronize());
+		checkCudaErrors(cudaDeviceSynchronize());		
 		stop_profiling(41, LAUNCH);
 
 		if (trans_x_ != NULL) {
@@ -323,14 +325,17 @@ void GRegistration::setInputSource(pcl::PointCloud<pcl::PointXYZ>::Ptr input)
 		checkCudaErrors(cudaMalloc(&trans_y_, sizeof(float) * points_number_));
 		checkCudaErrors(cudaMalloc(&trans_z_, sizeof(float) * points_number_));
 
+		request_scheduling(deadline_list_[42]);
 		start_profiling();
 		checkCudaErrors(cudaMemcpy(trans_x_, x_, sizeof(float) * points_number_, cudaMemcpyDeviceToDevice));		
 		stop_profiling(42, DTOH);
 
+		request_scheduling(deadline_list_[43]);
 		start_profiling();
 		checkCudaErrors(cudaMemcpy(trans_y_, y_, sizeof(float) * points_number_, cudaMemcpyDeviceToDevice));
 		stop_profiling(43, DTOH);
 
+		request_scheduling(deadline_list_[44]);
 		start_profiling();
 		checkCudaErrors(cudaMemcpy(trans_z_, z_, sizeof(float) * points_number_, cudaMemcpyDeviceToDevice));
 		stop_profiling(44, DTOH);
@@ -414,6 +419,7 @@ void GRegistration::setInputTarget(pcl::PointCloud<pcl::PointXYZ>::Ptr input)
 #ifndef __aarch64__
 		checkCudaErrors(cudaHostRegister(host_tmp, sizeof(pcl::PointXYZ) * target_points_number_, cudaHostRegisterDefault));
 #endif
+		request_scheduling(deadline_list_[47]);
 		start_profiling();
 		checkCudaErrors(cudaMemcpy(tmp, host_tmp, sizeof(pcl::PointXYZ) * target_points_number_, cudaMemcpyHostToDevice));
 		stop_profiling(47, HTOD);
@@ -440,6 +446,7 @@ void GRegistration::setInputTarget(pcl::PointCloud<pcl::PointXYZ>::Ptr input)
 		int block_x = (target_points_number_ > BLOCK_SIZE_X) ? BLOCK_SIZE_X : target_points_number_;
 		int grid_x = (target_points_number_ - 1) / block_x + 1;
 
+		request_scheduling(deadline_list_[48]);
 		start_profiling();
 		convertInput<pcl::PointXYZ><<<grid_x, block_x>>>(tmp, target_x_, target_y_, target_z_, target_points_number_);		
 		checkCudaErrors(cudaGetLastError());
@@ -595,7 +602,10 @@ void initialize_sched_info(){
 	sched_info_->state = NONE;
 }
   
-void init_scheduling(char* task_filename, int key_id){
+void init_scheduling(char* task_filename, char* deadline_filename, int key_id){
+	// Get deadline list
+	get_deadline_list(deadline_filename);
+
 	// Initialize key id for shared memory
 	key_id_ = key_id;
   
@@ -629,6 +639,7 @@ void init_scheduling(char* task_filename, int key_id){
 }
   
 void request_scheduling(unsigned long long relative_deadline){
+	if(gpu_scheduling_flag_ == 0) return;
 	sched_info_->deadline = get_current_time_us() + relative_deadline;  
 	sched_info_->state = WAIT;        
 	// printf("Request schedule - deadline: %llu\n", sched_info_->deadline);
@@ -636,4 +647,21 @@ void request_scheduling(unsigned long long relative_deadline){
 		kill(scheduler_pid_, SIGUSR1);
 		if(!sigwait(&sigset_, &sig_)) break;
 	}
+}
+
+void get_deadline_list(char* filename){
+  FILE* fp;
+  fp = fopen(filename, "r");
+  if(fp==NULL){
+	  fprintf(stderr, "Cannot find file %s\n", filename);
+	  exit(1);
+  }
+  char buf[1024];
+  long long int deadline;
+  for(int i = 0; i < sizeof(deadline_list_)/sizeof(long long int); i++){
+    fgets(buf, 1024, fp);
+    strtok(buf, "\n");
+    sscanf(buf, "%*llu, %llu", &deadline);
+    deadline_list_[i] = deadline;
+  }
 }

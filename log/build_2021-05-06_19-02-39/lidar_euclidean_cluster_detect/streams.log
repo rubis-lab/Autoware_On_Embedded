@@ -1,0 +1,420 @@
+[0.021s] Invoking command in '/home/hypark/git/Autoware_On_Embedded/build/lidar_euclidean_cluster_detect': /usr/bin/cmake --build /home/hypark/git/Autoware_On_Embedded/build/lidar_euclidean_cluster_detect -- -j12 -l12
+[0.183s] [ 20%] [34m[1mBuilding NVCC (Device) object CMakeFiles/gpu_euclidean_clustering.dir/nodes/lidar_euclidean_cluster_detect/gpu_euclidean_clustering_generated_gpu_euclidean_clustering.cu.o[0m
+[0.190s] [ 20%] Built target vector_map_server_generate_messages_nodejs
+[0.193s] [ 20%] Built target vector_map_msgs_generate_messages_py
+[0.198s] [ 20%] Built target rviz_generate_messages_py
+[0.201s] [ 20%] Built target tf_generate_messages_eus
+[0.204s] [ 20%] Built target vector_map_msgs_generate_messages_cpp
+[0.204s] [ 20%] Built target vector_map_msgs_generate_messages_lisp
+[0.205s] [ 20%] Built target vector_map_msgs_generate_messages_eus
+[0.210s] [ 20%] Built target people_msgs_generate_messages_lisp
+[0.220s] [ 20%] Built target rviz_generate_messages_cpp
+[0.225s] [ 20%] Built target people_msgs_generate_messages_py
+[0.226s] [ 20%] Built target map_msgs_generate_messages_lisp
+[0.300s] [ 20%] Built target vector_map_msgs_generate_messages_nodejs
+[0.301s] [ 20%] Built target bond_generate_messages_nodejs
+[0.302s] [ 20%] Built target rviz_generate_messages_eus
+[0.306s] [ 20%] Built target people_msgs_generate_messages_eus
+[0.307s] [ 20%] Built target people_msgs_generate_messages_cpp
+[0.319s] [ 20%] Built target bond_generate_messages_lisp
+[0.325s] [ 20%] Built target bond_generate_messages_eus
+[0.328s] [ 20%] Built target bond_generate_messages_py
+[0.337s] [ 20%] Built target bond_generate_messages_cpp
+[0.342s] [ 20%] Built target map_msgs_generate_messages_eus
+[0.362s] [ 20%] Built target nodelet_generate_messages_nodejs
+[0.406s] [ 20%] Built target nodelet_generate_messages_eus
+[0.411s] [ 20%] Built target dynamic_reconfigure_generate_messages_nodejs
+[0.414s] [ 20%] Built target dynamic_reconfigure_generate_messages_py
+[0.425s] [ 20%] Built target nodelet_generate_messages_cpp
+[0.433s] [ 20%] Built target dynamic_reconfigure_generate_messages_lisp
+[0.444s] [ 20%] Built target map_msgs_generate_messages_py
+[0.444s] [ 20%] Built target people_msgs_generate_messages_nodejs
+[0.445s] [ 20%] Built target dynamic_reconfigure_generate_messages_eus
+[0.461s] [ 20%] Built target jsk_hark_msgs_generate_messages_py
+[0.462s] [ 20%] Built target rviz_generate_messages_nodejs
+[0.466s] [ 20%] Built target pcl_ros_gencfg
+[0.504s] [ 20%] Built target jsk_hark_msgs_generate_messages_eus
+[0.525s] [ 20%] Built target jsk_hark_msgs_generate_messages_nodejs
+[0.543s] [ 20%] Built target jsk_rviz_plugins_generate_messages_nodejs
+[0.546s] [ 20%] Built target jsk_rviz_plugins_generate_messages_py
+[0.555s] [ 20%] Built target jsk_rviz_plugins_gencfg
+[0.559s] [ 20%] Built target jsk_rviz_plugins_generate_messages_lisp
+[0.562s] [ 20%] Built target visualization_msgs_generate_messages_nodejs
+[0.564s] [ 20%] Built target visualization_msgs_generate_messages_py
+[0.580s] [ 20%] Built target vector_map_server_generate_messages_cpp
+[0.580s] [ 20%] Built target rviz_generate_messages_lisp
+[0.582s] [ 20%] Built target jsk_recognition_utils_gencfg
+[0.635s] [ 20%] Built target visualization_msgs_generate_messages_eus
+[0.671s] [ 20%] Built target tf2_msgs_generate_messages_cpp
+[0.673s] [ 20%] Built target tf2_msgs_generate_messages_nodejs
+[0.680s] [ 20%] Built target actionlib_generate_messages_py
+[0.687s] [ 20%] Built target tf_generate_messages_lisp
+[0.689s] [ 20%] Built target map_msgs_generate_messages_cpp
+[0.693s] [ 20%] Built target tf2_msgs_generate_messages_py
+[0.696s] [ 20%] Built target tf_generate_messages_py
+[0.703s] [ 20%] Built target dynamic_reconfigure_generate_messages_cpp
+[0.707s] [ 20%] Built target actionlib_generate_messages_cpp
+[0.709s] [ 20%] Built target tf_generate_messages_nodejs
+[0.753s] [ 20%] Built target geometry_msgs_generate_messages_py
+[0.794s] [ 20%] Built target roscpp_generate_messages_cpp
+[0.808s] [ 20%] Built target vector_map_server_generate_messages_eus
+[0.816s] [ 20%] Built target sensor_msgs_generate_messages_nodejs
+[0.819s] [ 20%] Built target rosgraph_msgs_generate_messages_eus
+[0.819s] [ 20%] Built target pcl_msgs_generate_messages_eus
+[0.821s] [ 20%] Built target jsk_recognition_msgs_generate_messages_lisp
+[0.830s] [ 20%] Built target jsk_recognition_msgs_generate_messages_eus
+[0.844s] [ 20%] Built target std_msgs_generate_messages_py
+[0.861s] [ 20%] Built target autoware_msgs_generate_messages_py
+[0.869s] [ 20%] Built target nodelet_generate_messages_lisp
+[0.895s] [ 20%] Built target jsk_hark_msgs_generate_messages_lisp
+[0.931s] [ 20%] Built target sensor_msgs_generate_messages_eus
+[0.948s] [ 20%] Built target rosgraph_msgs_generate_messages_cpp
+[0.949s] [ 20%] Built target sensor_msgs_generate_messages_cpp
+[0.951s] [ 20%] Built target topic_tools_generate_messages_cpp
+[0.956s] [ 20%] Built target std_msgs_generate_messages_nodejs
+[0.964s] [ 20%] Built target autoware_msgs_generate_messages_cpp
+[0.966s] [ 20%] Built target jsk_recognition_msgs_generate_messages_py
+[0.994s] [ 20%] Built target sensor_msgs_generate_messages_py
+[0.994s] [ 20%] Built target nodelet_generate_messages_py
+[0.995s] [ 20%] Built target std_msgs_generate_messages_cpp
+[1.028s] [ 20%] Built target jsk_footstep_msgs_generate_messages_py
+[1.069s] [ 20%] Built target nav_msgs_generate_messages_nodejs
+[1.078s] [ 20%] Built target geometry_msgs_generate_messages_nodejs
+[1.080s] [ 20%] Built target geometry_msgs_generate_messages_eus
+[1.080s] [ 20%] Built target roscpp_generate_messages_nodejs
+[1.081s] [ 20%] Built target std_msgs_generate_messages_lisp
+[1.105s] [ 20%] Built target jsk_rviz_plugins_generate_messages_cpp
+[1.110s] [ 20%] Built target jsk_rviz_plugins_generate_messages_eus
+[1.120s] [ 20%] Built target geometry_msgs_generate_messages_lisp
+[1.143s] [ 20%] Built target pcl_msgs_generate_messages_py
+[1.147s] [ 20%] Built target actionlib_generate_messages_eus
+[1.154s] [ 20%] Built target actionlib_generate_messages_lisp
+[1.194s] [ 20%] Built target topic_tools_generate_messages_eus
+[1.194s] [ 20%] Built target autoware_msgs_generate_messages_lisp
+[1.199s] [ 20%] Built target geometry_msgs_generate_messages_cpp
+[1.210s] [ 20%] Built target autoware_msgs_generate_messages_eus
+[1.225s] [ 20%] Built target pcl_msgs_generate_messages_cpp
+[1.252s] [ 20%] Built target std_msgs_generate_messages_eus
+[1.253s] [ 20%] Built target visualization_msgs_generate_messages_lisp
+[1.266s] [ 20%] Built target jsk_footstep_msgs_generate_messages_eus
+[1.277s] [ 20%] Built target autoware_msgs_generate_messages_nodejs
+[1.298s] [ 20%] Built target actionlib_msgs_generate_messages_py
+[1.309s] [ 20%] Built target visualization_msgs_generate_messages_cpp
+[1.318s] [ 20%] Built target vector_map_server_generate_messages_lisp
+[1.340s] [ 20%] Built target jsk_footstep_msgs_generate_messages_lisp
+[1.353s] [ 20%] Built target jsk_footstep_msgs_generate_messages_nodejs
+[1.356s] [ 20%] Built target tf2_msgs_generate_messages_eus
+[1.369s] [ 20%] Built target nav_msgs_generate_messages_eus
+[1.399s] [ 20%] Built target grid_map_msgs_generate_messages_nodejs
+[1.403s] [ 20%] Built target std_srvs_generate_messages_cpp
+[1.418s] [ 20%] Built target std_srvs_generate_messages_eus
+[1.423s] [ 20%] Built target actionlib_msgs_generate_messages_lisp
+[1.444s] [ 20%] Built target grid_map_msgs_generate_messages_lisp
+[1.458s] [ 20%] Built target jsk_recognition_msgs_generate_messages_nodejs
+[1.475s] [ 20%] Built target roscpp_generate_messages_lisp
+[1.484s] [ 20%] Built target rosgraph_msgs_generate_messages_nodejs
+[1.485s] [ 20%] Built target grid_map_msgs_generate_messages_eus
+[1.503s] [ 20%] Built target rosgraph_msgs_generate_messages_lisp
+[1.505s] [ 20%] Built target vector_map_server_generate_messages_py
+[1.537s] [ 20%] Built target roscpp_generate_messages_eus
+[1.553s] [ 20%] Built target actionlib_msgs_generate_messages_eus
+[1.560s] [ 20%] Built target rosgraph_msgs_generate_messages_py
+[1.565s] [ 20%] Built target roscpp_generate_messages_py
+[1.595s] [ 20%] Built target jsk_hark_msgs_generate_messages_cpp
+[1.598s] [ 20%] Built target grid_map_msgs_generate_messages_cpp
+[1.605s] [ 20%] Built target nav_msgs_generate_messages_cpp
+[1.606s] [ 20%] Built target grid_map_msgs_generate_messages_py
+[1.617s] [ 20%] Built target sensor_msgs_generate_messages_lisp
+[1.663s] [ 20%] Built target nav_msgs_generate_messages_lisp
+[1.668s] [ 20%] Built target pcl_msgs_generate_messages_nodejs
+[1.676s] [ 20%] Built target dynamic_reconfigure_gencfg
+[1.697s] [ 20%] Built target nav_msgs_generate_messages_py
+[1.710s] [ 20%] Built target tf2_msgs_generate_messages_lisp
+[1.711s] [ 20%] Built target jsk_recognition_msgs_generate_messages_cpp
+[1.714s] [ 20%] Built target _catkin_empty_exported_target
+[1.725s] [ 20%] Built target std_srvs_generate_messages_nodejs
+[1.725s] [ 20%] Built target std_srvs_generate_messages_lisp
+[1.754s] [ 20%] Built target std_srvs_generate_messages_py
+[1.759s] [ 20%] Built target topic_tools_generate_messages_lisp
+[1.803s] [ 20%] Built target topic_tools_generate_messages_nodejs
+[1.813s] [ 20%] Built target nodelet_topic_tools_gencfg
+[1.824s] [ 20%] Built target map_msgs_generate_messages_nodejs
+[1.831s] [ 20%] Built target actionlib_msgs_generate_messages_nodejs
+[1.836s] [ 20%] Built target topic_tools_generate_messages_py
+[1.843s] [ 20%] Built target pcl_msgs_generate_messages_lisp
+[1.845s] [ 20%] Built target tf_generate_messages_cpp
+[1.851s] [ 20%] Built target actionlib_generate_messages_nodejs
+[1.854s] [ 20%] Built target jsk_footstep_msgs_generate_messages_cpp
+[1.861s] [ 20%] Built target actionlib_msgs_generate_messages_cpp
+[2.229s] /home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/nodes/lidar_euclidean_cluster_detect/gpu_euclidean_clustering.cu(1064): warning: result of call is not used
+[2.229s] 
+[2.229s] /home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/nodes/lidar_euclidean_cluster_detect/gpu_euclidean_clustering.cu(1088): warning: conversion from a string literal to "char *" is deprecated
+[2.229s] 
+[2.229s] /home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/nodes/lidar_euclidean_cluster_detect/gpu_euclidean_clustering.cu(1138): warning: result of call is not used
+[2.229s] 
+[3.839s] /home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/nodes/lidar_euclidean_cluster_detect/gpu_euclidean_clustering.cu(1064): warning: result of call is not used
+[3.839s] 
+[3.839s] /home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/nodes/lidar_euclidean_cluster_detect/gpu_euclidean_clustering.cu(1088): warning: conversion from a string literal to "char *" is deprecated
+[3.839s] 
+[3.839s] /home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/nodes/lidar_euclidean_cluster_detect/gpu_euclidean_clustering.cu(1138): warning: result of call is not used
+[3.839s] 
+[4.478s] /home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/nodes/lidar_euclidean_cluster_detect/gpu_euclidean_clustering.cu: In function ‘void get_deadlines(char*)’:
+[4.478s] /home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/nodes/lidar_euclidean_cluster_detect/gpu_euclidean_clustering.cu:1137:19: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+[4.478s]    for(int i = 0; i < sizeof(deadline_list_)/sizeof(long long int); i++){
+[4.478s]                  ~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[4.478s] /home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/nodes/lidar_euclidean_cluster_detect/gpu_euclidean_clustering.cu:1140:29: warning: format ‘%llu’ expects argument of type ‘long long unsigned int*’, but argument 3 has type ‘long long int’ [-Wformat=]
+[4.478s]      sscanf(buf, "%llu", deadline);
+[4.478s]                              ^
+[4.478s] /home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/nodes/lidar_euclidean_cluster_detect/gpu_euclidean_clustering.cu:1144:19: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+[4.478s]    for(int i = 0; i < sizeof(deadline_list_)/sizeof(long long int); i++){
+[4.478s]                  ~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[4.598s] /home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/nodes/lidar_euclidean_cluster_detect/gpu_euclidean_clustering.cu: In function ‘void get_scheduler_pid()’:
+[4.598s] /home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/nodes/lidar_euclidean_cluster_detect/gpu_euclidean_clustering.cu:1064:7: warning: ignoring return value of ‘int fscanf(FILE*, const char*, ...)’, declared with attribute warn_unused_result [-Wunused-result]
+[4.598s]        fscanf(scheduler_fp, "%d", &scheduler_pid_);
+[4.598s]        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[4.598s] /home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/nodes/lidar_euclidean_cluster_detect/gpu_euclidean_clustering.cu: In function ‘void get_deadlines(char*)’:
+[4.598s] /home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/nodes/lidar_euclidean_cluster_detect/gpu_euclidean_clustering.cu:1138:6: warning: ignoring return value of ‘char* fgets(char*, int, FILE*)’, declared with attribute warn_unused_result [-Wunused-result]
+[4.599s]      fgets(buf, 1024, fp);
+[4.599s]      ~^~~~~~~~~~~~~~~
+[4.853s] /home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/nodes/lidar_euclidean_cluster_detect/gpu_euclidean_clustering.cu:1140:7: warning: ‘deadline’ is used uninitialized in this function [-Wuninitialized]
+[4.853s]      sscanf(buf, "%llu", deadline);
+[4.853s]      ~~^~~~~~~~~~~~~~~~~~~~~~~
+[5.093s] [35m[1mScanning dependencies of target gpu_euclidean_clustering[0m
+[5.134s] [ 40%] [32m[1mLinking CXX shared library devel/lib/libgpu_euclidean_clustering.so[0m
+[5.241s] [ 40%] Built target gpu_euclidean_clustering
+[5.270s] [35m[1mScanning dependencies of target lidar_euclidean_cluster_detect[0m
+[5.451s] [ 60%] [32mBuilding CXX object CMakeFiles/lidar_euclidean_cluster_detect.dir/nodes/lidar_euclidean_cluster_detect/lidar_euclidean_cluster_detect.cpp.o[0m
+[5.452s] [ 80%] [32mBuilding CXX object CMakeFiles/lidar_euclidean_cluster_detect.dir/nodes/lidar_euclidean_cluster_detect/cluster.cpp.o[0m
+[7.105s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/nodes/lidar_euclidean_cluster_detect/lidar_euclidean_cluster_detect.cpp:71:0:[m[K [01;35m[Kwarning: [m[K"GPU_CLUSTERING" redefined
+[7.106s]  #define GPU_CLUSTERING
+[7.106s]  
+[7.106s] [01m[K<command-line>:0:0:[m[K [01;36m[Knote: [m[Kthis is the location of the previous definition
+[10.787s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/nodes/lidar_euclidean_cluster_detect/lidar_euclidean_cluster_detect.cpp:[m[K In function ‘[01m[Kvoid segmentByDistance(pcl::PointCloud<pcl::PointXYZ>::Ptr, pcl::PointCloud<pcl::PointXYZRGB>::Ptr, autoware_msgs::Centroids&, autoware_msgs::CloudClusterArray&)[m[K’:
+[10.787s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/nodes/lidar_euclidean_cluster_detect/lidar_euclidean_cluster_detect.cpp:663:3:[m[K [01;35m[Kwarning: [m[Kthis ‘[01m[Kelse[m[K’ clause does not guard... [[01;35m[K-Wmisleading-indentation[m[K]
+[10.787s]    [01;35m[Kelse[m[K
+[10.787s]    [01;35m[K^~~~[m[K
+[10.787s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/nodes/lidar_euclidean_cluster_detect/lidar_euclidean_cluster_detect.cpp:667:5:[m[K [01;36m[Knote: [m[K...this statement, but the latter is misleadingly indented as if it were guarded by the ‘[01m[Kelse[m[K’
+[10.787s]      [01;36m[Kfor[m[K (unsigned int i = 0; i < final_clusters.size(); i++)
+[10.787s]      [01;36m[K^~~[m[K
+[10.821s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/nodes/lidar_euclidean_cluster_detect/lidar_euclidean_cluster_detect.cpp:[m[K In function ‘[01m[Kint main(int, char**)[m[K’:
+[10.821s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/nodes/lidar_euclidean_cluster_detect/lidar_euclidean_cluster_detect.cpp:936:7:[m[K [01;35m[Kwarning: [m[Kunused variable ‘[01m[Kkey_id[m[K’ [[01;35m[K-Wunused-variable[m[K]
+[10.821s]    int [01;35m[Kkey_id[m[K = 1;
+[10.821s]        [01;35m[K^~~~~~[m[K
+[14.212s] In file included from [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/include/cluster.h:30:0[m[K,
+[14.212s]                  from [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/nodes/lidar_euclidean_cluster_detect/cluster.cpp:8[m[K:
+[14.212s] [01m[K/usr/include/pcl-1.8/pcl/sample_consensus/model_types.h:[m[K In function ‘[01m[Kvoid __static_initialization_and_destruction_0(int, int)[m[K’:
+[14.212s] [01m[K/usr/include/pcl-1.8/pcl/sample_consensus/model_types.h:99:3:[m[K [01;35m[Kwarning: [m[K‘[01m[Kpcl::SAC_SAMPLE_SIZE[m[K’ is deprecated: This map is deprecated and is kept only to prevent breaking existing user code. Starting from PCL 1.8.0 model sample size is a protected member of the SampleConsensusModel class [[01;35m[K-Wdeprecated-declarations[m[K]
+[14.212s]    [01;35m[KSAC_SAMPLE_SIZE[m[K (sample_size_pairs, sample_size_pairs + sizeof (sample_size_pairs) / sizeof (SampleSizeModel));
+[14.212s]    [01;35m[K^~~~~~~~~~~~~~~[m[K
+[14.212s] [01m[K/usr/include/pcl-1.8/pcl/sample_consensus/model_types.h:99:3:[m[K [01;36m[Knote: [m[Kdeclared here
+[15.684s] In file included from [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/nodes/lidar_euclidean_cluster_detect/lidar_euclidean_cluster_detect.cpp:31:0[m[K:
+[15.685s] [01m[K/usr/include/pcl-1.8/pcl/sample_consensus/model_types.h:[m[K In function ‘[01m[Kvoid __static_initialization_and_destruction_0(int, int)[m[K’:
+[15.685s] [01m[K/usr/include/pcl-1.8/pcl/sample_consensus/model_types.h:99:3:[m[K [01;35m[Kwarning: [m[K‘[01m[Kpcl::SAC_SAMPLE_SIZE[m[K’ is deprecated: This map is deprecated and is kept only to prevent breaking existing user code. Starting from PCL 1.8.0 model sample size is a protected member of the SampleConsensusModel class [[01;35m[K-Wdeprecated-declarations[m[K]
+[15.685s]    [01;35m[KSAC_SAMPLE_SIZE[m[K (sample_size_pairs, sample_size_pairs + sizeof (sample_size_pairs) / sizeof (SampleSizeModel));
+[15.685s]    [01;35m[K^~~~~~~~~~~~~~~[m[K
+[15.685s] [01m[K/usr/include/pcl-1.8/pcl/sample_consensus/model_types.h:99:3:[m[K [01;36m[Knote: [m[Kdeclared here
+[16.181s] In file included from [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/nodes/lidar_euclidean_cluster_detect/lidar_euclidean_cluster_detect.cpp:75:0[m[K:
+[16.181s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/include/gpu_euclidean_clustering.h:[m[K At global scope:
+[16.181s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/include/gpu_euclidean_clustering.h:44:22:[m[K [01;35m[Kwarning: [m[K‘[01m[Kdeadline_list_[m[K’ defined but not used [[01;35m[K-Wunused-variable[m[K]
+[16.182s]  static long long int [01;35m[Kdeadline_list_[m[K[35];
+[16.182s]                       [01;35m[K^~~~~~~~~~~~~~[m[K
+[16.182s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/include/gpu_euclidean_clustering.h:43:12:[m[K [01;35m[Kwarning: [m[K‘[01m[Ksig_[m[K’ defined but not used [[01;35m[K-Wunused-variable[m[K]
+[16.182s]  static int [01;35m[Ksig_[m[K;
+[16.182s]             [01;35m[K^~~~[m[K
+[16.182s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/include/gpu_euclidean_clustering.h:42:17:[m[K [01;35m[Kwarning: [m[K‘[01m[Ksigset_[m[K’ defined but not used [[01;35m[K-Wunused-variable[m[K]
+[16.182s]  static sigset_t [01;35m[Ksigset_[m[K;
+[16.182s]                  [01;35m[K^~~~~~~[m[K
+[16.182s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/include/gpu_euclidean_clustering.h:41:12:[m[K [01;35m[Kwarning: [m[K‘[01m[Kshmid_[m[K’ defined but not used [[01;35m[K-Wunused-variable[m[K]
+[16.182s]  static int [01;35m[Kshmid_[m[K;
+[16.182s]             [01;35m[K^~~~~~[m[K
+[16.182s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/include/gpu_euclidean_clustering.h:40:14:[m[K [01;35m[Kwarning: [m[K‘[01m[Kkey_[m[K’ defined but not used [[01;35m[K-Wunused-variable[m[K]
+[16.182s]  static key_t [01;35m[Kkey_[m[K;
+[16.182s]               [01;35m[K^~~~[m[K
+[16.182s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/include/gpu_euclidean_clustering.h:39:19:[m[K [01;35m[Kwarning: [m[K‘[01m[Ksched_info_[m[K’ defined but not used [[01;35m[K-Wunused-variable[m[K]
+[16.182s]  static SchedInfo* [01;35m[Ksched_info_[m[K;
+[16.182s]                    [01;35m[K^~~~~~~~~~~[m[K
+[16.182s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/include/gpu_euclidean_clustering.h:38:12:[m[K [01;35m[Kwarning: [m[K‘[01m[Kkey_id_[m[K’ defined but not used [[01;35m[K-Wunused-variable[m[K]
+[16.182s]  static int [01;35m[Kkey_id_[m[K;
+[16.182s]             [01;35m[K^~~~~~~[m[K
+[16.183s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/include/gpu_euclidean_clustering.h:37:12:[m[K [01;35m[Kwarning: [m[K‘[01m[Kscheduler_pid_[m[K’ defined but not used [[01;35m[K-Wunused-variable[m[K]
+[16.183s]  static int [01;35m[Kscheduler_pid_[m[K;
+[16.183s]             [01;35m[K^~~~~~~~~~~~~~[m[K
+[16.183s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/include/gpu_euclidean_clustering.h:36:13:[m[K [01;35m[Kwarning: [m[K‘[01m[Ktask_filename_[m[K’ defined but not used [[01;35m[K-Wunused-variable[m[K]
+[16.183s]  static char [01;35m[Ktask_filename_[m[K[BUFFER_SIZE];
+[16.183s]              [01;35m[K^~~~~~~~~~~~~~[m[K
+[19.987s] [100%] [32m[1mLinking CXX executable devel/lib/lidar_euclidean_cluster_detect/lidar_euclidean_cluster_detect[0m
+[24.498s] [100%] Built target lidar_euclidean_cluster_detect
+[24.521s] Invoked command in '/home/hypark/git/Autoware_On_Embedded/build/lidar_euclidean_cluster_detect' returned '0': /usr/bin/cmake --build /home/hypark/git/Autoware_On_Embedded/build/lidar_euclidean_cluster_detect -- -j12 -l12
+[25.097s] Invoking command in '/home/hypark/git/Autoware_On_Embedded/build/lidar_euclidean_cluster_detect': /usr/bin/cmake --build /home/hypark/git/Autoware_On_Embedded/build/lidar_euclidean_cluster_detect --target tests -- -j12 -l12
+[25.242s] [35m[1mScanning dependencies of target tests[0m
+[25.270s] Built target tests
+[25.294s] Invoked command in '/home/hypark/git/Autoware_On_Embedded/build/lidar_euclidean_cluster_detect' returned '0': /usr/bin/cmake --build /home/hypark/git/Autoware_On_Embedded/build/lidar_euclidean_cluster_detect --target tests -- -j12 -l12
+[25.887s] Invoking command in '/home/hypark/git/Autoware_On_Embedded/build/lidar_euclidean_cluster_detect': /usr/bin/cmake --build /home/hypark/git/Autoware_On_Embedded/build/lidar_euclidean_cluster_detect --target install -- -j12 -l12
+[26.060s] [  0%] Built target people_msgs_generate_messages_py
+[26.060s] [  0%] Built target rviz_generate_messages_cpp
+[26.063s] [  0%] Built target vector_map_msgs_generate_messages_py
+[26.063s] [  0%] Built target rviz_generate_messages_py
+[26.066s] [  0%] Built target vector_map_server_generate_messages_nodejs
+[26.066s] [  0%] Built target tf_generate_messages_eus
+[26.067s] [  0%] Built target map_msgs_generate_messages_lisp
+[26.070s] [  0%] Built target vector_map_msgs_generate_messages_lisp
+[26.071s] [  0%] Built target vector_map_msgs_generate_messages_eus
+[26.082s] [  0%] Built target vector_map_msgs_generate_messages_cpp
+[26.109s] [  0%] Built target people_msgs_generate_messages_lisp
+[26.162s] [ 40%] Built target gpu_euclidean_clustering
+[26.192s] [ 40%] Built target rviz_generate_messages_eus
+[26.192s] [ 40%] Built target bond_generate_messages_py
+[26.194s] [ 40%] Built target bond_generate_messages_nodejs
+[26.195s] [ 40%] Built target vector_map_msgs_generate_messages_nodejs
+[26.198s] [ 40%] Built target people_msgs_generate_messages_cpp
+[26.199s] [ 40%] Built target bond_generate_messages_lisp
+[26.200s] [ 40%] Built target people_msgs_generate_messages_eus
+[26.211s] [ 40%] Built target bond_generate_messages_eus
+[26.215s] [ 40%] Built target nodelet_generate_messages_nodejs
+[26.220s] [ 40%] Built target bond_generate_messages_cpp
+[26.247s] [ 40%] Built target map_msgs_generate_messages_eus
+[26.312s] [ 40%] Built target dynamic_reconfigure_generate_messages_py
+[26.313s] [ 40%] Built target nodelet_generate_messages_eus
+[26.315s] [ 40%] Built target people_msgs_generate_messages_nodejs
+[26.316s] [ 40%] Built target dynamic_reconfigure_generate_messages_lisp
+[26.323s] [ 40%] Built target nodelet_generate_messages_cpp
+[26.338s] [ 40%] Built target dynamic_reconfigure_generate_messages_nodejs
+[26.338s] [ 40%] Built target dynamic_reconfigure_generate_messages_eus
+[26.340s] [ 40%] Built target map_msgs_generate_messages_py
+[26.364s] [ 40%] Built target pcl_ros_gencfg
+[26.373s] [ 40%] Built target rviz_generate_messages_nodejs
+[26.375s] [ 40%] Built target jsk_hark_msgs_generate_messages_nodejs
+[26.380s] [ 40%] Built target jsk_hark_msgs_generate_messages_py
+[26.426s] [ 40%] Built target jsk_rviz_plugins_generate_messages_lisp
+[26.444s] [ 40%] Built target jsk_hark_msgs_generate_messages_eus
+[26.451s] [ 40%] Built target jsk_rviz_plugins_generate_messages_py
+[26.465s] [ 40%] Built target jsk_recognition_utils_gencfg
+[26.469s] [ 40%] Built target jsk_rviz_plugins_generate_messages_nodejs
+[26.475s] [ 40%] Built target rviz_generate_messages_lisp
+[26.495s] [ 40%] Built target vector_map_server_generate_messages_cpp
+[26.496s] [ 40%] Built target visualization_msgs_generate_messages_nodejs
+[26.496s] [ 40%] Built target jsk_rviz_plugins_gencfg
+[26.503s] [ 40%] Built target visualization_msgs_generate_messages_py
+[26.511s] [ 40%] Built target tf2_msgs_generate_messages_nodejs
+[26.514s] [ 40%] Built target visualization_msgs_generate_messages_eus
+[26.555s] [ 40%] Built target tf2_msgs_generate_messages_cpp
+[26.558s] [ 40%] Built target map_msgs_generate_messages_cpp
+[26.588s] [ 40%] Built target tf2_msgs_generate_messages_py
+[26.594s] [ 40%] Built target actionlib_generate_messages_py
+[26.616s] [ 40%] Built target tf_generate_messages_py
+[26.616s] [ 40%] Built target dynamic_reconfigure_generate_messages_cpp
+[26.623s] [ 40%] Built target tf_generate_messages_lisp
+[26.636s] [ 40%] Built target tf_generate_messages_nodejs
+[26.643s] [ 40%] Built target geometry_msgs_generate_messages_py
+[26.646s] [ 40%] Built target actionlib_generate_messages_cpp
+[26.667s] [ 40%] Built target vector_map_server_generate_messages_eus
+[26.692s] [ 40%] Built target sensor_msgs_generate_messages_nodejs
+[26.695s] [ 40%] Built target pcl_msgs_generate_messages_eus
+[26.695s] [ 40%] Built target roscpp_generate_messages_cpp
+[26.709s] [ 40%] Built target jsk_recognition_msgs_generate_messages_lisp
+[26.747s] [ 40%] Built target std_msgs_generate_messages_py
+[26.748s] [ 40%] Built target nodelet_generate_messages_lisp
+[26.760s] [ 40%] Built target jsk_recognition_msgs_generate_messages_eus
+[26.760s] [ 40%] Built target rosgraph_msgs_generate_messages_eus
+[26.775s] [ 40%] Built target jsk_hark_msgs_generate_messages_lisp
+[26.785s] [ 40%] Built target std_msgs_generate_messages_nodejs
+[26.789s] [ 40%] Built target autoware_msgs_generate_messages_py
+[26.797s] [ 40%] Built target sensor_msgs_generate_messages_cpp
+[26.813s] [ 40%] Built target sensor_msgs_generate_messages_eus
+[26.814s] [ 40%] Built target rosgraph_msgs_generate_messages_cpp
+[26.831s] [ 40%] Built target topic_tools_generate_messages_cpp
+[26.862s] [ 40%] Built target autoware_msgs_generate_messages_cpp
+[26.876s] [ 40%] Built target jsk_recognition_msgs_generate_messages_py
+[26.880s] [ 40%] Built target nodelet_generate_messages_py
+[26.904s] [ 40%] Built target sensor_msgs_generate_messages_py
+[26.911s] [ 40%] Built target std_msgs_generate_messages_cpp
+[26.915s] [ 40%] Built target geometry_msgs_generate_messages_eus
+[26.926s] [ 40%] Built target jsk_footstep_msgs_generate_messages_py
+[26.931s] [ 40%] Built target nav_msgs_generate_messages_nodejs
+[26.940s] [ 40%] Built target std_msgs_generate_messages_lisp
+[26.941s] [ 40%] Built target jsk_rviz_plugins_generate_messages_cpp
+[26.945s] [ 40%] Built target roscpp_generate_messages_nodejs
+[26.966s] [ 40%] Built target geometry_msgs_generate_messages_nodejs
+[27.009s] [ 40%] Built target pcl_msgs_generate_messages_py
+[27.009s] [ 40%] Built target jsk_rviz_plugins_generate_messages_eus
+[27.018s] [ 40%] Built target geometry_msgs_generate_messages_lisp
+[27.025s] [ 40%] Built target actionlib_generate_messages_eus
+[27.040s] [ 40%] Built target actionlib_generate_messages_lisp
+[27.054s] [ 40%] Built target geometry_msgs_generate_messages_cpp
+[27.055s] [ 40%] Built target autoware_msgs_generate_messages_eus
+[27.056s] [ 40%] Built target pcl_msgs_generate_messages_cpp
+[27.064s] [ 40%] Built target topic_tools_generate_messages_eus
+[27.068s] [ 40%] Built target visualization_msgs_generate_messages_lisp
+[27.095s] [ 40%] Built target autoware_msgs_generate_messages_lisp
+[27.116s] [ 40%] Built target std_msgs_generate_messages_eus
+[27.125s] [ 40%] Built target jsk_footstep_msgs_generate_messages_eus
+[27.143s] [ 40%] Built target autoware_msgs_generate_messages_nodejs
+[27.169s] [ 40%] Built target tf2_msgs_generate_messages_eus
+[27.176s] [ 40%] Built target vector_map_server_generate_messages_lisp
+[27.180s] [ 40%] Built target visualization_msgs_generate_messages_cpp
+[27.180s] [ 40%] Built target actionlib_msgs_generate_messages_py
+[27.188s] [ 40%] Built target jsk_footstep_msgs_generate_messages_lisp
+[27.190s] [ 40%] Built target grid_map_msgs_generate_messages_nodejs
+[27.195s] [ 40%] Built target jsk_footstep_msgs_generate_messages_nodejs
+[27.203s] [ 40%] Built target nav_msgs_generate_messages_eus
+[27.236s] [ 40%] Built target std_srvs_generate_messages_cpp
+[27.255s] [ 40%] Built target actionlib_msgs_generate_messages_lisp
+[27.270s] [ 40%] Built target grid_map_msgs_generate_messages_lisp
+[27.277s] [ 40%] Built target jsk_recognition_msgs_generate_messages_nodejs
+[27.289s] [ 40%] Built target std_srvs_generate_messages_eus
+[27.307s] [ 40%] Built target roscpp_generate_messages_lisp
+[27.310s] [ 40%] Built target grid_map_msgs_generate_messages_eus
+[27.318s] [ 40%] Built target rosgraph_msgs_generate_messages_nodejs
+[27.320s] [ 40%] Built target rosgraph_msgs_generate_messages_lisp
+[27.329s] [ 40%] Built target roscpp_generate_messages_eus
+[27.346s] [ 40%] Built target rosgraph_msgs_generate_messages_py
+[27.350s] [ 40%] Built target actionlib_msgs_generate_messages_eus
+[27.360s] [ 40%] Built target vector_map_server_generate_messages_py
+[27.368s] [ 40%] Built target roscpp_generate_messages_py
+[27.412s] [ 40%] Built target jsk_hark_msgs_generate_messages_cpp
+[27.418s] [ 40%] Built target grid_map_msgs_generate_messages_cpp
+[27.427s] [ 40%] Built target sensor_msgs_generate_messages_lisp
+[27.440s] [ 40%] Built target grid_map_msgs_generate_messages_py
+[27.448s] [ 40%] Built target pcl_msgs_generate_messages_nodejs
+[27.451s] [ 40%] Built target nav_msgs_generate_messages_lisp
+[27.461s] [ 40%] Built target nav_msgs_generate_messages_cpp
+[27.465s] [ 40%] Built target dynamic_reconfigure_gencfg
+[27.487s] [ 40%] Built target _catkin_empty_exported_target
+[27.487s] [ 40%] Built target nav_msgs_generate_messages_py
+[27.508s] [ 40%] Built target tf2_msgs_generate_messages_lisp
+[27.513s] [ 40%] Built target std_srvs_generate_messages_lisp
+[27.555s] [ 40%] Built target jsk_recognition_msgs_generate_messages_cpp
+[27.566s] [ 40%] Built target topic_tools_generate_messages_nodejs
+[27.586s] [ 40%] Built target topic_tools_generate_messages_lisp
+[27.587s] [ 40%] Built target map_msgs_generate_messages_nodejs
+[27.590s] [ 40%] Built target std_srvs_generate_messages_py
+[27.593s] [ 40%] Built target std_srvs_generate_messages_nodejs
+[27.604s] [ 40%] Built target actionlib_msgs_generate_messages_nodejs
+[27.605s] [ 40%] Built target nodelet_topic_tools_gencfg
+[27.608s] [ 40%] Built target actionlib_generate_messages_nodejs
+[27.618s] [ 40%] Built target topic_tools_generate_messages_py
+[27.626s] [ 40%] Built target pcl_msgs_generate_messages_lisp
+[27.629s] [ 40%] Built target tf_generate_messages_cpp
+[27.649s] [ 40%] Built target jsk_footstep_msgs_generate_messages_cpp
+[27.670s] [ 40%] Built target actionlib_msgs_generate_messages_cpp
+[27.756s] [100%] Built target lidar_euclidean_cluster_detect
+[27.815s] [36mInstall the project...[0m
+[27.838s] -- Install configuration: "Release"
+[27.838s] -- Installing: /home/hypark/git/Autoware_On_Embedded/install/lidar_euclidean_cluster_detect/lib/pkgconfig/lidar_euclidean_cluster_detect.pc
+[27.838s] -- Installing: /home/hypark/git/Autoware_On_Embedded/install/lidar_euclidean_cluster_detect/share/lidar_euclidean_cluster_detect/cmake/lidar_euclidean_cluster_detectConfig.cmake
+[27.838s] -- Installing: /home/hypark/git/Autoware_On_Embedded/install/lidar_euclidean_cluster_detect/share/lidar_euclidean_cluster_detect/cmake/lidar_euclidean_cluster_detectConfig-version.cmake
+[27.839s] -- Installing: /home/hypark/git/Autoware_On_Embedded/install/lidar_euclidean_cluster_detect/share/lidar_euclidean_cluster_detect/package.xml
+[27.839s] -- Installing: /home/hypark/git/Autoware_On_Embedded/install/lidar_euclidean_cluster_detect/lib/libgpu_euclidean_clustering.so
+[27.839s] -- Installing: /home/hypark/git/Autoware_On_Embedded/install/lidar_euclidean_cluster_detect/include/lidar_euclidean_cluster_detect
+[27.839s] -- Installing: /home/hypark/git/Autoware_On_Embedded/install/lidar_euclidean_cluster_detect/include/lidar_euclidean_cluster_detect/cluster.h
+[27.839s] -- Installing: /home/hypark/git/Autoware_On_Embedded/install/lidar_euclidean_cluster_detect/include/lidar_euclidean_cluster_detect/gpu_euclidean_clustering.h
+[27.840s] -- Installing: /home/hypark/git/Autoware_On_Embedded/install/lidar_euclidean_cluster_detect/include/lidar_euclidean_cluster_detect/gencolors.cpp
+[27.840s] -- Installing: /home/hypark/git/Autoware_On_Embedded/install/lidar_euclidean_cluster_detect/lib/lidar_euclidean_cluster_detect/lidar_euclidean_cluster_detect
+[27.840s] -- Set runtime path of "/home/hypark/git/Autoware_On_Embedded/install/lidar_euclidean_cluster_detect/lib/lidar_euclidean_cluster_detect/lidar_euclidean_cluster_detect" to ""
+[27.841s] -- Installing: /home/hypark/git/Autoware_On_Embedded/install/lidar_euclidean_cluster_detect/share/lidar_euclidean_cluster_detect/launch
+[27.841s] -- Installing: /home/hypark/git/Autoware_On_Embedded/install/lidar_euclidean_cluster_detect/share/lidar_euclidean_cluster_detect/launch/euclidean_clustering_Exp.launch
+[27.841s] -- Installing: /home/hypark/git/Autoware_On_Embedded/install/lidar_euclidean_cluster_detect/share/lidar_euclidean_cluster_detect/launch/lidar_euclidean_cluster_detect_param.launch
+[27.841s] -- Installing: /home/hypark/git/Autoware_On_Embedded/install/lidar_euclidean_cluster_detect/share/lidar_euclidean_cluster_detect/launch/lidar_euclidean_cluster_detect.launch
+[27.841s] -- Installing: /home/hypark/git/Autoware_On_Embedded/install/lidar_euclidean_cluster_detect/share/lidar_euclidean_cluster_detect/config
+[27.841s] -- Installing: /home/hypark/git/Autoware_On_Embedded/install/lidar_euclidean_cluster_detect/share/lidar_euclidean_cluster_detect/config/params.yaml
+[27.843s] Invoked command in '/home/hypark/git/Autoware_On_Embedded/build/lidar_euclidean_cluster_detect' returned '0': /usr/bin/cmake --build /home/hypark/git/Autoware_On_Embedded/build/lidar_euclidean_cluster_detect --target install -- -j12 -l12

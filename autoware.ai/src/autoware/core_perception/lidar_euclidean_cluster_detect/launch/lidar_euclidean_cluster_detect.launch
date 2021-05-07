@@ -34,6 +34,7 @@
        default="[0.5,1.1,1.6,2.1,2.6]"/><!-- Euclidean Clustering threshold distance for each segment -->
 
   <arg name="profiling_file_name" default="$(env HOME)/GPU_profiling/euclidean_cluster_detect.csv"/>
+  <arg name="gpu_scheduling_flag" default="0" />
 
   <node pkg="lidar_euclidean_cluster_detect" type="lidar_euclidean_cluster_detect" name="lidar_euclidean_cluster_detect_$(arg label)" output="screen">
     <param name="points_node"
@@ -64,6 +65,7 @@
     <remap from="/points_raw" to="/sync_drivers/points_raw" if="$(arg sync)" />
 
     <param name="profiling_file_name" value="$(arg profiling_file_name)" />
+    <param name="gpu_scheduling_flag" value="$(arg gpu_scheduling_flag)" />
   </node>
 
   <!-- <group if="$(arg use_vector_map)">

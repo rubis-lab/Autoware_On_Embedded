@@ -18,17 +18,17 @@ int gpu_index = 0;
 int count_dtoh = 0;
 int count_htod = 0;
 
-int bias_id = 0;
-int normalize_id = 0;
-int add_id = 0;
-int gpu_id = 0;
-int copy_gpu_id = 0;
-int upsample_id = 0;
-int activation_id = 0;
-int im2col_id = 0;
-int max_id = 0;
-int push_id = 0;
-int pull_id = 0;
+int push_id = 0; // 1
+int pull_id = 2; // 1~4
+int bias_id = 7; // 1~72
+int normalize_id = 80; // 1~72
+int add_id = 155; // 1~75
+int gpu_id = 0; 
+int copy_gpu_id = 260; // 1~104
+int upsample_id = 263; // 1~2
+int activation_id = 380; //1~116
+int im2col_id = 460; //1~75
+
 
 //int glob_id = 0;
 float htod_time;
@@ -55,22 +55,25 @@ void stop_profiling(int type,char* ker_name,int id){
 }
 
 void write_data(int id, float time, int type,char* ker_name){
-    fprintf(fp, "%d, %f, %d, %s\n", id, time, type, ker_name);	
+    // fprintf(fp, "%d, %f, %d, %s\n", id, time, type, ker_name);	
+    fprintf(fp, "%d, %f, %d\n", id, time, type);	
 }
 
 void write_dummy_line(){
-    bias_id = 0;
-    normalize_id = 0;
-    add_id = 0;
-    gpu_id = 0;
-    upsample_id = 0;
-    activation_id = 0;
-    im2col_id = 0;
-    push_id = 0;
-    pull_id = 0;
-    copy_gpu_id = 0;
+    
     fprintf(fp, "-1, -1, -1\n");						
     fflush(fp);
+
+    push_id = 0; // 1
+    pull_id = 2; // 1~4
+    bias_id = 7; // 1~72
+    normalize_id = 80; // 1~72
+    add_id = 155; // 1~75
+    gpu_id = 0; 
+    copy_gpu_id = 260; // 1~104
+    upsample_id = 263; // 1~2`
+    activation_id = 380; //1~116
+    im2col_id = 460; //1~75
     //glob_id = 0;
 }
 
@@ -251,6 +254,7 @@ void cuda_push_array(float *x_gpu, float *x, size_t n)
     count_htod += 1;
     if(count_htod > YOLO){
         push_id += 1;
+        request_scheduling(deadline_list_[push_id]);
         start_profiling();
     }
         
@@ -267,6 +271,7 @@ void cuda_pull_array(float *x_gpu, float *x, size_t n)
     size_t size = sizeof(float)*n;
 
     pull_id += 1;
+    request_scheduling(deadline_list_[pull_id]);
 
     start_profiling();
 
@@ -370,47 +375,68 @@ void initialize_sched_info(){
 	sched_info_->state = NONE;
 }
   
-void init_scheduling(char* task_filename, int key_id){
-	// Initialize key id for shared memory
-	key_id_ = key_id;
+void init_scheduling(char* task_filename, char* deadline_filename, int key_id){
+  // Get deadline list
+  get_deadline_list(deadline_filename);
+
+  // Initialize key id for shared memory
+  key_id_ = key_id;
+
+  // Initialize signal handler
+  initialize_signal_handler();
+
+  // Create task file
+
+  sprintf(task_filename_, "%s", task_filename);
+  create_task_file();    
+
+  // Get scheduler pid
+  get_scheduler_pid();
+
+  // Initialize scheduling information (shared memory data)
+  initialize_sched_info();
+
+  sigemptyset(&sigset_);
+  sigaddset(&sigset_, SIGUSR1);
+  sigaddset(&sigset_, SIGUSR2);
+  sigprocmask(SIG_BLOCK, &sigset_, NULL);    
+
+  // sigwait(&sigset_, &sig_);    
+  // kill(scheduler_pid_, SIGUSR2);
+  // sigprocmask(SIG_UNBLOCK, &sigset_, NULL);
   
-	// Initialize signal handler
-	initialize_signal_handler();
-  
-	// Create task file
-  
-	sprintf(task_filename_, "%s", task_filename);
-	create_task_file();    
-  
-	// Get scheduler pid
-	get_scheduler_pid();
-  
-	// Initialize scheduling information (shared memory data)
-	initialize_sched_info();
-  
-	sigemptyset(&sigset_);
-	sigaddset(&sigset_, SIGUSR1);
-	sigaddset(&sigset_, SIGUSR2);
-	sigprocmask(SIG_BLOCK, &sigset_, NULL);    
-  
-	// sigwait(&sigset_, &sig_);    
-	// kill(scheduler_pid_, SIGUSR2);
-	// sigprocmask(SIG_UNBLOCK, &sigset_, NULL);
-	
-	printf("Task [%d] is ready to work\n", getpid());
-	// sigaddset(&sigset_, SIGUSR1);
-	// sigprocmask(SIG_BLOCK, &sigset_, NULL);    
-  
+  printf("Task [%d] is ready to work\n", getpid());
+  // sigaddset(&sigset_, SIGUSR1);
+  // sigprocmask(SIG_BLOCK, &sigset_, NULL);    
+
 }
-  
+
 void request_scheduling(unsigned long long relative_deadline){
-	sched_info_->deadline = get_current_time_us() + relative_deadline;  
-	sched_info_->state = WAIT;        
-	// printf("Request schedule - deadline: %llu\n", sched_info_->deadline);
-	while(1){
-		kill(scheduler_pid_, SIGUSR1);
-		if(!sigwait(&sigset_, &sig_)) break;
-	}
+  if(gpu_scheduling_flag_ == 0) return;
+  sched_info_->deadline = get_current_time_us() + relative_deadline;  
+  sched_info_->state = WAIT;        
+  // printf("Request schedule - deadline: %llu\n", sched_info_->deadline);
+  while(1){
+      kill(scheduler_pid_, SIGUSR1);
+      if(!sigwait(&sigset_, &sig_)) break;
+  }
+}
+
+void get_deadline_list(char* filename){
+  FILE* fp;
+  fp = fopen(filename, "r");
+  if(fp==NULL){
+	  fprintf(stderr, "Cannot find file %s\n", filename);
+	  exit(1);
+  }
+  char buf[1024];
+  long long int deadline;
+  for(int i = 0; i < sizeof(deadline_list_)/sizeof(long long int); i++){
+    fgets(buf, 1024, fp);
+    strtok(buf, "\n");
+    sscanf(buf, "%*llu, %llu", &deadline);
+    deadline_list_[i] = deadline;
+  }
 }
 
 #else

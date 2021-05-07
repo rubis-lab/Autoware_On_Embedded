@@ -17,7 +17,6 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 
-
 #define BUFFER_SIZE 1024
 #define NS2MS(t) (t/1000000)
 #define NS2US(t) (t/1000)
@@ -43,6 +42,8 @@ static key_t key_;
 static int shmid_;
 static sigset_t sigset_;
 static int sig_;
+static long long int deadline_list_[550];
+static int gpu_scheduling_flag_;
 
 void sig_handler(int signum);
 void termination();
@@ -51,8 +52,9 @@ void us_sleep(unsigned long long us);
 void initialize_signal_handler();
 void create_task_file();
 void get_scheduler_pid();
-void init_scheduling(char* task_filename, int key_id);
+void init_scheduling(char* task_filename, char* deadline_filename, int key_id);
 void request_scheduling(unsigned long long relative_deadline);
+void get_deadline_list(char* filename);
 /* ========================================*/
 
 

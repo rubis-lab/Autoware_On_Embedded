@@ -58,6 +58,8 @@ void im2col_gpu(float *im,
 
     //
 
+    request_scheduling(deadline_list_[im2col_id]);
+    start_profiling();
     im2col_gpu_kernel<<<(num_kernels+BLOCK-1)/BLOCK,
         BLOCK>>>(
                 num_kernels, im, height, width, ksize, pad,

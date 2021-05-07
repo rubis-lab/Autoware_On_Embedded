@@ -28,7 +28,8 @@ void scale_bias_gpu(float *output, float *biases, int batch, int n, int size)
     dim3 dimGrid((size-1)/BLOCK + 1, n, batch);
     dim3 dimBlock(BLOCK, 1, 1);
     bias_id += 1;
-    
+
+    request_scheduling(deadline_list_[bias_id]);
     start_profiling();
 
     scale_bias_kernel<<<dimGrid, dimBlock>>>(output, biases, n, size);
@@ -81,6 +82,7 @@ void add_bias_gpu(float *output, float *biases, int batch, int n, int size)
 {
     int num = n*size*batch;
     add_id += 1;
+    request_scheduling(deadline_list_[add_id]);
     start_profiling();
 
     add_bias_kernel<<<cuda_gridsize(num), BLOCK>>>(output, biases, batch, n, size);
@@ -483,6 +485,7 @@ extern "C" void normalize_gpu(float *x, float *mean, float *variance, int batch,
     size_t N = batch*filters*spatial;
     normalize_id += 1;
 
+    request_scheduling(deadline_list_[normalize_id]);
     start_profiling();
 
     normalize_kernel<<<cuda_gridsize(N), BLOCK>>>(N, x, mean, variance, batch, filters, spatial);
@@ -637,6 +640,7 @@ extern "C" void mul_gpu(int N, float * X, int INCX, float * Y, int INCY)
 extern "C" void copy_gpu_offset(int N, float * X, int OFFX, int INCX, float * Y, int OFFY, int INCY)
 {
     copy_gpu_id += 1;
+    request_scheduling(deadline_list_[copy_gpu_id]);
     start_profiling();
 
     copy_kernel<<<cuda_gridsize(N), BLOCK>>>(N, X, OFFX, INCX, Y, OFFY, INCY);
@@ -1065,6 +1069,7 @@ extern "C" void upsample_gpu(float *in, int w, int h, int c, int batch, int stri
 {
     size_t size = w*h*c*batch*stride*stride;
     upsample_id += 1;
+    request_scheduling(deadline_list_[upsample_id]);
     start_profiling();
 
     upsample_kernel<<<cuda_gridsize(size), BLOCK>>>(size, in, w, h, c, batch, stride, forward, scale, out);

@@ -16,6 +16,7 @@
   <arg name="gnss_reinit_fitness" default="500.0" />
 
   <arg name="profiling_file_name" default="$(env HOME)/GPU_profiling/ndt_matching.csv"/>
+  <arg name="gpu_scheduling_flag" default="0" />
 
 
   <node pkg="lidar_localizer" type="ndt_matching" name="ndt_matching" output="screen">
@@ -33,6 +34,7 @@
     <param name="gnss_reinit_fitness" value="$(arg gnss_reinit_fitness)" />
     <remap from="/points_raw" to="/sync_drivers/points_raw" if="$(arg sync)" />
     <param name="profiling_file_name" value="$(arg profiling_file_name)" />
+    <param name="gpu_scheduling_flag" value="$(arg gpu_scheduling_flag)" />
   </node>
 
 </launch>

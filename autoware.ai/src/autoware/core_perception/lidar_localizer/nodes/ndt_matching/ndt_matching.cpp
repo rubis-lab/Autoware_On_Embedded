@@ -1524,8 +1524,10 @@ int main(int argc, char** argv)
   health_checker_ptr_->NODE_ACTIVATE();
 
   #ifdef CUDA_FOUND
-  int key_id = 0;
-  init_scheduling("/tmp/ndt_matching", key_id);
+  int key_id = 0;  
+  private_nh.param("gpu_scheduling_flag", gpu_scheduling_flag_, 0);
+  if(gpu_scheduling_flag_ == 1)
+    init_scheduling("/tmp/ndt_matching", "/home/hypark/GPU_profiling/deadline/ndt_matching_deadline.csv", key_id);
   #endif
 
   // Set log file name.

@@ -931,13 +931,6 @@ void velodyne_callback(const sensor_msgs::PointCloud2ConstPtr& in_sensor_cloud)
 }
 int main(int argc, char **argv)
 {
-  /* For GPU scheduling */
-  #ifdef GPU_CLUSTERING
-  int key_id = 1;  
-
-  // init_scheduling("/tmp/euclidean_cluster_detect", key_id);
-  #endif
-
   // Initialize ROS
   ros::init(argc, argv, "euclidean_cluster");
 
@@ -955,6 +948,13 @@ int main(int argc, char **argv)
   generateColors(_colors, 255);
 
 
+  /* For GPU scheduling */
+  #ifdef GPU_CLUSTERING
+  int key_id = 1;  
+  private_nh.param("gpu_scheduling_flag", gpu_scheduling_flag_, 0);
+  if(gpu_scheduling_flag_ == 1)
+    init_scheduling("/tmp/euclidean_cluster_detect", "/home/hypark/GPU_profiling/deadline/euclidean_cluster_detect_deadline.csv",key_id);
+  #endif
 
 
   std::string label;

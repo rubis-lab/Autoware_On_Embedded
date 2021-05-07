@@ -319,15 +319,18 @@ std::vector<std::string> Yolo3DetectorNode::read_custom_names_file(const std::st
 
 void Yolo3DetectorNode::Run()
 {    
-
     //ROS STUFF
-    ros::NodeHandle private_node_handle("~");//to receive args
-
+    ros::NodeHandle private_node_handle("~");//to receive args    
     private_node_handle.param<std::string>("profiling_file_name",_profiling_file_name,"/home/bkpark/prof_data/yolo_prof.csv");
+    private_node_handle.param("gpu_scheduling_flag", gpu_scheduling_flag_, 0);
     //private_node_handle.getParam("profiling_file_name", _profiling_file_name);
     fprintf(stderr,"%s\n", _profiling_file_name.c_str());
     initialize_file(_profiling_file_name.c_str());    
     
+    int key_id = 2;    
+    if(gpu_scheduling_flag_==1)
+        init_scheduling("/tmp/yolo", "/home/hypark/GPU_profiling/deadline/yolo_deadline.csv",key_id);
+
     
     //RECEIVE IMAGE TOPIC NAME
     std::string image_raw_topic_str;

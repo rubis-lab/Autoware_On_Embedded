@@ -26,17 +26,18 @@
     <arg name="names_file" value="$(find vision_darknet_detect)/darknet/cfg/coco.names"/>
     <arg name="camera_id" value="/"/>
     <arg name="image_src" value="/image_raw"/>
-    <arg name="profiling_file_name" value="$(env HOME)/GPU_profiling/X2.csv"/>
+    <arg name="profiling_file_name" value="$(env HOME)/GPU_profiling/210507_yolo_wo_scheduling.csv"/>
+    <arg name="gpu_scheduling_flag" value="0" />
   </include>
 
 <!-- lidar_euclidean_cluster_detect-->
   <include file="$(find lidar_euclidean_cluster_detect)/launch/lidar_euclidean_cluster_detect.launch">
-    <arg name="points_node" value="/points_no_ground_center" /><!--CHANGE THIS TO READ WHETHER FROM VSCAN OR POINTS_RAW -->
+    <arg name="points_node" value="/points_no_ground_center" />
     <arg name="remove_ground" value="true" />
-    <arg name="downsample_cloud" value="false" /> <!-- Apply VoxelGrid Filter with the value given by "leaf_size"-->
-    <arg name="leaf_size" value="0.68" /><!-- Voxel Grid Filter leaf size-->
-    <arg name="cluster_size_min" value="1" /><!-- Minimum number of points to consider a cluster as valid-->
-    <arg name="cluster_size_max" value="100000" /><!-- Maximum number of points to allow inside a cluster-->
+    <arg name="downsample_cloud" value="false" />
+    <arg name="leaf_size" value="0.68" />
+    <arg name="cluster_size_min" value="1" />
+    <arg name="cluster_size_max" value="100000" />
     <arg name="sync" value="false" />
     <arg name="use_diffnormals" value="false" />
     <arg name="pose_estimation" value="false" />
@@ -53,10 +54,11 @@
     <arg name="remove_points_upto" value="0.0" />
     <arg name="use_gpu" value="true" />    
     <arg name="use_multiple_thres" value="false"/>
-    <arg name="clustering_ranges" value="[15,30,45,60]"/><!-- Distances to segment pointcloud -->
+    <arg name="clustering_ranges" value="[15,30,45,60]"/>
     <arg name="clustering_distances"
-         value="[0.5,1.1,1.6,2.1,2.6]"/><!-- Euclidean Clustering threshold distance for each segment -->
-    <arg name="profiling_file_name" value="$(env HOME)/GPU_profiling/X.csv" />
+         value="[0.5,1.1,1.6,2.1,2.6]"/>
+    <arg name="profiling_file_name" value="$(env HOME)/GPU_profiling/210507_cluster_wo_scheduling.csv" />
+    <arg name="gpu_scheduling_flag" value="0" />
   </include>
   
   <!-- imm_ukf_pda_track -->

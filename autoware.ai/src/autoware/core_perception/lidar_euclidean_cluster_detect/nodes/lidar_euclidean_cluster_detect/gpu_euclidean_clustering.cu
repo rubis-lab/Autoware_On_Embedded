@@ -682,6 +682,7 @@ void GpuEuclideanCluster::extractClusters()
   // long long int relative_deadline=MS2US(10);
   // request_scheduling(relative_deadline);
 
+  request_scheduling(deadline_list_[17]);
   start_profiling();
   pclEuclideanInitialize << < grid_x, block_x >> > (cluster_indices_, size_);
   checkCudaErrors(cudaDeviceSynchronize());
@@ -689,15 +690,18 @@ void GpuEuclideanCluster::extractClusters()
 
   old_cluster_num = cluster_num = size_;
 
+  request_scheduling(deadline_list_[18]);
   checkCudaErrors(cudaMalloc(&cluster_offset, (size_ + 1) * sizeof(int)));
   start_profiling();
   checkCudaErrors(cudaMemset(cluster_offset, 0, (size_ + 1) * sizeof(int)));
   stop_profiling(18,HTOD);
 
+  request_scheduling(deadline_list_[19]);
   start_profiling();
   blockLabelling << < grid_x, block_x >> > (x_, y_, z_, cluster_indices_, size_, threshold_);
   stop_profiling(19, LAUNCH);
 
+  request_scheduling(deadline_list_[20]);
   start_profiling();
   clusterMark << < grid_x, block_x >> > (cluster_indices_, cluster_offset, size_);
   stop_profiling(20, LAUNCH);
@@ -706,7 +710,7 @@ void GpuEuclideanCluster::extractClusters()
   int *cluster_list, *new_cluster_list, *tmp;
 
   checkCudaErrors(cudaMalloc(&cluster_list, cluster_num * sizeof(int)));
-
+  request_scheduling(deadline_list_[21]);
   start_profiling();
   clusterCollector << < grid_x, block_x >> > (cluster_indices_, cluster_list, cluster_offset, size_);
   checkCudaErrors(cudaDeviceSynchronize());
@@ -715,6 +719,7 @@ void GpuEuclideanCluster::extractClusters()
   int *cluster_matrix;
   int *new_cluster_matrix;
 
+  request_scheduling(deadline_list_[22]);
   checkCudaErrors(cudaMalloc(&cluster_matrix, cluster_num * cluster_num * sizeof(int)));
   start_profiling();
   checkCudaErrors(cudaMemset(cluster_matrix, 0, cluster_num * cluster_num * sizeof(int)));
@@ -723,6 +728,8 @@ void GpuEuclideanCluster::extractClusters()
 
   checkCudaErrors(cudaMalloc(&new_cluster_list, cluster_num * sizeof(int)));
 
+
+  request_scheduling(deadline_list_[23]);
   start_profiling();
   buildClusterMatrix << < grid_x, block_x >> >
                                   (x_, y_, z_, cluster_indices_, cluster_matrix, cluster_offset, size_, cluster_num, threshold_);
@@ -749,6 +756,7 @@ void GpuEuclideanCluster::extractClusters()
     block_x2 = (cluster_num > BLOCK_SIZE_X) ? BLOCK_SIZE_X : cluster_num;
     grid_x2 = (cluster_num - 1) / block_x2 + 1;
 
+    request_scheduling(deadline_list_[24]);
     start_profiling();
     mergeSelfClusters << < grid_x2, block_x2 >> > (cluster_matrix, cluster_list, cluster_num, changed);
     stop_profiling(24, LAUNCH);
@@ -867,11 +875,13 @@ void GpuEuclideanCluster::extractClusters()
   cluster_num_ = cluster_num;
 
   //Reset all cluster indexes to make them start from 0
+  request_scheduling(deadline_list_[33]);
   start_profiling();
   resetClusterIndexes << < grid_x, block_x >> > (cluster_indices_, cluster_offset, size_);
-  checkCudaErrors(cudaDeviceSynchronize());
+  checkCudaErrors(cudaDeviceSynchronize());  
   stop_profiling(33, LAUNCH);
 
+  request_scheduling(deadline_list_[34]);
   start_profiling();
   checkCudaErrors(cudaMemcpy(cluster_indices_host_, cluster_indices_, size_ * sizeof(int), cudaMemcpyDeviceToHost));
   stop_profiling(34, DTOH);
@@ -1083,7 +1093,10 @@ void initialize_sched_info(){
   sched_info_->state = NONE;
 }
 
-void init_scheduling(char* task_filename, int key_id){
+void init_scheduling(char* task_filename, char* deadline_filename, int key_id){
+  // Get deadline list
+  get_deadline_list(deadline_filename);
+
   // Initialize key id for shared memory
   key_id_ = key_id;
 
@@ -1116,12 +1129,30 @@ void init_scheduling(char* task_filename, int key_id){
 
 }
 
-void request_scheduling(unsigned long long relative_deadline){
+void request_scheduling(unsigned long long relative_deadline){  
+  if(gpu_scheduling_flag_ == 0) return;
   sched_info_->deadline = get_current_time_us() + relative_deadline;  
   sched_info_->state = WAIT;        
   // printf("Request schedule - deadline: %llu\n", sched_info_->deadline);
   while(1){
       kill(scheduler_pid_, SIGUSR1);
       if(!sigwait(&sigset_, &sig_)) break;
+  }
+}
+
+void get_deadline_list(char* filename){
+  FILE* fp;
+  fp = fopen(filename, "r");
+  if(fp==NULL){
+	  fprintf(stderr, "Cannot find file %s\n", filename);
+	  exit(1);
+  }
+  char buf[1024];
+  long long int deadline;
+  for(int i = 0; i < sizeof(deadline_list_)/sizeof(long long int); i++){
+    fgets(buf, 1024, fp);
+    strtok(buf, "\n");
+    sscanf(buf, "%*llu, %llu", &deadline);
+    deadline_list_[i] = deadline;
   }
 }

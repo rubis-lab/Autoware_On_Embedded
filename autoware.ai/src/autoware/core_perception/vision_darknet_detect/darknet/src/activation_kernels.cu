@@ -193,6 +193,7 @@ __global__ void gradient_array_kernel(float *x, int n, ACTIVATION a, float *delt
 extern "C" void activate_array_gpu(float *x, int n, ACTIVATION a) 
 {
     activation_id += 1;
+    request_scheduling(deadline_list_[activation_id]);
     start_profiling(); //
 
     activate_array_kernel<<<cuda_gridsize(n), BLOCK>>>(x, n, a);
