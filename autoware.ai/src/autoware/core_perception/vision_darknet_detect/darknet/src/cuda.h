@@ -55,7 +55,7 @@ void initialize_signal_handler();
 void create_task_file();
 void get_scheduler_pid();
 void init_scheduling(char* task_filename, char* deadline_filename, int key_id);
-void request_scheduling(unsigned long long relative_deadline);
+void request_scheduling(int id);
 void get_deadline_list(char* filename);
 void set_identical_deadline(unsigned long long identical_deadline);
 void set_absolute_deadline();
@@ -67,7 +67,8 @@ extern "C" {
 #endif
 
 //extern int glob_id;
-extern FILE* fp;
+extern FILE* execution_time_fp;
+extern FILE* response_time_fp;
 
 extern int bias_id;
 extern int normalize_id;
@@ -84,15 +85,15 @@ extern int pull_id;
 extern float htod_time;
 extern float dtoh_time;
 extern float launch_time;  
-extern cudaEvent_t event_start, event_stop;
+extern cudaEvent_t e_event_start, e_event_stop, r_event_start, r_event_stop;
 
 
-void start_profiling();
-void stop_profiling(int type, char* ker_name, int id);
-void write_data(int id, float time, int type, char* ker_name);
+void start_profiling_execution_time();
+void start_profiling_response_time();
+void stop_profiling(int id, int type);
+void write_profiling_data(int id, float e_time, float r_time, int type);
 void write_dummy_line();
-//void initialize_file();
-void initialize_file(const char name[]);
+void initialize_file(const char execution_time_filename[], const char response_time_filename[]);
 void close_file();
 
 #ifdef __cplusplus

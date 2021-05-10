@@ -30,39 +30,59 @@ int activation_id = 380; //1~116
 int im2col_id = 460; //1~75
 
 
-//int glob_id = 0;
+int glob_id = 0;
 float htod_time;
 float dtoh_time;
 float launch_time;  
-cudaEvent_t event_start, event_stop;
+cudaEvent_t e_event_start, e_event_stop, r_event_start, r_event_stop;
 
-FILE* fp;
+FILE* execution_time_fp;
+FILE* response_time_fp;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-void start_profiling(){	
-    cudaEventRecord(event_start, 0);
+/* GPU Profiling */
+void start_profiling_execution_time(){
+	if(GPU_PROFILING == 1)
+		cudaEventRecord(e_event_start, 0);
 }
 
-void stop_profiling(int type,char* ker_name,int id){		
-    float time;
-    cudaEventRecord(event_stop, 0);
-    cudaEventSynchronize(event_stop);
-    cudaEventElapsedTime(&time, event_start, event_stop);
-    write_data(id, time, type,ker_name);
-    //glob_id++;	
+void start_profiling_response_time(){
+	if(GPU_PROFILING == 1)
+		cudaEventRecord(r_event_start, 0);
 }
 
-void write_data(int id, float time, int type,char* ker_name){
-    // fprintf(fp, "%d, %f, %d, %s\n", id, time, type, ker_name);	
-    fprintf(fp, "%d, %f, %d\n", id, time, type);	
+void stop_profiling(int id, int type){
+	if(GPU_PROFILING == 1){		
+		float e_time, r_time;
+		cudaEventRecord(e_event_stop, 0);
+    cudaEventRecord(r_event_stop, 0);
+		cudaEventSynchronize(e_event_stop);
+    cudaEventSynchronize(r_event_stop);
+		cudaEventElapsedTime(&e_time, e_event_start, e_event_stop);
+    cudaEventElapsedTime(&r_time, r_event_start, r_event_stop);
+		// write_data(gid, time, type);
+    write_profiling_data(id, e_time, r_time, type);
+		// gid++;
+	}
 }
+
+void write_profiling_data(int id, float e_time, float r_time, int type){
+	if(GPU_PROFILING == 1){
+		fprintf(execution_time_fp, "%d, %f, %d\n", id, e_time, type);	
+    fprintf(response_time_fp, "%d, %f, %d\n", id, r_time, type);	
+	}
+}
+
 
 void write_dummy_line(){
-    
-    fprintf(fp, "-1, -1, -1\n");						
-    fflush(fp);
+	if(GPU_PROFILING == 1){  
+        fprintf(execution_time_fp, "-1, -1, -1\n");						
+		fflush(execution_time_fp);
+		fprintf(response_time_fp, "-1, -1, -1\n");						
+		fflush(response_time_fp);
+	}
 
     push_id = 0; // 1
     pull_id = 2; // 1~4
@@ -74,19 +94,27 @@ void write_dummy_line(){
     upsample_id = 263; // 1~2`
     activation_id = 380; //1~116
     im2col_id = 460; //1~75
-    //glob_id = 0;
 }
 
-void initialize_file(const char name[]){
-    cudaEventCreate(&event_stop);
-    cudaEventCreate(&event_start);
+void initialize_file(const char execution_time_filename[], const char response_time_filename[]){
+    cudaEventCreate(&e_event_start);
+	cudaEventCreate(&e_event_stop);
+    cudaEventCreate(&r_event_start);
+	cudaEventCreate(&r_event_stop);
 
-    fp = fopen(name, "w+");
-    fprintf(fp, "ID, TIME, TYPE\n");
+	if(GPU_PROFILING == 1){
+		execution_time_fp = fopen(execution_time_filename, "w+");
+		fprintf(execution_time_fp, "ID, TIME, TYPE\n");
+    response_time_fp = fopen(response_time_filename, "w+");
+		fprintf(response_time_fp, "ID, TIME, TYPE\n");
+	}
 }
 
 void close_file(){
-    fclose(fp);
+	if(GPU_PROFILING == 1){
+		fclose(execution_time_fp);
+    fclose(response_time_fp);
+  }
 }
 
 #ifdef __cplusplus
@@ -254,14 +282,13 @@ void cuda_push_array(float *x_gpu, float *x, size_t n)
     count_htod += 1;
     if(count_htod > YOLO){
         push_id += 1;
-        request_scheduling(deadline_list_[push_id]);
-        start_profiling();
+        request_scheduling(push_id);
     }
         
 
     cudaError_t status = cudaMemcpy(x_gpu, x, size, cudaMemcpyHostToDevice);
     if(count_htod > YOLO)
-        stop_profiling(HTOD,"push_arr",push_id);
+        stop_profiling(push_id, HTOD);
 
     check_error(status);
 }
@@ -271,13 +298,11 @@ void cuda_pull_array(float *x_gpu, float *x, size_t n)
     size_t size = sizeof(float)*n;
 
     pull_id += 1;
-    request_scheduling(deadline_list_[pull_id]);
-
-    start_profiling();
+    request_scheduling(pull_id);
 
     cudaError_t status = cudaMemcpy(x, x_gpu, size, cudaMemcpyDeviceToHost);
 
-    stop_profiling(DTOH,"pull_arr",pull_id);
+    stop_profiling(pull_id, DTOH);
 
     check_error(status);
 }
@@ -291,90 +316,89 @@ float cuda_mag_array(float *x_gpu, size_t n)
     return m;
 }
 
-
 void sig_handler(int signum){
-	if(signum == SIGUSR1 || signum == SIGUSR2)
-		return;
-	else
-		termination();    
+  if(signum == SIGUSR1 || signum == SIGUSR2)
+      return;
+  else
+      termination();    
 }
-  
-  void termination(){
-	sched_info_->state = STOP;
-	shmdt(sched_info_);
-	if(remove(task_filename_)){
-		printf("Cannot remove file %s\n", task_filename_);
-		exit(1);
-	}
-	exit(0);
+
+void termination(){
+  sched_info_->state = STOP;
+  shmdt(sched_info_);
+  if(remove(task_filename_)){
+      printf("Cannot remove file %s\n", task_filename_);
+      exit(1);
+  }
+  exit(0);
 }
-  
-  unsigned long long get_current_time_us(){
-	struct timespec ts;
-	unsigned long long current_time;
-	clock_gettime(CLOCK_REALTIME, &ts);
-	current_time = ts.tv_sec%10000 * 1000000 + ts.tv_nsec/1000;
-	return current_time;
+
+unsigned long long get_current_time_us(){
+  struct timespec ts;
+  unsigned long long current_time;
+  clock_gettime(CLOCK_REALTIME, &ts);
+  current_time = ts.tv_sec%10000 * 1000000 + ts.tv_nsec/1000;
+  return current_time;
 }
-  
-  void us_sleep(unsigned long long us){
-	struct timespec ts;
-	ts.tv_sec = us/1000000;
-	ts.tv_nsec = us%1000000*1000;
-	nanosleep(&ts, NULL);
-	return;
+
+void us_sleep(unsigned long long us){
+  struct timespec ts;
+  ts.tv_sec = us/1000000;
+  ts.tv_nsec = us%1000000*1000;
+  nanosleep(&ts, NULL);
+  return;
 }
-  
-  void initialize_signal_handler(){
-	signal(SIGINT, sig_handler);
-	signal(SIGTSTP, sig_handler);
-	signal(SIGQUIT, sig_handler);
-	signal(SIGUSR1, sig_handler);
-	signal(SIGUSR2, sig_handler);
+
+void initialize_signal_handler(){
+  signal(SIGINT, sig_handler);
+  signal(SIGTSTP, sig_handler);
+  signal(SIGQUIT, sig_handler);
+  signal(SIGUSR1, sig_handler);
+  signal(SIGUSR2, sig_handler);
 }
-  
-  void create_task_file(){        
-	FILE* task_fp;
-	task_fp = fopen(task_filename_, "w");
-	if(task_fp == NULL){
-		printf("Cannot create task file at %s\n", task_filename_);
-		exit(1);
-	}
-	fprintf(task_fp, "%d\n", getpid());
-	fprintf(task_fp, "%d", key_id_);
-	fclose(task_fp);
+
+void create_task_file(){        
+  FILE* task_fp;
+  task_fp = fopen(task_filename_, "w");
+  if(task_fp == NULL){
+      printf("Cannot create task file at %s\n", task_filename_);
+      exit(1);
+  }
+  fprintf(task_fp, "%d\n", getpid());
+  fprintf(task_fp, "%d", key_id_);
+  fclose(task_fp);
 }
-  
+
 void get_scheduler_pid(){
-	FILE* scheduler_fp;
-	printf("Wait the scheduler...\n");
-	while(1){
-		scheduler_fp = fopen("/tmp/np_edf_scheduler", "r");
-		if(scheduler_fp) break;
-	}
-	while(1){
-		fscanf(scheduler_fp, "%d", &scheduler_pid_);
-		if(scheduler_pid_ != 0) break;
-	}
-	printf("Scheduler pid: %d\n", scheduler_pid_);
-	fclose(scheduler_fp);
+  FILE* scheduler_fp;
+  printf("Wait the scheduler...\n");
+  while(1){
+      scheduler_fp = fopen("/tmp/np_edf_scheduler", "r");
+      if(scheduler_fp) break;
+  }
+  while(1){
+      fscanf(scheduler_fp, "%d", &scheduler_pid_);
+      if(scheduler_pid_ != 0) break;
+  }
+  printf("Scheduler pid: %d\n", scheduler_pid_);
+  fclose(scheduler_fp);
 }
-  
+
 void initialize_sched_info(){
-	FILE* sm_key_fp;
-	sm_key_fp = fopen("/tmp/sm_key", "r");
-	if(sm_key_fp == NULL){
-		printf("Cannot open /tmp/sm_key\n");
-		termination();
-	}
-  
-	key_ = ftok("/tmp/sm_key", key_id_);
-	shmid_ = shmget(key_, sizeof(SchedInfo), 0666|IPC_CREAT);
-	sched_info_ = (SchedInfo*)shmat(shmid_, 0, 0);
-	sched_info_->pid = getpid();
-	sched_info_->state = NONE;
+  FILE* sm_key_fp;
+  sm_key_fp = fopen("/tmp/sm_key", "r");
+  if(sm_key_fp == NULL){
+      printf("Cannot open /tmp/sm_key\n");
+      termination();
+  }
+
+  key_ = ftok("/tmp/sm_key", key_id_);
+  shmid_ = shmget(key_, sizeof(SchedInfo), 0666|IPC_CREAT);
+  sched_info_ = (SchedInfo*)shmat(shmid_, 0, 0);
+  sched_info_->pid = getpid();
+  sched_info_->state = NONE;
 }
-  
+
 void init_scheduling(char* task_filename, char* deadline_filename, int key_id){
   gpu_scheduling_flag_ = 1;
   // Get deadline list
@@ -412,17 +436,21 @@ void init_scheduling(char* task_filename, char* deadline_filename, int key_id){
 
 }
 
-void request_scheduling(unsigned long long relative_deadline){  
+void request_scheduling(int id){  
+  unsigned long long relative_deadline = deadline_list_[id];
   if(gpu_scheduling_flag_ == 0) return;
   if(identical_deadline_ != 0) sched_info_->deadline = absolute_deadline_;  
   else sched_info_->deadline = get_current_time_us() + relative_deadline;  
 
   sched_info_->state = WAIT;        
   // printf("Request schedule - deadline: %llu\n", sched_info_->deadline);
+
+  start_profiling_response_time();
   while(1){
       kill(scheduler_pid_, SIGUSR1);
       if(!sigwait(&sigset_, &sig_)) break;
   }
+  start_profiling_execution_time();
 }
 
 void get_deadline_list(char* filename){

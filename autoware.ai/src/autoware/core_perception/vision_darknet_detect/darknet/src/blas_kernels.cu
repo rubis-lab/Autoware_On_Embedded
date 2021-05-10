@@ -29,12 +29,11 @@ void scale_bias_gpu(float *output, float *biases, int batch, int n, int size)
     dim3 dimBlock(BLOCK, 1, 1);
     bias_id += 1;
 
-    request_scheduling(deadline_list_[bias_id]);
-    start_profiling();
+    request_scheduling(bias_id);
 
     scale_bias_kernel<<<dimGrid, dimBlock>>>(output, biases, n, size);
 
-    stop_profiling(LAUNCH,"bias_ker",bias_id);
+    stop_profiling(bias_id, LAUNCH);
 
     check_error(cudaPeekAtLastError());
 }
@@ -82,12 +81,11 @@ void add_bias_gpu(float *output, float *biases, int batch, int n, int size)
 {
     int num = n*size*batch;
     add_id += 1;
-    request_scheduling(deadline_list_[add_id]);
-    start_profiling();
+    request_scheduling(add_id);
 
     add_bias_kernel<<<cuda_gridsize(num), BLOCK>>>(output, biases, batch, n, size);
 
-    stop_profiling(LAUNCH,"add_bias",add_id);
+    stop_profiling(add_id, LAUNCH);
 
     check_error(cudaPeekAtLastError());
 }
@@ -485,12 +483,11 @@ extern "C" void normalize_gpu(float *x, float *mean, float *variance, int batch,
     size_t N = batch*filters*spatial;
     normalize_id += 1;
 
-    request_scheduling(deadline_list_[normalize_id]);
-    start_profiling();
+    request_scheduling(normalize_id);
 
     normalize_kernel<<<cuda_gridsize(N), BLOCK>>>(N, x, mean, variance, batch, filters, spatial);
 
-    stop_profiling(LAUNCH,"normalize_gpu",normalize_id);
+    stop_profiling(normalize_id, LAUNCH);
 
     check_error(cudaPeekAtLastError());
 }
@@ -640,12 +637,11 @@ extern "C" void mul_gpu(int N, float * X, int INCX, float * Y, int INCY)
 extern "C" void copy_gpu_offset(int N, float * X, int OFFX, int INCX, float * Y, int OFFY, int INCY)
 {
     copy_gpu_id += 1;
-    request_scheduling(deadline_list_[copy_gpu_id]);
-    start_profiling();
+    request_scheduling(copy_gpu_id);
 
     copy_kernel<<<cuda_gridsize(N), BLOCK>>>(N, X, OFFX, INCX, Y, OFFY, INCY);
 
-    stop_profiling(LAUNCH,"copy_gpu",copy_gpu_id);
+    stop_profiling(copy_gpu_id, LAUNCH);
 
     // if(count_blas >= 533){        
     //     file_write(filename, -1, -1, -1);
@@ -1069,12 +1065,11 @@ extern "C" void upsample_gpu(float *in, int w, int h, int c, int batch, int stri
 {
     size_t size = w*h*c*batch*stride*stride;
     upsample_id += 1;
-    request_scheduling(deadline_list_[upsample_id]);
-    start_profiling();
+    request_scheduling(upsample_id);
 
     upsample_kernel<<<cuda_gridsize(size), BLOCK>>>(size, in, w, h, c, batch, stride, forward, scale, out);
 
-    stop_profiling(LAUNCH,"upsample",upsample_id);
+    stop_profiling(upsample_id, LAUNCH);
 
     check_error(cudaPeekAtLastError());
 }

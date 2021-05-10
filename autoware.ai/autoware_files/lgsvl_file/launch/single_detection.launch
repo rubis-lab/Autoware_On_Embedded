@@ -18,7 +18,7 @@
   
 
 <!-- lidar_euclidean_cluster_detect-->
-  <!-- <include file="$(find lidar_euclidean_cluster_detect)/launch/lidar_euclidean_cluster_detect.launch">
+  <include file="$(find lidar_euclidean_cluster_detect)/launch/lidar_euclidean_cluster_detect.launch">
     <arg name="points_node" value="/points_no_ground_center" />
     <arg name="remove_ground" value="true" />
     <arg name="downsample_cloud" value="false" />
@@ -49,7 +49,7 @@
     <arg name="gpu_scheduling_flag" value="1" />
     <arg name="identical_deadline" value="100000" />
   </include>
-   -->
+  
   <!-- vision_darknet_detect -->
   <include file="$(find vision_darknet_detect)/launch/vision_yolo3_detect.launch">
     <arg name="gpu_device_id" value="0"/>
