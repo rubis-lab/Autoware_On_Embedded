@@ -135,7 +135,8 @@ tf::StampedTransform *_velodyne_output_transform;
 tf::TransformListener *_transform_listener;
 tf::TransformListener *_vectormap_transform_listener;
 
-static std::string _filename;
+static std::string _execution_time_filename;
+static std::string _response_time_filename;
 /* For GPU Profiling */
 #ifdef GPU_CLUSTERING
 static GpuEuclideanCluster _gecl_cluster;  
@@ -385,7 +386,7 @@ std::vector<ClusterPtr> clusterAndColorGpu(const pcl::PointCloud<pcl::PointXYZ>:
   _gecl_cluster.setMaxClusterPts(_cluster_size_max);
   _gecl_cluster.extractClusters();
   std::vector<GpuEuclideanCluster::GClusterIndex> cluster_indices = _gecl_cluster.getOutput();
-  _gecl_cluster.write_dummy_line();
+  write_dummy_line();
 
   unsigned int k = 0;
 
@@ -1056,9 +1057,9 @@ int main(int argc, char **argv)
 
   #ifdef GPU_CLUSTERING
   if(_use_gpu == true){
-    private_nh.param<std::string>("profiling_file_name", _filename, "~/GPU_profiling/lidar_euclidean_cluster_detect.csv");
-    ROS_INFO("[%s] profiling_file_name: %s", __APP_NAME__, _filename.c_str());        
-    _gecl_cluster.initialize_file(_filename.c_str());
+    private_nh.param<std::string>("execution_time_file_name", _execution_time_filename, "~/GPU_profiling/cluster_execution_time.csv");
+    private_nh.param<std::string>("response_time_file_name", _response_time_filename, "~/GPU_profiling/cluster_reponse_time.csv");    
+    initialize_file(_execution_time_filename.c_str(), _response_time_filename.c_str());
   }
   #endif
 

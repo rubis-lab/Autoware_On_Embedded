@@ -802,8 +802,8 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 
 	dim3 grid;
 
-	request_scheduling(deadline_list_[49]);
-	start_profiling();
+
+	request_scheduling(49);
 	computePointGradients0<<<grid_x, block_x>>>(x_, y_, z_, points_number_,
 												valid_points, valid_points_num,
 												dj_ang_.buffer(),
@@ -818,8 +818,7 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 	stop_profiling(49, LAUNCH);
 	
 
-	request_scheduling(deadline_list_[50]);
-	start_profiling();
+	request_scheduling(50);
 	computePointGradients1<<<grid_x, block_x>>>(x_, y_, z_, points_number_,
 												valid_points, valid_points_num,
 												dj_ang_.buffer(),
@@ -831,8 +830,7 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 	stop_profiling(50, LAUNCH);
 
 	if (compute_hessian) {
-		request_scheduling(deadline_list_[51]);
-		start_profiling();
+		request_scheduling(51);
 		computePointHessian0<<<grid_x, block_x>>>(x_, y_, z_, points_number_,
 												valid_points, valid_points_num,
 												dh_ang_.buffer(),
@@ -845,8 +843,7 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 		checkCudaErrors(cudaGetLastError());
 		stop_profiling(51, LAUNCH);
 
-		request_scheduling(deadline_list_[52]);
-		start_profiling();
+		request_scheduling(52);
 		computePointHessian1<<<grid_x, block_x>>>(x_, y_, z_, points_number_,
 												valid_points, valid_points_num,
 												dh_ang_.buffer(),
@@ -856,8 +853,7 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 		checkCudaErrors(cudaGetLastError());
 		stop_profiling(52, LAUNCH);
 
-		request_scheduling(deadline_list_[53]);
-		start_profiling();
+		request_scheduling(53);
 		computePointHessian2<<<grid_x, block_x>>>(x_, y_, z_, points_number_,
 												valid_points, valid_points_num,
 												dh_ang_.buffer(),
@@ -882,8 +878,7 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 
 	checkCudaErrors(cudaMalloc(&cov_dxd_pi, sizeof(double) * valid_voxel_num * 3 * 6));
 
-	request_scheduling(deadline_list_[54]);
-	start_profiling();
+	request_scheduling(54);
 	computeExCovX<<<grid_x, block_x>>>(trans_x, trans_y, trans_z, valid_points,
 										starting_voxel_id, voxel_id, valid_points_num,
 										centroid, centroid + voxel_num, centroid + 2 * voxel_num,
@@ -895,8 +890,7 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 	checkCudaErrors(cudaGetLastError());
 	stop_profiling(54, LAUNCH);
 
-	request_scheduling(deadline_list_[55]);
-	start_profiling();
+	request_scheduling(55);
 	computeScoreList<<<grid_x, block_x>>>(starting_voxel_id, voxel_id, valid_points_num, e_x_cov_x, gauss_d1_, score);
 	checkCudaErrors(cudaGetLastError());
 	stop_profiling(55, LAUNCH);
@@ -904,8 +898,7 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 	int block_x2 = (valid_voxel_num > BLOCK_SIZE_X) ? BLOCK_SIZE_X : valid_voxel_num;
 	int grid_x2 = (valid_voxel_num - 1) / block_x2 + 1;
 
-	request_scheduling(deadline_list_[56]);
-	start_profiling();
+	request_scheduling(56);
 	updateExCovX<<<grid_x2, block_x2>>>(e_x_cov_x, gauss_d2_, valid_voxel_num);
 	checkCudaErrors(cudaGetLastError());
 	stop_profiling(56, LAUNCH);
@@ -914,8 +907,7 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 	grid.y = 3;
 	grid.z = 6;
 
-	request_scheduling(deadline_list_[57]);
-	start_profiling();
+	request_scheduling(57);
 	computeCovDxdPi<<<grid, block_x>>>(valid_points, starting_voxel_id, voxel_id, valid_points_num,
 											inverse_covariance, voxel_num,
 											gauss_d1_, gauss_d2_, point_gradients,
@@ -927,8 +919,7 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 	grid.y = 6;
 	grid.z = 1;
 
-	request_scheduling(deadline_list_[58]);
-	start_profiling();
+	request_scheduling(58);
 	computeScoreGradientList<<<grid, block_x>>>(trans_x, trans_y, trans_z, valid_points,
 													starting_voxel_id, voxel_id, valid_points_num,
 													centroid, centroid + voxel_num, centroid + 2 * voxel_num,
@@ -944,8 +935,7 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 		grid.z = 1;
 
 
-		request_scheduling(deadline_list_[59]);
-		start_profiling();
+		request_scheduling(59);
 		computeHessianListS0<<<grid, block_x>>>(trans_x, trans_y, trans_z, valid_points,
 												starting_voxel_id, voxel_id, valid_points_num,
 												centroid, centroid + voxel_num, centroid + 2 * voxel_num,
@@ -958,8 +948,7 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 		stop_profiling(59, LAUNCH);
 		grid.z = 6;
 
-		request_scheduling(deadline_list_[60]);
-		start_profiling();
+		request_scheduling(60);
 		computeHessianListS1<<<grid, block_x>>>(trans_x, trans_y, trans_z, valid_points,
 													starting_voxel_id, voxel_id, valid_points_num,
 													centroid, centroid + voxel_num, centroid + 2 * voxel_num,
@@ -970,12 +959,7 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 		checkCudaErrors(cudaGetLastError());
 		stop_profiling(60, LAUNCH);
 
-		// long long int relative_deadline;
-		// relative_deadline = MS2US(100);
-		// fprintf(stderr,"sched2!\n");
-		// request_scheduling(relative_deadline);
-		request_scheduling(deadline_list_[61]);
-		start_profiling();
+		request_scheduling(61);
 		computeHessianListS2<<<grid, block_x>>>(trans_x, trans_y, trans_z, valid_points,
 													starting_voxel_id, voxel_id, valid_points_num,
 													centroid, centroid + voxel_num, centroid + 2 * voxel_num,
@@ -999,21 +983,18 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 		grid.x = grid_x;
 		grid.y = 1;
 		grid.z = 6;
-		request_scheduling(deadline_list_[62]);
-		start_profiling();
+		request_scheduling(62);
 		matrixSum<<<grid, block_x>>>(gradients, full_size, half_size, 1, 6, valid_points_num);
 		checkCudaErrors(cudaGetLastError());
 		stop_profiling(62, LAUNCH);
 
 		grid.y = 6;
-		request_scheduling(deadline_list_[63]);
-		start_profiling();
+		request_scheduling(63);
 		matrixSum<<<grid, block_x>>>(hessians, full_size, half_size, 6, 6, valid_points_num);
 		checkCudaErrors(cudaGetLastError());
 		stop_profiling(63, LAUNCH);
 
-		request_scheduling(deadline_list_[64]);
-		start_profiling();
+		request_scheduling(64);
 		sumScore<<<grid_x, block_x>>>(score, full_size, half_size);
 		checkCudaErrors(cudaGetLastError());
 		stop_profiling(64, LAUNCH);
@@ -1027,8 +1008,7 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 	MatrixDevice dgrad(1, 6, valid_points_num, gradients), dhess(6, 6, valid_points_num, hessians);
 	MatrixHost hgrad(1, 6), hhess(6, 6);
 
-	request_scheduling(deadline_list_[65]);
-	start_profiling();
+	request_scheduling(65);
 	hgrad.moveToHost(dgrad);
 	hhess.moveToHost(dhess);
 	stop_profiling(65, DTOH);
@@ -1045,8 +1025,7 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 
 	double score_inc;
 
-	request_scheduling(deadline_list_[66]);
-	start_profiling();
+	request_scheduling(66);
 	checkCudaErrors(cudaMemcpy(&score_inc, score, sizeof(double), cudaMemcpyDeviceToHost));
 	stop_profiling(66, DTOH);
 	
@@ -1135,8 +1114,7 @@ void GNormalDistributionsTransform::computeAngleDerivatives(MatrixHost pose, boo
 	j_ang_(22) = cx * sy * cz - sx * sz;
 	j_ang_(23) = 0;
 
-	request_scheduling(deadline_list_[67]);
-	start_profiling();
+	request_scheduling(67);
 	j_ang_.moveToGpu(dj_ang_);
 	stop_profiling(67, HTOD);
 
@@ -1202,8 +1180,7 @@ void GNormalDistributionsTransform::computeAngleDerivatives(MatrixHost pose, boo
 		h_ang_(43) = -cx * sy * sz - sx * cz;
 		h_ang_(44) = 0;
 
-		request_scheduling(deadline_list_[68]);
-		start_profiling();
+		request_scheduling(68);
 		h_ang_.moveToGpu(dh_ang_);
 		stop_profiling(68, HTOD);
 	}
@@ -1248,8 +1225,7 @@ void GNormalDistributionsTransform::transformPointCloud(float *in_x, float *in_y
 		}
 	}
 
-	request_scheduling(deadline_list_[69]);
-	start_profiling();
+	request_scheduling(69);
 	htrans.moveToGpu(dtrans);
 	stop_profiling(69, HTOD);
 
@@ -1257,8 +1233,7 @@ void GNormalDistributionsTransform::transformPointCloud(float *in_x, float *in_y
 		int block_x = (points_number <= BLOCK_SIZE_X) ? points_number : BLOCK_SIZE_X;
 		int grid_x = (points_number - 1) / block_x + 1;
 
-		request_scheduling(deadline_list_[70]);
-		start_profiling();
+		request_scheduling(70);
 		gpuTransform<<<grid_x, block_x >>>(in_x, in_y, in_z, trans_x, trans_y, trans_z, points_number, dtrans);
 		checkCudaErrors(cudaGetLastError());
 		checkCudaErrors(cudaDeviceSynchronize());
@@ -1527,7 +1502,7 @@ void GNormalDistributionsTransform::computeHessian(Eigen::Matrix<double, 6, 6> &
 	int grid_x = (valid_points_num - 1) / block_x + 1;
 	dim3 grid;
 
-	start_profiling();
+	request_scheduling(71);
 	computePointGradients0<<<grid_x, block_x>>>(x_, y_, z_, points_number_,
 												valid_points, valid_points_num,
 												dj_ang_.buffer(),
@@ -1541,7 +1516,7 @@ void GNormalDistributionsTransform::computeHessian(Eigen::Matrix<double, 6, 6> &
 	checkCudaErrors(cudaGetLastError());
 	stop_profiling(71, LAUNCH);
 
-	start_profiling();
+	request_scheduling(72);
 	computePointGradients1<<<grid_x, block_x>>>(x_, y_, z_, points_number_,
 												valid_points, valid_points_num,
 												dj_ang_.buffer(),
@@ -1552,7 +1527,7 @@ void GNormalDistributionsTransform::computeHessian(Eigen::Matrix<double, 6, 6> &
 	checkCudaErrors(cudaGetLastError());
 	stop_profiling(72, LAUNCH);
 
-	start_profiling();
+	request_scheduling(73);
 	computePointHessian0<<<grid_x, block_x>>>(x_, y_, z_, points_number_,
 												valid_points, valid_points_num,
 												dh_ang_.buffer(),
@@ -1564,7 +1539,7 @@ void GNormalDistributionsTransform::computeHessian(Eigen::Matrix<double, 6, 6> &
 	checkCudaErrors(cudaGetLastError());
 	stop_profiling(73, LAUNCH);
 
-	start_profiling();
+	request_scheduling(74);
 	computePointHessian1<<<grid_x, block_x>>>(x_, y_, z_, points_number_,
 												valid_points, valid_points_num,
 												dh_ang_.buffer(),
@@ -1574,7 +1549,7 @@ void GNormalDistributionsTransform::computeHessian(Eigen::Matrix<double, 6, 6> &
 	checkCudaErrors(cudaGetLastError());
 	stop_profiling(74, LAUNCH);
 
-	start_profiling();
+	request_scheduling(75);
 	computePointHessian2<<<grid_x, block_x>>>(x_, y_, z_, points_number_,
 												valid_points, valid_points_num,
 												dh_ang_.buffer(),
@@ -1594,7 +1569,7 @@ void GNormalDistributionsTransform::computeHessian(Eigen::Matrix<double, 6, 6> &
 
 	checkCudaErrors(cudaMalloc(&cov_dxd_pi, sizeof(double) * valid_voxel_num * 3 * 6));
 
-	start_profiling();
+	request_scheduling(76);
 	computeExCovX<<<grid_x, block_x>>>(trans_x, trans_y, trans_z, valid_points,
 										starting_voxel_id, voxel_id, valid_points_num,
 										centroid, centroid + voxel_num, centroid + 2 * voxel_num,
@@ -1610,7 +1585,7 @@ void GNormalDistributionsTransform::computeHessian(Eigen::Matrix<double, 6, 6> &
 	grid.x = grid_x;
 	grid.y = 3;
 	grid.z = 6;
-	start_profiling();
+	request_scheduling(77);
 	computeCovDxdPi<<<grid, block_x>>>(valid_points, starting_voxel_id, voxel_id, valid_points_num,
 											inverse_covariance, voxel_num,
 											gauss_d1_, gauss_d2_, point_gradients,
@@ -1622,7 +1597,7 @@ void GNormalDistributionsTransform::computeHessian(Eigen::Matrix<double, 6, 6> &
 	int grid_x2 = (valid_voxel_num - 1) / block_x2 + 1;
 
 
-	start_profiling();
+	request_scheduling(78);
 	updateExCovX<<<grid_x2, block_x2>>>(e_x_cov_x, gauss_d2_, valid_voxel_num);
 	checkCudaErrors(cudaGetLastError());
 	stop_profiling(78, LAUNCH);
@@ -1630,7 +1605,7 @@ void GNormalDistributionsTransform::computeHessian(Eigen::Matrix<double, 6, 6> &
 	grid.y = 6;
 	grid.z = 1;
 
-	start_profiling();
+	request_scheduling(79);
 	computeHessianListS0<<<grid, block_x>>>(trans_x, trans_y, trans_z, valid_points,
 												starting_voxel_id, voxel_id, valid_points_num,
 												centroid, centroid + voxel_num, centroid + 2 * voxel_num,
@@ -1644,7 +1619,7 @@ void GNormalDistributionsTransform::computeHessian(Eigen::Matrix<double, 6, 6> &
 
 	grid.z = 6;
 
-	start_profiling();
+	request_scheduling(80);
 	computeHessianListS1<<<grid, block_x>>>(trans_x, trans_y, trans_z, valid_points,
 												starting_voxel_id, voxel_id, valid_points_num,
 												centroid, centroid + voxel_num, centroid + 2 * voxel_num,
@@ -1656,7 +1631,7 @@ void GNormalDistributionsTransform::computeHessian(Eigen::Matrix<double, 6, 6> &
 	stop_profiling(80, LAUNCH);
 
 
-	start_profiling();
+	request_scheduling(81);
 	computeHessianListS2<<<grid, block_x>>>(trans_x, trans_y, trans_z, valid_points,
 												starting_voxel_id, voxel_id, valid_points_num,
 												centroid, centroid + voxel_num, centroid + 2 * voxel_num,
@@ -1679,7 +1654,7 @@ void GNormalDistributionsTransform::computeHessian(Eigen::Matrix<double, 6, 6> &
 		grid.x = grid_x;
 		grid.y = 6;
 		grid.z = 6;
-		start_profiling();
+		request_scheduling(82);
 		matrixSum<<<grid_x, block_x>>>(hessians, full_size, half_size, 6, 6, valid_points_num);
 		stop_profiling(82, LAUNCH);
 

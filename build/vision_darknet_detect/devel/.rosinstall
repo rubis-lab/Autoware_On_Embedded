@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /home/hypark/git/Autoware_On_Embedded/build/vision_darknet_detect/devel/setup.sh

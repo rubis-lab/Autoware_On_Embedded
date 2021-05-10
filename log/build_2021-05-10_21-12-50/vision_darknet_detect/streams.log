@@ -1,0 +1,459 @@
+[0.021s] Invoking command in '/home/hypark/git/Autoware_On_Embedded/build/vision_darknet_detect': /usr/bin/cmake --build /home/hypark/git/Autoware_On_Embedded/build/vision_darknet_detect -- -j12 -l12
+[0.078s] -- CUDA compilation status: 1.
+[0.079s] -- Using CATKIN_DEVEL_PREFIX: /home/hypark/git/Autoware_On_Embedded/build/vision_darknet_detect/devel
+[0.079s] -- Using CMAKE_PREFIX_PATH: /home/hypark/rubis_ws/devel;/home/hypark/autoware.ai/install/ymc;/home/hypark/autoware.ai/install/xsens_driver;/home/hypark/autoware.ai/install/wf_simulator;/home/hypark/autoware.ai/install/lattice_planner;/home/hypark/autoware.ai/install/waypoint_planner;/home/hypark/autoware.ai/install/waypoint_maker;/home/hypark/autoware.ai/install/way_planner;/home/hypark/autoware.ai/install/vlg22c_cam;/home/hypark/autoware.ai/install/vision_ssd_detect;/home/hypark/autoware.ai/install/vision_segment_enet_detect;/home/hypark/autoware.ai/install/vision_lane_detect;/home/hypark/autoware.ai/install/vision_darknet_detect;/home/hypark/autoware.ai/install/vision_beyond_track;/home/hypark/autoware.ai/install/vel_pose_diff_checker;/home/hypark/autoware.ai/install/vehicle_socket;/home/hypark/autoware.ai/install/vehicle_sim_model;/home/hypark/autoware.ai/install/vehicle_model;/home/hypark/autoware.ai/install/vehicle_gazebo_simulation_launcher;/home/hypark/autoware.ai/install/vehicle_gazebo_simulation_interface;/home/hypark/autoware.ai/install/vehicle_engage_panel;/home/hypark/autoware.ai/install/vehicle_description;/home/hypark/autoware.ai/install/trafficlight_recognizer;/home/hypark/autoware.ai/install/op_utilities;/home/hypark/autoware.ai/install/op_simulation_package;/home/hypark/autoware.ai/install/op_local_planner;/home/hypark/autoware.ai/install/op_global_planner;/home/hypark/autoware.ai/install/lidar_kf_contour_track;/home/hypark/autoware.ai/install/op_ros_helpers;/home/hypark/autoware.ai/install/ff_waypoint_follower;/home/hypark/autoware.ai/install/dp_planner;/home/hypark/autoware.ai/install/op_simu;/home/hypark/autoware.ai/install/op_planner;/home/hypark/autoware.ai/install/op_utility;/home/hypark/autoware.ai/install/lidar_euclidean_cluster_detect;/home/hypark/autoware.ai/install/vector_map_server;/home/hypark/autoware.ai/install/road_occupancy_processor;/home/hypark/autoware.ai/install/costmap_generator;/home/hypark/autoware.ai/install/object_map;/home/hypark/autoware.ai/install/naive_motion_predict;/home/hypark/autoware.ai/install/lanelet_aisan_converter;/home/hypark/autoware.ai/install/map_file;/home/hypark/autoware.ai/install/libvectormap;/home/hypark/autoware.ai/install/lane_planner;/home/hypark/autoware.ai/install/imm_ukf_pda_track;/home/hypark/autoware.ai/install/decision_maker;/home/hypark/autoware.ai/install/vector_map;/home/hypark/autoware.ai/install/vector_map_msgs;/home/hypark/autoware.ai/install/vectacam;/home/hypark/autoware.ai/install/udon_socket;/home/hypark/autoware.ai/install/twist_generator;/home/hypark/autoware.ai/install/twist_gate;/home/hypark/autoware.ai/install/twist_filter;/home/hypark/autoware.ai/install/twist2odom;/home/hypark/autoware.ai/install/tablet_socket;/home/hypark/autoware.ai/install/runtime_manager;/home/hypark/autoware.ai/install/mqtt_socket;/home/hypark/autoware.ai/install/tablet_socket_msgs;/home/hypark/autoware.ai/install/state_machine_lib;/home/hypark/autoware.ai/install/sound_player;/home/hypark/autoware.ai/install/sick_lms5xx;/home/hypark/autoware.ai/install/sick_ldmrs_tools;/home/hypark/autoware.ai/install/sick_ldmrs_driver;/home/hypark/autoware.ai/install/sick_ldmrs_msgs;/home/hypark/autoware.ai/install/sick_ldmrs_description;/home/hypark/autoware.ai/install/points2image;/home/hypark/autoware.ai/install/rosinterface;/home/hypark/autoware.ai/install/rosbag_controller;/home/hypark/autoware.ai/install/pure_pursuit;/home/hypark/autoware.ai/install/points_preprocessor;/home/hypark/autoware.ai/install/mpc_follower;/home/hypark/autoware.ai/install/lidar_localizer;/home/hypark/autoware.ai/install/emergency_handler;/home/hypark/autoware.ai/install/autoware_health_checker;/home/hypark/autoware.ai/install/as;/home/hypark/autoware.ai/install/ros_observer;/home/hypark/autoware.ai/install/roi_object_filter;/home/hypark/autoware.ai/install/range_vision_fusion;/home/hypark/autoware.ai/install/pos_db;/home/hypark/autoware.ai/install/points_downsampler;/home/hypark/autoware.ai/install/pixel_cloud_fusion;/home/hypark/autoware.ai/install/pcl_omp_registration;/home/hypark/autoware.ai/install/pc2_downsampler;/home/hypark/autoware.ai/install/oculus_socket;/home/hypark/autoware.ai/install/obj_db;/home/hypark/autoware.ai/install/nmea_navsat;/home/hypark/autoware.ai/install/ndt_tku;/home/hypark/autoware.ai/install/ndt_gpu;/home/hypark/autoware.ai/install/ndt_cpu;/home/hypark/autoware.ai/install/multi_vlp_driver;/home/hypark/autoware.ai/install/multi_vlp_converter;/home/hypark/autoware.ai/install/multi_vlp_combiner;/home/hypark/autoware.ai/install/multi_lidar_calibrator;/home/hypark/autoware.ai/install/mrt_cmake_modules;/home/hypark/autoware.ai/install/microstrain_driver;/home/hypark/autoware.ai/install/memsic_imu;/home/hypark/autoware.ai/install/marker_downsampler;/home/hypark/autoware.ai/install/map_tools;/home/hypark/autoware.ai/install/map_tf_generator;/home/hypark/autoware.ai/install/log_tools;/home/hypark/autoware.ai/install/lidar_shape_estimation;/home/hypark/autoware.ai/install/lidar_point_pillars;/home/hypark/autoware.ai/install/lidar_naive_l_shape_detect;/home/hypark/autoware.ai/install/lidar_fake_perception;/home/hypark/autoware.ai/install/lidar_apollo_cnn_seg_detect;/home/hypark/autoware.ai/install/libwaypoint_follower;/home/hypark/autoware.ai/install/lgsvl_simulator_bridge;/home/hypark/autoware.ai/install/lanelet2_extension;/home/hypark/autoware.ai/install/lanelet2_validation;/home/hypark/autoware.ai/install/lanelet2_examples;/home/hypark/autoware.ai/install/lanelet2_python;/home/hypark/autoware.ai/install/lanelet2_routing;/home/hypark/autoware.ai/install/lanelet2_traffic_rules;/home/hypark/autoware.ai/install/lanelet2_projection;/home/hypark/autoware.ai/install/lanelet2_maps;/home/hypark/autoware.ai/install/lanelet2_io;/home/hypark/autoware.ai/install/lanelet2_core;/home/hypark/autoware.ai/install/kvaser;/home/hypark/autoware.ai/install/kitti_launch;/home/hypark/autoware.ai/install/kitti_player;/home/hypark/autoware.ai/install/kitti_box_publisher;/home/hypark/autoware.ai/install/javad_navsat_driver;/home/hypark/autoware.ai/install/integrated_viewer;/home/hypark/autoware.ai/install/image_processor;/home/hypark/autoware.ai/install/hokuyo;/home/hypark/autoware.ai/install/graph_tools;/home/hypark/autoware.ai/install/gnss_localizer;/home/hypark/autoware.ai/install/gnss;/home/hypark/autoware.ai/install/glviewer;/home/hypark/autoware.ai/install/gazebo_world_description;/home/hypark/autoware.ai/install/gazebo_imu_description;/home/hypark/autoware.ai/install/gazebo_camera_description;/home/hypark/autoware.ai/install/garmin;/home/hypark/autoware.ai/install/freespace_planner;/home/hypark/autoware.ai/install/fastvirtualscan;/home/hypark/autoware.ai/install/ekf_localizer;/home/hypark/autoware.ai/install/ds4_msgs;/home/hypark/autoware.ai/install/ds4_driver;/home/hypark/autoware.ai/install/detected_objects_visualizer;/home/hypark/autoware.ai/install/decision_maker_panel;/home/hypark/autoware.ai/install/data_preprocessor;/home/hypark/autoware.ai/install/custom_msgs;/home/hypark/autoware.ai/install/carla_autoware_bridge;/home/hypark/autoware.ai/install/calibration_publisher;/home/hypark/autoware.ai/install/autoware_system_msgs;/home/hypark/autoware.ai/install/autoware_rviz_plugins;/home/hypark/autoware.ai/install/autoware_quickstart_examples;/home/hypark/autoware.ai/install/autoware_pointgrey_drivers;/home/hypark/autoware.ai/install/autoware_driveworks_interface;/home/hypark/autoware.ai/install/autoware_connector;/home/hypark/autoware.ai/install/autoware_camera_lidar_calibrator;/home/hypark/autoware.ai/install/astar_search;/home/hypark/autoware.ai/install/amathutils_lib;/home/hypark/autoware.ai/install/autoware_msgs;/home/hypark/autoware.ai/install/autoware_map_msgs;/home/hypark/autoware.ai/install/autoware_launcher_rviz;/home/hypark/autoware.ai/install/autoware_launcher;/home/hypark/autoware.ai/install/autoware_lanelet2_msgs;/home/hypark/autoware.ai/install/autoware_external_msgs;/home/hypark/autoware.ai/install/autoware_driveworks_gmsl_interface;/home/hypark/autoware.ai/install/autoware_config_msgs;/home/hypark/autoware.ai/install/autoware_can_msgs;/home/hypark/autoware.ai/install/autoware_build_flags;/home/hypark/autoware.ai/install/autoware_bag_tools;/home/hypark/autoware.ai/install/adi_driver;/opt/ros/melodic
+[0.085s] -- This workspace overlays: /home/hypark/rubis_ws/devel;/home/hypark/autoware.ai/install/ymc;/home/hypark/autoware.ai/install/xsens_driver;/home/hypark/autoware.ai/install/wf_simulator;/home/hypark/autoware.ai/install/lattice_planner;/home/hypark/autoware.ai/install/waypoint_planner;/home/hypark/autoware.ai/install/waypoint_maker;/home/hypark/autoware.ai/install/way_planner;/home/hypark/autoware.ai/install/vlg22c_cam;/home/hypark/autoware.ai/install/vision_ssd_detect;/home/hypark/autoware.ai/install/vision_segment_enet_detect;/home/hypark/autoware.ai/install/vision_lane_detect;/home/hypark/autoware.ai/install/vision_darknet_detect;/home/hypark/autoware.ai/install/vision_beyond_track;/home/hypark/autoware.ai/install/vel_pose_diff_checker;/home/hypark/autoware.ai/install/vehicle_socket;/home/hypark/autoware.ai/install/vehicle_sim_model;/home/hypark/autoware.ai/install/vehicle_model;/home/hypark/autoware.ai/install/vehicle_gazebo_simulation_launcher;/home/hypark/autoware.ai/install/vehicle_gazebo_simulation_interface;/home/hypark/autoware.ai/install/vehicle_engage_panel;/home/hypark/autoware.ai/install/vehicle_description;/home/hypark/autoware.ai/install/trafficlight_recognizer;/home/hypark/autoware.ai/install/op_utilities;/home/hypark/autoware.ai/install/op_simulation_package;/home/hypark/autoware.ai/install/op_local_planner;/home/hypark/autoware.ai/install/op_global_planner;/home/hypark/autoware.ai/install/lidar_kf_contour_track;/home/hypark/autoware.ai/install/op_ros_helpers;/home/hypark/autoware.ai/install/ff_waypoint_follower;/home/hypark/autoware.ai/install/dp_planner;/home/hypark/autoware.ai/install/op_simu;/home/hypark/autoware.ai/install/op_planner;/home/hypark/autoware.ai/install/op_utility;/home/hypark/autoware.ai/install/lidar_euclidean_cluster_detect;/home/hypark/autoware.ai/install/vector_map_server;/home/hypark/autoware.ai/install/road_occupancy_processor;/home/hypark/autoware.ai/install/costmap_generator;/home/hypark/autoware.ai/install/object_map;/home/hypark/autoware.ai/install/naive_motion_predict;/home/hypark/autoware.ai/install/lanelet_aisan_converter;/home/hypark/autoware.ai/install/map_file;/home/hypark/autoware.ai/install/libvectormap;/home/hypark/autoware.ai/install/lane_planner;/home/hypark/autoware.ai/install/imm_ukf_pda_track;/home/hypark/autoware.ai/install/decision_maker;/home/hypark/autoware.ai/install/vector_map;/home/hypark/autoware.ai/install/vector_map_msgs;/home/hypark/autoware.ai/install/vectacam;/home/hypark/autoware.ai/install/udon_socket;/home/hypark/autoware.ai/install/twist_generator;/home/hypark/autoware.ai/install/twist_gate;/home/hypark/autoware.ai/install/twist_filter;/home/hypark/autoware.ai/install/twist2odom;/home/hypark/autoware.ai/install/tablet_socket;/home/hypark/autoware.ai/install/runtime_manager;/home/hypark/autoware.ai/install/mqtt_socket;/home/hypark/autoware.ai/install/tablet_socket_msgs;/home/hypark/autoware.ai/install/state_machine_lib;/home/hypark/autoware.ai/install/sound_player;/home/hypark/autoware.ai/install/sick_lms5xx;/home/hypark/autoware.ai/install/sick_ldmrs_tools;/home/hypark/autoware.ai/install/sick_ldmrs_driver;/home/hypark/autoware.ai/install/sick_ldmrs_msgs;/home/hypark/autoware.ai/install/sick_ldmrs_description;/home/hypark/autoware.ai/install/points2image;/home/hypark/autoware.ai/install/rosinterface;/home/hypark/autoware.ai/install/rosbag_controller;/home/hypark/autoware.ai/install/pure_pursuit;/home/hypark/autoware.ai/install/points_preprocessor;/home/hypark/autoware.ai/install/mpc_follower;/home/hypark/autoware.ai/install/lidar_localizer;/home/hypark/autoware.ai/install/emergency_handler;/home/hypark/autoware.ai/install/autoware_health_checker;/home/hypark/autoware.ai/install/as;/home/hypark/autoware.ai/install/ros_observer;/home/hypark/autoware.ai/install/roi_object_filter;/home/hypark/autoware.ai/install/range_vision_fusion;/home/hypark/autoware.ai/install/pos_db;/home/hypark/autoware.ai/install/points_downsampler;/home/hypark/autoware.ai/install/pixel_cloud_fusion;/home/hypark/autoware.ai/install/pcl_omp_registration;/home/hypark/autoware.ai/install/pc2_downsampler;/home/hypark/autoware.ai/install/oculus_socket;/home/hypark/autoware.ai/install/obj_db;/home/hypark/autoware.ai/install/nmea_navsat;/home/hypark/autoware.ai/install/ndt_tku;/home/hypark/autoware.ai/install/ndt_gpu;/home/hypark/autoware.ai/install/ndt_cpu;/home/hypark/autoware.ai/install/multi_vlp_driver;/home/hypark/autoware.ai/install/multi_vlp_converter;/home/hypark/autoware.ai/install/multi_vlp_combiner;/home/hypark/autoware.ai/install/multi_lidar_calibrator;/home/hypark/autoware.ai/install/mrt_cmake_modules;/home/hypark/autoware.ai/install/microstrain_driver;/home/hypark/autoware.ai/install/memsic_imu;/home/hypark/autoware.ai/install/marker_downsampler;/home/hypark/autoware.ai/install/map_tools;/home/hypark/autoware.ai/install/map_tf_generator;/home/hypark/autoware.ai/install/log_tools;/home/hypark/autoware.ai/install/lidar_shape_estimation;/home/hypark/autoware.ai/install/lidar_point_pillars;/home/hypark/autoware.ai/install/lidar_naive_l_shape_detect;/home/hypark/autoware.ai/install/lidar_fake_perception;/home/hypark/autoware.ai/install/lidar_apollo_cnn_seg_detect;/home/hypark/autoware.ai/install/libwaypoint_follower;/home/hypark/autoware.ai/install/lgsvl_simulator_bridge;/home/hypark/autoware.ai/install/lanelet2_extension;/home/hypark/autoware.ai/install/lanelet2_validation;/home/hypark/autoware.ai/install/lanelet2_examples;/home/hypark/autoware.ai/install/lanelet2_python;/home/hypark/autoware.ai/install/lanelet2_routing;/home/hypark/autoware.ai/install/lanelet2_traffic_rules;/home/hypark/autoware.ai/install/lanelet2_projection;/home/hypark/autoware.ai/install/lanelet2_maps;/home/hypark/autoware.ai/install/lanelet2_io;/home/hypark/autoware.ai/install/lanelet2_core;/home/hypark/autoware.ai/install/kvaser;/home/hypark/autoware.ai/install/kitti_launch;/home/hypark/autoware.ai/install/kitti_player;/home/hypark/autoware.ai/install/kitti_box_publisher;/home/hypark/autoware.ai/install/javad_navsat_driver;/home/hypark/autoware.ai/install/integrated_viewer;/home/hypark/autoware.ai/install/image_processor;/home/hypark/autoware.ai/install/hokuyo;/home/hypark/autoware.ai/install/graph_tools;/home/hypark/autoware.ai/install/gnss_localizer;/home/hypark/autoware.ai/install/gnss;/home/hypark/autoware.ai/install/glviewer;/home/hypark/autoware.ai/install/gazebo_world_description;/home/hypark/autoware.ai/install/gazebo_imu_description;/home/hypark/autoware.ai/install/gazebo_camera_description;/home/hypark/autoware.ai/install/garmin;/home/hypark/autoware.ai/install/freespace_planner;/home/hypark/autoware.ai/install/fastvirtualscan;/home/hypark/autoware.ai/install/ekf_localizer;/home/hypark/autoware.ai/install/ds4_msgs;/home/hypark/autoware.ai/install/ds4_driver;/home/hypark/autoware.ai/install/detected_objects_visualizer;/home/hypark/autoware.ai/install/decision_maker_panel;/home/hypark/autoware.ai/install/data_preprocessor;/home/hypark/autoware.ai/install/custom_msgs;/home/hypark/autoware.ai/install/carla_autoware_bridge;/home/hypark/autoware.ai/install/calibration_publisher;/home/hypark/autoware.ai/install/autoware_system_msgs;/home/hypark/autoware.ai/install/autoware_rviz_plugins;/home/hypark/autoware.ai/install/autoware_quickstart_examples;/home/hypark/autoware.ai/install/autoware_pointgrey_drivers;/home/hypark/autoware.ai/install/autoware_driveworks_interface;/home/hypark/autoware.ai/install/autoware_connector;/home/hypark/autoware.ai/install/autoware_camera_lidar_calibrator;/home/hypark/autoware.ai/install/astar_search;/home/hypark/autoware.ai/install/amathutils_lib;/home/hypark/autoware.ai/install/autoware_msgs;/home/hypark/autoware.ai/install/autoware_map_msgs;/home/hypark/autoware.ai/install/autoware_launcher_rviz;/home/hypark/autoware.ai/install/autoware_launcher;/home/hypark/autoware.ai/install/autoware_lanelet2_msgs;/home/hypark/autoware.ai/install/autoware_external_msgs;/home/hypark/autoware.ai/install/autoware_driveworks_gmsl_interface;/home/hypark/autoware.ai/install/autoware_config_msgs;/home/hypark/autoware.ai/install/autoware_can_msgs;/home/hypark/autoware.ai/install/autoware_build_flags;/home/hypark/autoware.ai/install/autoware_bag_tools;/home/hypark/autoware.ai/install/adi_driver;/opt/ros/melodic
+[0.104s] -- Found PythonInterp: /usr/bin/python2 (found suitable version "2.7.17", minimum required is "2") 
+[0.104s] -- Using PYTHON_EXECUTABLE: /usr/bin/python2
+[0.104s] -- Using Debian Python package layout
+[0.104s] -- Using empy: /usr/bin/empy
+[0.237s] -- Using CATKIN_ENABLE_TESTING: ON
+[0.237s] -- Call enable_testing()
+[0.238s] -- Using CATKIN_TEST_RESULTS_DIR: /home/hypark/git/Autoware_On_Embedded/build/vision_darknet_detect/test_results
+[0.276s] -- Found gtest sources under '/usr/src/googletest': gtests will be built
+[0.276s] -- Found gmock sources under '/usr/src/googletest': gmock will be built
+[0.294s] -- Found PythonInterp: /usr/bin/python2 (found version "2.7.17") 
+[0.299s] -- Using Python nosetests: /usr/bin/nosetests-2.7
+[0.345s] -- catkin 0.7.29
+[0.345s] -- BUILD_SHARED_LIBS is on
+[0.532s] -- Using these message generators: gencpp;geneus;genlisp;gennodejs;genpy
+[0.793s] -- Found OpenMP_C: -fopenmp  
+[0.794s] -- Found OpenMP_CXX: -fopenmp  
+[0.794s] -- Found OpenMP: TRUE   
+[0.997s] -- Configuring done
+[1.094s] -- Generating done
+[1.101s] -- Build files have been written to: /home/hypark/git/Autoware_On_Embedded/build/vision_darknet_detect
+[1.214s] [  0%] Built target roscpp_generate_messages_lisp
+[1.220s] [  0%] Built target jsk_footstep_msgs_generate_messages_nodejs
+[1.220s] [  0%] Built target rosgraph_msgs_generate_messages_lisp
+[1.223s] [  0%] Built target roscpp_generate_messages_py
+[1.223s] [  0%] Built target sensor_msgs_generate_messages_nodejs
+[1.224s] [  0%] Built target pcl_msgs_generate_messages_nodejs
+[1.224s] [  0%] Built target actionlib_msgs_generate_messages_cpp
+[1.227s] [  0%] Built target actionlib_msgs_generate_messages_lisp
+[1.236s] [  0%] Built target jsk_footstep_msgs_generate_messages_eus
+[1.240s] [  0%] Built target actionlib_msgs_generate_messages_py
+[1.242s] [  0%] Built target pcl_msgs_generate_messages_py
+[1.259s] [  0%] Built target rosgraph_msgs_generate_messages_nodejs
+[1.324s] [  0%] Built target std_msgs_generate_messages_nodejs
+[1.328s] [  0%] Built target rosgraph_msgs_generate_messages_cpp
+[1.329s] [  0%] Built target pcl_msgs_generate_messages_eus
+[1.330s] [  0%] Built target pcl_msgs_generate_messages_lisp
+[1.334s] [  0%] Built target std_msgs_generate_messages_lisp
+[1.340s] [  0%] Built target autoware_msgs_generate_messages_cpp
+[1.340s] [  0%] Built target sensor_msgs_generate_messages_cpp
+[1.347s] [  0%] Built target sensor_msgs_generate_messages_eus
+[1.367s] [  0%] Built target autoware_config_msgs_generate_messages_lisp
+[1.367s] [  0%] Built target autoware_config_msgs_generate_messages_eus
+[1.368s] [  0%] Built target jsk_footstep_msgs_generate_messages_lisp
+[1.378s] [  0%] Built target std_msgs_generate_messages_eus
+[1.429s] [  0%] Built target autoware_msgs_generate_messages_nodejs
+[1.432s] [  0%] Built target autoware_config_msgs_generate_messages_py
+[1.439s] [  0%] Built target actionlib_msgs_generate_messages_nodejs
+[1.442s] [  0%] Built target rosgraph_msgs_generate_messages_py
+[1.448s] [  0%] Built target std_msgs_generate_messages_py
+[1.453s] [  0%] Built target jsk_footstep_msgs_generate_messages_py
+[1.455s] [  0%] Built target std_msgs_generate_messages_cpp
+[1.468s] [  0%] Built target autoware_msgs_generate_messages_py
+[1.468s] [  0%] Built target sensor_msgs_generate_messages_py
+[1.472s] [  0%] Built target jsk_recognition_msgs_generate_messages_py
+[1.477s] [  0%] Built target autoware_msgs_generate_messages_eus
+[1.487s] [  0%] Built target jsk_recognition_msgs_generate_messages_cpp
+[1.531s] [  0%] Built target sensor_msgs_generate_messages_lisp
+[1.556s] [  0%] Built target actionlib_msgs_generate_messages_eus
+[1.559s] [  0%] Built target roscpp_generate_messages_nodejs
+[1.560s] [  0%] Built target autoware_config_msgs_generate_messages_nodejs
+[1.565s] [  0%] Built target pcl_msgs_generate_messages_cpp
+[1.569s] [  0%] Built target roscpp_generate_messages_eus
+[1.569s] [  0%] Built target autoware_msgs_generate_messages_lisp
+[1.570s] [  0%] Built target geometry_msgs_generate_messages_nodejs
+[1.571s] [  0%] Built target geometry_msgs_generate_messages_eus
+[1.573s] [  0%] Built target geometry_msgs_generate_messages_lisp
+[1.598s] [  0%] Built target jsk_footstep_msgs_generate_messages_cpp
+[1.604s] [  0%] Built target geometry_msgs_generate_messages_cpp
+[1.634s] [  0%] Built target geometry_msgs_generate_messages_py
+[1.642s] [  0%] Built target roscpp_generate_messages_cpp
+[1.644s] [  0%] Built target autoware_config_msgs_generate_messages_cpp
+[1.648s] [  0%] Built target jsk_recognition_msgs_generate_messages_eus
+[1.656s] [  0%] Built target jsk_recognition_msgs_generate_messages_lisp
+[1.658s] [  0%] Built target jsk_recognition_msgs_generate_messages_nodejs
+[1.660s] [  0%] Built target rosgraph_msgs_generate_messages_eus
+[1.707s] [  1%] [34m[1mBuilding NVCC (Device) object CMakeFiles/vision_darknet_detect_lib.dir/darknet/src/vision_darknet_detect_lib_generated_blas_kernels.cu.o[0m
+[2.165s] /home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/blas_kernels.cu(37): warning: conversion from a string literal to "char *" is deprecated
+[2.165s] 
+[2.165s] /home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/blas_kernels.cu(90): warning: conversion from a string literal to "char *" is deprecated
+[2.165s] 
+[2.169s] /home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/blas_kernels.cu(493): warning: conversion from a string literal to "char *" is deprecated
+[2.169s] 
+[2.170s] /home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/blas_kernels.cu(648): warning: conversion from a string literal to "char *" is deprecated
+[2.170s] 
+[2.174s] /home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/blas_kernels.cu(1077): warning: conversion from a string literal to "char *" is deprecated
+[2.174s] 
+[2.818s] /home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/blas_kernels.cu(37): warning: conversion from a string literal to "char *" is deprecated
+[2.818s] 
+[2.818s] /home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/blas_kernels.cu(90): warning: conversion from a string literal to "char *" is deprecated
+[2.818s] 
+[2.821s] /home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/blas_kernels.cu(493): warning: conversion from a string literal to "char *" is deprecated
+[2.821s] 
+[2.822s] /home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/blas_kernels.cu(648): warning: conversion from a string literal to "char *" is deprecated
+[2.822s] 
+[2.825s] /home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/blas_kernels.cu(1077): warning: conversion from a string literal to "char *" is deprecated
+[2.825s] 
+[3.124s] [35m[1mScanning dependencies of target vision_darknet_detect_lib[0m
+[3.231s] [  5%] [32mBuilding C object CMakeFiles/vision_darknet_detect_lib.dir/darknet/src/cuda.c.o[0m
+[3.231s] [  5%] [32mBuilding C object CMakeFiles/vision_darknet_detect_lib.dir/darknet/src/utils.c.o[0m
+[3.231s] [  6%] [32mBuilding C object CMakeFiles/vision_darknet_detect_lib.dir/darknet/src/activations.c.o[0m
+[3.232s] [  8%] [32mBuilding C object CMakeFiles/vision_darknet_detect_lib.dir/darknet/src/im2col.c.o[0m
+[3.232s] [ 10%] [32mBuilding C object CMakeFiles/vision_darknet_detect_lib.dir/darknet/src/deconvolutional_layer.c.o[0m
+[3.232s] [ 12%] [32mBuilding C object CMakeFiles/vision_darknet_detect_lib.dir/darknet/src/image.c.o[0m
+[3.234s] [ 13%] [32mBuilding C object CMakeFiles/vision_darknet_detect_lib.dir/darknet/src/gemm.c.o[0m
+[3.235s] [ 15%] [32mBuilding C object CMakeFiles/vision_darknet_detect_lib.dir/darknet/src/blas.c.o[0m
+[3.236s] [ 17%] [32mBuilding C object CMakeFiles/vision_darknet_detect_lib.dir/darknet/src/col2im.c.o[0m
+[3.244s] [ 18%] [32mBuilding C object CMakeFiles/vision_darknet_detect_lib.dir/darknet/src/list.c.o[0m
+[3.253s] [ 20%] [32mBuilding C object CMakeFiles/vision_darknet_detect_lib.dir/darknet/src/crop_layer.c.o[0m
+[3.257s] [ 22%] [32mBuilding C object CMakeFiles/vision_darknet_detect_lib.dir/darknet/src/convolutional_layer.c.o[0m
+[3.301s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/utils.c:[m[K In function ‘[01m[Kread_file[m[K’:
+[3.301s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/utils.c:267:5:[m[K [01;35m[Kwarning: [m[Kignoring return value of ‘[01m[Kfread[m[K’, declared with attribute warn_unused_result [[01;35m[K-Wunused-result[m[K]
+[3.301s]      [01;35m[Kfread(text, 1, size, fp)[m[K;
+[3.301s]      [01;35m[K^~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[3.301s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/utils.c:[m[K In function ‘[01m[Kfgetl[m[K’:
+[3.301s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/utils.c:355:9:[m[K [01;35m[Kwarning: [m[Kignoring return value of ‘[01m[Kfgets[m[K’, declared with attribute warn_unused_result [[01;35m[K-Wunused-result[m[K]
+[3.301s]          [01;35m[Kfgets(&line[curr], readsize, fp)[m[K;
+[3.301s]          [01;35m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[3.311s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/cuda.c:[m[K In function ‘[01m[Kget_deadline_list[m[K’:
+[3.311s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/cuda.c:440:17:[m[K [01;35m[Kwarning: [m[Kuse of assignment suppression and length modifier together in gnu_scanf format [[01;35m[K-Wformat=[m[K]
+[3.312s]      sscanf(buf, [01;35m[K"%*llu, %llu"[m[K, &deadline);
+[3.312s]                  [01;35m[K^~~~~~~~~~~~~[m[K
+[3.312s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/gemm.c:[m[K In function ‘[01m[Ktime_gpu[m[K’:
+[3.312s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/gemm.c:232:9:[m[K [01;35m[Kwarning: [m[K‘[01m[KcudaThreadSynchronize[m[K’ is deprecated [[01;35m[K-Wdeprecated-declarations[m[K]
+[3.312s]          [01;35m[KcudaThreadSynchronize[m[K();
+[3.313s]          [01;35m[K^~~~~~~~~~~~~~~~~~~~~[m[K
+[3.313s] In file included from [01m[K/usr/local/cuda-10.0/include/cuda_runtime.h:96:0[m[K,
+[3.313s]                  from [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/darknet.h:14[m[K,
+[3.313s]                  from [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/utils.h:5[m[K,
+[3.313s]                  from [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/gemm.c:2[m[K:
+[3.313s] [01m[K/usr/local/cuda-10.0/include/cuda_runtime_api.h:947:57:[m[K [01;36m[Knote: [m[Kdeclared here
+[3.313s]  extern __CUDA_DEPRECATED __host__ cudaError_t CUDARTAPI [01;36m[KcudaThreadSynchronize[m[K(void);
+[3.313s]                                                          [01;36m[K^~~~~~~~~~~~~~~~~~~~~[m[K
+[3.316s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/cuda.c:[m[K In function ‘[01m[Kget_scheduler_pid[m[K’:
+[3.316s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/cuda.c:356:3:[m[K [01;35m[Kwarning: [m[Kignoring return value of ‘[01m[Kfscanf[m[K’, declared with attribute warn_unused_result [[01;35m[K-Wunused-result[m[K]
+[3.316s]    [01;35m[Kfscanf(scheduler_fp, "%d", &scheduler_pid_)[m[K;
+[3.316s]    [01;35m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[3.317s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/cuda.c:[m[K In function ‘[01m[Kget_deadline_list[m[K’:
+[3.317s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/cuda.c:438:5:[m[K [01;35m[Kwarning: [m[Kignoring return value of ‘[01m[Kfgets[m[K’, declared with attribute warn_unused_result [[01;35m[K-Wunused-result[m[K]
+[3.317s]      [01;35m[Kfgets(buf, 1024, fp)[m[K;
+[3.317s]      [01;35m[K^~~~~~~~~~~~~~~~~~~~[m[K
+[3.378s] [ 24%] [32mBuilding C object CMakeFiles/vision_darknet_detect_lib.dir/darknet/src/dropout_layer.c.o[0m
+[3.416s] [ 25%] [32mBuilding C object CMakeFiles/vision_darknet_detect_lib.dir/darknet/src/maxpool_layer.c.o[0m
+[3.417s] [ 27%] [32mBuilding C object CMakeFiles/vision_darknet_detect_lib.dir/darknet/src/data.c.o[0m
+[3.424s] [ 29%] [32mBuilding C object CMakeFiles/vision_darknet_detect_lib.dir/darknet/src/softmax_layer.c.o[0m
+[3.498s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/data.c:[m[K In function ‘[01m[Kload_regression_labels_paths[m[K’:
+[3.498s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/data.c:574:13:[m[K [01;35m[Kwarning: [m[Kignoring return value of ‘[01m[Kfscanf[m[K’, declared with attribute warn_unused_result [[01;35m[K-Wunused-result[m[K]
+[3.499s]              [01;35m[Kfscanf(file, "%f", &(y.vals[i][j]))[m[K;
+[3.499s]              [01;35m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[3.500s] [ 31%] [32mBuilding C object CMakeFiles/vision_darknet_detect_lib.dir/darknet/src/network.c.o[0m
+[3.504s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/data.c:[m[K In function ‘[01m[Kload_cifar10_data[m[K’:
+[3.504s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/data.c:1354:9:[m[K [01;35m[Kwarning: [m[Kignoring return value of ‘[01m[Kfread[m[K’, declared with attribute warn_unused_result [[01;35m[K-Wunused-result[m[K]
+[3.504s]          [01;35m[Kfread(bytes, 1, 3073, fp)[m[K;
+[3.504s]          [01;35m[K^~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[3.505s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/data.c:[m[K In function ‘[01m[Kload_all_cifar10[m[K’:
+[3.505s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/data.c:1417:13:[m[K [01;35m[Kwarning: [m[Kignoring return value of ‘[01m[Kfread[m[K’, declared with attribute warn_unused_result [[01;35m[K-Wunused-result[m[K]
+[3.506s]              [01;35m[Kfread(bytes, 1, 3073, fp)[m[K;
+[3.506s]              [01;35m[K^~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[3.524s] [ 32%] [32mBuilding C object CMakeFiles/vision_darknet_detect_lib.dir/darknet/src/matrix.c.o[0m
+[3.561s] [ 34%] [32mBuilding C object CMakeFiles/vision_darknet_detect_lib.dir/darknet/src/cost_layer.c.o[0m
+[3.594s] [ 36%] [32mBuilding C object CMakeFiles/vision_darknet_detect_lib.dir/darknet/src/connected_layer.c.o[0m
+[3.597s] [ 37%] [32mBuilding C object CMakeFiles/vision_darknet_detect_lib.dir/darknet/src/option_list.c.o[0m
+[3.611s] [ 39%] [32mBuilding C object CMakeFiles/vision_darknet_detect_lib.dir/darknet/src/parser.c.o[0m
+[3.618s] [ 41%] [32mBuilding C object CMakeFiles/vision_darknet_detect_lib.dir/darknet/src/detection_layer.c.o[0m
+[3.642s] [ 43%] [32mBuilding C object CMakeFiles/vision_darknet_detect_lib.dir/darknet/src/route_layer.c.o[0m
+[3.699s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/parser.c:[m[K In function ‘[01m[Kload_connected_weights[m[K’:
+[3.699s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/parser.c:1085:5:[m[K [01;35m[Kwarning: [m[Kignoring return value of ‘[01m[Kfread[m[K’, declared with attribute warn_unused_result [[01;35m[K-Wunused-result[m[K]
+[3.699s]      [01;35m[Kfread(l.biases, sizeof(float), l.outputs, fp)[m[K;
+[3.699s]      [01;35m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[3.699s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/parser.c:1086:5:[m[K [01;35m[Kwarning: [m[Kignoring return value of ‘[01m[Kfread[m[K’, declared with attribute warn_unused_result [[01;35m[K-Wunused-result[m[K]
+[3.700s]      [01;35m[Kfread(l.weights, sizeof(float), l.outputs*l.inputs, fp)[m[K;
+[3.700s]      [01;35m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[3.700s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/parser.c:1093:9:[m[K [01;35m[Kwarning: [m[Kignoring return value of ‘[01m[Kfread[m[K’, declared with attribute warn_unused_result [[01;35m[K-Wunused-result[m[K]
+[3.700s]          [01;35m[Kfread(l.scales, sizeof(float), l.outputs, fp)[m[K;
+[3.700s]          [01;35m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[3.700s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/parser.c:1094:9:[m[K [01;35m[Kwarning: [m[Kignoring return value of ‘[01m[Kfread[m[K’, declared with attribute warn_unused_result [[01;35m[K-Wunused-result[m[K]
+[3.701s]          [01;35m[Kfread(l.rolling_mean, sizeof(float), l.outputs, fp)[m[K;
+[3.701s]          [01;35m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[3.701s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/parser.c:1095:9:[m[K [01;35m[Kwarning: [m[Kignoring return value of ‘[01m[Kfread[m[K’, declared with attribute warn_unused_result [[01;35m[K-Wunused-result[m[K]
+[3.701s]          [01;35m[Kfread(l.rolling_variance, sizeof(float), l.outputs, fp)[m[K;
+[3.701s]          [01;35m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[3.702s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/parser.c:[m[K In function ‘[01m[Kload_batchnorm_weights[m[K’:
+[3.702s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/parser.c:1109:5:[m[K [01;35m[Kwarning: [m[Kignoring return value of ‘[01m[Kfread[m[K’, declared with attribute warn_unused_result [[01;35m[K-Wunused-result[m[K]
+[3.702s]      [01;35m[Kfread(l.scales, sizeof(float), l.c, fp)[m[K;
+[3.702s]      [01;35m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[3.702s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/parser.c:1110:5:[m[K [01;35m[Kwarning: [m[Kignoring return value of ‘[01m[Kfread[m[K’, declared with attribute warn_unused_result [[01;35m[K-Wunused-result[m[K]
+[3.703s]      [01;35m[Kfread(l.rolling_mean, sizeof(float), l.c, fp)[m[K;
+[3.703s]      [01;35m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[3.703s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/parser.c:1111:5:[m[K [01;35m[Kwarning: [m[Kignoring return value of ‘[01m[Kfread[m[K’, declared with attribute warn_unused_result [[01;35m[K-Wunused-result[m[K]
+[3.703s]      [01;35m[Kfread(l.rolling_variance, sizeof(float), l.c, fp)[m[K;
+[3.703s]      [01;35m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[3.704s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/parser.c:[m[K In function ‘[01m[Kload_convolutional_weights_binary[m[K’:
+[3.704s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/parser.c:1121:5:[m[K [01;35m[Kwarning: [m[Kignoring return value of ‘[01m[Kfread[m[K’, declared with attribute warn_unused_result [[01;35m[K-Wunused-result[m[K]
+[3.704s]      [01;35m[Kfread(l.biases, sizeof(float), l.n, fp)[m[K;
+[3.704s]      [01;35m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[3.704s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/parser.c:1123:9:[m[K [01;35m[Kwarning: [m[Kignoring return value of ‘[01m[Kfread[m[K’, declared with attribute warn_unused_result [[01;35m[K-Wunused-result[m[K]
+[3.704s]          [01;35m[Kfread(l.scales, sizeof(float), l.n, fp)[m[K;
+[3.705s]          [01;35m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[3.705s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/parser.c:1124:9:[m[K [01;35m[Kwarning: [m[Kignoring return value of ‘[01m[Kfread[m[K’, declared with attribute warn_unused_result [[01;35m[K-Wunused-result[m[K]
+[3.705s]          [01;35m[Kfread(l.rolling_mean, sizeof(float), l.n, fp)[m[K;
+[3.705s]          [01;35m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[3.705s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/parser.c:1125:9:[m[K [01;35m[Kwarning: [m[Kignoring return value of ‘[01m[Kfread[m[K’, declared with attribute warn_unused_result [[01;35m[K-Wunused-result[m[K]
+[3.706s]          [01;35m[Kfread(l.rolling_variance, sizeof(float), l.n, fp)[m[K;
+[3.706s]          [01;35m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[3.706s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/parser.c:1131:9:[m[K [01;35m[Kwarning: [m[Kignoring return value of ‘[01m[Kfread[m[K’, declared with attribute warn_unused_result [[01;35m[K-Wunused-result[m[K]
+[3.706s]          [01;35m[Kfread(&mean, sizeof(float), 1, fp)[m[K;
+[3.706s]          [01;35m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[3.706s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/parser.c:1135:13:[m[K [01;35m[Kwarning: [m[Kignoring return value of ‘[01m[Kfread[m[K’, declared with attribute warn_unused_result [[01;35m[K-Wunused-result[m[K]
+[3.706s]              [01;35m[Kfread(&c, sizeof(char), 1, fp)[m[K;
+[3.706s]              [01;35m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[3.707s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/parser.c:[m[K In function ‘[01m[Kload_convolutional_weights[m[K’:
+[3.707s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/parser.c:1156:5:[m[K [01;35m[Kwarning: [m[Kignoring return value of ‘[01m[Kfread[m[K’, declared with attribute warn_unused_result [[01;35m[K-Wunused-result[m[K]
+[3.707s]      [01;35m[Kfread(l.biases, sizeof(float), l.n, fp)[m[K;
+[3.707s]      [01;35m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[3.707s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/parser.c:1158:9:[m[K [01;35m[Kwarning: [m[Kignoring return value of ‘[01m[Kfread[m[K’, declared with attribute warn_unused_result [[01;35m[K-Wunused-result[m[K]
+[3.707s]          [01;35m[Kfread(l.scales, sizeof(float), l.n, fp)[m[K;
+[3.708s]          [01;35m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[3.708s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/parser.c:1159:9:[m[K [01;35m[Kwarning: [m[Kignoring return value of ‘[01m[Kfread[m[K’, declared with attribute warn_unused_result [[01;35m[K-Wunused-result[m[K]
+[3.708s]          [01;35m[Kfread(l.rolling_mean, sizeof(float), l.n, fp)[m[K;
+[3.708s]          [01;35m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[3.708s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/parser.c:1160:9:[m[K [01;35m[Kwarning: [m[Kignoring return value of ‘[01m[Kfread[m[K’, declared with attribute warn_unused_result [[01;35m[K-Wunused-result[m[K]
+[3.708s]          [01;35m[Kfread(l.rolling_variance, sizeof(float), l.n, fp)[m[K;
+[3.708s]          [01;35m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[3.708s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/parser.c:1188:5:[m[K [01;35m[Kwarning: [m[Kignoring return value of ‘[01m[Kfread[m[K’, declared with attribute warn_unused_result [[01;35m[K-Wunused-result[m[K]
+[3.709s]      [01;35m[Kfread(l.weights, sizeof(float), num, fp)[m[K;
+[3.709s]      [01;35m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[3.710s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/parser.c:[m[K In function ‘[01m[Kload_weights_upto[m[K’:
+[3.710s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/parser.c:1217:5:[m[K [01;35m[Kwarning: [m[Kignoring return value of ‘[01m[Kfread[m[K’, declared with attribute warn_unused_result [[01;35m[K-Wunused-result[m[K]
+[3.710s]      [01;35m[Kfread(&major, sizeof(int), 1, fp)[m[K;
+[3.710s]      [01;35m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[3.710s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/parser.c:1218:5:[m[K [01;35m[Kwarning: [m[Kignoring return value of ‘[01m[Kfread[m[K’, declared with attribute warn_unused_result [[01;35m[K-Wunused-result[m[K]
+[3.710s]      [01;35m[Kfread(&minor, sizeof(int), 1, fp)[m[K;
+[3.710s]      [01;35m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[3.710s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/parser.c:1219:5:[m[K [01;35m[Kwarning: [m[Kignoring return value of ‘[01m[Kfread[m[K’, declared with attribute warn_unused_result [[01;35m[K-Wunused-result[m[K]
+[3.710s]      [01;35m[Kfread(&revision, sizeof(int), 1, fp)[m[K;
+[3.710s]      [01;35m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[3.711s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/parser.c:1221:9:[m[K [01;35m[Kwarning: [m[Kignoring return value of ‘[01m[Kfread[m[K’, declared with attribute warn_unused_result [[01;35m[K-Wunused-result[m[K]
+[3.711s]          [01;35m[Kfread(net->seen, sizeof(size_t), 1, fp)[m[K;
+[3.711s]          [01;35m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[3.711s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/parser.c:1224:9:[m[K [01;35m[Kwarning: [m[Kignoring return value of ‘[01m[Kfread[m[K’, declared with attribute warn_unused_result [[01;35m[K-Wunused-result[m[K]
+[3.711s]          [01;35m[Kfread(&iseen, sizeof(int), 1, fp)[m[K;
+[3.711s]          [01;35m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[3.712s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/parser.c:1279:13:[m[K [01;35m[Kwarning: [m[Kignoring return value of ‘[01m[Kfread[m[K’, declared with attribute warn_unused_result [[01;35m[K-Wunused-result[m[K]
+[3.712s]              [01;35m[Kfread(l.biases, sizeof(float), l.outputs, fp)[m[K;
+[3.712s]              [01;35m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[3.712s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/parser.c:1280:13:[m[K [01;35m[Kwarning: [m[Kignoring return value of ‘[01m[Kfread[m[K’, declared with attribute warn_unused_result [[01;35m[K-Wunused-result[m[K]
+[3.712s]              [01;35m[Kfread(l.weights, sizeof(float), size, fp)[m[K;
+[3.712s]              [01;35m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[3.753s] [ 44%] [32mBuilding C object CMakeFiles/vision_darknet_detect_lib.dir/darknet/src/upsample_layer.c.o[0m
+[3.786s] [ 46%] [32mBuilding C object CMakeFiles/vision_darknet_detect_lib.dir/darknet/src/box.c.o[0m
+[3.794s] [ 48%] [32mBuilding C object CMakeFiles/vision_darknet_detect_lib.dir/darknet/src/normalization_layer.c.o[0m
+[3.803s] [ 50%] [32mBuilding C object CMakeFiles/vision_darknet_detect_lib.dir/darknet/src/avgpool_layer.c.o[0m
+[3.849s] [ 51%] [32mBuilding C object CMakeFiles/vision_darknet_detect_lib.dir/darknet/src/layer.c.o[0m
+[3.877s] [ 53%] [32mBuilding C object CMakeFiles/vision_darknet_detect_lib.dir/darknet/src/local_layer.c.o[0m
+[3.951s] [ 55%] [32mBuilding C object CMakeFiles/vision_darknet_detect_lib.dir/darknet/src/activation_layer.c.o[0m
+[3.959s] [ 56%] [32mBuilding C object CMakeFiles/vision_darknet_detect_lib.dir/darknet/src/logistic_layer.c.o[0m
+[3.978s] [ 58%] [32mBuilding C object CMakeFiles/vision_darknet_detect_lib.dir/darknet/src/shortcut_layer.c.o[0m
+[4.006s] [ 60%] [32mBuilding C object CMakeFiles/vision_darknet_detect_lib.dir/darknet/src/rnn_layer.c.o[0m
+[4.024s] [ 62%] [32mBuilding C object CMakeFiles/vision_darknet_detect_lib.dir/darknet/src/gru_layer.c.o[0m
+[4.055s] [ 63%] [32mBuilding C object CMakeFiles/vision_darknet_detect_lib.dir/darknet/src/crnn_layer.c.o[0m
+[4.060s] [ 65%] [32mBuilding C object CMakeFiles/vision_darknet_detect_lib.dir/darknet/src/batchnorm_layer.c.o[0m
+[4.098s] [ 67%] [32mBuilding C object CMakeFiles/vision_darknet_detect_lib.dir/darknet/src/region_layer.c.o[0m
+[4.136s] [ 68%] [32mBuilding C object CMakeFiles/vision_darknet_detect_lib.dir/darknet/src/reorg_layer.c.o[0m
+[4.166s] [ 70%] [32mBuilding C object CMakeFiles/vision_darknet_detect_lib.dir/darknet/src/lstm_layer.c.o[0m
+[4.184s] [ 72%] [32mBuilding C object CMakeFiles/vision_darknet_detect_lib.dir/darknet/src/tree.c.o[0m
+[4.188s] [ 74%] [32mBuilding C object CMakeFiles/vision_darknet_detect_lib.dir/darknet/src/l2norm_layer.c.o[0m
+[4.301s] [ 75%] [32mBuilding C object CMakeFiles/vision_darknet_detect_lib.dir/darknet/src/yolo_layer.c.o[0m
+[7.174s] [ 77%] [32m[1mLinking CXX shared library devel/lib/libvision_darknet_detect_lib.so[0m
+[7.352s] [ 93%] Built target vision_darknet_detect_lib
+[7.381s] [35m[1mScanning dependencies of target vision_darknet_detect[0m
+[7.452s] [ 98%] [32mBuilding CXX object CMakeFiles/vision_darknet_detect.dir/src/vision_darknet_detect.cpp.o[0m
+[7.452s] [ 96%] [32mBuilding CXX object CMakeFiles/vision_darknet_detect.dir/src/vision_darknet_detect_node.cpp.o[0m
+[7.452s] [ 96%] [32mBuilding C object CMakeFiles/vision_darknet_detect.dir/darknet/src/cuda.c.o[0m
+[7.493s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/cuda.c:[m[K In function ‘[01m[Kget_deadline_list[m[K’:
+[7.493s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/cuda.c:440:17:[m[K [01;35m[Kwarning: [m[Kuse of assignment suppression and length modifier together in gnu_scanf format [[01;35m[K-Wformat=[m[K]
+[7.493s]      sscanf(buf, [01;35m[K"%*llu, %llu"[m[K, &deadline);
+[7.493s]                  [01;35m[K^~~~~~~~~~~~~[m[K
+[7.494s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/cuda.c:[m[K In function ‘[01m[Kget_scheduler_pid[m[K’:
+[7.494s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/cuda.c:356:3:[m[K [01;35m[Kwarning: [m[Kignoring return value of ‘[01m[Kfscanf[m[K’, declared with attribute warn_unused_result [[01;35m[K-Wunused-result[m[K]
+[7.494s]    [01;35m[Kfscanf(scheduler_fp, "%d", &scheduler_pid_)[m[K;
+[7.494s]    [01;35m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[7.495s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/cuda.c:[m[K In function ‘[01m[Kget_deadline_list[m[K’:
+[7.495s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/darknet/src/cuda.c:438:5:[m[K [01;35m[Kwarning: [m[Kignoring return value of ‘[01m[Kfgets[m[K’, declared with attribute warn_unused_result [[01;35m[K-Wunused-result[m[K]
+[7.495s]      [01;35m[Kfgets(buf, 1024, fp)[m[K;
+[7.495s]      [01;35m[K^~~~~~~~~~~~~~~~~~~~[m[K
+[9.188s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/src/vision_darknet_detect.cpp:[m[K In member function ‘[01m[Kstd::vector<RectClassScore<float> > darknet::Yolo3Detector::forward(image&)[m[K’:
+[9.188s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/src/vision_darknet_detect.cpp:115:16:[m[K [01;35m[Kwarning: [m[Kunused variable ‘[01m[Ktime[m[K’ [[01;35m[K-Wunused-variable[m[K]
+[9.189s]          double [01;35m[Ktime[m[K = what_time_is_it_now();
+[9.189s]                 [01;35m[K^~~~[m[K
+[9.200s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/src/vision_darknet_detect.cpp:[m[K In member function ‘[01m[Kvoid Yolo3DetectorNode::Run()[m[K’:
+[9.200s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/src/vision_darknet_detect.cpp:336:100:[m[K [01;35m[Kwarning: [m[KISO C++ forbids converting a string constant to ‘[01m[Kchar*[m[K’ [[01;35m[K-Wwrite-strings[m[K]
+[9.200s]          init_scheduling("/tmp/yolo", "/home/hypark/GPU_profiling/deadline/yolo_deadline.csv",key_id[01;35m[K)[m[K;
+[9.200s]                                                                                                     [01;35m[K^[m[K
+[9.200s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/src/vision_darknet_detect.cpp:336:100:[m[K [01;35m[Kwarning: [m[KISO C++ forbids converting a string constant to ‘[01m[Kchar*[m[K’ [[01;35m[K-Wwrite-strings[m[K]
+[9.429s] In file included from [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/src/vision_darknet_detect.h:57:0[m[K,
+[9.429s]                  from [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/src/vision_darknet_detect_node.cpp:21[m[K:
+[9.429s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/src/../darknet/src/cuda.h:48:27:[m[K [01;35m[Kwarning: [m[K‘[01m[Kidentical_deadline_[m[K’ defined but not used [[01;35m[K-Wunused-variable[m[K]
+[9.429s]  static unsigned long long [01;35m[Kidentical_deadline_[m[K;
+[9.429s]                            [01;35m[K^~~~~~~~~~~~~~~~~~~[m[K
+[9.429s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/src/../darknet/src/cuda.h:47:27:[m[K [01;35m[Kwarning: [m[K‘[01m[Kabsolute_deadline_[m[K’ defined but not used [[01;35m[K-Wunused-variable[m[K]
+[9.429s]  static unsigned long long [01;35m[Kabsolute_deadline_[m[K;
+[9.429s]                            [01;35m[K^~~~~~~~~~~~~~~~~~[m[K
+[9.430s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/src/../darknet/src/cuda.h:46:12:[m[K [01;35m[Kwarning: [m[K‘[01m[Kgpu_scheduling_flag_[m[K’ defined but not used [[01;35m[K-Wunused-variable[m[K]
+[9.430s]  static int [01;35m[Kgpu_scheduling_flag_[m[K;
+[9.430s]             [01;35m[K^~~~~~~~~~~~~~~~~~~~[m[K
+[9.430s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/src/../darknet/src/cuda.h:45:22:[m[K [01;35m[Kwarning: [m[K‘[01m[Kdeadline_list_[m[K’ defined but not used [[01;35m[K-Wunused-variable[m[K]
+[9.430s]  static long long int [01;35m[Kdeadline_list_[m[K[550];
+[9.430s]                       [01;35m[K^~~~~~~~~~~~~~[m[K
+[9.430s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/src/../darknet/src/cuda.h:44:12:[m[K [01;35m[Kwarning: [m[K‘[01m[Ksig_[m[K’ defined but not used [[01;35m[K-Wunused-variable[m[K]
+[9.430s]  static int [01;35m[Ksig_[m[K;
+[9.430s]             [01;35m[K^~~~[m[K
+[9.430s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/src/../darknet/src/cuda.h:43:17:[m[K [01;35m[Kwarning: [m[K‘[01m[Ksigset_[m[K’ defined but not used [[01;35m[K-Wunused-variable[m[K]
+[9.430s]  static sigset_t [01;35m[Ksigset_[m[K;
+[9.430s]                  [01;35m[K^~~~~~~[m[K
+[9.430s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/src/../darknet/src/cuda.h:42:12:[m[K [01;35m[Kwarning: [m[K‘[01m[Kshmid_[m[K’ defined but not used [[01;35m[K-Wunused-variable[m[K]
+[9.430s]  static int [01;35m[Kshmid_[m[K;
+[9.430s]             [01;35m[K^~~~~~[m[K
+[9.430s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/src/../darknet/src/cuda.h:41:14:[m[K [01;35m[Kwarning: [m[K‘[01m[Kkey_[m[K’ defined but not used [[01;35m[K-Wunused-variable[m[K]
+[9.430s]  static key_t [01;35m[Kkey_[m[K;
+[9.430s]               [01;35m[K^~~~[m[K
+[9.430s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/src/../darknet/src/cuda.h:40:19:[m[K [01;35m[Kwarning: [m[K‘[01m[Ksched_info_[m[K’ defined but not used [[01;35m[K-Wunused-variable[m[K]
+[9.431s]  static SchedInfo* [01;35m[Ksched_info_[m[K;
+[9.431s]                    [01;35m[K^~~~~~~~~~~[m[K
+[9.431s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/src/../darknet/src/cuda.h:39:12:[m[K [01;35m[Kwarning: [m[K‘[01m[Kkey_id_[m[K’ defined but not used [[01;35m[K-Wunused-variable[m[K]
+[9.431s]  static int [01;35m[Kkey_id_[m[K;
+[9.431s]             [01;35m[K^~~~~~~[m[K
+[9.431s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/src/../darknet/src/cuda.h:38:12:[m[K [01;35m[Kwarning: [m[K‘[01m[Kscheduler_pid_[m[K’ defined but not used [[01;35m[K-Wunused-variable[m[K]
+[9.431s]  static int [01;35m[Kscheduler_pid_[m[K;
+[9.431s]             [01;35m[K^~~~~~~~~~~~~~[m[K
+[9.431s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/src/../darknet/src/cuda.h:37:13:[m[K [01;35m[Kwarning: [m[K‘[01m[Ktask_filename_[m[K’ defined but not used [[01;35m[K-Wunused-variable[m[K]
+[9.431s]  static char [01;35m[Ktask_filename_[m[K[BUFFER_SIZE];
+[9.431s]              [01;35m[K^~~~~~~~~~~~~~[m[K
+[9.783s] In file included from [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/src/vision_darknet_detect.h:57:0[m[K,
+[9.784s]                  from [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/src/vision_darknet_detect.cpp:22[m[K:
+[9.784s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/src/../darknet/src/cuda.h:[m[K At global scope:
+[9.784s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/src/../darknet/src/cuda.h:48:27:[m[K [01;35m[Kwarning: [m[K‘[01m[Kidentical_deadline_[m[K’ defined but not used [[01;35m[K-Wunused-variable[m[K]
+[9.784s]  static unsigned long long [01;35m[Kidentical_deadline_[m[K;
+[9.784s]                            [01;35m[K^~~~~~~~~~~~~~~~~~~[m[K
+[9.784s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/src/../darknet/src/cuda.h:47:27:[m[K [01;35m[Kwarning: [m[K‘[01m[Kabsolute_deadline_[m[K’ defined but not used [[01;35m[K-Wunused-variable[m[K]
+[9.784s]  static unsigned long long [01;35m[Kabsolute_deadline_[m[K;
+[9.784s]                            [01;35m[K^~~~~~~~~~~~~~~~~~[m[K
+[9.784s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/src/../darknet/src/cuda.h:45:22:[m[K [01;35m[Kwarning: [m[K‘[01m[Kdeadline_list_[m[K’ defined but not used [[01;35m[K-Wunused-variable[m[K]
+[9.784s]  static long long int [01;35m[Kdeadline_list_[m[K[550];
+[9.784s]                       [01;35m[K^~~~~~~~~~~~~~[m[K
+[9.784s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/src/../darknet/src/cuda.h:44:12:[m[K [01;35m[Kwarning: [m[K‘[01m[Ksig_[m[K’ defined but not used [[01;35m[K-Wunused-variable[m[K]
+[9.784s]  static int [01;35m[Ksig_[m[K;
+[9.784s]             [01;35m[K^~~~[m[K
+[9.784s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/src/../darknet/src/cuda.h:43:17:[m[K [01;35m[Kwarning: [m[K‘[01m[Ksigset_[m[K’ defined but not used [[01;35m[K-Wunused-variable[m[K]
+[9.784s]  static sigset_t [01;35m[Ksigset_[m[K;
+[9.784s]                  [01;35m[K^~~~~~~[m[K
+[9.785s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/src/../darknet/src/cuda.h:42:12:[m[K [01;35m[Kwarning: [m[K‘[01m[Kshmid_[m[K’ defined but not used [[01;35m[K-Wunused-variable[m[K]
+[9.785s]  static int [01;35m[Kshmid_[m[K;
+[9.785s]             [01;35m[K^~~~~~[m[K
+[9.785s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/src/../darknet/src/cuda.h:41:14:[m[K [01;35m[Kwarning: [m[K‘[01m[Kkey_[m[K’ defined but not used [[01;35m[K-Wunused-variable[m[K]
+[9.785s]  static key_t [01;35m[Kkey_[m[K;
+[9.785s]               [01;35m[K^~~~[m[K
+[9.785s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/src/../darknet/src/cuda.h:40:19:[m[K [01;35m[Kwarning: [m[K‘[01m[Ksched_info_[m[K’ defined but not used [[01;35m[K-Wunused-variable[m[K]
+[9.785s]  static SchedInfo* [01;35m[Ksched_info_[m[K;
+[9.785s]                    [01;35m[K^~~~~~~~~~~[m[K
+[9.785s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/src/../darknet/src/cuda.h:39:12:[m[K [01;35m[Kwarning: [m[K‘[01m[Kkey_id_[m[K’ defined but not used [[01;35m[K-Wunused-variable[m[K]
+[9.785s]  static int [01;35m[Kkey_id_[m[K;
+[9.785s]             [01;35m[K^~~~~~~[m[K
+[9.785s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/src/../darknet/src/cuda.h:38:12:[m[K [01;35m[Kwarning: [m[K‘[01m[Kscheduler_pid_[m[K’ defined but not used [[01;35m[K-Wunused-variable[m[K]
+[9.785s]  static int [01;35m[Kscheduler_pid_[m[K;
+[9.785s]             [01;35m[K^~~~~~~~~~~~~~[m[K
+[9.785s] [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/vision_darknet_detect/src/../darknet/src/cuda.h:37:13:[m[K [01;35m[Kwarning: [m[K‘[01m[Ktask_filename_[m[K’ defined but not used [[01;35m[K-Wunused-variable[m[K]
+[9.785s]  static char [01;35m[Ktask_filename_[m[K[BUFFER_SIZE];
+[9.785s]              [01;35m[K^~~~~~~~~~~~~~[m[K
+[12.468s] [100%] [32m[1mLinking CXX executable devel/lib/vision_darknet_detect/vision_darknet_detect[0m
+[12.978s] [100%] Built target vision_darknet_detect
+[13.001s] Invoked command in '/home/hypark/git/Autoware_On_Embedded/build/vision_darknet_detect' returned '0': /usr/bin/cmake --build /home/hypark/git/Autoware_On_Embedded/build/vision_darknet_detect -- -j12 -l12
+[13.685s] Invoking command in '/home/hypark/git/Autoware_On_Embedded/build/vision_darknet_detect': /usr/bin/cmake --build /home/hypark/git/Autoware_On_Embedded/build/vision_darknet_detect --target tests -- -j12 -l12
+[13.816s] [35m[1mScanning dependencies of target tests[0m
+[13.846s] Built target tests
+[13.870s] Invoked command in '/home/hypark/git/Autoware_On_Embedded/build/vision_darknet_detect' returned '0': /usr/bin/cmake --build /home/hypark/git/Autoware_On_Embedded/build/vision_darknet_detect --target tests -- -j12 -l12
+[14.574s] Invoking command in '/home/hypark/git/Autoware_On_Embedded/build/vision_darknet_detect': /usr/bin/cmake --build /home/hypark/git/Autoware_On_Embedded/build/vision_darknet_detect --target install -- -j12 -l12
+[14.737s] [  0%] Built target roscpp_generate_messages_lisp
+[14.738s] [  0%] Built target roscpp_generate_messages_py
+[14.738s] [  0%] Built target rosgraph_msgs_generate_messages_lisp
+[14.738s] [  0%] Built target actionlib_msgs_generate_messages_lisp
+[14.739s] [  0%] Built target pcl_msgs_generate_messages_nodejs
+[14.739s] [  0%] Built target jsk_footstep_msgs_generate_messages_nodejs
+[14.742s] [  0%] Built target actionlib_msgs_generate_messages_py
+[14.742s] [  0%] Built target rosgraph_msgs_generate_messages_nodejs
+[14.753s] [  0%] Built target pcl_msgs_generate_messages_py
+[14.757s] [  0%] Built target actionlib_msgs_generate_messages_cpp
+[14.762s] [  0%] Built target jsk_footstep_msgs_generate_messages_eus
+[14.774s] [  0%] Built target sensor_msgs_generate_messages_nodejs
+[14.835s] [  0%] Built target pcl_msgs_generate_messages_lisp
+[14.835s] [  0%] Built target autoware_msgs_generate_messages_cpp
+[14.839s] [  0%] Built target rosgraph_msgs_generate_messages_cpp
+[14.845s] [  0%] Built target std_msgs_generate_messages_nodejs
+[14.849s] [  0%] Built target pcl_msgs_generate_messages_eus
+[14.853s] [  0%] Built target std_msgs_generate_messages_lisp
+[14.858s] [  0%] Built target sensor_msgs_generate_messages_cpp
+[14.874s] [  0%] Built target sensor_msgs_generate_messages_eus
+[14.883s] [  0%] Built target jsk_footstep_msgs_generate_messages_lisp
+[14.883s] [  0%] Built target autoware_config_msgs_generate_messages_eus
+[14.886s] [  0%] Built target autoware_config_msgs_generate_messages_lisp
+[14.891s] [  0%] Built target std_msgs_generate_messages_eus
+[14.938s] [  0%] Built target autoware_config_msgs_generate_messages_py
+[14.946s] [  0%] Built target std_msgs_generate_messages_cpp
+[14.948s] [  0%] Built target rosgraph_msgs_generate_messages_py
+[14.949s] [  0%] Built target autoware_msgs_generate_messages_nodejs
+[14.961s] [  0%] Built target jsk_footstep_msgs_generate_messages_py
+[14.976s] [  0%] Built target std_msgs_generate_messages_py
+[14.977s] [  0%] Built target autoware_msgs_generate_messages_py
+[14.984s] [  0%] Built target actionlib_msgs_generate_messages_nodejs
+[14.984s] [  0%] Built target sensor_msgs_generate_messages_py
+[14.989s] [  0%] Built target autoware_msgs_generate_messages_eus
+[14.989s] [  0%] Built target jsk_recognition_msgs_generate_messages_py
+[15.009s] [  0%] Built target jsk_recognition_msgs_generate_messages_cpp
+[15.038s] [  0%] Built target sensor_msgs_generate_messages_lisp
+[15.065s] [  0%] Built target pcl_msgs_generate_messages_cpp
+[15.071s] [  0%] Built target actionlib_msgs_generate_messages_eus
+[15.073s] [  0%] Built target autoware_msgs_generate_messages_lisp
+[15.079s] [  0%] Built target roscpp_generate_messages_nodejs
+[15.086s] [  0%] Built target autoware_config_msgs_generate_messages_nodejs
+[15.086s] [  0%] Built target roscpp_generate_messages_eus
+[15.088s] [  0%] Built target geometry_msgs_generate_messages_nodejs
+[15.092s] [  0%] Built target geometry_msgs_generate_messages_cpp
+[15.093s] [  0%] Built target geometry_msgs_generate_messages_lisp
+[15.093s] [  0%] Built target geometry_msgs_generate_messages_eus
+[15.131s] [  0%] Built target jsk_footstep_msgs_generate_messages_cpp
+[15.140s] [  0%] Built target geometry_msgs_generate_messages_py
+[15.154s] [  0%] Built target jsk_recognition_msgs_generate_messages_lisp
+[15.161s] [  0%] Built target jsk_recognition_msgs_generate_messages_nodejs
+[15.162s] [  0%] Built target autoware_config_msgs_generate_messages_cpp
+[15.169s] [  0%] Built target roscpp_generate_messages_cpp
+[15.169s] [  0%] Built target rosgraph_msgs_generate_messages_eus
+[15.177s] [  0%] Built target jsk_recognition_msgs_generate_messages_eus
+[15.279s] [ 93%] Built target vision_darknet_detect_lib
+[15.357s] [100%] Built target vision_darknet_detect
+[15.417s] [36mInstall the project...[0m
+[15.442s] -- Install configuration: "Release"
+[15.445s] -- Installing: /home/hypark/git/Autoware_On_Embedded/install/vision_darknet_detect/lib/pkgconfig/vision_darknet_detect.pc
+[15.445s] -- Installing: /home/hypark/git/Autoware_On_Embedded/install/vision_darknet_detect/share/vision_darknet_detect/cmake/vision_darknet_detectConfig.cmake
+[15.445s] -- Installing: /home/hypark/git/Autoware_On_Embedded/install/vision_darknet_detect/share/vision_darknet_detect/cmake/vision_darknet_detectConfig-version.cmake
+[15.445s] -- Installing: /home/hypark/git/Autoware_On_Embedded/install/vision_darknet_detect/share/vision_darknet_detect/package.xml
+[15.445s] -- Installing: /home/hypark/git/Autoware_On_Embedded/install/vision_darknet_detect/lib/libvision_darknet_detect_lib.so
+[15.447s] -- Set runtime path of "/home/hypark/git/Autoware_On_Embedded/install/vision_darknet_detect/lib/libvision_darknet_detect_lib.so" to ""
+[15.448s] -- Installing: /home/hypark/git/Autoware_On_Embedded/install/vision_darknet_detect/lib/vision_darknet_detect/vision_darknet_detect
+[15.452s] -- Set runtime path of "/home/hypark/git/Autoware_On_Embedded/install/vision_darknet_detect/lib/vision_darknet_detect/vision_darknet_detect" to ""
+[15.452s] -- Installing: /home/hypark/git/Autoware_On_Embedded/install/vision_darknet_detect/share/vision_darknet_detect/launch
+[15.452s] -- Installing: /home/hypark/git/Autoware_On_Embedded/install/vision_darknet_detect/share/vision_darknet_detect/launch/vision_yolo3_detect.launch
+[15.452s] -- Installing: /home/hypark/git/Autoware_On_Embedded/install/vision_darknet_detect/share/vision_darknet_detect/launch/vision_yolo2_detect.launch
+[15.452s] -- Installing: /home/hypark/git/Autoware_On_Embedded/install/vision_darknet_detect/share/vision_darknet_detect/darknet/cfg/
+[15.452s] -- Installing: /home/hypark/git/Autoware_On_Embedded/install/vision_darknet_detect/share/vision_darknet_detect/darknet/cfg//yolov2-tiny.cfg
+[15.452s] -- Installing: /home/hypark/git/Autoware_On_Embedded/install/vision_darknet_detect/share/vision_darknet_detect/darknet/cfg//yolov3-tiny.cfg
+[15.452s] -- Installing: /home/hypark/git/Autoware_On_Embedded/install/vision_darknet_detect/share/vision_darknet_detect/darknet/cfg//yolov2.cfg
+[15.452s] -- Installing: /home/hypark/git/Autoware_On_Embedded/install/vision_darknet_detect/share/vision_darknet_detect/darknet/cfg//voc.names
+[15.453s] -- Installing: /home/hypark/git/Autoware_On_Embedded/install/vision_darknet_detect/share/vision_darknet_detect/darknet/cfg//yolov3-voc.cfg
+[15.453s] -- Installing: /home/hypark/git/Autoware_On_Embedded/install/vision_darknet_detect/share/vision_darknet_detect/darknet/cfg//yolov3.cfg
+[15.453s] -- Installing: /home/hypark/git/Autoware_On_Embedded/install/vision_darknet_detect/share/vision_darknet_detect/darknet/cfg//coco.names
+[15.455s] Invoked command in '/home/hypark/git/Autoware_On_Embedded/build/vision_darknet_detect' returned '0': /usr/bin/cmake --build /home/hypark/git/Autoware_On_Embedded/build/vision_darknet_detect --target install -- -j12 -l12
