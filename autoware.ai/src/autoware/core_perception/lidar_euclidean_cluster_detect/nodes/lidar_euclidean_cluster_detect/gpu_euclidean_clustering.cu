@@ -665,14 +665,14 @@ void GpuEuclideanCluster::extractClusters()
   blockLabelling << < grid_x, block_x >> > (x_, y_, z_, cluster_indices_, size_, threshold_);
   stop_profiling(19, LAUNCH);
 
-  request_scheduling(deadline_list_[20]);
+  request_scheduling(20);
   clusterMark << < grid_x, block_x >> > (cluster_indices_, cluster_offset, size_);
   stop_profiling(20, LAUNCH);
   exclusiveScan(cluster_offset, size_ + 1, &cluster_num);
 
   int *cluster_list, *new_cluster_list, *tmp;
 
-  request_scheduling(deadline_list_[21]);
+  request_scheduling(21);
   checkCudaErrors(cudaMalloc(&cluster_list, cluster_num * sizeof(int)));
   clusterCollector << < grid_x, block_x >> > (cluster_indices_, cluster_list, cluster_offset, size_);
   checkCudaErrors(cudaDeviceSynchronize());
@@ -1068,7 +1068,6 @@ void init_scheduling(char* task_filename, char* deadline_filename, int key_id){
   gpu_scheduling_flag_ = 1;
   // Get deadline list
   get_deadline_list(deadline_filename);
-
   // Initialize key id for shared memory
   key_id_ = key_id;
 
@@ -1076,10 +1075,8 @@ void init_scheduling(char* task_filename, char* deadline_filename, int key_id){
   initialize_signal_handler();
 
   // Create task file
-
   sprintf(task_filename_, "%s", task_filename);
   create_task_file();    
-
   // Get scheduler pid
   get_scheduler_pid();
 
@@ -1103,6 +1100,7 @@ void init_scheduling(char* task_filename, char* deadline_filename, int key_id){
 
 void request_scheduling(int id){  
   unsigned long long relative_deadline = deadline_list_[id];
+
   if(gpu_scheduling_flag_ == 0) return;
   if(identical_deadline_ != 0) sched_info_->deadline = absolute_deadline_;  
   else sched_info_->deadline = get_current_time_us() + relative_deadline;  
@@ -1116,6 +1114,7 @@ void request_scheduling(int id){
       if(!sigwait(&sigset_, &sig_)) break;
   }
   start_profiling_execution_time();
+
 }
 
 void get_deadline_list(char* filename){

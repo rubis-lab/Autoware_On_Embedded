@@ -41,7 +41,7 @@ static key_t key_;
 static int shmid_;
 static sigset_t sigset_;
 static int sig_;
-static unsigned long long deadline_list_[35];
+static unsigned long long deadline_list_[40];
 static int gpu_scheduling_flag_;
 static unsigned long long absolute_deadline_;
 static unsigned long long identical_deadline_;
