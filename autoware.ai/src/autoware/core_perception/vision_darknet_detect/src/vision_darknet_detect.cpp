@@ -38,11 +38,12 @@ extern"C" void start_profiling_response_time();
 extern"C" void stop_profiling(int id, int type);
 extern"C" void write_profiling_data(int id, float e_time, float r_time, int type);
 extern"C" void write_dummy_line();
-extern"C" void initialize_file(const char execution_time_filename[], const char response_time_filename[]);
+extern"C" void initialize_file(const char execution_time_filename[], const char response_time_filename[], const char remain_time_filename[]);
 extern"C" void close_file();
 
 static std::string _execution_time_file_name;
 static std::string _response_time_file_name;
+static std::string _remain_time_file_name;
 
 namespace darknet
 {
@@ -326,12 +327,13 @@ void Yolo3DetectorNode::Run()
     int identical_deadline;
     private_node_handle.param<std::string>("execution_time_file_name",_execution_time_file_name,"./yolo_execution_time.csv");
     private_node_handle.param<std::string>("response_time_file_name",_response_time_file_name,"./yolo_response_time.csv");
+    private_node_handle.param<std::string>("remain_time_file_name",_remain_time_file_name,"./yolo_remain_time.csv");
     private_node_handle.param("gpu_scheduling_flag", gpu_scheduling_flag_, 0);
     private_node_handle.param("identical_deadline", identical_deadline, 0);
     set_identical_deadline((unsigned long long)identical_deadline);
     //private_node_handle.getParam("profiling_file_name", _profiling_file_name);
     // fprintf(stderr,"%s\n", _profiling_file_name.c_str());
-    initialize_file(_execution_time_file_name.c_str(), _response_time_file_name.c_str());    
+    initialize_file(_execution_time_file_name.c_str(), _response_time_file_name.c_str(), _remain_time_file_name.c_str());    
     
     int key_id = 2;    
     if(gpu_scheduling_flag_==1)

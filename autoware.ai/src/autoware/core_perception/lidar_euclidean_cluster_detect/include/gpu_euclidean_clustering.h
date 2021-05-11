@@ -74,7 +74,7 @@ void start_profiling_response_time();
 void stop_profiling(int id, int type);
 void write_profiling_data(int id, float e_time, float r_time, int type);
 void write_dummy_line();
-void initialize_file(const char execution_time_filename[], const char response_time_filename[]);
+void initialize_file(const char execution_time_filename[], const char response_time_filename[], const char remain_time_filename[]);
 void close_file();
 
 

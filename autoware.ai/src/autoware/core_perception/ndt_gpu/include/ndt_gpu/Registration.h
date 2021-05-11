@@ -74,6 +74,7 @@ void set_absolute_deadline();
 
 static FILE* execution_time_fp;
 static FILE* response_time_fp;
+static FILE* remain_time_fp;
 
 /* Added for GPU profiling */
 static cudaEvent_t e_event_start, e_event_stop, r_event_start, r_event_stop;
@@ -83,7 +84,7 @@ void start_profiling_response_time();
 void stop_profiling(int id, int type);
 void write_profiling_data(int id, float e_time, float r_time, int type);
 void write_dummy_line();
-void initialize_file(const char execution_time_filename[], const char response_time_filename[]);
+void initialize_file(const char execution_time_filename[], const char response_time_filename[], const char remain_time_filename[]);
 void close_file();
 
 namespace gpu {

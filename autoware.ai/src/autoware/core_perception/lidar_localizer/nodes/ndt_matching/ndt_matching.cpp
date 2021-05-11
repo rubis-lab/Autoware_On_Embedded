@@ -250,6 +250,7 @@ static bool _is_init_match_finished = false;
 
 static std::string _execution_time_file_name;
 static std::string _response_time_file_name;
+static std::string _remain_time_file_name;
 
 static pose convertPoseIntoRelativeCoordinate(const pose &target_pose, const pose &reference_pose)
 {
@@ -1569,7 +1570,8 @@ int main(int argc, char** argv)
   if(_method_type == MethodType::PCL_ANH_GPU){    
     private_nh.param<std::string>("execution_time_file_name", _execution_time_file_name, "~/GPU_profiling/ndt_execution_time.csv");    
     private_nh.param<std::string>("response_time_file_name", _response_time_file_name, "~/GPU_profiling/ndt_response_time.csv");    
-    initialize_file(_execution_time_file_name.c_str(), _response_time_file_name.c_str());    
+    private_nh.param<std::string>("remain_time_file_name", _remain_time_file_name, "~/GPU_profiling/ndt_remain_time.csv");    
+    initialize_file(_execution_time_file_name.c_str(), _response_time_file_name.c_str(), _remain_time_file_name.c_str());    
   }
 
 

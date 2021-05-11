@@ -493,33 +493,39 @@ void stop_profiling(int id, int type){
 void write_profiling_data(int id, float e_time, float r_time, int type){
 	if(GPU_PROFILING == 1){
 		fprintf(execution_time_fp, "%d, %f, %d\n", id, e_time, type);	
-    fprintf(response_time_fp, "%d, %f, %d\n", id, r_time, type);	
+    	fprintf(response_time_fp, "%d, %f, %d\n", id, r_time, type);	
+		fprintf(remain_time_fp, "%d, %llu\n", id, absolute_deadline_ - get_current_time_us());	
 	}
 }
 
 
 void write_dummy_line(){
 	if(GPU_PROFILING == 1){  
-    fprintf(execution_time_fp, "-1, -1, -1\n");						
+    	fprintf(execution_time_fp, "-1, -1, -1\n");						
 		fflush(execution_time_fp);
 		fprintf(response_time_fp, "-1, -1, -1\n");						
 		fflush(response_time_fp);
+		fprintf(remain_time_fp, "-1, -1\n");						
+		fflush(remain_time_fp);
 	}
 }
 
-void initialize_file(const char execution_time_filename[], const char response_time_filename[]){
+void initialize_file(const char execution_time_filename[], const char response_time_filename[], const char remain_time_filename[]){
 	if(GPU_PROFILING == 1){
 		execution_time_fp = fopen(execution_time_filename, "w+");
 		fprintf(execution_time_fp, "ID, TIME, TYPE\n");
-    response_time_fp = fopen(response_time_filename, "w+");
+    	response_time_fp = fopen(response_time_filename, "w+");
 		fprintf(response_time_fp, "ID, TIME, TYPE\n");
+		remain_time_fp = fopen(remain_time_filename, "w+");
+		fprintf(remain_time_fp, "ID, TIME\n");
 	}
 }
 
 void close_file(){
 	if(GPU_PROFILING == 1){
 		fclose(execution_time_fp);
-    fclose(response_time_fp);
+    	fclose(response_time_fp);
+		fclose(remain_time_fp);
   }
 }
 

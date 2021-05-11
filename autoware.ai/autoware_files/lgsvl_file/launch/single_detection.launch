@@ -44,14 +44,15 @@
     <arg name="clustering_ranges" value="[15,30,45,60]"/>
     <arg name="clustering_distances"
          value="[0.5,1.1,1.6,2.1,2.6]"/>
-    <arg name="execution_time_file_name" value="$(env HOME)/GPU_profiling/210510_cluster_execution_time_fifo.csv" />
-    <arg name="response_time_file_name" value="$(env HOME)/GPU_profiling/210510_cluster_response_time_fifo.csv" />
+    <arg name="execution_time_file_name" value="$(env HOME)/GPU_profiling/210511_cluster_execution_time.csv" />
+    <arg name="response_time_file_name" value="$(env HOME)/GPU_profiling/210511_cluster_response_time.csv" />
+    <arg name="remain_time_file_name" value="$(env HOME)/GPU_profiling/210511_cluster_remain_time.csv" />
     <arg name="gpu_scheduling_flag" value="1" />
-    <arg name="identical_deadline" value="0" />
+    <arg name="identical_deadline" value="60000" />
   </include>
   
   <!-- vision_darknet_detect -->
-  <!-- <include file="$(find vision_darknet_detect)/launch/vision_yolo3_detect.launch">
+  <include file="$(find vision_darknet_detect)/launch/vision_yolo3_detect.launch">
     <arg name="gpu_device_id" value="0"/>
     <arg name="score_threshold" value="0.5"/>
     <arg name="nms_threshold" value="0.45"/>
@@ -60,11 +61,12 @@
     <arg name="names_file" value="$(find vision_darknet_detect)/darknet/cfg/coco.names"/>
     <arg name="camera_id" value="/"/>
     <arg name="image_src" value="/image_raw"/>
-    <arg name="execution_time_file_name" value="$(env HOME)/GPU_profiling/210510_yolo_execution_time_fifo.csv"/>
-    <arg name="response_time_file_name" value="$(env HOME)/GPU_profiling/210510_yolo_response_time_fifo.csv"/>
+    <arg name="execution_time_file_name" value="$(env HOME)/GPU_profiling/210511_yolo_execution_time.csv"/>
+    <arg name="response_time_file_name" value="$(env HOME)/GPU_profiling/210511_yolo_response_time.csv"/>
+    <arg name="remain_time_file_name" value="$(env HOME)/GPU_profiling/210511_yolo_remain_time.csv"/>
     <arg name="gpu_scheduling_flag" value="1" />
-    <arg name="identical_deadline" value="0" />
-  </include> -->
+    <arg name="identical_deadline" value="60000" />
+  </include>
 
   <!-- imm_ukf_pda_track -->
   <!-- <include file="$(find imm_ukf_pda_track)/launch/imm_ukf_pda_track.launch">
