@@ -173,3 +173,16 @@ $ ./copy-rootfs-ssd.sh
 $ ./setup-service.sh
 $ sudo reboot
 ```
+
+## Install cuda
+```
+sudo apt-get install libopencv libopencv-python \
+cuda-toolkit-10-2 libopencv-dev opencv-licenses
+```
+
+### Cuda Library path
+In .bashrc
+```
+export PATH=/usr/local/cuda/bin:$PATH
+export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
+```
