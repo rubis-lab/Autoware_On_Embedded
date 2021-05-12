@@ -1,0 +1,371 @@
+-- The C compiler identification is GNU 7.5.0
+-- The CXX compiler identification is GNU 7.5.0
+-- Check for working C compiler: /usr/bin/cc
+-- Check for working C compiler: /usr/bin/cc -- works
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Check for working CXX compiler: /usr/bin/c++
+-- Check for working CXX compiler: /usr/bin/c++ -- works
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- CUDA compilation status: 1.
+-- Using CATKIN_DEVEL_PREFIX: /home/hypark/git/Autoware_On_Embedded/build/lidar_euclidean_cluster_detect/devel
+-- Using CMAKE_PREFIX_PATH: /home/hypark/rubis_ws/devel;/home/hypark/autoware.ai/install/ymc;/home/hypark/autoware.ai/install/xsens_driver;/home/hypark/autoware.ai/install/wf_simulator;/home/hypark/autoware.ai/install/lattice_planner;/home/hypark/autoware.ai/install/waypoint_planner;/home/hypark/autoware.ai/install/waypoint_maker;/home/hypark/autoware.ai/install/way_planner;/home/hypark/autoware.ai/install/vlg22c_cam;/home/hypark/autoware.ai/install/vision_ssd_detect;/home/hypark/autoware.ai/install/vision_segment_enet_detect;/home/hypark/autoware.ai/install/vision_lane_detect;/home/hypark/autoware.ai/install/vision_darknet_detect;/home/hypark/autoware.ai/install/vision_beyond_track;/home/hypark/autoware.ai/install/vel_pose_diff_checker;/home/hypark/autoware.ai/install/vehicle_socket;/home/hypark/autoware.ai/install/vehicle_sim_model;/home/hypark/autoware.ai/install/vehicle_model;/home/hypark/autoware.ai/install/vehicle_gazebo_simulation_launcher;/home/hypark/autoware.ai/install/vehicle_gazebo_simulation_interface;/home/hypark/autoware.ai/install/vehicle_engage_panel;/home/hypark/autoware.ai/install/vehicle_description;/home/hypark/autoware.ai/install/trafficlight_recognizer;/home/hypark/autoware.ai/install/op_utilities;/home/hypark/autoware.ai/install/op_simulation_package;/home/hypark/autoware.ai/install/op_local_planner;/home/hypark/autoware.ai/install/op_global_planner;/home/hypark/autoware.ai/install/lidar_kf_contour_track;/home/hypark/autoware.ai/install/op_ros_helpers;/home/hypark/autoware.ai/install/ff_waypoint_follower;/home/hypark/autoware.ai/install/dp_planner;/home/hypark/autoware.ai/install/op_simu;/home/hypark/autoware.ai/install/op_planner;/home/hypark/autoware.ai/install/op_utility;/home/hypark/autoware.ai/install/lidar_euclidean_cluster_detect;/home/hypark/autoware.ai/install/vector_map_server;/home/hypark/autoware.ai/install/road_occupancy_processor;/home/hypark/autoware.ai/install/costmap_generator;/home/hypark/autoware.ai/install/object_map;/home/hypark/autoware.ai/install/naive_motion_predict;/home/hypark/autoware.ai/install/lanelet_aisan_converter;/home/hypark/autoware.ai/install/map_file;/home/hypark/autoware.ai/install/libvectormap;/home/hypark/autoware.ai/install/lane_planner;/home/hypark/autoware.ai/install/imm_ukf_pda_track;/home/hypark/autoware.ai/install/decision_maker;/home/hypark/autoware.ai/install/vector_map;/home/hypark/autoware.ai/install/vector_map_msgs;/home/hypark/autoware.ai/install/vectacam;/home/hypark/autoware.ai/install/udon_socket;/home/hypark/autoware.ai/install/twist_generator;/home/hypark/autoware.ai/install/twist_gate;/home/hypark/autoware.ai/install/twist_filter;/home/hypark/autoware.ai/install/twist2odom;/home/hypark/autoware.ai/install/tablet_socket;/home/hypark/autoware.ai/install/runtime_manager;/home/hypark/autoware.ai/install/mqtt_socket;/home/hypark/autoware.ai/install/tablet_socket_msgs;/home/hypark/autoware.ai/install/state_machine_lib;/home/hypark/autoware.ai/install/sound_player;/home/hypark/autoware.ai/install/sick_lms5xx;/home/hypark/autoware.ai/install/sick_ldmrs_tools;/home/hypark/autoware.ai/install/sick_ldmrs_driver;/home/hypark/autoware.ai/install/sick_ldmrs_msgs;/home/hypark/autoware.ai/install/sick_ldmrs_description;/home/hypark/autoware.ai/install/points2image;/home/hypark/autoware.ai/install/rosinterface;/home/hypark/autoware.ai/install/rosbag_controller;/home/hypark/autoware.ai/install/pure_pursuit;/home/hypark/autoware.ai/install/points_preprocessor;/home/hypark/autoware.ai/install/mpc_follower;/home/hypark/autoware.ai/install/lidar_localizer;/home/hypark/autoware.ai/install/emergency_handler;/home/hypark/autoware.ai/install/autoware_health_checker;/home/hypark/autoware.ai/install/as;/home/hypark/autoware.ai/install/ros_observer;/home/hypark/autoware.ai/install/roi_object_filter;/home/hypark/autoware.ai/install/range_vision_fusion;/home/hypark/autoware.ai/install/pos_db;/home/hypark/autoware.ai/install/points_downsampler;/home/hypark/autoware.ai/install/pixel_cloud_fusion;/home/hypark/autoware.ai/install/pcl_omp_registration;/home/hypark/autoware.ai/install/pc2_downsampler;/home/hypark/autoware.ai/install/oculus_socket;/home/hypark/autoware.ai/install/obj_db;/home/hypark/autoware.ai/install/nmea_navsat;/home/hypark/autoware.ai/install/ndt_tku;/home/hypark/autoware.ai/install/ndt_gpu;/home/hypark/autoware.ai/install/ndt_cpu;/home/hypark/autoware.ai/install/multi_vlp_driver;/home/hypark/autoware.ai/install/multi_vlp_converter;/home/hypark/autoware.ai/install/multi_vlp_combiner;/home/hypark/autoware.ai/install/multi_lidar_calibrator;/home/hypark/autoware.ai/install/mrt_cmake_modules;/home/hypark/autoware.ai/install/microstrain_driver;/home/hypark/autoware.ai/install/memsic_imu;/home/hypark/autoware.ai/install/marker_downsampler;/home/hypark/autoware.ai/install/map_tools;/home/hypark/autoware.ai/install/map_tf_generator;/home/hypark/autoware.ai/install/log_tools;/home/hypark/autoware.ai/install/lidar_shape_estimation;/home/hypark/autoware.ai/install/lidar_point_pillars;/home/hypark/autoware.ai/install/lidar_naive_l_shape_detect;/home/hypark/autoware.ai/install/lidar_fake_perception;/home/hypark/autoware.ai/install/lidar_apollo_cnn_seg_detect;/home/hypark/autoware.ai/install/libwaypoint_follower;/home/hypark/autoware.ai/install/lgsvl_simulator_bridge;/home/hypark/autoware.ai/install/lanelet2_extension;/home/hypark/autoware.ai/install/lanelet2_validation;/home/hypark/autoware.ai/install/lanelet2_examples;/home/hypark/autoware.ai/install/lanelet2_python;/home/hypark/autoware.ai/install/lanelet2_routing;/home/hypark/autoware.ai/install/lanelet2_traffic_rules;/home/hypark/autoware.ai/install/lanelet2_projection;/home/hypark/autoware.ai/install/lanelet2_maps;/home/hypark/autoware.ai/install/lanelet2_io;/home/hypark/autoware.ai/install/lanelet2_core;/home/hypark/autoware.ai/install/kvaser;/home/hypark/autoware.ai/install/kitti_launch;/home/hypark/autoware.ai/install/kitti_player;/home/hypark/autoware.ai/install/kitti_box_publisher;/home/hypark/autoware.ai/install/javad_navsat_driver;/home/hypark/autoware.ai/install/integrated_viewer;/home/hypark/autoware.ai/install/image_processor;/home/hypark/autoware.ai/install/hokuyo;/home/hypark/autoware.ai/install/graph_tools;/home/hypark/autoware.ai/install/gnss_localizer;/home/hypark/autoware.ai/install/gnss;/home/hypark/autoware.ai/install/glviewer;/home/hypark/autoware.ai/install/gazebo_world_description;/home/hypark/autoware.ai/install/gazebo_imu_description;/home/hypark/autoware.ai/install/gazebo_camera_description;/home/hypark/autoware.ai/install/garmin;/home/hypark/autoware.ai/install/freespace_planner;/home/hypark/autoware.ai/install/fastvirtualscan;/home/hypark/autoware.ai/install/ekf_localizer;/home/hypark/autoware.ai/install/ds4_msgs;/home/hypark/autoware.ai/install/ds4_driver;/home/hypark/autoware.ai/install/detected_objects_visualizer;/home/hypark/autoware.ai/install/decision_maker_panel;/home/hypark/autoware.ai/install/data_preprocessor;/home/hypark/autoware.ai/install/custom_msgs;/home/hypark/autoware.ai/install/carla_autoware_bridge;/home/hypark/autoware.ai/install/calibration_publisher;/home/hypark/autoware.ai/install/autoware_system_msgs;/home/hypark/autoware.ai/install/autoware_rviz_plugins;/home/hypark/autoware.ai/install/autoware_quickstart_examples;/home/hypark/autoware.ai/install/autoware_pointgrey_drivers;/home/hypark/autoware.ai/install/autoware_driveworks_interface;/home/hypark/autoware.ai/install/autoware_connector;/home/hypark/autoware.ai/install/autoware_camera_lidar_calibrator;/home/hypark/autoware.ai/install/astar_search;/home/hypark/autoware.ai/install/amathutils_lib;/home/hypark/autoware.ai/install/autoware_msgs;/home/hypark/autoware.ai/install/autoware_map_msgs;/home/hypark/autoware.ai/install/autoware_launcher_rviz;/home/hypark/autoware.ai/install/autoware_launcher;/home/hypark/autoware.ai/install/autoware_lanelet2_msgs;/home/hypark/autoware.ai/install/autoware_external_msgs;/home/hypark/autoware.ai/install/autoware_driveworks_gmsl_interface;/home/hypark/autoware.ai/install/autoware_config_msgs;/home/hypark/autoware.ai/install/autoware_can_msgs;/home/hypark/autoware.ai/install/autoware_build_flags;/home/hypark/autoware.ai/install/autoware_bag_tools;/home/hypark/autoware.ai/install/adi_driver;/opt/ros/melodic
+-- This workspace overlays: /home/hypark/rubis_ws/devel;/home/hypark/autoware.ai/install/ymc;/home/hypark/autoware.ai/install/xsens_driver;/home/hypark/autoware.ai/install/wf_simulator;/home/hypark/autoware.ai/install/lattice_planner;/home/hypark/autoware.ai/install/waypoint_planner;/home/hypark/autoware.ai/install/waypoint_maker;/home/hypark/autoware.ai/install/way_planner;/home/hypark/autoware.ai/install/vlg22c_cam;/home/hypark/autoware.ai/install/vision_ssd_detect;/home/hypark/autoware.ai/install/vision_segment_enet_detect;/home/hypark/autoware.ai/install/vision_lane_detect;/home/hypark/autoware.ai/install/vision_darknet_detect;/home/hypark/autoware.ai/install/vision_beyond_track;/home/hypark/autoware.ai/install/vel_pose_diff_checker;/home/hypark/autoware.ai/install/vehicle_socket;/home/hypark/autoware.ai/install/vehicle_sim_model;/home/hypark/autoware.ai/install/vehicle_model;/home/hypark/autoware.ai/install/vehicle_gazebo_simulation_launcher;/home/hypark/autoware.ai/install/vehicle_gazebo_simulation_interface;/home/hypark/autoware.ai/install/vehicle_engage_panel;/home/hypark/autoware.ai/install/vehicle_description;/home/hypark/autoware.ai/install/trafficlight_recognizer;/home/hypark/autoware.ai/install/op_utilities;/home/hypark/autoware.ai/install/op_simulation_package;/home/hypark/autoware.ai/install/op_local_planner;/home/hypark/autoware.ai/install/op_global_planner;/home/hypark/autoware.ai/install/lidar_kf_contour_track;/home/hypark/autoware.ai/install/op_ros_helpers;/home/hypark/autoware.ai/install/ff_waypoint_follower;/home/hypark/autoware.ai/install/dp_planner;/home/hypark/autoware.ai/install/op_simu;/home/hypark/autoware.ai/install/op_planner;/home/hypark/autoware.ai/install/op_utility;/home/hypark/autoware.ai/install/lidar_euclidean_cluster_detect;/home/hypark/autoware.ai/install/vector_map_server;/home/hypark/autoware.ai/install/road_occupancy_processor;/home/hypark/autoware.ai/install/costmap_generator;/home/hypark/autoware.ai/install/object_map;/home/hypark/autoware.ai/install/naive_motion_predict;/home/hypark/autoware.ai/install/lanelet_aisan_converter;/home/hypark/autoware.ai/install/map_file;/home/hypark/autoware.ai/install/libvectormap;/home/hypark/autoware.ai/install/lane_planner;/home/hypark/autoware.ai/install/imm_ukf_pda_track;/home/hypark/autoware.ai/install/decision_maker;/home/hypark/autoware.ai/install/vector_map;/home/hypark/autoware.ai/install/vector_map_msgs;/home/hypark/autoware.ai/install/vectacam;/home/hypark/autoware.ai/install/udon_socket;/home/hypark/autoware.ai/install/twist_generator;/home/hypark/autoware.ai/install/twist_gate;/home/hypark/autoware.ai/install/twist_filter;/home/hypark/autoware.ai/install/twist2odom;/home/hypark/autoware.ai/install/tablet_socket;/home/hypark/autoware.ai/install/runtime_manager;/home/hypark/autoware.ai/install/mqtt_socket;/home/hypark/autoware.ai/install/tablet_socket_msgs;/home/hypark/autoware.ai/install/state_machine_lib;/home/hypark/autoware.ai/install/sound_player;/home/hypark/autoware.ai/install/sick_lms5xx;/home/hypark/autoware.ai/install/sick_ldmrs_tools;/home/hypark/autoware.ai/install/sick_ldmrs_driver;/home/hypark/autoware.ai/install/sick_ldmrs_msgs;/home/hypark/autoware.ai/install/sick_ldmrs_description;/home/hypark/autoware.ai/install/points2image;/home/hypark/autoware.ai/install/rosinterface;/home/hypark/autoware.ai/install/rosbag_controller;/home/hypark/autoware.ai/install/pure_pursuit;/home/hypark/autoware.ai/install/points_preprocessor;/home/hypark/autoware.ai/install/mpc_follower;/home/hypark/autoware.ai/install/lidar_localizer;/home/hypark/autoware.ai/install/emergency_handler;/home/hypark/autoware.ai/install/autoware_health_checker;/home/hypark/autoware.ai/install/as;/home/hypark/autoware.ai/install/ros_observer;/home/hypark/autoware.ai/install/roi_object_filter;/home/hypark/autoware.ai/install/range_vision_fusion;/home/hypark/autoware.ai/install/pos_db;/home/hypark/autoware.ai/install/points_downsampler;/home/hypark/autoware.ai/install/pixel_cloud_fusion;/home/hypark/autoware.ai/install/pcl_omp_registration;/home/hypark/autoware.ai/install/pc2_downsampler;/home/hypark/autoware.ai/install/oculus_socket;/home/hypark/autoware.ai/install/obj_db;/home/hypark/autoware.ai/install/nmea_navsat;/home/hypark/autoware.ai/install/ndt_tku;/home/hypark/autoware.ai/install/ndt_gpu;/home/hypark/autoware.ai/install/ndt_cpu;/home/hypark/autoware.ai/install/multi_vlp_driver;/home/hypark/autoware.ai/install/multi_vlp_converter;/home/hypark/autoware.ai/install/multi_vlp_combiner;/home/hypark/autoware.ai/install/multi_lidar_calibrator;/home/hypark/autoware.ai/install/mrt_cmake_modules;/home/hypark/autoware.ai/install/microstrain_driver;/home/hypark/autoware.ai/install/memsic_imu;/home/hypark/autoware.ai/install/marker_downsampler;/home/hypark/autoware.ai/install/map_tools;/home/hypark/autoware.ai/install/map_tf_generator;/home/hypark/autoware.ai/install/log_tools;/home/hypark/autoware.ai/install/lidar_shape_estimation;/home/hypark/autoware.ai/install/lidar_point_pillars;/home/hypark/autoware.ai/install/lidar_naive_l_shape_detect;/home/hypark/autoware.ai/install/lidar_fake_perception;/home/hypark/autoware.ai/install/lidar_apollo_cnn_seg_detect;/home/hypark/autoware.ai/install/libwaypoint_follower;/home/hypark/autoware.ai/install/lgsvl_simulator_bridge;/home/hypark/autoware.ai/install/lanelet2_extension;/home/hypark/autoware.ai/install/lanelet2_validation;/home/hypark/autoware.ai/install/lanelet2_examples;/home/hypark/autoware.ai/install/lanelet2_python;/home/hypark/autoware.ai/install/lanelet2_routing;/home/hypark/autoware.ai/install/lanelet2_traffic_rules;/home/hypark/autoware.ai/install/lanelet2_projection;/home/hypark/autoware.ai/install/lanelet2_maps;/home/hypark/autoware.ai/install/lanelet2_io;/home/hypark/autoware.ai/install/lanelet2_core;/home/hypark/autoware.ai/install/kvaser;/home/hypark/autoware.ai/install/kitti_launch;/home/hypark/autoware.ai/install/kitti_player;/home/hypark/autoware.ai/install/kitti_box_publisher;/home/hypark/autoware.ai/install/javad_navsat_driver;/home/hypark/autoware.ai/install/integrated_viewer;/home/hypark/autoware.ai/install/image_processor;/home/hypark/autoware.ai/install/hokuyo;/home/hypark/autoware.ai/install/graph_tools;/home/hypark/autoware.ai/install/gnss_localizer;/home/hypark/autoware.ai/install/gnss;/home/hypark/autoware.ai/install/glviewer;/home/hypark/autoware.ai/install/gazebo_world_description;/home/hypark/autoware.ai/install/gazebo_imu_description;/home/hypark/autoware.ai/install/gazebo_camera_description;/home/hypark/autoware.ai/install/garmin;/home/hypark/autoware.ai/install/freespace_planner;/home/hypark/autoware.ai/install/fastvirtualscan;/home/hypark/autoware.ai/install/ekf_localizer;/home/hypark/autoware.ai/install/ds4_msgs;/home/hypark/autoware.ai/install/ds4_driver;/home/hypark/autoware.ai/install/detected_objects_visualizer;/home/hypark/autoware.ai/install/decision_maker_panel;/home/hypark/autoware.ai/install/data_preprocessor;/home/hypark/autoware.ai/install/custom_msgs;/home/hypark/autoware.ai/install/carla_autoware_bridge;/home/hypark/autoware.ai/install/calibration_publisher;/home/hypark/autoware.ai/install/autoware_system_msgs;/home/hypark/autoware.ai/install/autoware_rviz_plugins;/home/hypark/autoware.ai/install/autoware_quickstart_examples;/home/hypark/autoware.ai/install/autoware_pointgrey_drivers;/home/hypark/autoware.ai/install/autoware_driveworks_interface;/home/hypark/autoware.ai/install/autoware_connector;/home/hypark/autoware.ai/install/autoware_camera_lidar_calibrator;/home/hypark/autoware.ai/install/astar_search;/home/hypark/autoware.ai/install/amathutils_lib;/home/hypark/autoware.ai/install/autoware_msgs;/home/hypark/autoware.ai/install/autoware_map_msgs;/home/hypark/autoware.ai/install/autoware_launcher_rviz;/home/hypark/autoware.ai/install/autoware_launcher;/home/hypark/autoware.ai/install/autoware_lanelet2_msgs;/home/hypark/autoware.ai/install/autoware_external_msgs;/home/hypark/autoware.ai/install/autoware_driveworks_gmsl_interface;/home/hypark/autoware.ai/install/autoware_config_msgs;/home/hypark/autoware.ai/install/autoware_can_msgs;/home/hypark/autoware.ai/install/autoware_build_flags;/home/hypark/autoware.ai/install/autoware_bag_tools;/home/hypark/autoware.ai/install/adi_driver;/opt/ros/melodic
+-- Found PythonInterp: /usr/bin/python2 (found suitable version "2.7.17", minimum required is "2") 
+-- Using PYTHON_EXECUTABLE: /usr/bin/python2
+-- Using Debian Python package layout
+-- Using empy: /usr/bin/empy
+-- Using CATKIN_ENABLE_TESTING: ON
+-- Call enable_testing()
+-- Using CATKIN_TEST_RESULTS_DIR: /home/hypark/git/Autoware_On_Embedded/build/lidar_euclidean_cluster_detect/test_results
+-- Found gtest sources under '/usr/src/googletest': gtests will be built
+-- Found gmock sources under '/usr/src/googletest': gmock will be built
+-- Found PythonInterp: /usr/bin/python2 (found version "2.7.17") 
+-- Looking for pthread.h
+-- Looking for pthread.h - found
+-- Looking for pthread_create
+-- Looking for pthread_create - not found
+-- Looking for pthread_create in pthreads
+-- Looking for pthread_create in pthreads - not found
+-- Looking for pthread_create in pthread
+-- Looking for pthread_create in pthread - found
+-- Found Threads: TRUE  
+-- Using Python nosetests: /usr/bin/nosetests-2.7
+-- catkin 0.7.29
+-- BUILD_SHARED_LIBS is on
+-- Using these message generators: gencpp;geneus;genlisp;gennodejs;genpy
+-- Found OpenMP_C: -fopenmp (found version "4.5") 
+-- Found OpenMP_CXX: -fopenmp (found version "4.5") 
+-- Found OpenMP: TRUE (found version "4.5")  
+-- Found OpenCV: /usr (found version "3.2.0") 
+-- Found PkgConfig: /usr/bin/pkg-config (found version "0.29.1") 
+-- Checking for module 'yaml-cpp'
+--   Found yaml-cpp, version 0.5.2
+-- Found CUDA: /usr/local/cuda-10.0 (found version "10.0") 
+-- USING ACCELERATED CLUSTERING --
+Version: 10.0
+Library: /usr/lib/x86_64-linux-gnu/libcuda.so
+Runtime: /usr/local/cuda-10.0/lib64/libcudart.so
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/hypark/git/Autoware_On_Embedded/build/lidar_euclidean_cluster_detect
+[ 20%] [34m[1mBuilding NVCC (Device) object CMakeFiles/gpu_euclidean_clustering.dir/nodes/lidar_euclidean_cluster_detect/gpu_euclidean_clustering_generated_gpu_euclidean_clustering.cu.o[0m
+[35m[1mScanning dependencies of target vector_map_msgs_generate_messages_cpp[0m
+[35m[1mScanning dependencies of target rviz_generate_messages_py[0m
+[35m[1mScanning dependencies of target vector_map_msgs_generate_messages_lisp[0m
+[35m[1mScanning dependencies of target vector_map_msgs_generate_messages_py[0m
+[35m[1mScanning dependencies of target map_msgs_generate_messages_lisp[0m
+[35m[1mScanning dependencies of target tf_generate_messages_eus[0m
+[35m[1mScanning dependencies of target people_msgs_generate_messages_lisp[0m
+[35m[1mScanning dependencies of target vector_map_server_generate_messages_nodejs[0m
+[35m[1mScanning dependencies of target vector_map_msgs_generate_messages_eus[0m
+[35m[1mScanning dependencies of target rviz_generate_messages_cpp[0m
+[ 20%] Built target vector_map_msgs_generate_messages_cpp
+[35m[1mScanning dependencies of target people_msgs_generate_messages_py[0m
+[ 20%] Built target rviz_generate_messages_py
+[ 20%] Built target vector_map_msgs_generate_messages_lisp
+[ 20%] Built target map_msgs_generate_messages_lisp
+[ 20%] Built target people_msgs_generate_messages_lisp
+[ 20%] Built target vector_map_server_generate_messages_nodejs
+[35m[1mScanning dependencies of target rviz_generate_messages_eus[0m
+[ 20%] Built target tf_generate_messages_eus
+[ 20%] Built target vector_map_msgs_generate_messages_py
+[35m[1mScanning dependencies of target people_msgs_generate_messages_cpp[0m
+[ 20%] Built target rviz_generate_messages_cpp
+[ 20%] Built target people_msgs_generate_messages_py
+[35m[1mScanning dependencies of target bond_generate_messages_py[0m
+[35m[1mScanning dependencies of target vector_map_msgs_generate_messages_nodejs[0m
+[35m[1mScanning dependencies of target people_msgs_generate_messages_eus[0m
+[ 20%] Built target vector_map_msgs_generate_messages_eus
+[35m[1mScanning dependencies of target bond_generate_messages_nodejs[0m
+[35m[1mScanning dependencies of target bond_generate_messages_lisp[0m
+[ 20%] Built target rviz_generate_messages_eus
+[35m[1mScanning dependencies of target bond_generate_messages_eus[0m
+[ 20%] Built target people_msgs_generate_messages_cpp
+[35m[1mScanning dependencies of target nodelet_generate_messages_nodejs[0m
+[ 20%] Built target people_msgs_generate_messages_eus
+[35m[1mScanning dependencies of target bond_generate_messages_cpp[0m
+[35m[1mScanning dependencies of target map_msgs_generate_messages_eus[0m
+[ 20%] Built target bond_generate_messages_py
+[ 20%] Built target bond_generate_messages_nodejs
+[ 20%] Built target vector_map_msgs_generate_messages_nodejs
+[ 20%] Built target bond_generate_messages_lisp
+[ 20%] Built target bond_generate_messages_eus
+[35m[1mScanning dependencies of target nodelet_generate_messages_eus[0m
+[35m[1mScanning dependencies of target dynamic_reconfigure_generate_messages_py[0m
+[35m[1mScanning dependencies of target dynamic_reconfigure_generate_messages_nodejs[0m
+[ 20%] Built target map_msgs_generate_messages_eus
+[35m[1mScanning dependencies of target nodelet_generate_messages_cpp[0m
+[ 20%] Built target nodelet_generate_messages_nodejs
+[35m[1mScanning dependencies of target dynamic_reconfigure_generate_messages_eus[0m
+[35m[1mScanning dependencies of target people_msgs_generate_messages_nodejs[0m
+[35m[1mScanning dependencies of target dynamic_reconfigure_generate_messages_lisp[0m
+[ 20%] Built target bond_generate_messages_cpp
+[ 20%] Built target nodelet_generate_messages_eus
+[ 20%] Built target dynamic_reconfigure_generate_messages_nodejs
+[35m[1mScanning dependencies of target map_msgs_generate_messages_py[0m
+[ 20%] Built target dynamic_reconfigure_generate_messages_py
+[ 20%] Built target dynamic_reconfigure_generate_messages_eus
+[35m[1mScanning dependencies of target pcl_ros_gencfg[0m
+[ 20%] Built target nodelet_generate_messages_cpp
+[35m[1mScanning dependencies of target jsk_hark_msgs_generate_messages_py[0m
+[ 20%] Built target people_msgs_generate_messages_nodejs
+[35m[1mScanning dependencies of target rviz_generate_messages_nodejs[0m
+[ 20%] Built target map_msgs_generate_messages_py
+[35m[1mScanning dependencies of target jsk_hark_msgs_generate_messages_eus[0m
+[ 20%] Built target dynamic_reconfigure_generate_messages_lisp
+[35m[1mScanning dependencies of target jsk_hark_msgs_generate_messages_nodejs[0m
+[35m[1mScanning dependencies of target jsk_rviz_plugins_generate_messages_py[0m
+[35m[1mScanning dependencies of target jsk_recognition_utils_gencfg[0m
+[35m[1mScanning dependencies of target jsk_rviz_plugins_generate_messages_nodejs[0m
+[ 20%] Built target pcl_ros_gencfg
+[ 20%] Built target jsk_hark_msgs_generate_messages_py
+[ 20%] Built target rviz_generate_messages_nodejs
+[ 20%] Built target jsk_hark_msgs_generate_messages_eus
+[35m[1mScanning dependencies of target jsk_rviz_plugins_generate_messages_lisp[0m
+[35m[1mScanning dependencies of target rviz_generate_messages_lisp[0m
+[ 20%] Built target jsk_hark_msgs_generate_messages_nodejs
+[ 20%] Built target jsk_recognition_utils_gencfg
+[ 20%] Built target jsk_rviz_plugins_generate_messages_py
+[35m[1mScanning dependencies of target jsk_rviz_plugins_gencfg[0m
+[ 20%] Built target jsk_rviz_plugins_generate_messages_nodejs
+[35m[1mScanning dependencies of target visualization_msgs_generate_messages_eus[0m
+[35m[1mScanning dependencies of target visualization_msgs_generate_messages_py[0m
+[35m[1mScanning dependencies of target visualization_msgs_generate_messages_nodejs[0m
+[35m[1mScanning dependencies of target tf2_msgs_generate_messages_nodejs[0m
+[35m[1mScanning dependencies of target vector_map_server_generate_messages_cpp[0m
+[ 20%] Built target rviz_generate_messages_lisp
+[35m[1mScanning dependencies of target tf2_msgs_generate_messages_cpp[0m
+[ 20%] Built target jsk_rviz_plugins_gencfg
+[ 20%] Built target jsk_rviz_plugins_generate_messages_lisp
+[ 20%] Built target visualization_msgs_generate_messages_nodejs
+[ 20%] Built target visualization_msgs_generate_messages_py
+[35m[1mScanning dependencies of target tf2_msgs_generate_messages_py[0m
+[35m[1mScanning dependencies of target map_msgs_generate_messages_cpp[0m
+[ 20%] Built target vector_map_server_generate_messages_cpp
+[ 20%] Built target tf2_msgs_generate_messages_nodejs
+[ 20%] Built target visualization_msgs_generate_messages_eus
+[35m[1mScanning dependencies of target actionlib_generate_messages_cpp[0m
+[35m[1mScanning dependencies of target actionlib_generate_messages_py[0m
+[35m[1mScanning dependencies of target tf_generate_messages_py[0m
+[ 20%] Built target tf2_msgs_generate_messages_cpp
+[35m[1mScanning dependencies of target dynamic_reconfigure_generate_messages_cpp[0m
+[35m[1mScanning dependencies of target tf_generate_messages_nodejs[0m
+[ 20%] Built target map_msgs_generate_messages_cpp
+[ 20%] Built target tf2_msgs_generate_messages_py
+[35m[1mScanning dependencies of target geometry_msgs_generate_messages_py[0m
+[35m[1mScanning dependencies of target tf_generate_messages_lisp[0m
+[35m[1mScanning dependencies of target sensor_msgs_generate_messages_nodejs[0m
+[35m[1mScanning dependencies of target vector_map_server_generate_messages_eus[0m
+[35m[1mScanning dependencies of target roscpp_generate_messages_cpp[0m
+[ 20%] Built target tf_generate_messages_py
+[ 20%] Built target actionlib_generate_messages_cpp
+[ 20%] Built target actionlib_generate_messages_py
+[ 20%] Built target dynamic_reconfigure_generate_messages_cpp
+[ 20%] Built target tf_generate_messages_nodejs
+[ 20%] Built target geometry_msgs_generate_messages_py
+[ 20%] Built target tf_generate_messages_lisp
+[35m[1mScanning dependencies of target pcl_msgs_generate_messages_eus[0m
+[ 20%] Built target sensor_msgs_generate_messages_nodejs
+[35m[1mScanning dependencies of target rosgraph_msgs_generate_messages_eus[0m
+[ 20%] Built target vector_map_server_generate_messages_eus
+[ 20%] Built target roscpp_generate_messages_cpp
+[35m[1mScanning dependencies of target std_msgs_generate_messages_py[0m
+[35m[1mScanning dependencies of target nodelet_generate_messages_lisp[0m
+[35m[1mScanning dependencies of target jsk_recognition_msgs_generate_messages_lisp[0m
+[35m[1mScanning dependencies of target jsk_recognition_msgs_generate_messages_eus[0m
+[ 20%] Built target rosgraph_msgs_generate_messages_eus
+[35m[1mScanning dependencies of target autoware_msgs_generate_messages_py[0m
+[35m[1mScanning dependencies of target jsk_hark_msgs_generate_messages_lisp[0m
+[35m[1mScanning dependencies of target sensor_msgs_generate_messages_cpp[0m
+[ 20%] Built target pcl_msgs_generate_messages_eus
+[35m[1mScanning dependencies of target std_msgs_generate_messages_nodejs[0m
+[ 20%] Built target std_msgs_generate_messages_py
+[ 20%] Built target nodelet_generate_messages_lisp
+[35m[1mScanning dependencies of target sensor_msgs_generate_messages_eus[0m
+[ 20%] Built target jsk_recognition_msgs_generate_messages_eus
+[ 20%] Built target jsk_recognition_msgs_generate_messages_lisp
+[ 20%] Built target sensor_msgs_generate_messages_cpp
+[ 20%] Built target autoware_msgs_generate_messages_py
+[35m[1mScanning dependencies of target topic_tools_generate_messages_cpp[0m
+[35m[1mScanning dependencies of target jsk_recognition_msgs_generate_messages_py[0m
+[ 20%] Built target std_msgs_generate_messages_nodejs
+[35m[1mScanning dependencies of target autoware_msgs_generate_messages_cpp[0m
+[ 20%] Built target sensor_msgs_generate_messages_eus
+[ 20%] Built target jsk_hark_msgs_generate_messages_lisp
+[35m[1mScanning dependencies of target rosgraph_msgs_generate_messages_cpp[0m
+[35m[1mScanning dependencies of target jsk_footstep_msgs_generate_messages_py[0m
+[ 20%] Built target topic_tools_generate_messages_cpp
+[35m[1mScanning dependencies of target nodelet_generate_messages_py[0m
+[35m[1mScanning dependencies of target nav_msgs_generate_messages_nodejs[0m
+[35m[1mScanning dependencies of target std_msgs_generate_messages_cpp[0m
+[ 20%] Built target autoware_msgs_generate_messages_cpp
+[35m[1mScanning dependencies of target geometry_msgs_generate_messages_eus[0m
+[35m[1mScanning dependencies of target jsk_rviz_plugins_generate_messages_cpp[0m
+[35m[1mScanning dependencies of target std_msgs_generate_messages_lisp[0m
+[35m[1mScanning dependencies of target sensor_msgs_generate_messages_py[0m
+[ 20%] Built target jsk_recognition_msgs_generate_messages_py
+[ 20%] Built target nav_msgs_generate_messages_nodejs
+[ 20%] Built target std_msgs_generate_messages_cpp
+[ 20%] Built target rosgraph_msgs_generate_messages_cpp
+[ 20%] Built target nodelet_generate_messages_py
+[ 20%] Built target geometry_msgs_generate_messages_eus
+[ 20%] Built target jsk_footstep_msgs_generate_messages_py
+[ 20%] Built target std_msgs_generate_messages_lisp
+[35m[1mScanning dependencies of target roscpp_generate_messages_nodejs[0m
+[ 20%] Built target sensor_msgs_generate_messages_py
+[35m[1mScanning dependencies of target geometry_msgs_generate_messages_nodejs[0m
+[35m[1mScanning dependencies of target jsk_rviz_plugins_generate_messages_eus[0m
+[35m[1mScanning dependencies of target geometry_msgs_generate_messages_lisp[0m
+[35m[1mScanning dependencies of target actionlib_generate_messages_eus[0m
+[ 20%] Built target jsk_rviz_plugins_generate_messages_cpp
+[35m[1mScanning dependencies of target pcl_msgs_generate_messages_py[0m
+[ 20%] Built target roscpp_generate_messages_nodejs
+[35m[1mScanning dependencies of target actionlib_generate_messages_lisp[0m
+[35m[1mScanning dependencies of target geometry_msgs_generate_messages_cpp[0m
+[35m[1mScanning dependencies of target pcl_msgs_generate_messages_cpp[0m
+[ 20%] Built target geometry_msgs_generate_messages_lisp
+[35m[1mScanning dependencies of target autoware_msgs_generate_messages_eus[0m
+[ 20%] Built target jsk_rviz_plugins_generate_messages_eus
+[ 20%] Built target pcl_msgs_generate_messages_py
+[35m[1mScanning dependencies of target autoware_msgs_generate_messages_lisp[0m
+[ 20%] Built target geometry_msgs_generate_messages_nodejs
+[ 20%] Built target actionlib_generate_messages_eus
+[ 20%] Built target actionlib_generate_messages_lisp
+[35m[1mScanning dependencies of target visualization_msgs_generate_messages_lisp[0m
+[ 20%] Built target autoware_msgs_generate_messages_eus
+[ 20%] Built target pcl_msgs_generate_messages_cpp
+[35m[1mScanning dependencies of target std_msgs_generate_messages_eus[0m
+[35m[1mScanning dependencies of target topic_tools_generate_messages_eus[0m
+[ 20%] Built target geometry_msgs_generate_messages_cpp
+[35m[1mScanning dependencies of target autoware_msgs_generate_messages_nodejs[0m
+[ 20%] Built target autoware_msgs_generate_messages_lisp
+[35m[1mScanning dependencies of target jsk_footstep_msgs_generate_messages_eus[0m
+[35m[1mScanning dependencies of target nav_msgs_generate_messages_eus[0m
+[35m[1mScanning dependencies of target actionlib_msgs_generate_messages_py[0m
+[ 20%] Built target visualization_msgs_generate_messages_lisp
+[35m[1mScanning dependencies of target visualization_msgs_generate_messages_cpp[0m
+[ 20%] Built target autoware_msgs_generate_messages_nodejs
+[ 20%] Built target std_msgs_generate_messages_eus
+[35m[1mScanning dependencies of target tf2_msgs_generate_messages_eus[0m
+[ 20%] Built target topic_tools_generate_messages_eus
+[ 20%] Built target nav_msgs_generate_messages_eus
+[35m[1mScanning dependencies of target std_srvs_generate_messages_cpp[0m
+[35m[1mScanning dependencies of target jsk_footstep_msgs_generate_messages_lisp[0m
+[35m[1mScanning dependencies of target vector_map_server_generate_messages_lisp[0m
+[ 20%] Built target actionlib_msgs_generate_messages_py
+[35m[1mScanning dependencies of target grid_map_msgs_generate_messages_nodejs[0m
+[ 20%] Built target visualization_msgs_generate_messages_cpp
+[ 20%] Built target jsk_footstep_msgs_generate_messages_eus
+[35m[1mScanning dependencies of target jsk_footstep_msgs_generate_messages_nodejs[0m
+[ 20%] Built target vector_map_server_generate_messages_lisp
+[35m[1mScanning dependencies of target grid_map_msgs_generate_messages_lisp[0m
+[ 20%] Built target tf2_msgs_generate_messages_eus
+[35m[1mScanning dependencies of target actionlib_msgs_generate_messages_lisp[0m
+[ 20%] Built target std_srvs_generate_messages_cpp
+[35m[1mScanning dependencies of target jsk_recognition_msgs_generate_messages_nodejs[0m
+[ 20%] Built target jsk_footstep_msgs_generate_messages_lisp
+[ 20%] Built target grid_map_msgs_generate_messages_nodejs
+[ 20%] Built target jsk_footstep_msgs_generate_messages_nodejs
+[35m[1mScanning dependencies of target roscpp_generate_messages_lisp[0m
+[35m[1mScanning dependencies of target grid_map_msgs_generate_messages_eus[0m
+[35m[1mScanning dependencies of target std_srvs_generate_messages_eus[0m
+[ 20%] Built target grid_map_msgs_generate_messages_lisp
+[ 20%] Built target jsk_recognition_msgs_generate_messages_nodejs
+[35m[1mScanning dependencies of target rosgraph_msgs_generate_messages_nodejs[0m
+[35m[1mScanning dependencies of target rosgraph_msgs_generate_messages_lisp[0m
+[ 20%] Built target actionlib_msgs_generate_messages_lisp
+[35m[1mScanning dependencies of target actionlib_msgs_generate_messages_eus[0m
+[ 20%] Built target grid_map_msgs_generate_messages_eus
+[ 20%] Built target std_srvs_generate_messages_eus
+[ 20%] Built target roscpp_generate_messages_lisp
+[35m[1mScanning dependencies of target vector_map_server_generate_messages_py[0m
+[35m[1mScanning dependencies of target roscpp_generate_messages_eus[0m
+[35m[1mScanning dependencies of target rosgraph_msgs_generate_messages_py[0m
+[35m[1mScanning dependencies of target jsk_hark_msgs_generate_messages_cpp[0m
+[35m[1mScanning dependencies of target roscpp_generate_messages_py[0m
+[ 20%] Built target rosgraph_msgs_generate_messages_nodejs
+[ 20%] Built target vector_map_server_generate_messages_py
+[35m[1mScanning dependencies of target grid_map_msgs_generate_messages_py[0m
+[ 20%] Built target rosgraph_msgs_generate_messages_lisp
+[35m[1mScanning dependencies of target grid_map_msgs_generate_messages_cpp[0m
+[ 20%] Built target actionlib_msgs_generate_messages_eus
+[ 20%] Built target roscpp_generate_messages_eus
+[ 20%] Built target roscpp_generate_messages_py
+[ 20%] Built target rosgraph_msgs_generate_messages_py
+[35m[1mScanning dependencies of target sensor_msgs_generate_messages_lisp[0m
+[35m[1mScanning dependencies of target pcl_msgs_generate_messages_nodejs[0m
+[ 20%] Built target jsk_hark_msgs_generate_messages_cpp
+[35m[1mScanning dependencies of target nav_msgs_generate_messages_cpp[0m
+[ 20%] Built target grid_map_msgs_generate_messages_py
+[35m[1mScanning dependencies of target nav_msgs_generate_messages_lisp[0m
+[35m[1mScanning dependencies of target _catkin_empty_exported_target[0m
+[35m[1mScanning dependencies of target nav_msgs_generate_messages_py[0m
+[ 20%] Built target grid_map_msgs_generate_messages_cpp
+[ 20%] Built target sensor_msgs_generate_messages_lisp
+[35m[1mScanning dependencies of target tf2_msgs_generate_messages_lisp[0m
+[35m[1mScanning dependencies of target dynamic_reconfigure_gencfg[0m
+[35m[1mScanning dependencies of target std_srvs_generate_messages_lisp[0m
+[ 20%] Built target pcl_msgs_generate_messages_nodejs
+[ 20%] Built target nav_msgs_generate_messages_cpp
+[ 20%] Built target nav_msgs_generate_messages_lisp
+[ 20%] Built target _catkin_empty_exported_target
+[ 20%] Built target nav_msgs_generate_messages_py
+[35m[1mScanning dependencies of target topic_tools_generate_messages_lisp[0m
+[35m[1mScanning dependencies of target std_srvs_generate_messages_nodejs[0m
+[35m[1mScanning dependencies of target jsk_recognition_msgs_generate_messages_cpp[0m
+[35m[1mScanning dependencies of target topic_tools_generate_messages_nodejs[0m
+[ 20%] Built target tf2_msgs_generate_messages_lisp
+[ 20%] Built target std_srvs_generate_messages_lisp
+[35m[1mScanning dependencies of target std_srvs_generate_messages_py[0m
+[ 20%] Built target dynamic_reconfigure_gencfg
+[35m[1mScanning dependencies of target map_msgs_generate_messages_nodejs[0m
+[35m[1mScanning dependencies of target nodelet_topic_tools_gencfg[0m
+[ 20%] Built target topic_tools_generate_messages_lisp
+[35m[1mScanning dependencies of target actionlib_msgs_generate_messages_nodejs[0m
+[ 20%] Built target std_srvs_generate_messages_nodejs
+[ 20%] Built target std_srvs_generate_messages_py
+[35m[1mScanning dependencies of target actionlib_generate_messages_nodejs[0m
+[35m[1mScanning dependencies of target pcl_msgs_generate_messages_lisp[0m
+[35m[1mScanning dependencies of target topic_tools_generate_messages_py[0m
+[ 20%] Built target nodelet_topic_tools_gencfg
+[ 20%] Built target jsk_recognition_msgs_generate_messages_cpp
+[ 20%] Built target map_msgs_generate_messages_nodejs
+[ 20%] Built target topic_tools_generate_messages_nodejs
+[ 20%] Built target actionlib_msgs_generate_messages_nodejs
+[35m[1mScanning dependencies of target tf_generate_messages_cpp[0m
+[ 20%] Built target topic_tools_generate_messages_py
+[ 20%] Built target pcl_msgs_generate_messages_lisp
+[35m[1mScanning dependencies of target jsk_footstep_msgs_generate_messages_cpp[0m
+[ 20%] Built target actionlib_generate_messages_nodejs
+[35m[1mScanning dependencies of target actionlib_msgs_generate_messages_cpp[0m
+[ 20%] Built target tf_generate_messages_cpp
+[ 20%] Built target jsk_footstep_msgs_generate_messages_cpp
+[ 20%] Built target actionlib_msgs_generate_messages_cpp
+/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/nodes/lidar_euclidean_cluster_detect/gpu_euclidean_clustering.cu(726): error: too many arguments in function call
+
+/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/nodes/lidar_euclidean_cluster_detect/gpu_euclidean_clustering.cu(1064): warning: result of call is not used
+
+/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/nodes/lidar_euclidean_cluster_detect/gpu_euclidean_clustering.cu(1088): warning: conversion from a string literal to "char *" is deprecated
+
+/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/nodes/lidar_euclidean_cluster_detect/gpu_euclidean_clustering.cu(1135): error: identifier "BUFER_SIZE" is undefined
+
+/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/nodes/lidar_euclidean_cluster_detect/gpu_euclidean_clustering.cu(1138): warning: result of call is not used
+
+2 errors detected in the compilation of "/tmp/tmpxft_00006c35_00000000-6_gpu_euclidean_clustering.cpp1.ii".
+CMake Error at gpu_euclidean_clustering_generated_gpu_euclidean_clustering.cu.o.Release.cmake:279 (message):
+  Error generating file
+  /home/hypark/git/Autoware_On_Embedded/build/lidar_euclidean_cluster_detect/CMakeFiles/gpu_euclidean_clustering.dir/nodes/lidar_euclidean_cluster_detect/./gpu_euclidean_clustering_generated_gpu_euclidean_clustering.cu.o
+
+
+CMakeFiles/gpu_euclidean_clustering.dir/build.make:63: recipe for target 'CMakeFiles/gpu_euclidean_clustering.dir/nodes/lidar_euclidean_cluster_detect/gpu_euclidean_clustering_generated_gpu_euclidean_clustering.cu.o' failed
+make[2]: *** [CMakeFiles/gpu_euclidean_clustering.dir/nodes/lidar_euclidean_cluster_detect/gpu_euclidean_clustering_generated_gpu_euclidean_clustering.cu.o] Error 1
+CMakeFiles/Makefile2:291: recipe for target 'CMakeFiles/gpu_euclidean_clustering.dir/all' failed
+make[1]: *** [CMakeFiles/gpu_euclidean_clustering.dir/all] Error 2
+make: *** [all] Error 2
+Makefile:140: recipe for target 'all' failed

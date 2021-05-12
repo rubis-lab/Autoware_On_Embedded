@@ -1,0 +1,140 @@
+[0.030s] Invoking command in '/home/hypark/git/Autoware_On_Embedded/build/vision_darknet_detect': CMAKE_PREFIX_PATH=/home/hypark/git/Autoware_On_Embedded/install/autoware_msgs:${CMAKE_PREFIX_PATH} PKG_CONFIG_PATH=/home/hypark/git/Autoware_On_Embedded/install/autoware_msgs/lib/x86_64-linux-gnu/pkgconfig:/home/hypark/git/Autoware_On_Embedded/install/autoware_msgs/lib/pkgconfig:${PKG_CONFIG_PATH} PYTHONPATH=/home/hypark/git/Autoware_On_Embedded/install/autoware_msgs/lib/python2.7/dist-packages:${PYTHONPATH} ROS_PACKAGE_PATH=/home/hypark/git/Autoware_On_Embedded/install/autoware_msgs/share:${ROS_PACKAGE_PATH} /usr/bin/cmake --build /home/hypark/git/Autoware_On_Embedded/build/vision_darknet_detect -- -j12 -l12
+[0.189s] [  0%] Built target sensor_msgs_generate_messages_nodejs
+[0.189s] [  0%] Built target rosgraph_msgs_generate_messages_lisp
+[0.195s] [  0%] Built target actionlib_msgs_generate_messages_cpp
+[0.196s] [  0%] Built target roscpp_generate_messages_lisp
+[0.196s] [  0%] Built target actionlib_msgs_generate_messages_lisp
+[0.196s] [  0%] Built target jsk_footstep_msgs_generate_messages_nodejs
+[0.197s] [  0%] Built target roscpp_generate_messages_py
+[0.197s] [  0%] Built target actionlib_msgs_generate_messages_py
+[0.203s] [  0%] Built target pcl_msgs_generate_messages_nodejs
+[0.204s] [  0%] Built target pcl_msgs_generate_messages_py
+[0.204s] [  0%] Built target jsk_footstep_msgs_generate_messages_eus
+[0.224s] [  0%] Built target rosgraph_msgs_generate_messages_nodejs
+[0.288s] [  0%] Built target autoware_msgs_generate_messages_cpp
+[0.293s] [  0%] Built target rosgraph_msgs_generate_messages_cpp
+[0.293s] [  0%] Built target pcl_msgs_generate_messages_lisp
+[0.296s] [  0%] Built target std_msgs_generate_messages_nodejs
+[0.297s] [  0%] Built target std_msgs_generate_messages_lisp
+[0.300s] [  0%] Built target sensor_msgs_generate_messages_eus
+[0.302s] [  0%] Built target pcl_msgs_generate_messages_eus
+[0.305s] [  0%] Built target sensor_msgs_generate_messages_cpp
+[0.310s] [  0%] Built target autoware_config_msgs_generate_messages_eus
+[0.323s] [  0%] Built target autoware_config_msgs_generate_messages_lisp
+[0.331s] [  0%] Built target jsk_footstep_msgs_generate_messages_lisp
+[0.340s] [  0%] Built target std_msgs_generate_messages_eus
+[0.396s] [  0%] Built target std_msgs_generate_messages_py
+[0.396s] [  0%] Built target autoware_config_msgs_generate_messages_py
+[0.397s] [  0%] Built target std_msgs_generate_messages_cpp
+[0.404s] [  0%] Built target rosgraph_msgs_generate_messages_py
+[0.408s] [  0%] Built target actionlib_msgs_generate_messages_nodejs
+[0.408s] [  0%] Built target autoware_msgs_generate_messages_nodejs
+[0.419s] [  0%] Built target autoware_msgs_generate_messages_py
+[0.433s] [  0%] Built target jsk_footstep_msgs_generate_messages_py
+[0.436s] [  0%] Built target sensor_msgs_generate_messages_py
+[0.448s] [  0%] Built target autoware_msgs_generate_messages_eus
+[0.450s] [  0%] Built target jsk_recognition_msgs_generate_messages_py
+[0.451s] [  0%] Built target jsk_recognition_msgs_generate_messages_cpp
+[0.505s] [  0%] Built target sensor_msgs_generate_messages_lisp
+[0.508s] [  0%] Built target pcl_msgs_generate_messages_cpp
+[0.509s] [  0%] Built target roscpp_generate_messages_eus
+[0.519s] [  0%] Built target autoware_msgs_generate_messages_lisp
+[0.520s] [  0%] Built target actionlib_msgs_generate_messages_eus
+[0.529s] [  0%] Built target roscpp_generate_messages_nodejs
+[0.545s] [  0%] Built target autoware_config_msgs_generate_messages_nodejs
+[0.545s] [  0%] Built target geometry_msgs_generate_messages_nodejs
+[0.551s] [  0%] Built target geometry_msgs_generate_messages_eus
+[0.557s] [  0%] Built target geometry_msgs_generate_messages_lisp
+[0.566s] [  0%] Built target geometry_msgs_generate_messages_cpp
+[0.569s] [  0%] Built target jsk_footstep_msgs_generate_messages_cpp
+[0.597s] [  0%] Built target geometry_msgs_generate_messages_py
+[0.605s] [  0%] Built target rosgraph_msgs_generate_messages_eus
+[0.608s] [  0%] Built target autoware_config_msgs_generate_messages_cpp
+[0.608s] [  0%] Built target jsk_recognition_msgs_generate_messages_lisp
+[0.614s] [  0%] Built target jsk_recognition_msgs_generate_messages_eus
+[0.621s] [  0%] Built target roscpp_generate_messages_cpp
+[0.621s] [  0%] Built target jsk_recognition_msgs_generate_messages_nodejs
+[0.720s] [ 93%] Built target vision_darknet_detect_lib
+[0.784s] [100%] Built target vision_darknet_detect
+[0.809s] Invoked command in '/home/hypark/git/Autoware_On_Embedded/build/vision_darknet_detect' returned '0': CMAKE_PREFIX_PATH=/home/hypark/git/Autoware_On_Embedded/install/autoware_msgs:${CMAKE_PREFIX_PATH} PKG_CONFIG_PATH=/home/hypark/git/Autoware_On_Embedded/install/autoware_msgs/lib/x86_64-linux-gnu/pkgconfig:/home/hypark/git/Autoware_On_Embedded/install/autoware_msgs/lib/pkgconfig:${PKG_CONFIG_PATH} PYTHONPATH=/home/hypark/git/Autoware_On_Embedded/install/autoware_msgs/lib/python2.7/dist-packages:${PYTHONPATH} ROS_PACKAGE_PATH=/home/hypark/git/Autoware_On_Embedded/install/autoware_msgs/share:${ROS_PACKAGE_PATH} /usr/bin/cmake --build /home/hypark/git/Autoware_On_Embedded/build/vision_darknet_detect -- -j12 -l12
+[1.500s] Invoking command in '/home/hypark/git/Autoware_On_Embedded/build/vision_darknet_detect': CMAKE_PREFIX_PATH=/home/hypark/git/Autoware_On_Embedded/install/autoware_msgs:${CMAKE_PREFIX_PATH} PKG_CONFIG_PATH=/home/hypark/git/Autoware_On_Embedded/install/autoware_msgs/lib/x86_64-linux-gnu/pkgconfig:/home/hypark/git/Autoware_On_Embedded/install/autoware_msgs/lib/pkgconfig:${PKG_CONFIG_PATH} PYTHONPATH=/home/hypark/git/Autoware_On_Embedded/install/autoware_msgs/lib/python2.7/dist-packages:${PYTHONPATH} ROS_PACKAGE_PATH=/home/hypark/git/Autoware_On_Embedded/install/autoware_msgs/share:${ROS_PACKAGE_PATH} /usr/bin/cmake --build /home/hypark/git/Autoware_On_Embedded/build/vision_darknet_detect --target tests -- -j12 -l12
+[1.658s] Built target tests
+[1.681s] Invoked command in '/home/hypark/git/Autoware_On_Embedded/build/vision_darknet_detect' returned '0': CMAKE_PREFIX_PATH=/home/hypark/git/Autoware_On_Embedded/install/autoware_msgs:${CMAKE_PREFIX_PATH} PKG_CONFIG_PATH=/home/hypark/git/Autoware_On_Embedded/install/autoware_msgs/lib/x86_64-linux-gnu/pkgconfig:/home/hypark/git/Autoware_On_Embedded/install/autoware_msgs/lib/pkgconfig:${PKG_CONFIG_PATH} PYTHONPATH=/home/hypark/git/Autoware_On_Embedded/install/autoware_msgs/lib/python2.7/dist-packages:${PYTHONPATH} ROS_PACKAGE_PATH=/home/hypark/git/Autoware_On_Embedded/install/autoware_msgs/share:${ROS_PACKAGE_PATH} /usr/bin/cmake --build /home/hypark/git/Autoware_On_Embedded/build/vision_darknet_detect --target tests -- -j12 -l12
+[2.368s] Invoking command in '/home/hypark/git/Autoware_On_Embedded/build/vision_darknet_detect': CMAKE_PREFIX_PATH=/home/hypark/git/Autoware_On_Embedded/install/autoware_msgs:${CMAKE_PREFIX_PATH} PKG_CONFIG_PATH=/home/hypark/git/Autoware_On_Embedded/install/autoware_msgs/lib/x86_64-linux-gnu/pkgconfig:/home/hypark/git/Autoware_On_Embedded/install/autoware_msgs/lib/pkgconfig:${PKG_CONFIG_PATH} PYTHONPATH=/home/hypark/git/Autoware_On_Embedded/install/autoware_msgs/lib/python2.7/dist-packages:${PYTHONPATH} ROS_PACKAGE_PATH=/home/hypark/git/Autoware_On_Embedded/install/autoware_msgs/share:${ROS_PACKAGE_PATH} /usr/bin/cmake --build /home/hypark/git/Autoware_On_Embedded/build/vision_darknet_detect --target install -- -j12 -l12
+[2.533s] [  0%] Built target jsk_footstep_msgs_generate_messages_nodejs
+[2.534s] [  0%] Built target roscpp_generate_messages_py
+[2.535s] [  0%] Built target pcl_msgs_generate_messages_nodejs
+[2.536s] [  0%] Built target actionlib_msgs_generate_messages_py
+[2.539s] [  0%] Built target roscpp_generate_messages_lisp
+[2.541s] [  0%] Built target sensor_msgs_generate_messages_nodejs
+[2.542s] [  0%] Built target rosgraph_msgs_generate_messages_lisp
+[2.543s] [  0%] Built target actionlib_msgs_generate_messages_cpp
+[2.556s] [  0%] Built target rosgraph_msgs_generate_messages_nodejs
+[2.559s] [  0%] Built target actionlib_msgs_generate_messages_lisp
+[2.566s] [  0%] Built target jsk_footstep_msgs_generate_messages_eus
+[2.577s] [  0%] Built target pcl_msgs_generate_messages_py
+[2.629s] [  0%] Built target autoware_msgs_generate_messages_cpp
+[2.629s] [  0%] Built target rosgraph_msgs_generate_messages_cpp
+[2.640s] [  0%] Built target pcl_msgs_generate_messages_lisp
+[2.640s] [  0%] Built target std_msgs_generate_messages_nodejs
+[2.651s] [  0%] Built target pcl_msgs_generate_messages_eus
+[2.660s] [  0%] Built target sensor_msgs_generate_messages_cpp
+[2.661s] [  0%] Built target std_msgs_generate_messages_lisp
+[2.664s] [  0%] Built target jsk_footstep_msgs_generate_messages_lisp
+[2.674s] [  0%] Built target std_msgs_generate_messages_eus
+[2.675s] [  0%] Built target sensor_msgs_generate_messages_eus
+[2.680s] [  0%] Built target autoware_config_msgs_generate_messages_lisp
+[2.680s] [  0%] Built target autoware_config_msgs_generate_messages_eus
+[2.730s] [  0%] Built target autoware_msgs_generate_messages_nodejs
+[2.739s] [  0%] Built target actionlib_msgs_generate_messages_nodejs
+[2.740s] [  0%] Built target rosgraph_msgs_generate_messages_py
+[2.756s] [  0%] Built target autoware_config_msgs_generate_messages_py
+[2.767s] [  0%] Built target jsk_footstep_msgs_generate_messages_py
+[2.770s] [  0%] Built target std_msgs_generate_messages_py
+[2.772s] [  0%] Built target std_msgs_generate_messages_cpp
+[2.775s] [  0%] Built target jsk_recognition_msgs_generate_messages_py
+[2.775s] [  0%] Built target sensor_msgs_generate_messages_py
+[2.777s] [  0%] Built target jsk_recognition_msgs_generate_messages_cpp
+[2.781s] [  0%] Built target autoware_msgs_generate_messages_py
+[2.795s] [  0%] Built target autoware_msgs_generate_messages_eus
+[2.859s] [  0%] Built target actionlib_msgs_generate_messages_eus
+[2.860s] [  0%] Built target sensor_msgs_generate_messages_lisp
+[2.865s] [  0%] Built target pcl_msgs_generate_messages_cpp
+[2.868s] [  0%] Built target roscpp_generate_messages_nodejs
+[2.870s] [  0%] Built target geometry_msgs_generate_messages_lisp
+[2.872s] [  0%] Built target roscpp_generate_messages_eus
+[2.877s] [  0%] Built target autoware_msgs_generate_messages_lisp
+[2.880s] [  0%] Built target autoware_config_msgs_generate_messages_nodejs
+[2.882s] [  0%] Built target geometry_msgs_generate_messages_cpp
+[2.885s] [  0%] Built target geometry_msgs_generate_messages_eus
+[2.894s] [  0%] Built target geometry_msgs_generate_messages_nodejs
+[2.897s] [  0%] Built target jsk_footstep_msgs_generate_messages_cpp
+[2.941s] [  0%] Built target geometry_msgs_generate_messages_py
+[2.945s] [  0%] Built target autoware_config_msgs_generate_messages_cpp
+[2.952s] [  0%] Built target jsk_recognition_msgs_generate_messages_eus
+[2.954s] [  0%] Built target rosgraph_msgs_generate_messages_eus
+[2.955s] [  0%] Built target jsk_recognition_msgs_generate_messages_lisp
+[2.958s] [  0%] Built target roscpp_generate_messages_cpp
+[2.959s] [  0%] Built target jsk_recognition_msgs_generate_messages_nodejs
+[3.060s] [ 93%] Built target vision_darknet_detect_lib
+[3.126s] [100%] Built target vision_darknet_detect
+[3.176s] [36mInstall the project...[0m
+[3.200s] -- Install configuration: "Release"
+[3.200s] -- Up-to-date: /home/hypark/git/Autoware_On_Embedded/install/vision_darknet_detect/lib/pkgconfig/vision_darknet_detect.pc
+[3.201s] -- Up-to-date: /home/hypark/git/Autoware_On_Embedded/install/vision_darknet_detect/share/vision_darknet_detect/cmake/vision_darknet_detectConfig.cmake
+[3.201s] -- Up-to-date: /home/hypark/git/Autoware_On_Embedded/install/vision_darknet_detect/share/vision_darknet_detect/cmake/vision_darknet_detectConfig-version.cmake
+[3.201s] -- Up-to-date: /home/hypark/git/Autoware_On_Embedded/install/vision_darknet_detect/share/vision_darknet_detect/package.xml
+[3.201s] -- Up-to-date: /home/hypark/git/Autoware_On_Embedded/install/vision_darknet_detect/lib/libvision_darknet_detect_lib.so
+[3.201s] -- Up-to-date: /home/hypark/git/Autoware_On_Embedded/install/vision_darknet_detect/lib/vision_darknet_detect/vision_darknet_detect
+[3.201s] -- Up-to-date: /home/hypark/git/Autoware_On_Embedded/install/vision_darknet_detect/share/vision_darknet_detect/launch
+[3.201s] -- Up-to-date: /home/hypark/git/Autoware_On_Embedded/install/vision_darknet_detect/share/vision_darknet_detect/launch/vision_yolo3_detect.launch
+[3.201s] -- Up-to-date: /home/hypark/git/Autoware_On_Embedded/install/vision_darknet_detect/share/vision_darknet_detect/launch/vision_yolo2_detect.launch
+[3.201s] -- Up-to-date: /home/hypark/git/Autoware_On_Embedded/install/vision_darknet_detect/share/vision_darknet_detect/darknet/cfg/
+[3.201s] -- Up-to-date: /home/hypark/git/Autoware_On_Embedded/install/vision_darknet_detect/share/vision_darknet_detect/darknet/cfg//yolov2-tiny.cfg
+[3.201s] -- Up-to-date: /home/hypark/git/Autoware_On_Embedded/install/vision_darknet_detect/share/vision_darknet_detect/darknet/cfg//yolov3-tiny.cfg
+[3.202s] -- Up-to-date: /home/hypark/git/Autoware_On_Embedded/install/vision_darknet_detect/share/vision_darknet_detect/darknet/cfg//yolov2.cfg
+[3.202s] -- Up-to-date: /home/hypark/git/Autoware_On_Embedded/install/vision_darknet_detect/share/vision_darknet_detect/darknet/cfg//voc.names
+[3.202s] -- Up-to-date: /home/hypark/git/Autoware_On_Embedded/install/vision_darknet_detect/share/vision_darknet_detect/darknet/cfg//yolov3-voc.cfg
+[3.202s] -- Up-to-date: /home/hypark/git/Autoware_On_Embedded/install/vision_darknet_detect/share/vision_darknet_detect/darknet/cfg//yolov3.cfg
+[3.202s] -- Up-to-date: /home/hypark/git/Autoware_On_Embedded/install/vision_darknet_detect/share/vision_darknet_detect/darknet/cfg//coco.names
+[3.204s] Invoked command in '/home/hypark/git/Autoware_On_Embedded/build/vision_darknet_detect' returned '0': CMAKE_PREFIX_PATH=/home/hypark/git/Autoware_On_Embedded/install/autoware_msgs:${CMAKE_PREFIX_PATH} PKG_CONFIG_PATH=/home/hypark/git/Autoware_On_Embedded/install/autoware_msgs/lib/x86_64-linux-gnu/pkgconfig:/home/hypark/git/Autoware_On_Embedded/install/autoware_msgs/lib/pkgconfig:${PKG_CONFIG_PATH} PYTHONPATH=/home/hypark/git/Autoware_On_Embedded/install/autoware_msgs/lib/python2.7/dist-packages:${PYTHONPATH} ROS_PACKAGE_PATH=/home/hypark/git/Autoware_On_Embedded/install/autoware_msgs/share:${ROS_PACKAGE_PATH} /usr/bin/cmake --build /home/hypark/git/Autoware_On_Embedded/build/vision_darknet_detect --target install -- -j12 -l12

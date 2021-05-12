@@ -68,6 +68,8 @@
 
 #include "cluster.h"
 
+#define GPU_CLUSTERING
+
 #ifdef GPU_CLUSTERING
 
 #include "gpu_euclidean_clustering.h"
@@ -133,9 +135,13 @@ tf::StampedTransform *_velodyne_output_transform;
 tf::TransformListener *_transform_listener;
 tf::TransformListener *_vectormap_transform_listener;
 
+static std::string _execution_time_filename;
+static std::string _response_time_filename;
+static std::string _remain_time_filename;
 /* For GPU Profiling */
-static std::string _filename;
+#ifdef GPU_CLUSTERING
 static GpuEuclideanCluster _gecl_cluster;  
+#endif
 
 tf::StampedTransform findTransform(const std::string &in_target_frame, const std::string &in_source_frame)
 {
@@ -374,14 +380,14 @@ std::vector<ClusterPtr> clusterAndColorGpu(const pcl::PointCloud<pcl::PointXYZ>:
     tmp_y[i] = tmp_point.y;
     tmp_z[i] = tmp_point.z;
   }  
-
+  set_absolute_deadline();
   _gecl_cluster.setInputPoints(tmp_x, tmp_y, tmp_z, size);
   _gecl_cluster.setThreshold(in_max_cluster_distance);
   _gecl_cluster.setMinClusterPts(_cluster_size_min);
   _gecl_cluster.setMaxClusterPts(_cluster_size_max);
   _gecl_cluster.extractClusters();
   std::vector<GpuEuclideanCluster::GClusterIndex> cluster_indices = _gecl_cluster.getOutput();
-  _gecl_cluster.write_dummy_line();
+  write_dummy_line();
 
   unsigned int k = 0;
 
@@ -848,7 +854,7 @@ void removePointsUpTo(const pcl::PointCloud<pcl::PointXYZ>::Ptr in_cloud_ptr,
 
 void velodyne_callback(const sensor_msgs::PointCloud2ConstPtr& in_sensor_cloud)
 {
-  //_start = std::chrono::system_clock::now();
+  //_start = std::chrono::system_clock::now();  
 
   if (!_using_sensor_cloud)
   {
@@ -944,6 +950,16 @@ int main(int argc, char **argv)
   generateColors(_colors, 255);
 
 
+  /* For GPU scheduling */
+  #ifdef GPU_CLUSTERING
+  int key_id = 1;    
+  int identical_deadline;
+  private_nh.param("gpu_scheduling_flag", gpu_scheduling_flag_, 0);
+  private_nh.param("identical_deadline", identical_deadline, 0);
+  set_identical_deadline((unsigned long long)identical_deadline);
+  if(gpu_scheduling_flag_ == 1)
+    init_scheduling("/tmp/euclidean_cluster_detect", "/home/hypark/GPU_profiling/deadline/euclidean_cluster_detect_deadline.csv",key_id);    
+  #endif
 
 
   std::string label;
@@ -1040,11 +1056,14 @@ int main(int argc, char **argv)
   private_nh.param("clustering_ranges", str_ranges, std::string("[15,30,45,60]"));
     ROS_INFO("[%s] clustering_ranges: %s", __APP_NAME__, str_ranges.c_str());
 
+  #ifdef GPU_CLUSTERING
   if(_use_gpu == true){
-    private_nh.param<std::string>("profiling_file_name", _filename, "~/GPU_profiling/lidar_euclidean_cluster_detect.csv");
-    ROS_INFO("[%s] profiling_file_name: %s", __APP_NAME__, _filename.c_str());    
-    _gecl_cluster.initialize_file(_filename.c_str());
+    private_nh.param<std::string>("execution_time_file_name", _execution_time_filename, "~/GPU_profiling/cluster_execution_time.csv");
+    private_nh.param<std::string>("response_time_file_name", _response_time_filename, "~/GPU_profiling/cluster_reponse_time.csv");    
+    private_nh.param<std::string>("remain_time_file_name", _remain_time_filename, "~/GPU_profiling/cluster_remain_time.csv");    
+    initialize_file(_execution_time_filename.c_str(), _response_time_filename.c_str(), _remain_time_filename.c_str());
   }
+  #endif
 
   if (_use_multiple_thres)
   {

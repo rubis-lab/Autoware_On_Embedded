@@ -1,0 +1,90 @@
+/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/nodes/lidar_euclidean_cluster_detect/gpu_euclidean_clustering.cu(1064): warning: result of call is not used
+
+/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/nodes/lidar_euclidean_cluster_detect/gpu_euclidean_clustering.cu(1088): warning: conversion from a string literal to "char *" is deprecated
+
+/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/nodes/lidar_euclidean_cluster_detect/gpu_euclidean_clustering.cu(1138): warning: result of call is not used
+
+/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/nodes/lidar_euclidean_cluster_detect/gpu_euclidean_clustering.cu(1064): warning: result of call is not used
+
+/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/nodes/lidar_euclidean_cluster_detect/gpu_euclidean_clustering.cu(1088): warning: conversion from a string literal to "char *" is deprecated
+
+/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/nodes/lidar_euclidean_cluster_detect/gpu_euclidean_clustering.cu(1138): warning: result of call is not used
+
+/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/nodes/lidar_euclidean_cluster_detect/gpu_euclidean_clustering.cu: In function ‘void get_deadlines(char*)’:
+/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/nodes/lidar_euclidean_cluster_detect/gpu_euclidean_clustering.cu:1137:19: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+   for(int i = 0; i < sizeof(deadline_list_)/sizeof(long long int); i++){
+                 ~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/nodes/lidar_euclidean_cluster_detect/gpu_euclidean_clustering.cu:1140:29: warning: format ‘%llu’ expects argument of type ‘long long unsigned int*’, but argument 3 has type ‘long long int’ [-Wformat=]
+     sscanf(buf, "%llu", deadline);
+                             ^
+/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/nodes/lidar_euclidean_cluster_detect/gpu_euclidean_clustering.cu:1144:19: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+   for(int i = 0; i < sizeof(deadline_list_)/sizeof(long long int); i++){
+                 ~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/nodes/lidar_euclidean_cluster_detect/gpu_euclidean_clustering.cu: In function ‘void get_scheduler_pid()’:
+/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/nodes/lidar_euclidean_cluster_detect/gpu_euclidean_clustering.cu:1064:7: warning: ignoring return value of ‘int fscanf(FILE*, const char*, ...)’, declared with attribute warn_unused_result [-Wunused-result]
+       fscanf(scheduler_fp, "%d", &scheduler_pid_);
+       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/nodes/lidar_euclidean_cluster_detect/gpu_euclidean_clustering.cu: In function ‘void get_deadlines(char*)’:
+/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/nodes/lidar_euclidean_cluster_detect/gpu_euclidean_clustering.cu:1138:6: warning: ignoring return value of ‘char* fgets(char*, int, FILE*)’, declared with attribute warn_unused_result [-Wunused-result]
+     fgets(buf, 1024, fp);
+     ~^~~~~~~~~~~~~~~
+/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/nodes/lidar_euclidean_cluster_detect/gpu_euclidean_clustering.cu:1140:7: warning: ‘deadline’ is used uninitialized in this function [-Wuninitialized]
+     sscanf(buf, "%llu", deadline);
+     ~~^~~~~~~~~~~~~~~~~~~~~~~
+[01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/nodes/lidar_euclidean_cluster_detect/lidar_euclidean_cluster_detect.cpp:71:0:[m[K [01;35m[Kwarning: [m[K"GPU_CLUSTERING" redefined
+ #define GPU_CLUSTERING
+ 
+[01m[K<command-line>:0:0:[m[K [01;36m[Knote: [m[Kthis is the location of the previous definition
+[01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/nodes/lidar_euclidean_cluster_detect/lidar_euclidean_cluster_detect.cpp:[m[K In function ‘[01m[Kvoid segmentByDistance(pcl::PointCloud<pcl::PointXYZ>::Ptr, pcl::PointCloud<pcl::PointXYZRGB>::Ptr, autoware_msgs::Centroids&, autoware_msgs::CloudClusterArray&)[m[K’:
+[01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/nodes/lidar_euclidean_cluster_detect/lidar_euclidean_cluster_detect.cpp:663:3:[m[K [01;35m[Kwarning: [m[Kthis ‘[01m[Kelse[m[K’ clause does not guard... [[01;35m[K-Wmisleading-indentation[m[K]
+   [01;35m[Kelse[m[K
+   [01;35m[K^~~~[m[K
+[01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/nodes/lidar_euclidean_cluster_detect/lidar_euclidean_cluster_detect.cpp:667:5:[m[K [01;36m[Knote: [m[K...this statement, but the latter is misleadingly indented as if it were guarded by the ‘[01m[Kelse[m[K’
+     [01;36m[Kfor[m[K (unsigned int i = 0; i < final_clusters.size(); i++)
+     [01;36m[K^~~[m[K
+[01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/nodes/lidar_euclidean_cluster_detect/lidar_euclidean_cluster_detect.cpp:[m[K In function ‘[01m[Kint main(int, char**)[m[K’:
+[01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/nodes/lidar_euclidean_cluster_detect/lidar_euclidean_cluster_detect.cpp:936:7:[m[K [01;35m[Kwarning: [m[Kunused variable ‘[01m[Kkey_id[m[K’ [[01;35m[K-Wunused-variable[m[K]
+   int [01;35m[Kkey_id[m[K = 1;
+       [01;35m[K^~~~~~[m[K
+In file included from [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/include/cluster.h:30:0[m[K,
+                 from [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/nodes/lidar_euclidean_cluster_detect/cluster.cpp:8[m[K:
+[01m[K/usr/include/pcl-1.8/pcl/sample_consensus/model_types.h:[m[K In function ‘[01m[Kvoid __static_initialization_and_destruction_0(int, int)[m[K’:
+[01m[K/usr/include/pcl-1.8/pcl/sample_consensus/model_types.h:99:3:[m[K [01;35m[Kwarning: [m[K‘[01m[Kpcl::SAC_SAMPLE_SIZE[m[K’ is deprecated: This map is deprecated and is kept only to prevent breaking existing user code. Starting from PCL 1.8.0 model sample size is a protected member of the SampleConsensusModel class [[01;35m[K-Wdeprecated-declarations[m[K]
+   [01;35m[KSAC_SAMPLE_SIZE[m[K (sample_size_pairs, sample_size_pairs + sizeof (sample_size_pairs) / sizeof (SampleSizeModel));
+   [01;35m[K^~~~~~~~~~~~~~~[m[K
+[01m[K/usr/include/pcl-1.8/pcl/sample_consensus/model_types.h:99:3:[m[K [01;36m[Knote: [m[Kdeclared here
+In file included from [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/nodes/lidar_euclidean_cluster_detect/lidar_euclidean_cluster_detect.cpp:31:0[m[K:
+[01m[K/usr/include/pcl-1.8/pcl/sample_consensus/model_types.h:[m[K In function ‘[01m[Kvoid __static_initialization_and_destruction_0(int, int)[m[K’:
+[01m[K/usr/include/pcl-1.8/pcl/sample_consensus/model_types.h:99:3:[m[K [01;35m[Kwarning: [m[K‘[01m[Kpcl::SAC_SAMPLE_SIZE[m[K’ is deprecated: This map is deprecated and is kept only to prevent breaking existing user code. Starting from PCL 1.8.0 model sample size is a protected member of the SampleConsensusModel class [[01;35m[K-Wdeprecated-declarations[m[K]
+   [01;35m[KSAC_SAMPLE_SIZE[m[K (sample_size_pairs, sample_size_pairs + sizeof (sample_size_pairs) / sizeof (SampleSizeModel));
+   [01;35m[K^~~~~~~~~~~~~~~[m[K
+[01m[K/usr/include/pcl-1.8/pcl/sample_consensus/model_types.h:99:3:[m[K [01;36m[Knote: [m[Kdeclared here
+In file included from [01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/nodes/lidar_euclidean_cluster_detect/lidar_euclidean_cluster_detect.cpp:75:0[m[K:
+[01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/include/gpu_euclidean_clustering.h:[m[K At global scope:
+[01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/include/gpu_euclidean_clustering.h:44:22:[m[K [01;35m[Kwarning: [m[K‘[01m[Kdeadline_list_[m[K’ defined but not used [[01;35m[K-Wunused-variable[m[K]
+ static long long int [01;35m[Kdeadline_list_[m[K[35];
+                      [01;35m[K^~~~~~~~~~~~~~[m[K
+[01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/include/gpu_euclidean_clustering.h:43:12:[m[K [01;35m[Kwarning: [m[K‘[01m[Ksig_[m[K’ defined but not used [[01;35m[K-Wunused-variable[m[K]
+ static int [01;35m[Ksig_[m[K;
+            [01;35m[K^~~~[m[K
+[01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/include/gpu_euclidean_clustering.h:42:17:[m[K [01;35m[Kwarning: [m[K‘[01m[Ksigset_[m[K’ defined but not used [[01;35m[K-Wunused-variable[m[K]
+ static sigset_t [01;35m[Ksigset_[m[K;
+                 [01;35m[K^~~~~~~[m[K
+[01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/include/gpu_euclidean_clustering.h:41:12:[m[K [01;35m[Kwarning: [m[K‘[01m[Kshmid_[m[K’ defined but not used [[01;35m[K-Wunused-variable[m[K]
+ static int [01;35m[Kshmid_[m[K;
+            [01;35m[K^~~~~~[m[K
+[01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/include/gpu_euclidean_clustering.h:40:14:[m[K [01;35m[Kwarning: [m[K‘[01m[Kkey_[m[K’ defined but not used [[01;35m[K-Wunused-variable[m[K]
+ static key_t [01;35m[Kkey_[m[K;
+              [01;35m[K^~~~[m[K
+[01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/include/gpu_euclidean_clustering.h:39:19:[m[K [01;35m[Kwarning: [m[K‘[01m[Ksched_info_[m[K’ defined but not used [[01;35m[K-Wunused-variable[m[K]
+ static SchedInfo* [01;35m[Ksched_info_[m[K;
+                   [01;35m[K^~~~~~~~~~~[m[K
+[01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/include/gpu_euclidean_clustering.h:38:12:[m[K [01;35m[Kwarning: [m[K‘[01m[Kkey_id_[m[K’ defined but not used [[01;35m[K-Wunused-variable[m[K]
+ static int [01;35m[Kkey_id_[m[K;
+            [01;35m[K^~~~~~~[m[K
+[01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/include/gpu_euclidean_clustering.h:37:12:[m[K [01;35m[Kwarning: [m[K‘[01m[Kscheduler_pid_[m[K’ defined but not used [[01;35m[K-Wunused-variable[m[K]
+ static int [01;35m[Kscheduler_pid_[m[K;
+            [01;35m[K^~~~~~~~~~~~~~[m[K
+[01m[K/home/hypark/git/Autoware_On_Embedded/autoware.ai/src/autoware/core_perception/lidar_euclidean_cluster_detect/include/gpu_euclidean_clustering.h:36:13:[m[K [01;35m[Kwarning: [m[K‘[01m[Ktask_filename_[m[K’ defined but not used [[01;35m[K-Wunused-variable[m[K]
+ static char [01;35m[Ktask_filename_[m[K[BUFFER_SIZE];
+             [01;35m[K^~~~~~~~~~~~~~[m[K

@@ -248,7 +248,9 @@ pthread_mutex_t mutex;
 
 static bool _is_init_match_finished = false;
 
-static std::string _profiling_file_name;
+static std::string _execution_time_file_name;
+static std::string _response_time_file_name;
+static std::string _remain_time_file_name;
 
 static pose convertPoseIntoRelativeCoordinate(const pose &target_pose, const pose &reference_pose)
 {
@@ -906,7 +908,9 @@ static void imu_callback(const sensor_msgs::Imu::Ptr& input)
 }
 
 static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
-{
+{  
+  set_absolute_deadline();
+
   // Check inital matching is success or not
   if(_is_init_match_finished == false && previous_score < USING_GPS_THRESHOLD && previous_score != 0.0)
     _is_init_match_finished = true;
@@ -945,8 +949,9 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
     else if (_method_type == MethodType::PCL_ANH)
       anh_ndt.setInputSource(filtered_scan_ptr);
 #ifdef CUDA_FOUND
-    else if (_method_type == MethodType::PCL_ANH_GPU)
+    else if (_method_type == MethodType::PCL_ANH_GPU){
       anh_gpu_ndt_ptr->setInputSource(filtered_scan_ptr);
+    }
 #endif
 #ifdef USE_PCL_OPENMP
     else if (_method_type == MethodType::PCL_OPENMP)
@@ -1062,7 +1067,7 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
 
       trans_probability = anh_gpu_ndt_ptr->getTransformationProbability();
       
-      anh_gpu_ndt_ptr->write_dummy_line();
+      write_dummy_line();
     }
 #endif
 #ifdef USE_PCL_OPENMP
@@ -1523,6 +1528,16 @@ int main(int argc, char** argv)
   health_checker_ptr_->ENABLE();
   health_checker_ptr_->NODE_ACTIVATE();
 
+  #ifdef CUDA_FOUND
+  int key_id = 0;  
+  int identical_deadline;
+  private_nh.param("gpu_scheduling_flag", gpu_scheduling_flag_, 0);
+  private_nh.param("identical_deadline", identical_deadline, 0);
+  set_identical_deadline((unsigned long long)identical_deadline);
+  if(gpu_scheduling_flag_ == 1)
+    init_scheduling("/tmp/ndt_matching", "/home/hypark/GPU_profiling/deadline/ndt_matching_deadline.csv", key_id);
+  #endif
+
   // Set log file name.
   private_nh.getParam("output_log_data", _output_log_data);
   if(_output_log_data)
@@ -1553,8 +1568,10 @@ int main(int argc, char** argv)
   private_nh.param<double>("gnss_reinit_fitness", _gnss_reinit_fitness, 500.0);
   
   if(_method_type == MethodType::PCL_ANH_GPU){    
-    private_nh.param<std::string>("profiling_file_name", _profiling_file_name, "~/GPU_profiling/ndt_matching.csv");    
-    anh_gpu_ndt_ptr->initialize_file(_profiling_file_name.c_str());    
+    private_nh.param<std::string>("execution_time_file_name", _execution_time_file_name, "~/GPU_profiling/ndt_execution_time.csv");    
+    private_nh.param<std::string>("response_time_file_name", _response_time_file_name, "~/GPU_profiling/ndt_response_time.csv");    
+    private_nh.param<std::string>("remain_time_file_name", _remain_time_file_name, "~/GPU_profiling/ndt_remain_time.csv");    
+    initialize_file(_execution_time_file_name.c_str(), _response_time_file_name.c_str(), _remain_time_file_name.c_str());    
   }
 
 
@@ -1675,6 +1692,6 @@ int main(int argc, char** argv)
 
   ros::spin();
 
-  anh_gpu_ndt_ptr->close_file();
+  close_file();
   return 0;
 }

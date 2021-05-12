@@ -44,6 +44,12 @@ rosdep install -y --from-paths src --ignore-src --rosdistro $ROS_DISTRO
 # If you have CUDA
 AUTOWARE_COMPILE_WITH_CUDA=1 colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release
 
+# Build only some package
+AUTOWARE_COMPILE_WITH_CUDA=1 colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release --packages-select $(pakcage name)
+
+# Build without some package
+AUTOWARE_COMPILE_WITH_CUDA=1 colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release --packages-skip $(pakcage name)
+
 # If you don't have CUDA
 colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release
 ```

@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /home/hypark/git/Autoware_On_Embedded/build/autoware_config_msgs/devel/setup.sh

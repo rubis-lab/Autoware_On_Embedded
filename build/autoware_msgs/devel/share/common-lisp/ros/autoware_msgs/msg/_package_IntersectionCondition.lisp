@@ -1,0 +1,14 @@
+(cl:in-package autoware_msgs-msg)
+(cl:export '(HEADER-VAL
+          HEADER
+          INTERSECTIONID-VAL
+          INTERSECTIONID
+          INTERSECTIONDISTANCE-VAL
+          INTERSECTIONDISTANCE
+          ISINTERSECTION-VAL
+          ISINTERSECTION
+          RISKYLEFTTURN-VAL
+          RISKYLEFTTURN
+          RISKYRIGHTTURN-VAL
+          RISKYRIGHTTURN
+))

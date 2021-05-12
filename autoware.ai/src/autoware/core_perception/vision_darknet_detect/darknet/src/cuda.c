@@ -12,65 +12,116 @@ int gpu_index = 0;
 #include <stdlib.h>
 #include <time.h>
 
-// cudaEvent_t start, stop;
-// float htod_time = 0;
-// float dtoh_time = 0;
+#define TINY 297
+#define YOLO 1752
+
 int count_dtoh = 0;
 int count_htod = 0;
-// int count_flag = 0;
-// int count_exec = 0;
+
+int push_id = 0; // 1
+int pull_id = 2; // 1~4
+int bias_id = 7; // 1~72
+int normalize_id = 80; // 1~72
+int add_id = 155; // 1~75
+int gpu_id = 0; 
+int copy_gpu_id = 260; // 1~104
+int upsample_id = 263; // 1~2
+int activation_id = 380; //1~116
+int im2col_id = 460; //1~75
+
 
 int glob_id = 0;
 float htod_time;
 float dtoh_time;
 float launch_time;  
-cudaEvent_t event_start, event_stop;
+cudaEvent_t e_event_start, e_event_stop, r_event_start, r_event_stop;
 
-FILE* fp;
+FILE* execution_time_fp;
+FILE* response_time_fp;
+FILE* remain_time_fp;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-void start_profiling(){	
-    cudaEventRecord(event_start, 0);
+/* GPU Profiling */
+void start_profiling_execution_time(){
+	if(GPU_PROFILING == 1)
+		cudaEventRecord(e_event_start, 0);
 }
 
-void stop_profiling(int type,char* ker_name,int count){		
-    float time;
-    cudaEventRecord(event_stop, 0);
-    cudaEventSynchronize(event_stop);
-    cudaEventElapsedTime(&time, event_start, event_stop);
-    write_data(glob_id, time, type,ker_name,count);
-    glob_id++;	
+void start_profiling_response_time(){
+	if(GPU_PROFILING == 1)
+		cudaEventRecord(r_event_start, 0);
 }
 
-void write_data(int id, float time, int type,char* ker_name,int count){
-    fprintf(fp, "%d, %f, %d, %s, %d\n", id, time, type, ker_name, count);	
+void stop_profiling(int id, int type){
+	if(GPU_PROFILING == 1){		
+		float e_time, r_time;
+		cudaEventRecord(e_event_stop, 0);
+    cudaEventRecord(r_event_stop, 0);
+		cudaEventSynchronize(e_event_stop);
+    cudaEventSynchronize(r_event_stop);
+		cudaEventElapsedTime(&e_time, e_event_start, e_event_stop);
+    cudaEventElapsedTime(&r_time, r_event_start, r_event_stop);
+		// write_data(gid, time, type);
+    write_profiling_data(id, e_time, r_time, type);
+		// gid++;
+	}
 }
+
+void write_profiling_data(int id, float e_time, float r_time, int type){
+	if(GPU_PROFILING == 1){
+		fprintf(execution_time_fp, "%d, %f, %d\n", id, e_time, type);	
+    fprintf(response_time_fp, "%d, %f, %d\n", id, r_time, type);	
+    fprintf(remain_time_fp, "%d, %llu\n", id, absolute_deadline_ - get_current_time_us());	
+	}
+}
+
 
 void write_dummy_line(){
-    fprintf(fp, "-1, -1, -1\n");						
-    fflush(fp);
-    glob_id = 0;
+	if(GPU_PROFILING == 1){  
+    fprintf(execution_time_fp, "-1, -1, -1\n");						
+		fflush(execution_time_fp);
+		fprintf(response_time_fp, "-1, -1, -1\n");						
+		fflush(response_time_fp);
+    fprintf(remain_time_fp, "-1, -1\n");						
+		fflush(remain_time_fp);
+	}
+
+    push_id = 0; // 1
+    pull_id = 2; // 1~4
+    bias_id = 7; // 1~72
+    normalize_id = 80; // 1~72
+    add_id = 155; // 1~75
+    gpu_id = 0; 
+    copy_gpu_id = 260; // 1~104
+    upsample_id = 263; // 1~2`
+    activation_id = 380; //1~116
+    im2col_id = 460; //1~75
 }
 
-// void initialize_file(){
-//     cudaEventCreate(&event_stop);
-//     cudaEventCreate(&event_start);
+void initialize_file(const char execution_time_filename[], const char response_time_filename[], const char remain_time_filename[]){
+    cudaEventCreate(&e_event_start);
+	cudaEventCreate(&e_event_stop);
+    cudaEventCreate(&r_event_start);
+	cudaEventCreate(&r_event_stop);
 
-//     fp = fopen("/home/bkpark/prof_data/yolo_prof.csv", "w+");
-//     fprintf(fp, "ID, TIME, TYPE\n");
-// }
-void initialize_file(const char name[]){
-    cudaEventCreate(&event_stop);
-    cudaEventCreate(&event_start);
-
-    fp = fopen(name, "w+");
-    fprintf(fp, "ID, TIME, TYPE\n");
+	if(GPU_PROFILING == 1){
+		execution_time_fp = fopen(execution_time_filename, "w+");
+		fprintf(execution_time_fp, "ID, TIME, TYPE\n");
+    response_time_fp = fopen(response_time_filename, "w+");
+		fprintf(response_time_fp, "ID, TIME, TYPE\n");
+    remain_time_fp = fopen(remain_time_filename, "w+");
+		fprintf(remain_time_fp, "ID, TIME\n");
+	}
 }
 
 void close_file(){
-    fclose(fp);
+	if(GPU_PROFILING == 1){
+		fclose(execution_time_fp);
+    fclose(response_time_fp);
+    fclose(remain_time_fp);
+  }
 }
 
 #ifdef __cplusplus
@@ -173,12 +224,8 @@ float *cuda_make_array(float *x, size_t n)
     check_error(status);
     if(x){
         count_htod += 1;
-        
-        //start_profiling();
 
         cudaError_t status = cudaMemcpy(x_gpu, x, size, cudaMemcpyHostToDevice);
-
-        //stop_profiling(HTOD,"make_arr",count_htod);
 
         check_error(status);
 
@@ -240,41 +287,15 @@ void cuda_push_array(float *x_gpu, float *x, size_t n)
 {
     size_t size = sizeof(float)*n;
     count_htod += 1;
-    if(count_htod > 297)
-        start_profiling();
+    if(count_htod > YOLO){
+        push_id += 1;
+        request_scheduling(push_id);
+    }
+        
 
     cudaError_t status = cudaMemcpy(x_gpu, x, size, cudaMemcpyHostToDevice);
-    if(count_htod > 297)
-        stop_profiling(HTOD,"push_arr",count_htod);
-
-    //htod_time += gpu_elapsed_time_ms1;
-    /*
-    if(count_htod >= 516){        
-        htod_time = 0;
-        count_htod = 0;
-        count_flag = 1;
-    }
-    pid_t tid = syscall(__NR_gettid);
-
-
-    if(count_flag && htod_time){
-        char filename[100];
-        sprintf(filename, "~/prof_data/yolo_mem_%d.csv", tid);
-        
-        FILE *f = fopen(filename, "a+");
-        if(f == NULL){
-            printf("Cannot open file!\n");
-            return;
-        } 
-        
-        fprintf(f, "htod time,%f\n", htod_time/1000);
-        fclose(f);
-        htod_time = 0;
-    }*/
-    // pid_t tid = syscall(__NR_gettid);
-    // char filename[100];
-    // sprintf(filename, "~/prof_data/yolo_mem_%d.csv", tid);
-    // file_write(filename, count_dtoh, gpu_elapsed_time_ms1/1000,1);
+    if(count_htod > YOLO)
+        stop_profiling(push_id, HTOD);
 
     check_error(status);
 }
@@ -283,13 +304,12 @@ void cuda_pull_array(float *x_gpu, float *x, size_t n)
 {
     size_t size = sizeof(float)*n;
 
-    count_dtoh += 1;
-
-    start_profiling();
+    pull_id += 1;
+    request_scheduling(pull_id);
 
     cudaError_t status = cudaMemcpy(x, x_gpu, size, cudaMemcpyDeviceToHost);
 
-    stop_profiling(DTOH,"pull_arr",count_dtoh);
+    stop_profiling(pull_id, DTOH);
 
     check_error(status);
 }
@@ -303,6 +323,167 @@ float cuda_mag_array(float *x_gpu, size_t n)
     return m;
 }
 
+void sig_handler(int signum){
+  if(signum == SIGUSR1 || signum == SIGUSR2)
+      return;
+  else
+      termination();    
+}
+
+void termination(){
+  sched_info_->state = STOP;
+  shmdt(sched_info_);
+  if(remove(task_filename_)){
+      printf("Cannot remove file %s\n", task_filename_);
+      exit(1);
+  }
+  exit(0);
+}
+
+unsigned long long get_current_time_us(){
+  struct timespec ts;
+  unsigned long long current_time;
+  clock_gettime(CLOCK_REALTIME, &ts);
+  current_time = ts.tv_sec%10000 * 1000000 + ts.tv_nsec/1000;
+  return current_time;
+}
+
+void us_sleep(unsigned long long us){
+  struct timespec ts;
+  ts.tv_sec = us/1000000;
+  ts.tv_nsec = us%1000000*1000;
+  nanosleep(&ts, NULL);
+  return;
+}
+
+void initialize_signal_handler(){
+  signal(SIGINT, sig_handler);
+  signal(SIGTSTP, sig_handler);
+  signal(SIGQUIT, sig_handler);
+  signal(SIGUSR1, sig_handler);
+  signal(SIGUSR2, sig_handler);
+}
+
+void create_task_file(){        
+  FILE* task_fp;
+  task_fp = fopen(task_filename_, "w");
+  if(task_fp == NULL){
+      printf("Cannot create task file at %s\n", task_filename_);
+      exit(1);
+  }
+  fprintf(task_fp, "%d\n", getpid());
+  fprintf(task_fp, "%d", key_id_);
+  fclose(task_fp);
+}
+
+void get_scheduler_pid(){
+  FILE* scheduler_fp;
+  printf("Wait the scheduler...\n");
+  while(1){
+      scheduler_fp = fopen("/tmp/np_edf_scheduler", "r");
+      if(scheduler_fp) break;
+  }
+  while(1){
+      fscanf(scheduler_fp, "%d", &scheduler_pid_);
+      if(scheduler_pid_ != 0) break;
+  }
+  printf("Scheduler pid: %d\n", scheduler_pid_);
+  fclose(scheduler_fp);
+}
+
+void initialize_sched_info(){
+  FILE* sm_key_fp;
+  sm_key_fp = fopen("/tmp/sm_key", "r");
+  if(sm_key_fp == NULL){
+      printf("Cannot open /tmp/sm_key\n");
+      termination();
+  }
+
+  key_ = ftok("/tmp/sm_key", key_id_);
+  shmid_ = shmget(key_, sizeof(SchedInfo), 0666|IPC_CREAT);
+  sched_info_ = (SchedInfo*)shmat(shmid_, 0, 0);
+  sched_info_->pid = getpid();
+  sched_info_->state = NONE;
+}
+
+void init_scheduling(char* task_filename, char* deadline_filename, int key_id){
+  gpu_scheduling_flag_ = 1;
+  // Get deadline list
+  get_deadline_list(deadline_filename);
+
+  // Initialize key id for shared memory
+  key_id_ = key_id;
+
+  // Initialize signal handler
+  initialize_signal_handler();
+
+  // Create task file
+
+  sprintf(task_filename_, "%s", task_filename);
+  create_task_file();    
+
+  // Get scheduler pid
+  get_scheduler_pid();
+
+  // Initialize scheduling information (shared memory data)
+  initialize_sched_info();
+
+  sigemptyset(&sigset_);
+  sigaddset(&sigset_, SIGUSR1);
+  sigaddset(&sigset_, SIGUSR2);
+  sigprocmask(SIG_BLOCK, &sigset_, NULL);    
+
+  // sigwait(&sigset_, &sig_);    
+  // kill(scheduler_pid_, SIGUSR2);
+  // sigprocmask(SIG_UNBLOCK, &sigset_, NULL);
+  
+  printf("Task [%d] is ready to work\n", getpid());
+  // sigaddset(&sigset_, SIGUSR1);
+  // sigprocmask(SIG_BLOCK, &sigset_, NULL);    
+
+}
+
+void request_scheduling(int id){  
+  unsigned long long relative_deadline = deadline_list_[id];
+  if(gpu_scheduling_flag_ == 0) return;
+  if(identical_deadline_ != 0) sched_info_->deadline = absolute_deadline_;  
+  else sched_info_->deadline = get_current_time_us() + relative_deadline;  
+
+  sched_info_->state = WAIT;        
+  // printf("Request schedule - deadline: %llu\n", sched_info_->deadline);
+
+  start_profiling_response_time();
+  while(1){
+      kill(scheduler_pid_, SIGUSR1);
+      if(!sigwait(&sigset_, &sig_)) break;
+  }
+  start_profiling_execution_time();
+}
+
+void get_deadline_list(char* filename){
+  FILE* fp;
+  fp = fopen(filename, "r");
+  if(fp==NULL){
+	  fprintf(stderr, "Cannot find file %s\n", filename);
+	  exit(1);
+  }
+  char buf[1024];
+  long long int deadline;
+  for(int i = 0; i < sizeof(deadline_list_)/sizeof(long long int); i++){
+    fgets(buf, 1024, fp);
+    strtok(buf, "\n");
+    sscanf(buf, "%*llu, %llu", &deadline);
+    deadline_list_[i] = deadline;
+  }
+}
+
+void set_identical_deadline(unsigned long long identical_deadline){
+  identical_deadline_ = identical_deadline;
+}
+
+void set_absolute_deadline(){  
+  absolute_deadline_ = get_current_time_us() + identical_deadline_;
+}
 
 #else
 void cuda_set_device(int n){}

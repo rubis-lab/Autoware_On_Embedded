@@ -24,30 +24,26 @@
 #include <unistd.h>
 #include <sys/syscall.h>
 #include "../darknet/src/cuda.h"
-//#include "../darknet/src/cuda.c"
 #if (CV_MAJOR_VERSION <= 2)
 #include <opencv2/contrib/contrib.hpp>
 #else
 #include "gencolors.cpp"
 #endif
-
-// extern"C" FILE* fp;
-// extern"C" int glob_id;
-//int count_exec;
 extern"C" float htod_time;
 extern"C" float dtoh_time;
-extern"C" float launch_time;  
-extern"C" cudaEvent_t event_start, event_stop;
-//extern"C" int gid = 0;
-extern"C" void start_profiling();
-extern"C" void stop_profiling(int type, char* ker_name, int count);
-extern"C" void write_data(int id, float time, int type, char* ker_name, int count);
+extern"C" float launch_time;
+extern"C" cudaEvent_t e_event_start, e_event_stop, r_event_start, r_event_stop;
+extern"C" void start_profiling_execution_time();
+extern"C" void start_profiling_response_time();
+extern"C" void stop_profiling(int id, int type);
+extern"C" void write_profiling_data(int id, float e_time, float r_time, int type);
 extern"C" void write_dummy_line();
-//extern"C" void initialize_file();
-extern"C" void initialize_file(const char name[]);
+extern"C" void initialize_file(const char execution_time_filename[], const char response_time_filename[], const char remain_time_filename[]);
 extern"C" void close_file();
 
-static std::string _profiling_file_name;
+static std::string _execution_time_file_name;
+static std::string _response_time_file_name;
+static std::string _remain_time_file_name;
 
 namespace darknet
 {
@@ -125,14 +121,14 @@ namespace darknet
 
         layer output_layer = darknet_network_->layers[darknet_network_->n - 1];
 
-        char filename[100];
-        sprintf(filename, "/home/bkpark/prof_data/yolo_res.csv");
-        FILE *f = fopen(filename, "a+");        
-        if(f == NULL){
-            fprintf(stderr,"Cannot open file!\n");
-        } 
-        fprintf(f, "res_time,%f\n", what_time_is_it_now() - time);
-        fclose(f);
+        // char filename[100];
+        // sprintf(filename, "~/GPU_profiling/yolo_res.csv");
+        // FILE *f = fopen(filename, "a+");        
+        // if(f == NULL){
+        //     fprintf(stderr,"Cannot open file!\n");
+        // } 
+        // fprintf(f, "res_time,%f\n", what_time_is_it_now() - time);
+        // fclose(f);
 
         output_layer.output = prediction;
         int nboxes = 0;
@@ -290,6 +286,7 @@ void Yolo3DetectorNode::image_callback(const sensor_msgs::ImageConstPtr& in_imag
     
     darknet_image_ = convert_ipl_to_image(in_image_message);
 
+    set_absolute_deadline();
     detections = yolo_detector_.detect(darknet_image_);
 
     //Prepare Output message
@@ -325,15 +322,23 @@ std::vector<std::string> Yolo3DetectorNode::read_custom_names_file(const std::st
 
 void Yolo3DetectorNode::Run()
 {    
-
     //ROS STUFF
-    ros::NodeHandle private_node_handle("~");//to receive args
-
-    private_node_handle.param<std::string>("profiling_file_name",_profiling_file_name,"/home/bkpark/prof_data/yolo_prof.csv");
+    ros::NodeHandle private_node_handle("~");//to receive args    
+    int identical_deadline;
+    private_node_handle.param<std::string>("execution_time_file_name",_execution_time_file_name,"./yolo_execution_time.csv");
+    private_node_handle.param<std::string>("response_time_file_name",_response_time_file_name,"./yolo_response_time.csv");
+    private_node_handle.param<std::string>("remain_time_file_name",_remain_time_file_name,"./yolo_remain_time.csv");
+    private_node_handle.param("gpu_scheduling_flag", gpu_scheduling_flag_, 0);
+    private_node_handle.param("identical_deadline", identical_deadline, 0);
+    set_identical_deadline((unsigned long long)identical_deadline);
     //private_node_handle.getParam("profiling_file_name", _profiling_file_name);
-    fprintf(stderr,"%s\n", _profiling_file_name.c_str());
-    initialize_file(_profiling_file_name.c_str());    
+    // fprintf(stderr,"%s\n", _profiling_file_name.c_str());
+    initialize_file(_execution_time_file_name.c_str(), _response_time_file_name.c_str(), _remain_time_file_name.c_str());    
     
+    int key_id = 2;    
+    if(gpu_scheduling_flag_==1)
+        init_scheduling("/tmp/yolo", "/home/hypark/GPU_profiling/deadline/yolo_deadline.csv",key_id);
+
     
     //RECEIVE IMAGE TOPIC NAME
     std::string image_raw_topic_str;

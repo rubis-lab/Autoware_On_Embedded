@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /home/hypark/git/Autoware_On_Embedded/install/lidar_euclidean_cluster_detect/setup.sh

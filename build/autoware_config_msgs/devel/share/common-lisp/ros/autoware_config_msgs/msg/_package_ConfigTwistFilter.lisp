@@ -1,0 +1,16 @@
+(cl:in-package autoware_config_msgs-msg)
+(cl:export '(HEADER-VAL
+          HEADER
+          USE_DECISION_MAKER-VAL
+          USE_DECISION_MAKER
+          LATERAL_ACCEL_LIMIT-VAL
+          LATERAL_ACCEL_LIMIT
+          LATERAL_JERK_LIMIT-VAL
+          LATERAL_JERK_LIMIT
+          LOWPASS_GAIN_LINEAR_X-VAL
+          LOWPASS_GAIN_LINEAR_X
+          LOWPASS_GAIN_ANGULAR_Z-VAL
+          LOWPASS_GAIN_ANGULAR_Z
+          LOWPASS_GAIN_STEERING_ANGLE-VAL
+          LOWPASS_GAIN_STEERING_ANGLE
+))

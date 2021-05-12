@@ -1,0 +1,2 @@
+Invoking command in '/home/hypark/git/Autoware_On_Embedded/build/lidar_euclidean_cluster_detect': /usr/bin/cmake --build /home/hypark/git/Autoware_On_Embedded/build/lidar_euclidean_cluster_detect -- -j12 -l12
+Invoked command in '/home/hypark/git/Autoware_On_Embedded/build/lidar_euclidean_cluster_detect' returned '2': /usr/bin/cmake --build /home/hypark/git/Autoware_On_Embedded/build/lidar_euclidean_cluster_detect -- -j12 -l12

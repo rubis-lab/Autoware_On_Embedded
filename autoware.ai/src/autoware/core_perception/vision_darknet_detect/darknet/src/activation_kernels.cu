@@ -192,41 +192,12 @@ __global__ void gradient_array_kernel(float *x, int n, ACTIVATION a, float *delt
 
 extern "C" void activate_array_gpu(float *x, int n, ACTIVATION a) 
 {
-    count_activation += 1;
-    // count_exec += 1;
-    // cudaEventCreate(&start3);
-    // cudaEventCreate(&stop3);
-
-    // cudaEventRecord(start3, 0);
-
-    start_profiling(); //
+    activation_id += 1;
+    request_scheduling(activation_id);
 
     activate_array_kernel<<<cuda_gridsize(n), BLOCK>>>(x, n, a);
 
-    stop_profiling(LAUNCH,"activation",count_activation);
-
-    // cudaEventRecord(stop3, 0); //*
-    // cudaEventSynchronize(stop3);
-    // cudaEventElapsedTime(&gpu_elapsed_time_ms4, start3, stop3);
-    //execution_time_activation += gpu_elapsed_time_ms4;    
-    // pid_t tid = syscall(__NR_gettid);
-    // char filename[100];
-    // sprintf(filename, "~/prof_data/yolo_exec_%d.csv", tid);
-    // file_write(filename, count_exec, gpu_elapsed_time_ms4/1000,2);    
-
-    // if(count_activation >= 116){
-    //     char filename[100];
-    //     sprintf(filename, "~/prof_data/yolo_exec_%d.csv", tid);
-    //     FILE *f = fopen(filename, "a+");
-    //     if(f == NULL){
-    //         printf("Cannot open file!\n");
-    //         return;
-    //     } 
-    //     fprintf(f, "execution_time_activation,%f\n", execution_time_activation/1000);
-    //     fclose(f);
-    //     execution_time_activation = 0;
-    //     count_activation = 0;
-    // }
+    stop_profiling(activation_id, LAUNCH);
 
     check_error(cudaPeekAtLastError());
 }
