@@ -58,10 +58,9 @@ void im2col_gpu(float *im,
 
     //
 
-    request_scheduling(im2col_id);
 
-    stop_cpu_profiling(cpu_id);
-    
+    stop_cpu_profiling();
+    request_scheduling(im2col_id);
 
     im2col_gpu_kernel<<<(num_kernels+BLOCK-1)/BLOCK,
         BLOCK>>>(
@@ -71,6 +70,5 @@ void im2col_gpu(float *im,
     
     stop_profiling(im2col_id, LAUNCH);
 
-    cpu_id++;
     start_profiling_cpu_time();
 }

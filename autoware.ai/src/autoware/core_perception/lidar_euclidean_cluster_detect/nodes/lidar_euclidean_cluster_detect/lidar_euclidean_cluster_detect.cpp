@@ -139,6 +139,8 @@ tf::TransformListener *_vectormap_transform_listener;
 static std::string _execution_time_filename;
 static std::string _response_time_filename;
 static std::string _remain_time_filename;
+static std::string _deadline_file_name;
+
 /* For GPU Profiling */
 #ifdef GPU_CLUSTERING
 static GpuEuclideanCluster _gecl_cluster;  
@@ -388,7 +390,6 @@ std::vector<ClusterPtr> clusterAndColorGpu(const pcl::PointCloud<pcl::PointXYZ>:
   _gecl_cluster.setMaxClusterPts(_cluster_size_max);
   _gecl_cluster.extractClusters();
   std::vector<GpuEuclideanCluster::GClusterIndex> cluster_indices = _gecl_cluster.getOutput();
-  write_dummy_line();
 
   unsigned int k = 0;
 
@@ -855,6 +856,7 @@ void removePointsUpTo(const pcl::PointCloud<pcl::PointXYZ>::Ptr in_cloud_ptr,
 
 void velodyne_callback(const sensor_msgs::PointCloud2ConstPtr& in_sensor_cloud)
 {
+  start_profiling_cpu_time();
   set_absolute_deadline();
   //_start = std::chrono::system_clock::now();  
 
@@ -931,6 +933,8 @@ void velodyne_callback(const sensor_msgs::PointCloud2ConstPtr& in_sensor_cloud)
     publishCloudClusters(&_pub_clusters_message, cloud_clusters, _output_frame, _velodyne_header);
 
     _using_sensor_cloud = false;
+    stop_cpu_profiling();
+    write_dummy_line();
   }
 }
 int main(int argc, char **argv)
@@ -958,9 +962,10 @@ int main(int argc, char **argv)
   int identical_deadline;
   private_nh.param("gpu_scheduling_flag", gpu_scheduling_flag_, 0);
   private_nh.param("identical_deadline", identical_deadline, 0);
+  private_nh.param<std::string>("deadline_file_name", _deadline_file_name, "./deadline/cluster_deadline.csv");
   set_identical_deadline((unsigned long long)identical_deadline);
   if(gpu_scheduling_flag_ == 1)
-    init_scheduling("/tmp/euclidean_cluster_detect", "/home/hypark/GPU_profiling/deadline/cluster_deadline.csv",key_id);    
+    init_scheduling("/tmp/euclidean_cluster_detect", _deadline_file_name.c_str(),key_id);    
   #endif
 
 

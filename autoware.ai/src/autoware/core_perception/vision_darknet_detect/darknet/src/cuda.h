@@ -89,14 +89,14 @@ extern float dtoh_time;
 extern float launch_time;  
 extern cudaEvent_t e_event_start, e_event_stop, r_event_start, r_event_stop;
 
-void start_profiling_cpu_time();
-void stop_cpu_profiling(int id);
 void start_profiling_execution_time();
 void start_profiling_response_time();
+void start_profiling_cpu_time();
+void stop_cpu_profiling();
 void stop_profiling(int id, int type);
 //void write_profiling_data(int id, float e_time, float r_time, int type);
-void write_cpu_profiling_data(char *id, long long int c_time);
-void write_profiling_data(char *id, float e_time, float r_time, int type);
+void write_cpu_profiling_data(const char *id, long long int c_time);
+void write_profiling_data(const char *id, float e_time, float r_time, int type);
 void write_dummy_line();
 void initialize_file(const char execution_time_filename[], const char response_time_filename[], const char remain_time_filename[]);
 void close_file();

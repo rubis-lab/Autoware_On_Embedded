@@ -58,14 +58,16 @@ void start_profiling_response_time(){
 }
 
 void start_profiling_cpu_time(){
-  if(GPU_PROFILING == 1)
+  if(GPU_PROFILING == 1){
+    cpu_id++;
 		gettimeofday(&startTime, NULL);
+  }
 }
 
 void stop_profiling(int id, int type){
 	if(GPU_PROFILING == 1){		
 		float e_time, r_time;
-    char *gpu_id;
+    char gpu_id_buf[BUFFER_SIZE];
 
 		cudaEventRecord(e_event_stop, 0);
     cudaEventRecord(r_event_stop, 0);
@@ -76,35 +78,33 @@ void stop_profiling(int id, int type){
     e_time = MS2US(e_time);
     r_time = MS2US(r_time);
 		// write_data(gid, time, type);
-    sprintf(gpu_id,"g%d",id);
+    sprintf(gpu_id_buf,"g%d",id);
 
     //write_profiling_data(id, e_time, r_time, type);
 
-    write_profiling_data(gpu_id, e_time, r_time, type);
+    write_profiling_data(gpu_id_buf, e_time, r_time, type);
 		// gid++;
 	}
 }
 
-void stop_cpu_profiling(int id){
+void stop_cpu_profiling(){
   if(GPU_PROFILING == 1){
     long long int elapsedTime;
-    char *cpu_id;
+    char cpu_id_buf[BUFFER_SIZE];
 
     gettimeofday(&endTime, NULL);
     elapsedTime = ((long long int)(endTime.tv_sec - startTime.tv_sec)) * 1000000ll + (endTime.tv_usec - startTime.tv_usec);
 
-    sprintf(cpu_id,"e%d",id);
-
-    write_cpu_profiling_data(cpu_id,elapsedTime);
+    sprintf(cpu_id_buf,"e%d",cpu_id);
+    write_cpu_profiling_data(cpu_id_buf,elapsedTime);    
   }
 }
 
-void write_cpu_profiling_data(char *id, long long int c_time){
+void write_cpu_profiling_data(const char *id, long long int c_time){
   if(GPU_PROFILING == 1){
 		fprintf(execution_time_fp, "%s, %02d\n", id, c_time);	
     fprintf(response_time_fp, "%s, %02d\n", id, c_time);    
 	}
-
 }
 
 // void write_profiling_data(int id, float e_time, float r_time, int type){
@@ -115,7 +115,7 @@ void write_cpu_profiling_data(char *id, long long int c_time){
 // 	}
 // }
 
-void write_profiling_data(char *id, float e_time, float r_time, int type){
+void write_profiling_data(const char *id, float e_time, float r_time, int type){
 	if(GPU_PROFILING == 1){
 		fprintf(execution_time_fp, "%s, %f, %d\n", id, e_time, type);	
     fprintf(response_time_fp, "%s, %f, %d\n", id, r_time, type);	
@@ -131,6 +131,7 @@ void write_dummy_line(){
 		fflush(response_time_fp);
     fprintf(remain_time_fp, "-1, -1\n");						
 		fflush(remain_time_fp);
+    cpu_id = 0;
 	}
 
     push_id = 0; // 1
@@ -334,19 +335,15 @@ void cuda_push_array(float *x_gpu, float *x, size_t n)
     count_htod += 1;
     if(count_htod > YOLO){
         push_id += 1;
-        // set_absolute_deadline();        
-        request_scheduling(push_id);
-
-        stop_cpu_profiling(cpu_id);        
+        // set_absolute_deadline();       
+        stop_cpu_profiling();        
+        request_scheduling(push_id);        
     }
         
 
     cudaError_t status = cudaMemcpy(x_gpu, x, size, cudaMemcpyHostToDevice);
     if(count_htod > YOLO){
-      
       stop_profiling(push_id, HTOD);      
-      
-      cpu_id++;
       start_profiling_cpu_time();
     }
       
@@ -359,15 +356,14 @@ void cuda_pull_array(float *x_gpu, float *x, size_t n)
     size_t size = sizeof(float)*n;
 
     pull_id += 1;
-    request_scheduling(pull_id);
+    stop_cpu_profiling();
 
-    stop_cpu_profiling(cpu_id);
+    request_scheduling(pull_id);
     
     cudaError_t status = cudaMemcpy(x, x_gpu, size, cudaMemcpyDeviceToHost);
     
     stop_profiling(pull_id, DTOH);
 
-    cpu_id++;
     start_profiling_cpu_time();
     
     check_error(status);

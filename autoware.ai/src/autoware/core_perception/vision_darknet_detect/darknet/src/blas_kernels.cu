@@ -29,7 +29,7 @@ void scale_bias_gpu(float *output, float *biases, int batch, int n, int size)
     dim3 dimBlock(BLOCK, 1, 1);
     bias_id += 1;
 
-    stop_cpu_profiling(cpu_id);
+    stop_cpu_profiling();
 
     request_scheduling(bias_id);
     
@@ -37,7 +37,6 @@ void scale_bias_gpu(float *output, float *biases, int batch, int n, int size)
 
     stop_profiling(bias_id, LAUNCH);    
 
-    cpu_id++;
     start_profiling_cpu_time();
 
     check_error(cudaPeekAtLastError());
@@ -87,7 +86,7 @@ void add_bias_gpu(float *output, float *biases, int batch, int n, int size)
     int num = n*size*batch;
     add_id += 1;
 
-    stop_cpu_profiling(cpu_id);
+    stop_cpu_profiling();
 
     request_scheduling(add_id);    
     
@@ -95,7 +94,6 @@ void add_bias_gpu(float *output, float *biases, int batch, int n, int size)
 
     stop_profiling(add_id, LAUNCH);    
 
-    cpu_id++;
     start_profiling_cpu_time();
 
     check_error(cudaPeekAtLastError());
@@ -494,7 +492,7 @@ extern "C" void normalize_gpu(float *x, float *mean, float *variance, int batch,
     size_t N = batch*filters*spatial;
     normalize_id += 1;
 
-    stop_cpu_profiling(cpu_id);
+    stop_cpu_profiling();
 
     request_scheduling(normalize_id);
 
@@ -503,7 +501,6 @@ extern "C" void normalize_gpu(float *x, float *mean, float *variance, int batch,
     
     stop_profiling(normalize_id, LAUNCH);
 
-    cpu_id++;
     start_profiling_cpu_time();
 
     check_error(cudaPeekAtLastError());
@@ -655,7 +652,7 @@ extern "C" void copy_gpu_offset(int N, float * X, int OFFX, int INCX, float * Y,
 {
     copy_gpu_id += 1;
 
-    stop_cpu_profiling(cpu_id);
+    stop_cpu_profiling();
 
     request_scheduling(copy_gpu_id);
         
@@ -663,7 +660,6 @@ extern "C" void copy_gpu_offset(int N, float * X, int OFFX, int INCX, float * Y,
 
     stop_profiling(copy_gpu_id, LAUNCH);
 
-    cpu_id++;
     start_profiling_cpu_time();
 
     // if(count_blas >= 533){        
@@ -1089,7 +1085,7 @@ extern "C" void upsample_gpu(float *in, int w, int h, int c, int batch, int stri
     size_t size = w*h*c*batch*stride*stride;
     upsample_id += 1;
 
-    stop_cpu_profiling(cpu_id);
+    stop_cpu_profiling();
     
     request_scheduling(upsample_id);
     
@@ -1097,7 +1093,6 @@ extern "C" void upsample_gpu(float *in, int w, int h, int c, int batch, int stri
 
     stop_profiling(upsample_id, LAUNCH);
 
-    cpu_id++;
     start_profiling_cpu_time();
 
     check_error(cudaPeekAtLastError());

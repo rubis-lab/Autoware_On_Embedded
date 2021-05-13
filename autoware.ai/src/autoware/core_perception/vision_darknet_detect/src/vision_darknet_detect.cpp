@@ -34,14 +34,13 @@ extern"C" float dtoh_time;
 extern"C" float launch_time;
 extern"C" cudaEvent_t e_event_start, e_event_stop, r_event_start, r_event_stop;
 extern"C" void start_profiling_cpu_time();
-extern"C" void stop_cpu_profiling(int id);
-extern"C" void write_cpu_profiling_data(char *id, long long int c_time);
+extern"C" void stop_cpu_profiling();
 extern"C" void start_profiling_execution_time();
 extern"C" void start_profiling_response_time();
 extern"C" void stop_profiling(int id, int type);
 //extern"C" void write_profiling_data(int id, float e_time, float r_time, int type);
-extern"C" void write_cpu_profiling_data(char *id, long long int c_time);
-extern"C" void write_profiling_data(char *id, float e_time, float r_time, int type);
+extern"C" void write_cpu_profiling_data(const char *id, long long int c_time);
+extern"C" void write_profiling_data(const char *id, float e_time, float r_time, int type);
 extern"C" void write_dummy_line();
 extern"C" void initialize_file(const char execution_time_filename[], const char response_time_filename[], const char remain_time_filename[]);
 extern"C" void close_file();
@@ -288,7 +287,6 @@ image Yolo3DetectorNode::convert_ipl_to_image(const sensor_msgs::ImageConstPtr& 
 
 void Yolo3DetectorNode::image_callback(const sensor_msgs::ImageConstPtr& in_image_message)
 {
-    cpu_id++;
     start_profiling_cpu_time();
 
     set_absolute_deadline();
@@ -310,7 +308,7 @@ void Yolo3DetectorNode::image_callback(const sensor_msgs::ImageConstPtr& in_imag
 
     free(darknet_image_.data);
 
-    stop_cpu_profiling(cpu_id);
+    stop_cpu_profiling();
 
     write_dummy_line();//
 }
