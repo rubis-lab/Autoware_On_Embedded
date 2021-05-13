@@ -32,8 +32,13 @@ void forward_dropout_layer_gpu(dropout_layer layer, network net)
 
     request_scheduling(count_dropout);
 
+    stop_cpu_profiling(cpu_id);
+    
     yoloswag420blazeit360noscope<<<cuda_gridsize(size), BLOCK>>>(net.input_gpu, size, layer.rand_gpu, layer.probability, layer.scale);
     
+    cpu_id++;
+    start_profiling_cpu_time();
+
     stop_profiling(count_dropout, LAUNCH);
 
     check_error(cudaPeekAtLastError());
@@ -47,8 +52,13 @@ void backward_dropout_layer_gpu(dropout_layer layer, network net)
 
     request_scheduling(count_dropout);
 
+    stop_cpu_profiling(cpu_id);
+    
     yoloswag420blazeit360noscope<<<cuda_gridsize(size), BLOCK>>>(net.delta_gpu, size, layer.rand_gpu, layer.probability, layer.scale);
     
+    cpu_id++;
+    start_profiling_cpu_time();
+
     stop_profiling(count_dropout, LAUNCH);
     
     check_error(cudaPeekAtLastError());

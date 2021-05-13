@@ -33,17 +33,24 @@ extern"C" float htod_time;
 extern"C" float dtoh_time;
 extern"C" float launch_time;
 extern"C" cudaEvent_t e_event_start, e_event_stop, r_event_start, r_event_stop;
+extern"C" void start_profiling_cpu_time();
+extern"C" void stop_cpu_profiling(int id);
+extern"C" void write_cpu_profiling_data(char *id, long long int c_time);
 extern"C" void start_profiling_execution_time();
 extern"C" void start_profiling_response_time();
 extern"C" void stop_profiling(int id, int type);
-extern"C" void write_profiling_data(int id, float e_time, float r_time, int type);
+//extern"C" void write_profiling_data(int id, float e_time, float r_time, int type);
+extern"C" void write_cpu_profiling_data(char *id, long long int c_time);
+extern"C" void write_profiling_data(char *id, float e_time, float r_time, int type);
 extern"C" void write_dummy_line();
 extern"C" void initialize_file(const char execution_time_filename[], const char response_time_filename[], const char remain_time_filename[]);
 extern"C" void close_file();
+//extern"C" void init_scheduling(char* task_filename, const char deadline_filename[], int key_id);
 
 static std::string _execution_time_file_name;
 static std::string _response_time_file_name;
 static std::string _remain_time_file_name;
+static std::string _deadline_file_name;
 
 namespace darknet
 {
@@ -281,7 +288,11 @@ image Yolo3DetectorNode::convert_ipl_to_image(const sensor_msgs::ImageConstPtr& 
 
 void Yolo3DetectorNode::image_callback(const sensor_msgs::ImageConstPtr& in_image_message)
 {
+    cpu_id++;
+    start_profiling_cpu_time();
+
     set_absolute_deadline();
+  
     std::vector< RectClassScore<float> > detections;
 
     
@@ -298,6 +309,8 @@ void Yolo3DetectorNode::image_callback(const sensor_msgs::ImageConstPtr& in_imag
     publisher_objects_.publish(output_message);
 
     free(darknet_image_.data);
+
+    stop_cpu_profiling(cpu_id);
 
     write_dummy_line();//
 }
@@ -328,6 +341,7 @@ void Yolo3DetectorNode::Run()
     private_node_handle.param<std::string>("execution_time_file_name",_execution_time_file_name,"./yolo_execution_time.csv");
     private_node_handle.param<std::string>("response_time_file_name",_response_time_file_name,"./yolo_response_time.csv");
     private_node_handle.param<std::string>("remain_time_file_name",_remain_time_file_name,"./yolo_remain_time.csv");
+    private_node_handle.param<std::string>("deadline_file_name",_deadline_file_name,"./deadline/yolo_deadline.csv");
     private_node_handle.param("gpu_scheduling_flag", gpu_scheduling_flag_, 0);
     private_node_handle.param("identical_deadline", identical_deadline, 0);
     set_identical_deadline((unsigned long long)identical_deadline);
@@ -337,7 +351,7 @@ void Yolo3DetectorNode::Run()
     
     int key_id = 2;    
     if(gpu_scheduling_flag_==1)
-        init_scheduling("/tmp/yolo", "/home/hypark/GPU_profiling/deadline/yolo_deadline.csv",key_id);
+        init_scheduling("/tmp/yolo", _deadline_file_name.c_str(),key_id);
 
     
     //RECEIVE IMAGE TOPIC NAME

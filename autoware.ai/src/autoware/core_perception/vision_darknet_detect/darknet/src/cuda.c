@@ -29,11 +29,14 @@ int upsample_id = 263; // 1~2
 int activation_id = 380; //1~116
 int im2col_id = 460; //1~75
 
+int cpu_id = 0;
 
 int glob_id = 0;
 float htod_time;
 float dtoh_time;
-float launch_time;  
+float launch_time;
+
+struct timeval startTime, endTime;
 cudaEvent_t e_event_start, e_event_stop, r_event_start, r_event_stop;
 
 FILE* execution_time_fp;
@@ -54,9 +57,16 @@ void start_profiling_response_time(){
 		cudaEventRecord(r_event_start, 0);
 }
 
+void start_profiling_cpu_time(){
+  if(GPU_PROFILING == 1)
+		gettimeofday(&startTime, NULL);
+}
+
 void stop_profiling(int id, int type){
 	if(GPU_PROFILING == 1){		
 		float e_time, r_time;
+    char *gpu_id;
+
 		cudaEventRecord(e_event_stop, 0);
     cudaEventRecord(r_event_stop, 0);
 		cudaEventSynchronize(e_event_stop);
@@ -66,19 +76,52 @@ void stop_profiling(int id, int type){
     e_time = MS2US(e_time);
     r_time = MS2US(r_time);
 		// write_data(gid, time, type);
-    write_profiling_data(id, e_time, r_time, type);
+    sprintf(gpu_id,"g%d",id);
+
+    //write_profiling_data(id, e_time, r_time, type);
+
+    write_profiling_data(gpu_id, e_time, r_time, type);
 		// gid++;
 	}
 }
 
-void write_profiling_data(int id, float e_time, float r_time, int type){
-	if(GPU_PROFILING == 1){
-		fprintf(execution_time_fp, "%d, %f, %d\n", id, e_time, type);	
-    fprintf(response_time_fp, "%d, %f, %d\n", id, r_time, type);	
-    fprintf(remain_time_fp, "%d, %llu\n", id, absolute_deadline_ - get_current_time_us());	
-	}
+void stop_cpu_profiling(int id){
+  if(GPU_PROFILING == 1){
+    long long int elapsedTime;
+    char *cpu_id;
+
+    gettimeofday(&endTime, NULL);
+    elapsedTime = ((long long int)(endTime.tv_sec - startTime.tv_sec)) * 1000000ll + (endTime.tv_usec - startTime.tv_usec);
+
+    sprintf(cpu_id,"e%d",id);
+
+    write_cpu_profiling_data(cpu_id,elapsedTime);
+  }
 }
 
+void write_cpu_profiling_data(char *id, long long int c_time){
+  if(GPU_PROFILING == 1){
+		fprintf(execution_time_fp, "%s, %02d\n", id, c_time);	
+    fprintf(response_time_fp, "%s, %02d\n", id, c_time);    
+	}
+
+}
+
+// void write_profiling_data(int id, float e_time, float r_time, int type){
+// 	if(GPU_PROFILING == 1){
+// 		fprintf(execution_time_fp, "%d, %f, %d\n", id, e_time, type);	
+//     fprintf(response_time_fp, "%d, %f, %d\n", id, r_time, type);	
+//     fprintf(remain_time_fp, "%d, %llu\n", id, absolute_deadline_ - get_current_time_us());	
+// 	}
+// }
+
+void write_profiling_data(char *id, float e_time, float r_time, int type){
+	if(GPU_PROFILING == 1){
+		fprintf(execution_time_fp, "%s, %f, %d\n", id, e_time, type);	
+    fprintf(response_time_fp, "%s, %f, %d\n", id, r_time, type);	
+    fprintf(remain_time_fp, "%s, %llu\n", id, absolute_deadline_ - get_current_time_us());	
+	}
+}
 
 void write_dummy_line(){
 	if(GPU_PROFILING == 1){  
@@ -291,14 +334,21 @@ void cuda_push_array(float *x_gpu, float *x, size_t n)
     count_htod += 1;
     if(count_htod > YOLO){
         push_id += 1;
-        // set_absolute_deadline();
+        // set_absolute_deadline();        
         request_scheduling(push_id);
+
+        stop_cpu_profiling(cpu_id);        
     }
         
 
     cudaError_t status = cudaMemcpy(x_gpu, x, size, cudaMemcpyHostToDevice);
-    if(count_htod > YOLO)
-        stop_profiling(push_id, HTOD);
+    if(count_htod > YOLO){
+      cpu_id++;
+      start_profiling_cpu_time();
+
+      stop_profiling(push_id, HTOD);      
+    }
+      
 
     check_error(status);
 }
@@ -310,10 +360,15 @@ void cuda_pull_array(float *x_gpu, float *x, size_t n)
     pull_id += 1;
     request_scheduling(pull_id);
 
+    stop_cpu_profiling(cpu_id);
+    
     cudaError_t status = cudaMemcpy(x, x_gpu, size, cudaMemcpyDeviceToHost);
 
+    cpu_id++;
+    start_profiling_cpu_time();
+    
     stop_profiling(pull_id, DTOH);
-
+    
     check_error(status);
 }
 
@@ -409,7 +464,7 @@ void initialize_sched_info(){
   sched_info_->state = NONE;
 }
 
-void init_scheduling(char* task_filename, char* deadline_filename, int key_id){
+void init_scheduling(char* task_filename, const char deadline_filename[], int key_id){
   gpu_scheduling_flag_ = 1;
   // Get deadline list
   get_deadline_list(deadline_filename);
