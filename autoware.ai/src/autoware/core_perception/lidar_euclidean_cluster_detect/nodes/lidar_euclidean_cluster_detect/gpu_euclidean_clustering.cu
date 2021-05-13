@@ -483,9 +483,70 @@ void GpuEuclideanCluster::extractClustersOld()
 }
 
 extern "C" __global__ void mergeSelfClusters(int *cluster_matrix, int *cluster_list, int cluster_num, bool *changed)
-{
+{  
   int row_start = blockIdx.x * blockDim.x;
   int row_end = (row_start + blockDim.x <= cluster_num) ? row_start + blockDim.x : cluster_num;
+  int col = row_start + threadIdx.x;
+  __shared__ int local_changed[BLOCK_SIZE_X];
+  __shared__ int local_offset[BLOCK_SIZE_X];
+  bool block_changed = false;
+
+  if (col < row_end)
+  {
+    local_offset[threadIdx.x] = threadIdx.x;
+
+    __syncthreads();
+
+    for (int row = row_start; row < row_end; row++)
+    {
+      int col_offset = local_offset[threadIdx.x];
+      int row_offset = local_offset[row - row_start];
+
+      local_changed[threadIdx.x] = 0;
+      __syncthreads();
+
+      if (row < col && row_offset != col_offset && (cluster_matrix[row * cluster_num + col] == 1))
+      {
+        local_changed[col_offset] = 1;
+        block_changed = true;
+      }
+      __syncthreads();
+
+      local_offset[threadIdx.x] = (local_changed[col_offset] == 1) ? row_offset : col_offset;
+      __syncthreads();
+    }
+
+    __syncthreads();
+
+    int new_cluster = cluster_list[row_start + local_offset[threadIdx.x]];
+
+    __syncthreads();
+
+    cluster_list[col] = new_cluster;
+
+
+    __syncthreads();
+    if (block_changed)
+      *changed = true;
+  }
+}
+
+extern "C" __global__ void mergeSelfClustersWithSlicing(int *cluster_matrix, int *cluster_list, int cluster_num, bool *changed, int slice_id, int slice_cnt)
+{ 
+  int row_start_origin = blockIdx.x * blockDim.x;
+  int row_end_origin = (row_start_origin + blockDim.x <= cluster_num) ? row_start_origin + blockDim.x : cluster_num;
+
+  int quotient = (row_end_origin-row_start_origin)/slice_cnt;
+  int remainder = (row_end_origin-row_start_origin)%slice_cnt;
+
+  int row_start = row_start_origin + quotient*slice_id;
+  if(slice_id > remainder) row_start += remainder;
+  else row_start += slice_id;
+
+  int row_end = row_start + quotient;    
+  if(remainder - slice_id > 0) row_end + 1;
+  if(row_end > row_end_origin) row_end = row_end_origin;
+
   int col = row_start + threadIdx.x;
   __shared__ int local_changed[BLOCK_SIZE_X];
   __shared__ int local_offset[BLOCK_SIZE_X];
@@ -649,7 +710,7 @@ void GpuEuclideanCluster::extractClusters()
   int *cluster_offset;
   int cluster_num, old_cluster_num;
 
- 
+  // set_absolute_deadline();
   request_scheduling(17);
   pclEuclideanInitialize << < grid_x, block_x >> > (cluster_indices_, size_);
   checkCudaErrors(cudaDeviceSynchronize());
@@ -718,10 +779,21 @@ void GpuEuclideanCluster::extractClusters()
     block_x2 = (cluster_num > BLOCK_SIZE_X) ? BLOCK_SIZE_X : cluster_num;
     grid_x2 = (cluster_num - 1) / block_x2 + 1;
 
-    request_scheduling(25);
-    mergeSelfClusters << < grid_x2, block_x2 >> > (cluster_matrix, cluster_list, cluster_num, changed);    
-    checkCudaErrors(cudaDeviceSynchronize());
-    stop_profiling(25, LAUNCH);
+    if(!slicing_flag_){    
+      request_scheduling(25);
+      mergeSelfClusters << < grid_x2, block_x2 >> > (cluster_matrix, cluster_list, cluster_num, changed);
+      checkCudaErrors(cudaDeviceSynchronize());
+      stop_profiling(25, LAUNCH);    
+    }    
+    else{ 
+      int slice_cnt = 2;
+      for(int slice_id = 0; slice_id < slice_cnt; slice_id++){ // s: slice id        
+        request_scheduling(25);
+        mergeSelfClustersWithSlicing << < grid_x2, block_x2 >> > (cluster_matrix, cluster_list, cluster_num, changed, slice_id, slice_cnt);
+        checkCudaErrors(cudaDeviceSynchronize());
+        stop_profiling(25, LAUNCH);
+      }      
+    }
 
     int base_row = 1, base_column = 0;
     int sub_matrix_offset_row = 2, sub_matrix_offset_col = 2;
@@ -944,6 +1016,8 @@ void stop_profiling(int id, int type){
 		cudaEventElapsedTime(&e_time, e_event_start, e_event_stop);
     cudaEventElapsedTime(&r_time, r_event_start, r_event_stop);
 		// write_data(gid, time, type);
+    e_time = MS2US(e_time);
+    r_time = MS2US(r_time);
     write_profiling_data(id, e_time, r_time, type);
 		// gid++;
 	}
@@ -1147,4 +1221,8 @@ void set_identical_deadline(unsigned long long identical_deadline){
 
 void set_absolute_deadline(){  
   absolute_deadline_ = get_current_time_us() + identical_deadline_;
+}
+
+void set_slicing_flag(int flag){
+  slicing_flag_ = flag;
 }

@@ -19,6 +19,7 @@
  */
 
 #include "vision_darknet_detect.h"
+#include <sched.h>
 
 int main(int argc, char **argv)
 {

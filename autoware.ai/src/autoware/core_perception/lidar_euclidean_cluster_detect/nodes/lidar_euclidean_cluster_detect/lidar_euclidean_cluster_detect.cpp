@@ -4,6 +4,7 @@
 #include <sstream>
 #include <limits>
 #include <cmath>
+#include <sched.h>
 
 #include <ros/ros.h>
 
@@ -380,7 +381,7 @@ std::vector<ClusterPtr> clusterAndColorGpu(const pcl::PointCloud<pcl::PointXYZ>:
     tmp_y[i] = tmp_point.y;
     tmp_z[i] = tmp_point.z;
   }  
-  set_absolute_deadline();
+  
   _gecl_cluster.setInputPoints(tmp_x, tmp_y, tmp_z, size);
   _gecl_cluster.setThreshold(in_max_cluster_distance);
   _gecl_cluster.setMinClusterPts(_cluster_size_min);
@@ -854,6 +855,7 @@ void removePointsUpTo(const pcl::PointCloud<pcl::PointXYZ>::Ptr in_cloud_ptr,
 
 void velodyne_callback(const sensor_msgs::PointCloud2ConstPtr& in_sensor_cloud)
 {
+  set_absolute_deadline();
   //_start = std::chrono::system_clock::now();  
 
   if (!_using_sensor_cloud)
@@ -958,7 +960,7 @@ int main(int argc, char **argv)
   private_nh.param("identical_deadline", identical_deadline, 0);
   set_identical_deadline((unsigned long long)identical_deadline);
   if(gpu_scheduling_flag_ == 1)
-    init_scheduling("/tmp/euclidean_cluster_detect", "/home/hypark/GPU_profiling/deadline/euclidean_cluster_detect_deadline.csv",key_id);    
+    init_scheduling("/tmp/euclidean_cluster_detect", "/home/hypark/GPU_profiling/deadline/cluster_deadline.csv",key_id);    
   #endif
 
 
@@ -1051,6 +1053,7 @@ int main(int argc, char **argv)
 
   std::string str_distances;
   std::string str_ranges;
+  
   private_nh.param("clustering_distances", str_distances, std::string("[0.5,1.1,1.6,2.1,2.6]"));
   ROS_INFO("[%s] clustering_distances: %s", __APP_NAME__, str_distances.c_str());
   private_nh.param("clustering_ranges", str_ranges, std::string("[15,30,45,60]"));
@@ -1058,10 +1061,13 @@ int main(int argc, char **argv)
 
   #ifdef GPU_CLUSTERING
   if(_use_gpu == true){
+    int slicing_flag;
     private_nh.param<std::string>("execution_time_file_name", _execution_time_filename, "~/GPU_profiling/cluster_execution_time.csv");
     private_nh.param<std::string>("response_time_file_name", _response_time_filename, "~/GPU_profiling/cluster_reponse_time.csv");    
     private_nh.param<std::string>("remain_time_file_name", _remain_time_filename, "~/GPU_profiling/cluster_remain_time.csv");    
+    private_nh.param<int>("slicing_flag", slicing_flag, 0);    
     initialize_file(_execution_time_filename.c_str(), _response_time_filename.c_str(), _remain_time_filename.c_str());
+    set_slicing_flag(slicing_flag);
   }
   #endif
 

@@ -45,6 +45,7 @@ static unsigned long long deadline_list_[40];
 static int gpu_scheduling_flag_;
 static unsigned long long absolute_deadline_;
 static unsigned long long identical_deadline_;
+static int slicing_flag_;
 
 void sig_handler(int signum);
 void termination();
@@ -59,6 +60,7 @@ void set_identical_deadline(unsigned long long identical_deadline);
 void set_absolute_deadline();
 void initialize_sched_info();
 void request_scheduling(int id);
+void set_slicing_flag(int flag);
 /* ========================================*/
 
 #define HTOD 0

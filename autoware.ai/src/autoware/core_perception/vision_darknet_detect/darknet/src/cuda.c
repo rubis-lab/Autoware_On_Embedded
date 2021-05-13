@@ -63,6 +63,8 @@ void stop_profiling(int id, int type){
     cudaEventSynchronize(r_event_stop);
 		cudaEventElapsedTime(&e_time, e_event_start, e_event_stop);
     cudaEventElapsedTime(&r_time, r_event_start, r_event_stop);
+    e_time = MS2US(e_time);
+    r_time = MS2US(r_time);
 		// write_data(gid, time, type);
     write_profiling_data(id, e_time, r_time, type);
 		// gid++;
@@ -289,6 +291,7 @@ void cuda_push_array(float *x_gpu, float *x, size_t n)
     count_htod += 1;
     if(count_htod > YOLO){
         push_id += 1;
+        // set_absolute_deadline();
         request_scheduling(push_id);
     }
         

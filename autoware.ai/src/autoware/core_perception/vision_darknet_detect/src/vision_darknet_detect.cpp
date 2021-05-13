@@ -281,12 +281,12 @@ image Yolo3DetectorNode::convert_ipl_to_image(const sensor_msgs::ImageConstPtr& 
 
 void Yolo3DetectorNode::image_callback(const sensor_msgs::ImageConstPtr& in_image_message)
 {
+    set_absolute_deadline();
     std::vector< RectClassScore<float> > detections;
 
     
     darknet_image_ = convert_ipl_to_image(in_image_message);
 
-    set_absolute_deadline();
     detections = yolo_detector_.detect(darknet_image_);
 
     //Prepare Output message
