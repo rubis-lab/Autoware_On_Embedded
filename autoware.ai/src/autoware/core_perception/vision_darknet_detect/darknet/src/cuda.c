@@ -343,10 +343,11 @@ void cuda_push_array(float *x_gpu, float *x, size_t n)
 
     cudaError_t status = cudaMemcpy(x_gpu, x, size, cudaMemcpyHostToDevice);
     if(count_htod > YOLO){
+      
+      stop_profiling(push_id, HTOD);      
+      
       cpu_id++;
       start_profiling_cpu_time();
-
-      stop_profiling(push_id, HTOD);      
     }
       
 
@@ -363,11 +364,11 @@ void cuda_pull_array(float *x_gpu, float *x, size_t n)
     stop_cpu_profiling(cpu_id);
     
     cudaError_t status = cudaMemcpy(x, x_gpu, size, cudaMemcpyDeviceToHost);
+    
+    stop_profiling(pull_id, DTOH);
 
     cpu_id++;
     start_profiling_cpu_time();
-    
-    stop_profiling(pull_id, DTOH);
     
     check_error(status);
 }

@@ -69,8 +69,8 @@ void im2col_gpu(float *im,
                 stride, height_col,
                 width_col, data_col);
     
+    stop_profiling(im2col_id, LAUNCH);
+
     cpu_id++;
     start_profiling_cpu_time();
-
-    stop_profiling(im2col_id, LAUNCH);
 }
