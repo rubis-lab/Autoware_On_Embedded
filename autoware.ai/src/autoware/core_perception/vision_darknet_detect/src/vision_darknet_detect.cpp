@@ -33,6 +33,7 @@ extern"C" float htod_time;
 extern"C" float dtoh_time;
 extern"C" float launch_time;
 extern"C" cudaEvent_t e_event_start, e_event_stop, r_event_start, r_event_stop;
+extern"C" int is_scheduled_;
 extern"C" void start_profiling_cpu_time();
 extern"C" void stop_cpu_profiling();
 extern"C" void start_profiling_execution_time();
@@ -44,6 +45,7 @@ extern"C" void write_profiling_data(const char *id, float e_time, float r_time, 
 extern"C" void write_dummy_line();
 extern"C" void initialize_file(const char execution_time_filename[], const char response_time_filename[], const char remain_time_filename[]);
 extern"C" void close_file();
+extern"C" void sig_handler(int signum);
 //extern"C" void init_scheduling(char* task_filename, const char deadline_filename[], int key_id);
 
 static std::string _execution_time_file_name;

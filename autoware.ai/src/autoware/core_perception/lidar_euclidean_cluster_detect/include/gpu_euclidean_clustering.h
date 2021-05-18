@@ -31,6 +31,7 @@ typedef struct schedInfo{
     int pid;
     unsigned long long deadline;
     int state; // NONE = 0, WAIT = 1, RUN = 2
+    int scheduling_flag;
 } SchedInfo;
 
 static char task_filename_[BUFFER_SIZE];
@@ -48,6 +49,7 @@ static unsigned long long identical_deadline_;
 static int slicing_flag_;
 static int cpu_id;
 static int gpu_id;
+static int is_scheduled_;
 
 void sig_handler(int signum);
 void termination();

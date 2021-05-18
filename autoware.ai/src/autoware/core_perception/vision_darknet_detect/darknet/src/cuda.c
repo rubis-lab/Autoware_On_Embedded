@@ -68,6 +68,8 @@ void stop_profiling(int id, int type){
 	if(GPU_PROFILING == 1){		
 		float e_time, r_time;
     char gpu_id_buf[BUFFER_SIZE];
+    sched_info_->state = NONE;
+    sched_info_->scheduling_flag = 0;
 
 		cudaEventRecord(e_event_stop, 0);
     cudaEventRecord(r_event_stop, 0);
@@ -379,8 +381,9 @@ float cuda_mag_array(float *x_gpu, size_t n)
 }
 
 void sig_handler(int signum){
-  if(signum == SIGUSR1 || signum == SIGUSR2)
-      return;
+  if(signum == SIGUSR1 || signum == SIGUSR2){    
+    return;
+  }
   else
       termination();    
 }
@@ -459,6 +462,7 @@ void initialize_sched_info(){
   sched_info_ = (SchedInfo*)shmat(shmid_, 0, 0);
   sched_info_->pid = getpid();
   sched_info_->state = NONE;
+  sched_info_->scheduling_flag = 0;
 }
 
 void init_scheduling(char* task_filename, const char deadline_filename[], int key_id){
@@ -510,9 +514,14 @@ void request_scheduling(int id){
   start_profiling_response_time();
   while(1){
       kill(scheduler_pid_, SIGUSR1);
-      if(!sigwait(&sigset_, &sig_)) break;
-  }
+      // if(!sigwait(&sigset_, &sig_)) break;
+      // printf("request scheduling: is_scheuld %d \n", is_scheduled_);
+      // if(is_scheduled_==1) break;
+      if(sched_info_->scheduling_flag == 1) break;
+  }  
   start_profiling_execution_time();
+  sched_info_->state = RUN;
+  sched_info_->deadline = 0;
 }
 
 void get_deadline_list(char* filename){
@@ -527,7 +536,7 @@ void get_deadline_list(char* filename){
   for(int i = 0; i < sizeof(deadline_list_)/sizeof(long long int); i++){
     fgets(buf, 1024, fp);
     strtok(buf, "\n");
-    sscanf(buf, "%*llu, %llu", &deadline);
+    sscanf(buf, "%*s, %llu", &deadline);
     deadline_list_[i] = deadline;
   }
 }
