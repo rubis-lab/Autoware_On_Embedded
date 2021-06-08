@@ -8,6 +8,7 @@
 #define DTOH 1
 #define LAUNCH 2
 #define GPU_PROFILING 1
+#define SLICING
 
 /* For GPU Scheduling ====================*/
 #include <unistd.h>

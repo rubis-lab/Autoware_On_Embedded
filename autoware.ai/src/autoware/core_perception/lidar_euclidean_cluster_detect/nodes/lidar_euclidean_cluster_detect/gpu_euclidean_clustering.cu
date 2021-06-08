@@ -97,9 +97,10 @@ void GpuEuclideanCluster::setMaxClusterPts(int max_cluster_pts)
  */
 
 extern "C" __global__ void pclEuclideanInitialize(int *cluster_indices, int size)
-{
-  for (int index = threadIdx.x + blockIdx.x * blockDim.x; index < size; index += blockDim.x * gridDim.x)
+{  
+  for (int index = threadIdx.x + blockIdx.x * blockDim.x; index < size; index += blockDim.x * gridDim.x){
     cluster_indices[index] = index;
+  }
 }
 
 /* Connected component labeling points at GPU block thread level.
@@ -127,8 +128,69 @@ extern "C" __global__ void pclEuclideanInitialize(int *cluster_indices, int size
  */
 extern "C" __global__ void blockLabelling(float *x, float *y, float *z, int *cluster_indices, int size, float threshold)
 {
+  
   int block_start = blockIdx.x * blockDim.x;
   int block_end = (block_start + blockDim.x <= size) ? (block_start + blockDim.x) : size;
+  int row = threadIdx.x + block_start;
+  __shared__ int local_offset[BLOCK_SIZE_X];
+  __shared__ float local_x[BLOCK_SIZE_X];
+  __shared__ float local_y[BLOCK_SIZE_X];
+  __shared__ float local_z[BLOCK_SIZE_X];
+  __shared__ int local_cluster_changed[BLOCK_SIZE_X];
+
+
+  if (row < block_end)
+  {
+    local_offset[threadIdx.x] = threadIdx.x;
+    local_x[threadIdx.x] = x[row];
+    local_y[threadIdx.x] = y[row];
+    local_z[threadIdx.x] = z[row];
+    __syncthreads();
+
+    for (int column = block_start; column < block_end; column++)
+    {
+      float tmp_x = local_x[threadIdx.x] - local_x[column - block_start];
+      float tmp_y = local_y[threadIdx.x] - local_y[column - block_start];
+      float tmp_z = local_z[threadIdx.x] - local_z[column - block_start];
+      int column_offset = local_offset[column - block_start];
+      int row_offset = local_offset[threadIdx.x];
+
+      local_cluster_changed[threadIdx.x] = 0;
+      __syncthreads();
+
+      if (row > column && column_offset != row_offset && norm3df(tmp_x, tmp_y, tmp_z) < threshold)
+        local_cluster_changed[row_offset] = 1;
+      __syncthreads();
+
+      local_offset[threadIdx.x] = (local_cluster_changed[row_offset] == 1) ? column_offset : row_offset;
+      __syncthreads();
+    }
+
+    __syncthreads();
+
+    int new_cluster = cluster_indices[block_start + local_offset[threadIdx.x]];
+
+    __syncthreads();
+
+    cluster_indices[row] = new_cluster;
+  }
+}
+
+extern "C" __global__ void blockLabelling_with_slicing(float *x, float *y, float *z, int *cluster_indices, int size, float threshold, int slice_id, int slice_cnt)
+{
+  
+  int total_block_start = blockIdx.x * blockDim.x;
+  int total_block_end = (total_block_start + blockDim.x <= size) ? (total_block_start + blockDim.x) : size;  
+  
+  int quotient = (total_block_start-total_block_end) / slice_cnt;
+  int remainder = (total_block_start-total_block_end) % slice_cnt;
+
+  int block_start = quotient*(slice_id+1);
+  int block_end = block_start + quotient;
+  if( (slice_id+1) == slice_cnt) block_end += remainder;
+
+
+
   int row = threadIdx.x + block_start;
   __shared__ int local_offset[BLOCK_SIZE_X];
   __shared__ float local_x[BLOCK_SIZE_X];
@@ -143,7 +205,7 @@ extern "C" __global__ void blockLabelling(float *x, float *y, float *z, int *clu
     local_y[threadIdx.x] = y[row];
     local_z[threadIdx.x] = z[row];
     __syncthreads();
-
+    
     for (int column = block_start; column < block_end; column++)
     {
       float tmp_x = local_x[threadIdx.x] - local_x[column - block_start];
@@ -194,8 +256,9 @@ extern "C" __global__ void clusterMark(int *cluster_list, int *cluster_mark, int
 extern "C" __global__ void
 clusterCollector(int *old_cluster_list, int *new_cluster_list, int *cluster_location, int size)
 {
-  for (int i = threadIdx.x + blockIdx.x * blockDim.x; i < size; i += blockDim.x * gridDim.x)
+  for (int i = threadIdx.x + blockIdx.x * blockDim.x; i < size; i += blockDim.x * gridDim.x){    
     new_cluster_list[cluster_location[old_cluster_list[i]]] = old_cluster_list[i];
+  }
 }
 
 /* Create a cluster matrix.
@@ -234,6 +297,58 @@ buildClusterMatrix(float *x, float *y, float *z, int *cluster_indices, int *clus
 
     __syncthreads();
 
+    for (int row = 0; row < column; row++)
+    {
+      float tmp_x = x[row] - local_x[threadIdx.x];
+      float tmp_y = y[row] - local_y[threadIdx.x];
+      float tmp_z = z[row] - local_z[threadIdx.x];
+      int row_cluster = cluster_indices[row];
+      int rc_offset = cluster_offset[row_cluster];
+
+      if (row_cluster != column_cluster && norm3df(tmp_x, tmp_y, tmp_z) < threshold)
+        cluster_matrix[rc_offset * cluster_num + cc_offset] = 1;
+    }
+    __syncthreads();
+  }
+}
+
+extern "C" __global__ void
+buildClusterMatrix_with_slicing(float *x, float *y, float *z, int *cluster_indices, int *cluster_matrix, int *cluster_offset,
+                   int size, int cluster_num, float threshold, int slice_id, int slice_cnt)
+{
+  int index = threadIdx.x + blockIdx.x * blockDim.x;
+  int stride = blockDim.x * gridDim.x;
+  __shared__ float local_x[BLOCK_SIZE_X];
+  __shared__ float local_y[BLOCK_SIZE_X];
+  __shared__ float local_z[BLOCK_SIZE_X];
+
+  if (index>size)
+    return;
+
+  int quotient = size/slice_cnt;
+  int remainder = size%slice_cnt;
+  int column_start = index + slice_id * quotient;
+  int column_end = column_start + remainder;
+  if((slice_id + 1) == slice_cnt) column_end + remainder;
+  if(column_end > size) column_end = size;
+
+  // for (int column = index; column < size; column += stride)
+  for (int column = column_start; column < column_end; column += stride)
+  {
+    local_x[threadIdx.x] = x[column];
+    local_y[threadIdx.x] = y[column];
+    local_z[threadIdx.x] = z[column];
+    int column_cluster = cluster_indices[column];
+    int cc_offset = cluster_offset[column_cluster];
+
+    __syncthreads();
+
+    // int row_start = slice_id * column/slice_cnt;
+    // int row_end = row_start + column/slice_cnt;
+    // if((slice_id + 1) == slice_cnt) row_end + column%slice_cnt;
+    // if(row_end > column) row_end = column;
+
+    // for (int row = row_start; row < row_end; row++)
     for (int row = 0; row < column; row++)
     {
       float tmp_x = x[row] - local_x[threadIdx.x];
@@ -398,7 +513,7 @@ void GpuEuclideanCluster::extractClustersOld()
   int *cluster_offset;
   int cluster_num, old_cluster_num;
 
-  pclEuclideanInitialize << < grid_x, block_x >> > (cluster_indices_, size_);
+  // pclEuclideanInitialize << < grid_x, block_x >> > (cluster_indices_, size_);
   checkCudaErrors(cudaDeviceSynchronize());
 
   old_cluster_num = cluster_num = size_;
@@ -531,22 +646,10 @@ extern "C" __global__ void mergeSelfClusters(int *cluster_matrix, int *cluster_l
   }
 }
 
-extern "C" __global__ void mergeSelfClustersWithSlicing(int *cluster_matrix, int *cluster_list, int cluster_num, bool *changed, int slice_id, int slice_cnt)
+extern "C" __global__ void mergeSelfClustersWithSlicing(int *cluster_matrix, int *cluster_list, int cluster_num, bool *changed, int row_start, int row_end)
 { 
-  int row_start_origin = blockIdx.x * blockDim.x;
-  int row_end_origin = (row_start_origin + blockDim.x <= cluster_num) ? row_start_origin + blockDim.x : cluster_num;
-
-  int quotient = (row_end_origin-row_start_origin)/slice_cnt;
-  int remainder = (row_end_origin-row_start_origin)%slice_cnt;
-
-  int row_start = row_start_origin + quotient*slice_id;
-  if(slice_id > remainder) row_start += remainder;
-  else row_start += slice_id;
-
-  int row_end = row_start + quotient;    
-  if(remainder - slice_id > 0) row_end + 1;
-  if(row_end > row_end_origin) row_end = row_end_origin;
-
+  // int row_start = blockIdx.x * blockDim.x;
+  // int row_end = (row_start + blockDim.x <= cluster_num) ? row_start + blockDim.x : cluster_num;
   int col = row_start + threadIdx.x;
   __shared__ int local_changed[BLOCK_SIZE_X];
   __shared__ int local_offset[BLOCK_SIZE_X];
@@ -591,6 +694,7 @@ extern "C" __global__ void mergeSelfClustersWithSlicing(int *cluster_matrix, int
       *changed = true;
   }
 }
+
 
 /* Merge clusters from different blocks of points.
  *
@@ -710,13 +814,25 @@ void GpuEuclideanCluster::extractClusters()
   int *cluster_offset;
   int cluster_num, old_cluster_num;
 
-  // set_absolute_deadline();
   stop_cpu_profiling();
   request_scheduling(17);
   pclEuclideanInitialize << < grid_x, block_x >> > (cluster_indices_, size_);
   checkCudaErrors(cudaDeviceSynchronize());
   stop_profiling(17, LAUNCH);
   start_profiling_cpu_time();
+
+  // #ifdef SLICING
+  // int* init_data = (int *)malloc((size_) * sizeof(int));
+  // for(int i = 0; i < size_; i++){
+  //   init_data[i] = i;    
+  // }
+  // stop_cpu_profiling();
+  // request_scheduling(17);
+  // checkCudaErrors(cudaMemcpy(cluster_indices_, init_data, (size_) * sizeof(int), cudaMemcpyHostToDevice));
+  // checkCudaErrors(cudaDeviceSynchronize());
+  // stop_profiling(17, HTOD);
+  // start_profiling_cpu_time();
+  // #endif
 
   old_cluster_num = cluster_num = size_;
 
@@ -727,11 +843,24 @@ void GpuEuclideanCluster::extractClusters()
   stop_profiling(18,HTOD);
   start_profiling_cpu_time();
 
+
   stop_cpu_profiling();
   request_scheduling(19);
   blockLabelling << < grid_x, block_x >> > (x_, y_, z_, cluster_indices_, size_, threshold_);
   stop_profiling(19, LAUNCH);
   start_profiling_cpu_time();
+
+  // #ifdef SLICING
+  // int slice_cnt = 2;
+  // for(int slice_id = 0; slice_id < slice_cnt; slice_id++){
+  //   stop_cpu_profiling();
+  //   request_scheduling(19);
+  //   blockLabelling_with_slicing << < grid_x, block_x >> > (x_, y_, z_, cluster_indices_, size_, threshold_, slice_id, slice_cnt);
+  //   stop_profiling(19, LAUNCH);
+  //   start_profiling_cpu_time();
+  // }
+  // #endif
+  
 
   stop_cpu_profiling();
   request_scheduling(20);
@@ -743,48 +872,190 @@ void GpuEuclideanCluster::extractClusters()
   int *cluster_list, *new_cluster_list, *tmp;
 
   stop_cpu_profiling();
-  request_scheduling(21);
+  request_scheduling(21);  
   checkCudaErrors(cudaMalloc(&cluster_list, cluster_num * sizeof(int)));
+  stop_profiling(21, HTOD);
+  start_profiling_cpu_time();
+
+
+  #ifndef SLICING
+  stop_cpu_profiling();
+  request_scheduling(22);
   clusterCollector << < grid_x, block_x >> > (cluster_indices_, cluster_list, cluster_offset, size_);
   checkCudaErrors(cudaDeviceSynchronize());
-  stop_profiling(21, LAUNCH);
+  stop_profiling(22, LAUNCH);
   start_profiling_cpu_time();
+  #endif
+
+  #ifdef SLICING
+  // [22] //////////////////////////////////////////////////////////////
+  int idx = 0;
+  int* h_cluster_indices = (int *)malloc(size_ * sizeof(int));
+  
+  stop_cpu_profiling();
+  request_scheduling(22);
+  checkCudaErrors(cudaMemcpy(h_cluster_indices, cluster_indices_, size_/3*sizeof(int), cudaMemcpyDeviceToHost));  
+  stop_profiling(22, DTOH);
+  start_profiling_cpu_time();
+
+  idx += size_/3;
+  stop_cpu_profiling();
+  request_scheduling(22);
+  checkCudaErrors(cudaMemcpy(&(h_cluster_indices[idx]), &(cluster_indices_[idx]), size_/3*sizeof(int), cudaMemcpyDeviceToHost));  
+  stop_profiling(22, DTOH);
+  start_profiling_cpu_time();
+
+  idx += size_/3;
+  stop_cpu_profiling();
+  request_scheduling(22);
+  checkCudaErrors(cudaMemcpy(&(h_cluster_indices[idx]), &(cluster_indices_[idx]), (size_/3 + size_%3)*sizeof(int), cudaMemcpyDeviceToHost));  
+  stop_profiling(22, DTOH);
+  start_profiling_cpu_time();
+
+  int* h_cluster_offset = (int *)malloc((size_ + 1) * sizeof(int));
+
+  idx = 0;
+  stop_cpu_profiling();
+  request_scheduling(22);
+  checkCudaErrors(cudaMemcpy(h_cluster_offset, cluster_offset, (size_+1)/3*sizeof(int), cudaMemcpyDeviceToHost));  
+  checkCudaErrors(cudaDeviceSynchronize());
+  stop_profiling(22, DTOH);
+  start_profiling_cpu_time();
+
+  idx += (size_+1)/3;
+  stop_cpu_profiling();
+  request_scheduling(22);
+  checkCudaErrors(cudaMemcpy(&(h_cluster_offset[idx]), &(cluster_offset[idx]), (size_+1)/3*sizeof(int), cudaMemcpyDeviceToHost));  
+  checkCudaErrors(cudaDeviceSynchronize());
+  stop_profiling(22, DTOH);
+  start_profiling_cpu_time();
+
+  idx += (size_+1)/3;
+  stop_cpu_profiling();
+  request_scheduling(22);
+  checkCudaErrors(cudaMemcpy(&(h_cluster_offset[idx]), &(cluster_offset[idx]), ((size_+1)%3 + (size_+1)/3)*sizeof(int), cudaMemcpyDeviceToHost));  
+  checkCudaErrors(cudaDeviceSynchronize());
+  stop_profiling(22, DTOH);
+  start_profiling_cpu_time();
+
+  
+  int* h_cluster_list = (int *)malloc(cluster_num * sizeof(int));
+  idx = 0;
+  stop_cpu_profiling();
+  request_scheduling(22);
+  checkCudaErrors(cudaMemcpy(h_cluster_list, cluster_list, cluster_num/3 * sizeof(int), cudaMemcpyDeviceToHost));  
+  checkCudaErrors(cudaDeviceSynchronize());
+  stop_profiling(22, DTOH);
+  start_profiling_cpu_time();
+
+  idx += cluster_num/3;
+  stop_cpu_profiling();
+  request_scheduling(22);
+  checkCudaErrors(cudaMemcpy(&(h_cluster_list[idx]), &(cluster_list[idx]), (cluster_num/3) * sizeof(int), cudaMemcpyDeviceToHost));  
+  checkCudaErrors(cudaDeviceSynchronize());
+  stop_profiling(22, DTOH);
+  start_profiling_cpu_time();
+
+  idx += cluster_num/3;
+  stop_cpu_profiling();
+  request_scheduling(22);
+  checkCudaErrors(cudaMemcpy(&(h_cluster_list[idx]), &(cluster_list[idx]), (cluster_num/3 + cluster_num%3) * sizeof(int), cudaMemcpyDeviceToHost));  
+  checkCudaErrors(cudaDeviceSynchronize());
+  stop_profiling(22, DTOH);
+  start_profiling_cpu_time();
+  
+  for(int i = 0; i < size_; i++){
+    h_cluster_list[h_cluster_offset[h_cluster_indices[i]]] = h_cluster_indices[i];
+  }
+
+  idx = 0;
+  stop_cpu_profiling();
+  request_scheduling(22);
+  checkCudaErrors(cudaMemcpy(cluster_list, h_cluster_list, cluster_num/3 * sizeof(int), cudaMemcpyHostToDevice));  
+  stop_profiling(22, HTOD);
+  start_profiling_cpu_time();
+
+  idx += cluster_num/3;
+  stop_cpu_profiling();
+  request_scheduling(22);
+  checkCudaErrors(cudaMemcpy(&(cluster_list[idx]), &(h_cluster_list[idx]), (cluster_num/3) * sizeof(int), cudaMemcpyHostToDevice));  
+  stop_profiling(22, HTOD);
+  start_profiling_cpu_time();
+
+  idx += cluster_num/3;
+  stop_cpu_profiling();
+  request_scheduling(22);
+  checkCudaErrors(cudaMemcpy(&(cluster_list[idx]), &(h_cluster_list[idx]), (cluster_num%3 + cluster_num/3 ) * sizeof(int), cudaMemcpyHostToDevice));  
+  stop_profiling(22, HTOD);
+  start_profiling_cpu_time();
+
+  checkCudaErrors(cudaDeviceSynchronize());
+  #endif
 
   int *cluster_matrix;
   int *new_cluster_matrix;
 
   stop_cpu_profiling();
-  request_scheduling(22);
-  checkCudaErrors(cudaMalloc(&cluster_matrix, cluster_num * cluster_num * sizeof(int)));
-  checkCudaErrors(cudaMemset(cluster_matrix, 0, cluster_num * cluster_num * sizeof(int)));
-  checkCudaErrors(cudaDeviceSynchronize());
-  stop_profiling(22, HTOD);
-  start_profiling_cpu_time();
-
-  stop_cpu_profiling();
   request_scheduling(23);
-  checkCudaErrors(cudaMalloc(&new_cluster_list, cluster_num * sizeof(int)));
+  checkCudaErrors(cudaMalloc(&cluster_matrix, cluster_num * cluster_num * sizeof(int)));
   stop_profiling(23, HTOD);
   start_profiling_cpu_time();
 
   stop_cpu_profiling();
   request_scheduling(24);
-  buildClusterMatrix << < grid_x, block_x >> >
-                                  (x_, y_, z_, cluster_indices_, cluster_matrix, cluster_offset, size_, cluster_num, threshold_);
-  checkCudaErrors(cudaDeviceSynchronize());
-  stop_profiling(24, LAUNCH);
+  checkCudaErrors(cudaMemset(cluster_matrix, 0, cluster_num * cluster_num * sizeof(int)));
+  stop_profiling(24, HTOD);
   start_profiling_cpu_time();
+
+  checkCudaErrors(cudaDeviceSynchronize());
+
+
+  stop_cpu_profiling();  
+  request_scheduling(25);
+  checkCudaErrors(cudaMalloc(&new_cluster_list, cluster_num * sizeof(int)));
+  stop_profiling(25, HTOD);
+  start_profiling_cpu_time();
+
+  
+
+
+  stop_cpu_profiling();
+  request_scheduling(26);
+  buildClusterMatrix << < grid_x, block_x >> >
+                                    (x_, y_, z_, cluster_indices_, cluster_matrix, cluster_offset, size_, cluster_num, threshold_);
+  
+  stop_profiling(26, LAUNCH);
+  start_profiling_cpu_time();
+  checkCudaErrors(cudaDeviceSynchronize());
+  // [25] ////////////////////////////////////////////////////////////// 
+  // slice_cnt = 5;
+  // for(int slice_id = 0; slice_id<slice_cnt; slice_id++){
+  //   stop_cpu_profiling();
+  //   request_scheduling(26);    
+  //   buildClusterMatrix_with_slicing << < grid_x, block_x >> > (x_, y_, z_, cluster_indices_, cluster_matrix, cluster_offset, size_, cluster_num, threshold_, slice_id, slice_cnt);
+  //   stop_profiling(26, LAUNCH);
+  //   start_profiling_cpu_time();
+  //   checkCudaErrors(cudaDeviceSynchronize());
+  // }
+  ///////////////////////////////////////////////////////////////////////
 
   int block_x2 = 0, grid_x2 = 0;
 
   bool *changed;
-
+  
+  stop_cpu_profiling();
+  request_scheduling(27);
   checkCudaErrors(cudaMallocHost(&changed, sizeof(bool)));
-
+  stop_profiling(27, LAUNCH);
+  start_profiling_cpu_time();
 #ifndef SERIAL
   int *changed_diag;
 
+  stop_cpu_profiling();
+  request_scheduling(28);
   checkCudaErrors(cudaMallocHost(&changed_diag, sizeof(int)));
+  stop_profiling(28, LAUNCH);
+  start_profiling_cpu_time();
 #endif
 
   int max_base_row = 0;
@@ -795,25 +1066,45 @@ void GpuEuclideanCluster::extractClusters()
     block_x2 = (cluster_num > BLOCK_SIZE_X) ? BLOCK_SIZE_X : cluster_num;
     grid_x2 = (cluster_num - 1) / block_x2 + 1;
 
-    if(!slicing_flag_){    
-      stop_cpu_profiling();
-  request_scheduling(25);
-      mergeSelfClusters << < grid_x2, block_x2 >> > (cluster_matrix, cluster_list, cluster_num, changed);
-      checkCudaErrors(cudaDeviceSynchronize());
-      stop_profiling(25, LAUNCH);    
-      start_profiling_cpu_time();
-    }    
-    else{ 
-      int slice_cnt = 2;
-      for(int slice_id = 0; slice_id < slice_cnt; slice_id++){ // s: slice id        
-        stop_cpu_profiling();
-  request_scheduling(25);
-        mergeSelfClustersWithSlicing << < grid_x2, block_x2 >> > (cluster_matrix, cluster_list, cluster_num, changed, slice_id, slice_cnt);
-        checkCudaErrors(cudaDeviceSynchronize());
-        stop_profiling(25, LAUNCH);
-        start_profiling_cpu_time();
-      }      
-    }
+    stop_cpu_profiling();
+    request_scheduling(29);
+    mergeSelfClusters << < grid_x2, block_x2 >> > (cluster_matrix, cluster_list, cluster_num, changed);
+    checkCudaErrors(cudaDeviceSynchronize());
+    stop_profiling(29, LAUNCH);    
+    start_profiling_cpu_time();
+
+    // #ifdef SLICING
+    // slice_cnt = 5;
+    
+    // int row_start_origin = block_x2;
+    // int row_end_origin = (row_start_origin + block_x2 <= cluster_num) ? row_start_origin + block_x2 : cluster_num;
+    // int quotient = row_start_origin / row_end_origin;
+    // int remainder = row_start_origin % row_end_origin;
+
+    // if(block_x2 >= slice_cnt){
+    //   for(int slice_id = 0; slice_id < slice_cnt; slice_id++){
+    //     int row_start = slice_id*quotient;
+    //     int row_end = row_start + quotient;
+    //     if((slice_id+1) == slice_cnt) row_end += remainder;
+    //     if(row_end > row_end_origin) row_end = row_end_origin;
+
+    //     stop_cpu_profiling();
+    //     request_scheduling(29);
+    //     mergeSelfClustersWithSlicing << < grid_x2, block_x2 >> > (cluster_matrix, cluster_list, cluster_num, changed, row_start, row_end);
+    //     checkCudaErrors(cudaDeviceSynchronize());
+    //     stop_profiling(29, LAUNCH);    
+    //     start_profiling_cpu_time();
+    //   }      
+    // }
+    // else{
+    //   stop_cpu_profiling();
+    //   request_scheduling(29);
+    //   mergeSelfClusters << < grid_x2, block_x2 >> > (cluster_matrix, cluster_list, cluster_num, changed);
+    //   checkCudaErrors(cudaDeviceSynchronize());
+    //   stop_profiling(29, LAUNCH);    
+    //   start_profiling_cpu_time();
+    // }
+    // #endif
 
     int base_row = 1, base_column = 0;
     int sub_matrix_offset_row = 2, sub_matrix_offset_col = 2;
@@ -834,12 +1125,16 @@ void GpuEuclideanCluster::extractClusters()
 #ifdef SERIAL
       //Merge clusters in each sub-matrix by moving from top to bottom of the similarity sub-matrix
       for (int shift_level = 0; !(*changed) && shift_level < sub_matrix_col; shift_level++) {
+        stop_cpu_profiling();
+        request_scheduling(30);
         mergeInterClusters<<<grid_x2, block_x2>>>(cluster_matrix, cluster_list,
                                 shift_level,
                                 base_row, base_column,
                                 sub_matrix_row, sub_matrix_col,
                                 sub_matrix_offset_row, sub_matrix_offset_col,
                                 cluster_num, changed);
+        stop_profiling(30, LAUNCH);
+        start_profiling_cpu_time();
         checkCudaErrors(cudaDeviceSynchronize());
       }
 #else
@@ -850,29 +1145,29 @@ void GpuEuclideanCluster::extractClusters()
 
       *changed_diag = -1;
       stop_cpu_profiling();
-  request_scheduling(26);
+      request_scheduling(31);
       clustersIntersecCheck << < grid_size, block_size >> > (cluster_matrix, changed_diag,
         base_row, base_column,
         sub_matrix_row, sub_matrix_col,
         sub_matrix_offset_row, sub_matrix_offset_col,
-        cluster_num);
+        cluster_num);      
+      stop_profiling(31, LAUNCH);
       checkCudaErrors(cudaDeviceSynchronize());
-      stop_profiling(26, LAUNCH);
       start_profiling_cpu_time();
 
       if (*changed_diag > 0)
       {
         //Merge clusters in sub-matrix that stay in the changed_diag diagonal by moving from top to bottom of the matrix.
         stop_cpu_profiling();
-  request_scheduling(27);
+        request_scheduling(32);
         mergeInterClusters << < grid_x2, block_x2 >> > (cluster_matrix, cluster_list, *changed_diag,
           base_row, base_column,
           sub_matrix_row, sub_matrix_col,
           sub_matrix_offset_row, sub_matrix_offset_col,
           cluster_num, changed);
-        checkCudaErrors(cudaDeviceSynchronize());
-        stop_profiling(27, LAUNCH);
+        stop_profiling(32, LAUNCH);
         start_profiling_cpu_time();
+        checkCudaErrors(cudaDeviceSynchronize());
       }
 
 #endif
@@ -888,48 +1183,60 @@ void GpuEuclideanCluster::extractClusters()
     if (*changed)
     {
       stop_cpu_profiling();
-  request_scheduling(28);
-      reflexClusterChanges << < grid_x, block_x >> > (cluster_indices_, cluster_offset, cluster_list, size_);
+      request_scheduling(33);
+      reflexClusterChanges << < grid_x, block_x >> > (cluster_indices_, cluster_offset, cluster_list, size_);      
+      stop_profiling(33, LAUNCH);
+      start_profiling_cpu_time();
+      
+      stop_cpu_profiling();
+      request_scheduling(34);
       checkCudaErrors(cudaMemset(cluster_offset, 0, (size_ + 1) * sizeof(int)));
-      stop_profiling(28, LAUNCH);
+      stop_profiling(34, HTOD);
       start_profiling_cpu_time();
 
       block_x2 = (cluster_num > BLOCK_SIZE_X) ? BLOCK_SIZE_X : cluster_num;
       grid_x2 = (cluster_num - 1) / block_x2 + 1;
 
       stop_cpu_profiling();
-  request_scheduling(29);
+      request_scheduling(35);
       clusterMark << < grid_x2, block_x2 >> > (cluster_list, cluster_offset, cluster_num);
-      stop_profiling(29, LAUNCH);
+      stop_profiling(35, LAUNCH);
       start_profiling_cpu_time();
 
       old_cluster_num = cluster_num;
       exclusiveScan(cluster_offset, size_ + 1, &cluster_num);
 
       stop_cpu_profiling();
-  request_scheduling(30);
+      request_scheduling(36);
       clusterCollector << < grid_x2, block_x2 >> > (cluster_list, new_cluster_list, cluster_offset, old_cluster_num);
-      checkCudaErrors(cudaDeviceSynchronize());
-      stop_profiling(30, LAUNCH);
+      
+      stop_profiling(36, LAUNCH);
       start_profiling_cpu_time();
+      checkCudaErrors(cudaDeviceSynchronize());
 
       checkCudaErrors(cudaMalloc(&new_cluster_matrix, cluster_num * cluster_num * sizeof(int)));
 
       stop_cpu_profiling();
-  request_scheduling(31);
+      request_scheduling(37);
       checkCudaErrors(cudaMemset(new_cluster_matrix, 0, cluster_num * cluster_num * sizeof(int)));
-      stop_profiling(31, HTOD);
+      stop_profiling(37, HTOD);
       start_profiling_cpu_time();
 
       stop_cpu_profiling();
-  request_scheduling(32);
+      request_scheduling(38);
       rebuildClusterMatrix << < grid_x2, block_x2 >> >
                                          (cluster_matrix, cluster_list, new_cluster_matrix, cluster_offset, old_cluster_num, cluster_num);
+      
+      stop_profiling(38, LAUNCH);
+      start_profiling_cpu_time();
       checkCudaErrors(cudaDeviceSynchronize());
-      stop_profiling(32, LAUNCH);
+
+      stop_cpu_profiling();
+      request_scheduling(39);
+      checkCudaErrors(cudaFree(cluster_matrix));
+      stop_profiling(39, HTOD);
       start_profiling_cpu_time();
 
-      checkCudaErrors(cudaFree(cluster_matrix));
       cluster_matrix = new_cluster_matrix;
       tmp = cluster_list;
       cluster_list = new_cluster_list;
@@ -941,25 +1248,70 @@ void GpuEuclideanCluster::extractClusters()
 
   //Reset all cluster indexes to make them start from 0
   stop_cpu_profiling();
-  request_scheduling(33);
-  resetClusterIndexes << < grid_x, block_x >> > (cluster_indices_, cluster_offset, size_);
+  request_scheduling(40);
+  resetClusterIndexes << < grid_x, block_x >> > (cluster_indices_, cluster_offset, size_);  
+  stop_profiling(40, LAUNCH);
+  start_profiling_cpu_time();
   checkCudaErrors(cudaDeviceSynchronize());  
-  stop_profiling(33, LAUNCH);
+
+  stop_cpu_profiling();
+  request_scheduling(41);
+  checkCudaErrors(cudaMemcpy(cluster_indices_host_, cluster_indices_, size_ * sizeof(int), cudaMemcpyDeviceToHost));
+  stop_profiling(41, DTOH);
+  start_profiling_cpu_time();
+
+  // slice_cnt = 3;
+  // int quotient = size_/slice_cnt;
+  // int remainder = size_%slice_cnt;
+  // for(int slice_id = 0; slice_id < slice_cnt; slice_id++){
+  //   int start_idx = slice_id * quotient;
+  //   int size = 
+
+  //   stop_cpu_profiling();
+  //   request_scheduling(36);
+
+  //   stop_profiling(36, DTOH);
+  //   start_profiling_cpu_time();
+  // }
+
+
+  /////////////////////////////////////////////////////////////////// 
+
+  stop_cpu_profiling();
+  request_scheduling(42);
+  checkCudaErrors(cudaFree(cluster_matrix));
+  stop_profiling(42, DTOH);
   start_profiling_cpu_time();
 
   stop_cpu_profiling();
-  request_scheduling(34);
-  checkCudaErrors(cudaMemcpy(cluster_indices_host_, cluster_indices_, size_ * sizeof(int), cudaMemcpyDeviceToHost));
-  stop_profiling(34, DTOH);
+  request_scheduling(43);
+  checkCudaErrors(cudaFree(cluster_list));
+  stop_profiling(43, DTOH);
   start_profiling_cpu_time();
 
-  checkCudaErrors(cudaFree(cluster_matrix));
-  checkCudaErrors(cudaFree(cluster_list));
+  stop_cpu_profiling();
+  request_scheduling(44);
   checkCudaErrors(cudaFree(new_cluster_list));
+  stop_profiling(44, DTOH);
+  start_profiling_cpu_time();
+
+  stop_cpu_profiling();
+  request_scheduling(45);
   checkCudaErrors(cudaFree(cluster_offset));
+  stop_profiling(45, DTOH);
+  start_profiling_cpu_time();
+
+  stop_cpu_profiling();
+  request_scheduling(46);
   checkCudaErrors(cudaFreeHost(changed));
+  stop_profiling(46, DTOH);
+  start_profiling_cpu_time();
 #ifndef SERIAL
+  stop_cpu_profiling();
+  request_scheduling(47);
   checkCudaErrors(cudaFreeHost(changed_diag));
+  stop_profiling(47, DTOH);
+  start_profiling_cpu_time();
 #endif
 }
 

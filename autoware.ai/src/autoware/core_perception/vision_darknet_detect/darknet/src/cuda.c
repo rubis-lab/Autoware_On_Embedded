@@ -335,18 +335,39 @@ void cuda_push_array(float *x_gpu, float *x, size_t n)
 {
     size_t size = sizeof(float)*n;
     count_htod += 1;
-    if(count_htod > YOLO){
-        push_id += 1;
-        // set_absolute_deadline();       
-        stop_cpu_profiling();        
-        request_scheduling(push_id);        
-    }
-        
+    cudaError_t status;
 
-    cudaError_t status = cudaMemcpy(x_gpu, x, size, cudaMemcpyHostToDevice);
     if(count_htod > YOLO){
+      push_id += 1;
+      // set_absolute_deadline();       
+      size_t local_size1 = sizeof(float)*n/2;
+      size_t local_size2 = sizeof(float)*n%2;
+
+      // #ifdef SLICING
+      // stop_cpu_profiling();        
+      // request_scheduling(push_id);        
+      // status = cudaMemcpy(x_gpu, x, local_size1, cudaMemcpyHostToDevice);
+      // stop_profiling(push_id, HTOD);      
+      // start_profiling_cpu_time();
+
+      // int idx = n/2;
+      // stop_cpu_profiling();        
+      // request_scheduling(push_id);        
+      // status = cudaMemcpy(&(x_gpu[idx]), &(x[idx]), local_size2, cudaMemcpyHostToDevice);
+      // stop_profiling(push_id, HTOD);      
+      // start_profiling_cpu_time();
+      // #endif
+
+      stop_cpu_profiling();        
+      request_scheduling(push_id);        
+      status = cudaMemcpy(x_gpu, x, size, cudaMemcpyHostToDevice);
       stop_profiling(push_id, HTOD);      
       start_profiling_cpu_time();
+      
+      
+    }
+    else{
+      status = cudaMemcpy(x_gpu, x, size, cudaMemcpyHostToDevice);
     }
       
 
@@ -358,16 +379,43 @@ void cuda_pull_array(float *x_gpu, float *x, size_t n)
     size_t size = sizeof(float)*n;
 
     pull_id += 1;
+
+    #ifndef SLICING
     stop_cpu_profiling();
-
     request_scheduling(pull_id);
-    
     cudaError_t status = cudaMemcpy(x, x_gpu, size, cudaMemcpyDeviceToHost);
-    
     stop_profiling(pull_id, DTOH);
-
     start_profiling_cpu_time();
+    #endif
     
+    #ifdef SLICING
+    size_t local_size1 = sizeof(float)*n/3;
+    size_t local_size2 = sizeof(float)*n/3;
+    size_t local_size3 = sizeof(float)*(n/3 + n%3);
+    cudaError_t status;
+    int idx;
+    
+    stop_cpu_profiling();        
+    request_scheduling(pull_id);        
+    status = cudaMemcpy(x, x_gpu, local_size1, cudaMemcpyDeviceToHost);
+    stop_profiling(pull_id, DTOH);      
+    start_profiling_cpu_time();
+
+    idx += n/3;
+    stop_cpu_profiling();        
+    request_scheduling(pull_id);        
+    status = cudaMemcpy(&(x[idx]), &(x_gpu[idx]), local_size2, cudaMemcpyDeviceToHost);
+    stop_profiling(pull_id, DTOH);      
+    start_profiling_cpu_time();
+
+    idx += n/3;
+    stop_cpu_profiling();        
+    request_scheduling(pull_id);        
+    status = cudaMemcpy(&(x[idx]), &(x_gpu[idx]), local_size3, cudaMemcpyDeviceToHost);
+    stop_profiling(pull_id, DTOH);      
+    start_profiling_cpu_time();
+    #endif
+
     check_error(status);
 }
 

@@ -15,6 +15,7 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 
+#define SLICING
 
 #define BUFFER_SIZE 1024
 #define NS2MS(t) (t/1000000)
@@ -42,7 +43,7 @@ static key_t key_;
 static int shmid_;
 static sigset_t sigset_;
 static int sig_;
-static unsigned long long deadline_list_[40];
+static unsigned long long deadline_list_[60];
 static int gpu_scheduling_flag_;
 static unsigned long long absolute_deadline_;
 static unsigned long long identical_deadline_;

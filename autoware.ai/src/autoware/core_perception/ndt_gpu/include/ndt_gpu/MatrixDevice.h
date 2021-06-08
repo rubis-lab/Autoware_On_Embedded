@@ -6,6 +6,9 @@
 namespace gpu {
 class MatrixDevice : public Matrix {
 public:
+  int memAllocId;
+  int memFreeId;
+
   CUDAH MatrixDevice();
 
   MatrixDevice(int rows, int cols);
@@ -21,6 +24,10 @@ public:
   CUDAH void setBuffer(double *buffer);
 
   void memAlloc();
+
+  void memAlloc_free();
+  void memAlloc_malloc();
+  void memAlloc_memset();
 
   void memFree();
 

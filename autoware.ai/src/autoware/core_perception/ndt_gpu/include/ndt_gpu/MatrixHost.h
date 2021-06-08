@@ -7,6 +7,9 @@
 namespace gpu {
 class MatrixHost : public Matrix {
 public:
+  int moveToGpuId;
+  int moveToHostId;
+
   MatrixHost();
   MatrixHost(int rows, int cols);
   MatrixHost(int rows, int cols, int offset, double *buffer);
