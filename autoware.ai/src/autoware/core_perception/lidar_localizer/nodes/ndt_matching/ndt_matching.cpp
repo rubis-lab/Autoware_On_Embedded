@@ -72,6 +72,8 @@
 //headers in Autoware Health Checker
 #include <autoware_health_checker/health_checker/health_checker.h>
 
+#define SPIN_PROFILING
+
 #define PREDICT_POSE_THRESHOLD 0.5
 
 #define USING_GPS_THRESHOLD 10
@@ -1697,7 +1699,25 @@ int main(int argc, char** argv)
   pthread_t thread;
   pthread_create(&thread, NULL, thread_func, NULL);
 
+  #ifndef SPIN_PROFILING
   ros::spin();
+  #endif
+
+  #ifdef SPIN_PROFILING
+  std::string print_file_path = std::getenv("HOME");
+  print_file_path.append("/Documents/spin_profiling/ndt_matching.csv");
+  FILE *fp;
+  fp = fopen(print_file_path.c_str(), "a");
+  while(ros::ok()){
+    struct timespec start_time, end_time;
+    clock_gettime(CLOCK_MONOTONIC, &start_time);
+    ros::spinOnce();
+    clock_gettime(CLOCK_MONOTONIC, &end_time);
+    fprintf(fp, "%lld.%.9ld,%lld.%.9ld,%d\n",start_time.tv_sec,start_time.tv_nsec,end_time.tv_sec,end_time.tv_nsec,getpid());    
+    fflush(fp);
+  }  
+  fclose(fp);
+  #endif
 
   close_file();
   return 0;

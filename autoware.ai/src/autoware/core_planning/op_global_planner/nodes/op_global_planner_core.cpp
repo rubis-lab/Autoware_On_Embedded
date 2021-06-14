@@ -17,6 +17,8 @@
 #include "op_global_planner_core.h"
 #include "op_ros_helpers/op_ROSHelpers.h"
 
+#define SPIN_PROFILING
+
 namespace GlobalPlanningNS
 {
 
@@ -423,8 +425,19 @@ void GlobalPlanner::MainLoop()
   timespec animation_timer;
   UtilityHNS::UtilityH::GetTickCount(animation_timer);
 
+  #ifdef SPIN_PROFILING
+  std::string print_file_path = std::getenv("HOME");
+  print_file_path.append("/Documents/spin_profiling/op_global_planner.csv");
+  FILE *fp;
+  fp = fopen(print_file_path.c_str(), "a");
+  #endif
+
   while (ros::ok())
   {
+    #ifdef SPIN_PROFILING
+    struct timespec start_time, end_time;
+    clock_gettime(CLOCK_MONOTONIC, &start_time);
+    #endif
     ros::spinOnce();
     bool bMakeNewPlan = false;
 
@@ -521,7 +534,11 @@ void GlobalPlanner::MainLoop()
       }
       VisualizeDestinations(m_GoalsPos, m_iCurrentGoalIndex);
     }
-
+    #ifdef SPIN_PROFILING
+    clock_gettime(CLOCK_MONOTONIC, &end_time);
+    fprintf(fp, "%lld.%.9ld,%lld.%.9ld,%d\n",start_time.tv_sec,start_time.tv_nsec,end_time.tv_sec,end_time.tv_nsec,getpid());    
+    fflush(fp);
+    #endif
     loop_rate.sleep();
   }
 }

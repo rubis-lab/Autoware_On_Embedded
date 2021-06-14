@@ -29,6 +29,8 @@
 
 #include "points_downsampler.h"
 
+#define SPIN_PROFILING
+
 #define MAX_MEASUREMENT_RANGE 200.0
 
 ros::Publisher filtered_points_pub;
@@ -153,7 +155,24 @@ int main(int argc, char** argv)
   ros::Subscriber config_sub = nh.subscribe("config/voxel_grid_filter", 10, config_callback);
   ros::Subscriber scan_sub = nh.subscribe(POINTS_TOPIC, 10, scan_callback);
 
+  #ifndef SPIN_PROFILING
   ros::spin();
+  #endif
+  #ifdef SPIN_PROFILING
+  std::string print_file_path = std::getenv("HOME");
+  print_file_path.append("/Documents/spin_profiling/voxel_grid_filter.csv");
+  FILE *fp;
+  fp = fopen(print_file_path.c_str(), "a");
+  while(ros::ok()){
+      struct timespec start_time, end_time;
+      clock_gettime(CLOCK_MONOTONIC, &start_time);
+      ros::spinOnce();
+      clock_gettime(CLOCK_MONOTONIC, &end_time);
+      fprintf(fp, "%lld.%.9ld,%lld.%.9ld,%d\n",start_time.tv_sec,start_time.tv_nsec,end_time.tv_sec,end_time.tv_nsec,getpid());    
+      fflush(fp);
+  }  
+  fclose(fp);  
+  #endif
 
   return 0;
 }

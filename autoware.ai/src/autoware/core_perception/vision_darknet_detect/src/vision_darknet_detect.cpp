@@ -24,6 +24,9 @@
 #include <unistd.h>
 #include <sys/syscall.h>
 #include "../darknet/src/cuda.h"
+
+#define SPIN_PROFILING
+
 #if (CV_MAJOR_VERSION <= 2)
 #include <opencv2/contrib/contrib.hpp>
 #else
@@ -340,11 +343,12 @@ void Yolo3DetectorNode::Run()
     //ROS STUFF
     ros::NodeHandle private_node_handle("~");//to receive args    
     int identical_deadline;
+    int gpu_scheduling_flag;
     private_node_handle.param<std::string>("execution_time_file_name",_execution_time_file_name,"./yolo_execution_time.csv");
     private_node_handle.param<std::string>("response_time_file_name",_response_time_file_name,"./yolo_response_time.csv");
     private_node_handle.param<std::string>("remain_time_file_name",_remain_time_file_name,"./yolo_remain_time.csv");
     private_node_handle.param<std::string>("deadline_file_name",_deadline_file_name,"./deadline/yolo_deadline.csv");
-    private_node_handle.param("gpu_scheduling_flag", gpu_scheduling_flag_, 0);
+    private_node_handle.param("gpu_scheduling_flag", gpu_scheduling_flag, 0);
     private_node_handle.param("identical_deadline", identical_deadline, 0);
     set_identical_deadline((unsigned long long)identical_deadline);
     //private_node_handle.getParam("profiling_file_name", _profiling_file_name);
@@ -352,7 +356,7 @@ void Yolo3DetectorNode::Run()
     initialize_file(_execution_time_file_name.c_str(), _response_time_file_name.c_str(), _remain_time_file_name.c_str());    
     
     int key_id = 2;    
-    set_gpu_scheduling_flag(gpu_scheduling_flag_);
+    set_gpu_scheduling_flag(gpu_scheduling_flag);
     init_scheduling("/tmp/yolo", _deadline_file_name.c_str(),key_id);
 
     
@@ -428,7 +432,24 @@ void Yolo3DetectorNode::Run()
 
     ROS_INFO_STREAM( __APP_NAME__ << "" );
 
+    #ifndef SPIN_PROFILING
     ros::spin();
+    #endif
+    #ifdef SPIN_PROFILING
+    std::string print_file_path = std::getenv("HOME");
+    print_file_path.append("/Documents/spin_profiling/vision_darknet_detect.csv");
+    FILE *fp;
+    fp = fopen(print_file_path.c_str(), "a");
+    while(ros::ok()){
+        struct timespec start_time, end_time;
+        clock_gettime(CLOCK_MONOTONIC, &start_time);
+        ros::spinOnce();
+        clock_gettime(CLOCK_MONOTONIC, &end_time);
+        fprintf(fp, "%lld.%.9ld,%lld.%.9ld,%d\n",start_time.tv_sec,start_time.tv_nsec,end_time.tv_sec,end_time.tv_nsec,getpid());    
+        fflush(fp);
+    }  
+    fclose(fp);  
+    #endif
     close_file();
     ROS_INFO("END Yolo");
 

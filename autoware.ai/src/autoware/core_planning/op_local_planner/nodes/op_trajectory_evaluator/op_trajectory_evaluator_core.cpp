@@ -18,6 +18,7 @@
 #include "op_ros_helpers/op_ROSHelpers.h"
 #include "op_planner/MappingHelpers.h"
 
+#define SPIN_PROFILING
 
 namespace TrajectoryEvaluatorNS
 {
@@ -435,8 +436,20 @@ void TrajectoryEval::MainLoop()
   nh.getParam("/op_trajectory_evaluator/intersection_list", intersection_xml);
   PlannerHNS::MappingHelpers::ConstructIntersection_RUBIS(intersection_list, intersection_xml);
 
+  #ifdef SPIN_PROFILING
+  std::string print_file_path = std::getenv("HOME");
+  print_file_path.append("/Documents/spin_profiling/op_trajectory_evaluator.csv");
+  FILE *fp;
+  fp = fopen(print_file_path.c_str(), "a");
+  #endif
+
   while (ros::ok())
   {
+    #ifdef SPIN_PROFILING
+    struct timespec start_time, end_time;
+    clock_gettime(CLOCK_MONOTONIC, &start_time);
+    #endif
+
     UpdateMyParams();
     UpdateTf();
     
@@ -530,6 +543,11 @@ void TrajectoryEval::MainLoop()
     else
       sub_GlobalPlannerPaths = nh.subscribe("/lane_waypoints_array",   1,    &TrajectoryEval::callbackGetGlobalPlannerPath,   this);
 
+    #ifdef SPIN_PROFILING
+    clock_gettime(CLOCK_MONOTONIC, &end_time);
+    fprintf(fp, "%lld.%.9ld,%lld.%.9ld,%d\n",start_time.tv_sec,start_time.tv_nsec,end_time.tv_sec,end_time.tv_nsec,getpid());    
+    fflush(fp);
+    #endif
     loop_rate.sleep();
   }
 }

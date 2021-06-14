@@ -69,6 +69,8 @@
 
 #include "cluster.h"
 
+#define SPIN_PROFILING
+
 #define GPU_CLUSTERING
 
 #ifdef GPU_CLUSTERING
@@ -1109,7 +1111,26 @@ int main(int argc, char **argv)
   // Create a ROS subscriber for the input point cloud
   ros::Subscriber sub = h.subscribe(points_topic, 1, velodyne_callback);
 
+  #ifndef SPIN_PROFILING
   // Spin
   ros::spin();
+  #endif
+
+  #ifdef SPIN_PROFILING
+  std::string print_file_path = std::getenv("HOME");
+  print_file_path.append("/Documents/spin_profiling/lidar_euclidean_cluster_detect.csv");
+  FILE *fp;
+  fp = fopen(print_file_path.c_str(), "a");
+  while(ros::ok()){
+    struct timespec start_time, end_time;
+    clock_gettime(CLOCK_MONOTONIC, &start_time);
+    ros::spinOnce();
+    clock_gettime(CLOCK_MONOTONIC, &end_time);
+    fprintf(fp, "%lld.%.9ld,%lld.%.9ld,%d\n",start_time.tv_sec,start_time.tv_nsec,end_time.tv_sec,end_time.tv_nsec,getpid());    
+    fflush(fp);
+  }  
+  fclose(fp);
+  #endif
+
   // _gecl_cluster.close_file();
 }

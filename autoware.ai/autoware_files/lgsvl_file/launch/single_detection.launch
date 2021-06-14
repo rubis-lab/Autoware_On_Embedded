@@ -9,16 +9,16 @@
   <arg name="camera_calib" default="$(env HOME)/autoware.ai/autoware_files/data/calibration/single_lidar/Lexus2016RXHybrid.yaml"/>
 
   <!-- calibration_publisher -->
-  <!-- <include file="$(find runtime_manager)/launch_files/calibration_publisher.launch">
+  <include file="$(find runtime_manager)/launch_files/calibration_publisher.launch">
     <arg name="file" value="$(arg camera_calib)" />
     <arg name="register_lidar2camera_tf" value="$(arg is_register_lidar2camera_tf)" />
     <arg name="publish_extrinsic_mat" value="$(arg is_publish_projection_matrix)" />
     <arg name="publish_camera_info" value="$(arg is_publish_camera_info)" />
-  </include> -->
+  </include>
   
 
 <!-- lidar_euclidean_cluster_detect-->
-  <!-- <include file="$(find lidar_euclidean_cluster_detect)/launch/lidar_euclidean_cluster_detect.launch">
+  <include file="$(find lidar_euclidean_cluster_detect)/launch/lidar_euclidean_cluster_detect.launch">
     <arg name="points_node" value="/points_no_ground_center" />
     <arg name="remove_ground" value="true" />
     <arg name="downsample_cloud" value="false" />
@@ -48,10 +48,10 @@
     <arg name="response_time_file_name" value="$(env HOME)/GPU_profiling/210611_cluster_response_time_scheduling.csv" />
     <arg name="remain_time_file_name" value="$(env HOME)/GPU_profiling/210611_cluster_remain_time_scheduling.csv" />
     <arg name="deadline_file_name" value="$(env HOME)/GPU_profiling/deadline/test_cluster_deadline.csv"/>
-    <arg name="gpu_scheduling_flag" value="1" />
+    <arg name="gpu_scheduling_flag" value="0" />
     <arg name="identical_deadline" value="100000" />
     <arg name="slicing_flag" value="0" />
-  </include> -->
+  </include>
   
   <!-- vision_darknet_detect -->
   <include file="$(find vision_darknet_detect)/launch/vision_yolo3_detect.launch">
@@ -67,12 +67,12 @@
     <arg name="response_time_file_name" value="$(env HOME)/GPU_profiling/test_yolo_response_time.csv"/>
     <arg name="remain_time_file_name" value="$(env HOME)/GPU_profiling/test_yolo_remain_time.csv"/>
     <arg name="deadline_file_name" value="$(env HOME)/GPU_profiling/deadline/test_yolo_deadline.csv"/>
-    <arg name="gpu_scheduling_flag" value="1" />
+    <arg name="gpu_scheduling_flag" value="0" />
     <arg name="identical_deadline" value="100000" />
   </include>
 
   <!-- imm_ukf_pda_track -->
-  <!-- <include file="$(find imm_ukf_pda_track)/launch/imm_ukf_pda_track.launch">
+  <include file="$(find imm_ukf_pda_track)/launch/imm_ukf_pda_track.launch">
     <arg name="namespace" default="/detection/object_tracker"/>
     <arg name="tracker_input_topic" default="/detection/lidar_detector/objects_center" />
     <arg name="tracker_output_topic" default="/detection/object_tracker/objects_center" />
@@ -90,10 +90,10 @@
     <arg name="lane_direction_chi_threshold" default="2.71" />
     <arg name="nearest_lane_distance_threshold" default="1.0" />
     <arg name="vectormap_frame" default="/map" />
-  </include> -->
+  </include>
 
   <!-- range_fusion -->
-  <!-- <include file="$(find range_vision_fusion)/launch/range_vision_fusion.launch">
+  <include file="$(find range_vision_fusion)/launch/range_vision_fusion.launch">
     <arg name="detected_objects_range" default="/detection/object_tracker/objects_center"/>
     <arg name="detected_objects_vision" default="/detection/image_detector/objects"/>
     <arg name="camera_info_src" default="/camera_info"/>
@@ -104,6 +104,6 @@
     <arg name="overlap_threshold" default="0"/>
     <arg name="use_vector_map" default="false"/>
     <arg name="namespace" default="/detection/fusion_tools"/>
-  </include> -->
+  </include>
 
 </launch>

@@ -37,6 +37,8 @@
 
 #include "points_preprocessor/ray_ground_filter/ray_ground_filter.h"
 
+#define SPIN_PROFILING
+
 void RayGroundFilter::update_config_params(const autoware_config_msgs::ConfigRayGroundFilter::ConstPtr& param)
 {
   general_max_slope_ = param->general_max_slope;
@@ -441,5 +443,23 @@ void RayGroundFilter::Run()
 
   ROS_INFO("Ready");
 
+  #ifndef SPIN_PROFILING
   ros::spin();
+  #endif
+  #ifdef SPIN_PROFILING
+  std::string print_file_path = std::getenv("HOME");
+  print_file_path.append("/Documents/spin_profiling/ray_ground_filter.csv");
+  FILE *fp;
+  fp = fopen(print_file_path.c_str(), "a");
+  while(ros::ok()){
+    struct timespec start_time, end_time;
+    clock_gettime(CLOCK_MONOTONIC, &start_time);
+    ros::spinOnce();
+    clock_gettime(CLOCK_MONOTONIC, &end_time);
+    fprintf(fp, "%lld.%.9ld,%lld.%.9ld,%d\n",start_time.tv_sec,start_time.tv_nsec,end_time.tv_sec,end_time.tv_nsec,getpid());    
+    fflush(fp);
+  }  
+  fclose(fp);
+  #endif
+
 }

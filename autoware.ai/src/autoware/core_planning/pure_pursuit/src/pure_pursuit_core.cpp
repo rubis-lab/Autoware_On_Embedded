@@ -17,6 +17,8 @@
 #include <vector>
 #include <pure_pursuit/pure_pursuit_core.h>
 
+#define SPIN_PROFILING
+
 namespace waypoint_follower
 {
 DynamicParams::DynamicParams(){
@@ -127,8 +129,19 @@ void PurePursuitNode::run()
 {
   ROS_INFO_STREAM("pure pursuit start");
   ros::Rate loop_rate(LOOP_RATE_);
+
+  #ifdef SPIN_PROFILING
+  std::string print_file_path = std::getenv("HOME");
+  print_file_path.append("/Documents/spin_profiling/pure_pursuit.csv");
+  FILE *fp;
+  fp = fopen(print_file_path.c_str(), "a");
+  #endif
   while (ros::ok())
   {
+    #ifdef SPIN_PROFILING
+    struct timespec start_time, end_time;
+    clock_gettime(CLOCK_MONOTONIC, &start_time);
+    #endif
     ros::spinOnce();
     if (!is_pose_set_ || !is_waypoint_set_ || !is_velocity_set_)
     {
@@ -172,7 +185,11 @@ void PurePursuitNode::run()
     is_pose_set_ = false;
     is_velocity_set_ = false;
     is_waypoint_set_ = false;
-
+    #ifdef SPIN_PROFILING
+    clock_gettime(CLOCK_MONOTONIC, &end_time);
+    fprintf(fp, "%lld.%.9ld,%lld.%.9ld,%d\n",start_time.tv_sec,start_time.tv_nsec,end_time.tv_sec,end_time.tv_nsec,getpid());    
+    fflush(fp);
+    #endif
     loop_rate.sleep();
   }
 }
