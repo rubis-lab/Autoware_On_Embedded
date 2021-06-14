@@ -964,8 +964,8 @@ int main(int argc, char **argv)
   private_nh.param("identical_deadline", identical_deadline, 0);
   private_nh.param<std::string>("deadline_file_name", _deadline_file_name, "./deadline/cluster_deadline.csv");
   set_identical_deadline((unsigned long long)identical_deadline);
-  if(gpu_scheduling_flag_ == 1)
-    init_scheduling("/tmp/euclidean_cluster_detect", _deadline_file_name.c_str(),key_id);    
+  set_gpu_scheduling_flag(gpu_scheduling_flag_);
+  init_scheduling("/tmp/cluster", _deadline_file_name.c_str(), key_id);    
   #endif
 
 

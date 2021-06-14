@@ -1534,13 +1534,12 @@ int main(int argc, char** argv)
   int key_id = 0;  
   int identical_deadline;
   
-  private_nh.param("gpu_scheduling_flag", gpu_scheduling_flag_, 0);
+  private_nh.param<int>("gpu_scheduling_flag", gpu_scheduling_flag_, 0);
   private_nh.param("identical_deadline", identical_deadline, 0);
   private_nh.param<std::string>("deadline_file_name", _deadline_file_name, "./deadline/ndt_deadline.csv");
   set_identical_deadline((unsigned long long)identical_deadline);
-  if(gpu_scheduling_flag_ == 1)
-    init_scheduling("/tmp/ndt_matching", _deadline_file_name.c_str(), key_id);
-    printf("##Finish init shceduling\n");
+  set_gpu_scheduling_flag(gpu_scheduling_flag_);
+  init_scheduling("/tmp/ndt_matching", _deadline_file_name.c_str(), key_id);    
   #endif
 
   // Set log file name.

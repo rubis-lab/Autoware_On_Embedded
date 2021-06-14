@@ -1,6 +1,0 @@
-Header header
-int32 intersectionID
-float32 intersectionDistance
-int8 isIntersection
-int8 riskyLeftTurn
-int8 riskyRightTurn

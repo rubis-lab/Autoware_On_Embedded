@@ -1,8 +1,0 @@
-prefix=/home/hypark/git/Autoware_On_Embedded/install/autoware_msgs
-
-Name: autoware_msgs
-Description: Description of autoware_msgs
-Version: 1.13.0
-Cflags: -I${prefix}/include
-Libs: -L${prefix}/lib 
-Requires: geometry_msgs jsk_recognition_msgs message_runtime sensor_msgs std_msgs

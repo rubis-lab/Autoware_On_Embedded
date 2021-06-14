@@ -542,8 +542,10 @@ void stop_profiling(int id, int type){
 	if(GPU_PROFILING == 1){		
 		float e_time, r_time;
     char gpu_id_buf[BUFFER_SIZE];
-    sched_info_->scheduling_flag = 0;
-    sched_info_->state = NONE;
+	if(gpu_scheduling_flag_==1){
+    	sched_info_->scheduling_flag = 0;
+    	sched_info_->state = NONE;
+	}
 
 		cudaEventRecord(e_event_stop, 0);
     cudaEventRecord(r_event_stop, 0);
@@ -634,8 +636,11 @@ void sig_handler(int signum){
 }
 
 void termination(){
-  sched_info_->state = STOP;
-  shmdt(sched_info_);
+	if(gpu_scheduling_flag_==1){
+		sched_info_->state = STOP;
+  	shmdt(sched_info_);
+	}
+  
   if(remove(task_filename_)){
       printf("Cannot remove file %s\n", task_filename_);
       exit(1);
@@ -695,6 +700,7 @@ void get_scheduler_pid(){
 }
 
 void initialize_sched_info(){
+	if(gpu_scheduling_flag_!=1) return;
   FILE* sm_key_fp;
   sm_key_fp = fopen("/tmp/sm_key", "r");
   if(sm_key_fp == NULL){
@@ -711,7 +717,7 @@ void initialize_sched_info(){
 }
 
 void init_scheduling(char* task_filename, const char* deadline_filename, int key_id){
-  gpu_scheduling_flag_ = 1;
+	if(gpu_scheduling_flag_!=1) return;
   // Get deadline list
   get_deadline_list(deadline_filename);
   // Initialize key id for shared memory
@@ -745,24 +751,32 @@ void init_scheduling(char* task_filename, const char* deadline_filename, int key
 }
 
 void request_scheduling(int id){  
-  unsigned long long relative_deadline = deadline_list_[id];
-  if(gpu_scheduling_flag_ == 0) return;
-  if(identical_deadline_ != 0) sched_info_->deadline = absolute_deadline_;  
-  else sched_info_->deadline = get_current_time_us() + relative_deadline;  
+  if(gpu_scheduling_flag_ == 1){
+		unsigned long long relative_deadline = deadline_list_[id];  
+		if(identical_deadline_ != 0) sched_info_->deadline = absolute_deadline_;  
+		else sched_info_->deadline = get_current_time_us() + relative_deadline;  
 
-  sched_info_->state = WAIT;        
-  // printf("Request schedule - deadline: %llu\n", sched_info_->deadline);
+		sched_info_->state = WAIT;        
+		// printf("Request schedule - deadline: %llu\n", sched_info_->deadline);
+  }
 
   start_profiling_response_time();
-  while(1){
-      kill(scheduler_pid_, SIGUSR1);
-      // if(!sigwait(&sigset_, &sig_)) break;
-      // if(is_scheduled_ == 1) break;
-      if(sched_info_->scheduling_flag == 1) break;
-  }  
+
+  if(gpu_scheduling_flag_ == 1){
+		while(1){
+			kill(scheduler_pid_, SIGUSR1);
+			// if(!sigwait(&sigset_, &sig_)) break;
+			// if(is_scheduled_ == 1) break;
+			if(sched_info_->scheduling_flag == 1) break;
+		}  
+  }
+
   start_profiling_execution_time();
-  sched_info_->state = RUN;
-  sched_info_->deadline = 0;
+
+  if(gpu_scheduling_flag_==1){
+		sched_info_->state = RUN;
+		sched_info_->deadline = 0;
+	}
 }
 
 void get_deadline_list(const char* filename){
@@ -792,4 +806,8 @@ void set_absolute_deadline(){
 
 void set_slicing_flag(int flag){
   slicing_flag_ = flag;
+}
+
+void set_gpu_scheduling_flag(int gpu_scheduling_flag){
+	gpu_scheduling_flag_ = gpu_scheduling_flag;
 }

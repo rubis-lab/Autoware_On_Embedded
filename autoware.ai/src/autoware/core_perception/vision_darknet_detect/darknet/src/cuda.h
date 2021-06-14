@@ -49,6 +49,7 @@ static int gpu_scheduling_flag_;
 static unsigned long long absolute_deadline_;
 static unsigned long long identical_deadline_;
 static int is_scheduled_;
+void set_gpu_scheduling_flag(int gpu_scheduling_flag);
 
 void sig_handler(int signum);
 void termination();

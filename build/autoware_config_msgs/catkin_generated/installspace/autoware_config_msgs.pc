@@ -1,8 +1,0 @@
-prefix=/home/hypark/git/Autoware_On_Embedded/install/autoware_config_msgs
-
-Name: autoware_config_msgs
-Description: Description of autoware_config_msgs
-Version: 1.13.0
-Cflags: -I${prefix}/include
-Libs: -L${prefix}/lib 
-Requires: message_runtime std_msgs

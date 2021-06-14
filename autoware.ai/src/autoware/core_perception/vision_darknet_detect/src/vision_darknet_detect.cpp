@@ -46,6 +46,8 @@ extern"C" void write_dummy_line();
 extern"C" void initialize_file(const char execution_time_filename[], const char response_time_filename[], const char remain_time_filename[]);
 extern"C" void close_file();
 extern"C" void sig_handler(int signum);
+extern"C" void set_gpu_scheduling_flag(int gpu_scheduling_flag);
+
 //extern"C" void init_scheduling(char* task_filename, const char deadline_filename[], int key_id);
 
 static std::string _execution_time_file_name;
@@ -350,8 +352,8 @@ void Yolo3DetectorNode::Run()
     initialize_file(_execution_time_file_name.c_str(), _response_time_file_name.c_str(), _remain_time_file_name.c_str());    
     
     int key_id = 2;    
-    if(gpu_scheduling_flag_==1)
-        init_scheduling("/tmp/yolo", _deadline_file_name.c_str(),key_id);
+    set_gpu_scheduling_flag(gpu_scheduling_flag_);
+    init_scheduling("/tmp/yolo", _deadline_file_name.c_str(),key_id);
 
     
     //RECEIVE IMAGE TOPIC NAME

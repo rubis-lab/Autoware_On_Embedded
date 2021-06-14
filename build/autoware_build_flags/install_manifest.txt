@@ -1,5 +1,0 @@
-/home/hypark/git/Autoware_On_Embedded/install/autoware_build_flags/lib/pkgconfig/autoware_build_flags.pc
-/home/hypark/git/Autoware_On_Embedded/install/autoware_build_flags/share/autoware_build_flags/cmake/autoware_build_flags-extras.cmake
-/home/hypark/git/Autoware_On_Embedded/install/autoware_build_flags/share/autoware_build_flags/cmake/autoware_build_flagsConfig.cmake
-/home/hypark/git/Autoware_On_Embedded/install/autoware_build_flags/share/autoware_build_flags/cmake/autoware_build_flagsConfig-version.cmake
-/home/hypark/git/Autoware_On_Embedded/install/autoware_build_flags/share/autoware_build_flags/package.xml

@@ -66,6 +66,7 @@ void set_absolute_deadline();
 void initialize_sched_info();
 void request_scheduling(int id);
 void set_slicing_flag(int flag);
+void set_gpu_scheduling_flag(int gpu_scheduling_flag);
 /* ========================================*/
 
 #define HTOD 0
