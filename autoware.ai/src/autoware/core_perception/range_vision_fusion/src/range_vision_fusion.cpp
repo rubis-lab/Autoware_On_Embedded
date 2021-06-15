@@ -731,6 +731,8 @@ ROSRangeVisionFusionApp::Run()
   #endif
   FILE *fp;
   fp = fopen(print_file_path.c_str(), "a");
+  ros::Rate r(10);
+
   while(ros::ok()){
     struct timespec start_time, end_time;
     clock_gettime(CLOCK_MONOTONIC, &start_time);
@@ -739,6 +741,7 @@ ROSRangeVisionFusionApp::Run()
     clock_gettime(CLOCK_MONOTONIC, &end_time);
     fprintf(fp, "%lld.%.9ld,%lld.%.9ld,%d\n",start_time.tv_sec,start_time.tv_nsec,end_time.tv_sec,end_time.tv_nsec,getpid());    
     fflush(fp);
+    r.sleep();
   }  
   fclose(fp);
   #endif
