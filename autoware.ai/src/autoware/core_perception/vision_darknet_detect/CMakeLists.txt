@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 2.8.12)
 project(vision_darknet_detect)
 
+if("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "aarch64")
+  add_definitions(-D__aarch64__)
+endif()
 
 find_package(autoware_build_flags REQUIRED)
 
@@ -104,6 +107,7 @@ if(USE_CUDA)
     ${PROJECT_SOURCE_DIR}/darknet
     ${PROJECT_SOURCE_DIR}/darknet/src
     ${PROJECT_SOURCE_DIR}/src
+    $ENV{HOME}/autoware.ai/src/rubis/rubis_sched/include
   )
 
   target_link_libraries(vision_darknet_detect_lib
@@ -114,6 +118,7 @@ if(USE_CUDA)
     ${CUDA_LIBRARIES}
     ${CUDA_CUBLAS_LIBRARIES}
     ${CUDA_curand_LIBRARY}
+
   )
 
   add_dependencies(vision_darknet_detect_lib
@@ -137,6 +142,7 @@ if(USE_CUDA)
     ${PROJECT_SOURCE_DIR}/darknet
     ${PROJECT_SOURCE_DIR}/darknet/src
     ${PROJECT_SOURCE_DIR}/src
+    $ENV{HOME}/autoware.ai/src/rubis/rubis_sched/include
   )
 
   target_link_libraries(vision_darknet_detect
@@ -212,6 +218,7 @@ else()
     ${PROJECT_SOURCE_DIR}/darknet
     ${PROJECT_SOURCE_DIR}/darknet/src
     ${PROJECT_SOURCE_DIR}/src
+    $ENV{HOME}/autoware.ai/src/rubis/rubis_sched/include
   )
 
   target_link_libraries(vision_darknet_detect_lib
@@ -241,6 +248,7 @@ else()
     ${PROJECT_SOURCE_DIR}/darknet
     ${PROJECT_SOURCE_DIR}/darknet/src
     ${PROJECT_SOURCE_DIR}/src
+    $ENV{HOME}/autoware.ai/src/rubis/rubis_sched/include
   )
 
   target_link_libraries(vision_darknet_detect

@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(imm_ukf_pda_track)
 
+if("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "aarch64")
+  add_definitions(-D__aarch64__)
+endif()
+
 find_package(autoware_build_flags REQUIRED)
 
 find_package(catkin REQUIRED COMPONENTS
@@ -34,6 +38,7 @@ roslint_cpp(
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
+  $ENV{HOME}/autoware.ai/src/rubis/rubis_sched/include
 )
 
 #imm_ukf_pda

@@ -81,6 +81,11 @@ struct sched_attr {
 #define __NR_sched_getattr		381
 #endif
 
+#ifdef __aarch64__
+#define __NR_sched_setattr		380
+#define __NR_sched_getattr		381
+#endif
+
 // #define BUFFER_SIZE 5000
 // #define MAX_TOKEN_COUNT 128
 

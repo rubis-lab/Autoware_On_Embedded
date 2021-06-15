@@ -16,6 +16,7 @@
 
 #include <vector>
 #include <pure_pursuit/pure_pursuit_core.h>
+#include <sched.hpp>
 
 #define SPIN_PROFILING
 
@@ -131,8 +132,13 @@ void PurePursuitNode::run()
   ros::Rate loop_rate(LOOP_RATE_);
 
   #ifdef SPIN_PROFILING
-  std::string print_file_path = std::getenv("HOME");
-  print_file_path.append("/Documents/spin_profiling/pure_pursuit.csv");
+  #ifdef __aarch64__
+  std::string print_file_path("/home/nvidia/Documents/spin_profiling/pure_pursuit.csv");
+  #endif
+  #ifndef __aarch64__
+  std::string print_file_path("/home/hypark/Documents/spin_profiling/pure_pursuit.csv");
+  #endif
+
   FILE *fp;
   fp = fopen(print_file_path.c_str(), "a");
   #endif
@@ -141,6 +147,7 @@ void PurePursuitNode::run()
     #ifdef SPIN_PROFILING
     struct timespec start_time, end_time;
     clock_gettime(CLOCK_MONOTONIC, &start_time);
+    rubis::sched::set_sched_deadline(gettid(), static_cast<uint64_t>(1000000000), static_cast<uint64_t>(1000000000), static_cast<uint64_t>(1000000000));
     #endif
     ros::spinOnce();
     if (!is_pose_set_ || !is_waypoint_set_ || !is_velocity_set_)

@@ -17,6 +17,7 @@
 #include "op_trajectory_evaluator_core.h"
 #include "op_ros_helpers/op_ROSHelpers.h"
 #include "op_planner/MappingHelpers.h"
+#include <sched.hpp>
 
 #define SPIN_PROFILING
 
@@ -437,8 +438,13 @@ void TrajectoryEval::MainLoop()
   PlannerHNS::MappingHelpers::ConstructIntersection_RUBIS(intersection_list, intersection_xml);
 
   #ifdef SPIN_PROFILING
-  std::string print_file_path = std::getenv("HOME");
-  print_file_path.append("/Documents/spin_profiling/op_trajectory_evaluator.csv");
+  #ifdef __aarch64__
+  std::string print_file_path("/home/nvidia/Documents/spin_profiling/ndt_matching.csv");
+  #endif
+  #ifndef __aarch64__
+  std::string print_file_path("/home/hypark/Documents/spin_profiling/ndt_matching.csv");
+  #endif
+
   FILE *fp;
   fp = fopen(print_file_path.c_str(), "a");
   #endif
@@ -448,6 +454,7 @@ void TrajectoryEval::MainLoop()
     #ifdef SPIN_PROFILING
     struct timespec start_time, end_time;
     clock_gettime(CLOCK_MONOTONIC, &start_time);
+    rubis::sched::set_sched_deadline(gettid(), static_cast<uint64_t>(1000000000), static_cast<uint64_t>(1000000000), static_cast<uint64_t>(1000000000));
     #endif
 
     UpdateMyParams();

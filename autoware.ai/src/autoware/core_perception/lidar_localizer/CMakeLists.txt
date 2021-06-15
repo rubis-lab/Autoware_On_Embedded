@@ -3,6 +3,10 @@ project(lidar_localizer)
 
 find_package(PCL REQUIRED)
 
+if("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "aarch64")
+  add_definitions(-D__aarch64__)
+endif()
+
 if(NOT (PCL_VERSION VERSION_LESS "1.7.2"))
   SET(PCL_OPENMP_PACKAGES pcl_omp_registration)
 endif()

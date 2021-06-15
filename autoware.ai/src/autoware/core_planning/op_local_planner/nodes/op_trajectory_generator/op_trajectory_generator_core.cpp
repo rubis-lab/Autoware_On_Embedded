@@ -16,7 +16,7 @@
 
 #include "op_trajectory_generator_core.h"
 #include "op_ros_helpers/op_ROSHelpers.h"
-
+#include <sched.hpp>
 #define SPIN_PROFILING
 
 namespace TrajectoryGeneratorNS
@@ -201,8 +201,12 @@ void TrajectoryGen::MainLoop()
   PlannerHNS::WayPoint prevState, state_change;
 
   #ifdef SPIN_PROFILING
-  std::string print_file_path = std::getenv("HOME");
-  print_file_path.append("/Documents/spin_profiling/op_trajectory_generator.csv");
+  #ifdef __aarch64__
+  std::string print_file_path("/home/nvidia/Documents/spin_profiling/op_trajectory_generator.csv");
+  #endif
+  #ifndef __aarch64__
+  std::string print_file_path("/home/hypark/Documents/spin_profiling/op_trajectory_generator.csv");
+  #endif
   FILE *fp;
   fp = fopen(print_file_path.c_str(), "a");
   #endif
@@ -212,6 +216,7 @@ void TrajectoryGen::MainLoop()
     #ifdef SPIN_PROFILING
     struct timespec start_time, end_time;
     clock_gettime(CLOCK_MONOTONIC, &start_time);
+    rubis::sched::set_sched_deadline(gettid(), static_cast<uint64_t>(1000000000), static_cast<uint64_t>(1000000000), static_cast<uint64_t>(1000000000));
     #endif
 
     ros::spinOnce();

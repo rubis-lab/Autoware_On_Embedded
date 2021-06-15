@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(lidar_euclidean_cluster_detect)
 
+if("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "aarch64")
+  add_definitions(-D__aarch64__)
+endif()
+
 find_package(autoware_build_flags REQUIRED)
 
 find_package(catkin REQUIRED COMPONENTS
@@ -45,6 +49,7 @@ include_directories(
   include
   ${catkin_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
+  $ENV{HOME}/autoware.ai/src/rubis/rubis_sched/include
 )
 link_directories(${OpenCV_LIBRARY_DIRS})
 

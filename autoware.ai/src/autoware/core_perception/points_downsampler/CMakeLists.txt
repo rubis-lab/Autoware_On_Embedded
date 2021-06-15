@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(points_downsampler)
 
+if("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "aarch64")
+  add_definitions(-D__aarch64__)
+endif()
+
 find_package(autoware_build_flags REQUIRED)
 
 find_package(catkin REQUIRED COMPONENTS
@@ -31,7 +35,11 @@ catkin_package(
   sensor_msgs
 )
 
-include_directories(include ${catkin_INCLUDE_DIRS})
+include_directories(
+  include
+  ${catkin_INCLUDE_DIRS}
+  $ENV{HOME}/autoware.ai/src/rubis/rubis_sched/include
+)
 SET(CMAKE_CXX_FLAGS "-O2 -g -Wall ${CMAKE_CXX_FLAGS}")
 
 add_executable(voxel_grid_filter nodes/voxel_grid_filter/voxel_grid_filter.cpp)
