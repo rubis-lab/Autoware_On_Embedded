@@ -450,11 +450,11 @@ void RayGroundFilter::Run()
   #endif
   #ifdef SPIN_PROFILING
   #ifdef __aarch64__
-  std::string print_file_path("/home/nvidia/Documents/spin_profiling/ray_ground_filter.csv");
+  std::string print_file_path("/home/nvidia/Documents/spin_profiling/ray_ground_filter.csv");  
   #endif
   #ifndef __aarch64__
   std::string print_file_path("/home/hypark/Documents/spin_profiling/ray_ground_filter.csv");
-  #endif
+  #endif  
   FILE *fp;
   fp = fopen(print_file_path.c_str(), "a");
   while(ros::ok()){
