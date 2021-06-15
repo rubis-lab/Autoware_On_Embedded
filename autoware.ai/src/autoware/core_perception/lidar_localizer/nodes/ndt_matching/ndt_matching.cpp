@@ -72,6 +72,8 @@
 //headers in Autoware Health Checker
 #include <autoware_health_checker/health_checker/health_checker.h>
 
+#include <sched.hpp>
+
 #define SPIN_PROFILING
 
 #define PREDICT_POSE_THRESHOLD 0.5
@@ -1704,13 +1706,22 @@ int main(int argc, char** argv)
   #endif
 
   #ifdef SPIN_PROFILING
-  std::string print_file_path = std::getenv("HOME");
-  print_file_path.append("/Documents/spin_profiling/ndt_matching.csv");
+
+  #ifdef __arm__
+  std::string print_file_path("/home/nvidia/Documents/spin_profiling/ndt_matching.csv");
+  #endif
+  #ifndef __arm__
+  std::string print_file_path("/home/hypark/Documents/spin_profiling/ndt_matching.csv");
+  #endif
+  
   FILE *fp;
   fp = fopen(print_file_path.c_str(), "a");
+  
+  
   while(ros::ok()){
     struct timespec start_time, end_time;
     clock_gettime(CLOCK_MONOTONIC, &start_time);
+    rubis::sched::set_sched_deadline(gettid(), static_cast<uint64_t>(10000000000), static_cast<uint64_t>(10000000000), static_cast<uint64_t>(10000000000)); // nano seconds
     ros::spinOnce();
     clock_gettime(CLOCK_MONOTONIC, &end_time);
     fprintf(fp, "%lld.%.9ld,%lld.%.9ld,%d\n",start_time.tv_sec,start_time.tv_nsec,end_time.tv_sec,end_time.tv_nsec,getpid());    

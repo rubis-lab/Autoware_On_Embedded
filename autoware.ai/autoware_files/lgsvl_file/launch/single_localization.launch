@@ -54,14 +54,18 @@
   <!-- ndt_matching -->
   <include file="$(find lidar_localizer)/launch/ndt_matching.launch">
     <arg name="method_type" value="2" /> <!-- pcl_generic=0, pcl_anh=1, pcl_anh_gpu=2, pcl_openmp=3 -->
-    <arg name="get_height" value="true" />\    
-    <arg name="execution_time_file_name" value="$(env HOME)/GPU_profiling/test_ndt_execution_time.csv"/>
+    <arg name="get_height" value="true" /> 
+    <arg name="execution_time_file_name" value="/home/hypark/GPU_profiling/test_ndt_execution_time.csv"/>
+    <arg name="response_time_file_name" value="/home/hypark/GPU_profiling/test_ndt_response_time.csv"/>
+    <arg name="remain_time_file_name" value="/home/hypark/GPU_profiling/test_ndt_remain_time.csv"/>
+    <arg name="deadline_file_name" value="/home/hypark/GPU_profiling/deadline/test_ndt_deadline.csv"/>
+    <!-- <arg name="execution_time_file_name" value="$(env HOME)/GPU_profiling/test_ndt_execution_time.csv"/>
     <arg name="response_time_file_name" value="$(env HOME)/GPU_profiling/test_ndt_response_time.csv"/>
     <arg name="remain_time_file_name" value="$(env HOME)/GPU_profiling/test_ndt_remain_time.csv"/>
-    <arg name="deadline_file_name" value="$(env HOME)/GPU_profiling/deadline/test_ndt_deadline.csv"/>
+    <arg name="deadline_file_name" value="$(env HOME)/GPU_profiling/deadline/test_ndt_deadline.csv"/> -->
     <arg name="gpu_scheduling_flag" value="0" />
     <arg name="identical_deadline" value="0" />
-    <arg name="slicing_flag" value="0" />
+    <arg name="slicing_flag" value="0" />    
   </include>
 
   <!-- ndt config -->
