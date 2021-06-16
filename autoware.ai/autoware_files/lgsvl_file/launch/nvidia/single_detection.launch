@@ -1,4 +1,5 @@
 <launch>
+  <rosparam command="load" file="/home/nvidia/autoware.ai/autoware_files/data/yaml/nvidia_scheduling_params.yaml" />
   <!-- setting of this launch file -->
   <arg name="car_detection" default="true" />
   <arg name="pedestrian_detection" default="false" />
@@ -6,11 +7,9 @@
   <arg name="is_register_lidar2camera_tf" default="true" />
   <arg name="is_publish_projection_matrix" default="true" />
   <arg name="is_publish_camera_info" default="true" />
-  <arg name="camera_calib" default="$(env HOME)/autoware.ai/autoware_files/data/calibration/single_lidar/Lexus2016RXHybrid.yaml"/>
 
   <!-- calibration_publisher -->
   <include file="$(find runtime_manager)/launch_files/calibration_publisher.launch">
-    <arg name="file" value="$(arg camera_calib)" />
     <arg name="register_lidar2camera_tf" value="$(arg is_register_lidar2camera_tf)" />
     <arg name="publish_extrinsic_mat" value="$(arg is_publish_projection_matrix)" />
     <arg name="publish_camera_info" value="$(arg is_publish_camera_info)" />
@@ -43,14 +42,7 @@
     <arg name="use_multiple_thres" value="false"/>
     <arg name="clustering_ranges" value="[15,30,45,60]"/>
     <arg name="clustering_distances"
-         value="[0.5,1.1,1.6,2.1,2.6]"/>
-    <arg name="execution_time_file_name" value="$(env HOME)/GPU_profiling/210611_cluster_execution_time_scheduling.csv" />
-    <arg name="response_time_file_name" value="$(env HOME)/GPU_profiling/210611_cluster_response_time_scheduling.csv" />
-    <arg name="remain_time_file_name" value="$(env HOME)/GPU_profiling/210611_cluster_remain_time_scheduling.csv" />
-    <arg name="deadline_file_name" value="$(env HOME)/GPU_profiling/deadline/test_cluster_deadline.csv"/>
-    <arg name="gpu_scheduling_flag" value="0" />
-    <arg name="identical_deadline" value="100000" />
-    <arg name="slicing_flag" value="0" />
+         value="[0.5,1.1,1.6,2.1,2.6]"/>    
   </include>
   
   <!-- vision_darknet_detect -->
@@ -58,17 +50,9 @@
     <arg name="gpu_device_id" value="0"/>
     <arg name="score_threshold" value="0.5"/>
     <arg name="nms_threshold" value="0.45"/>
-    <arg name="network_definition_file" value="$(env HOME)/autoware.ai/autoware_files/vision/yolov3-320.cfg"/>
-    <arg name="pretrained_model_file" value="$(env HOME)/autoware.ai/autoware_files/vision/yolov3-320.weights"/>
     <arg name="names_file" value="$(find vision_darknet_detect)/darknet/cfg/coco.names"/>
     <arg name="camera_id" value="/"/>
-    <arg name="image_src" value="/image_raw"/>
-    <arg name="execution_time_file_name" value="$(env HOME)/GPU_profiling/test_yolo_execution_time.csv"/>
-    <arg name="response_time_file_name" value="$(env HOME)/GPU_profiling/test_yolo_response_time.csv"/>
-    <arg name="remain_time_file_name" value="$(env HOME)/GPU_profiling/test_yolo_remain_time.csv"/>
-    <arg name="deadline_file_name" value="$(env HOME)/GPU_profiling/deadline/test_yolo_deadline.csv"/>
-    <arg name="gpu_scheduling_flag" value="0" />
-    <arg name="identical_deadline" value="100000" />
+    <arg name="image_src" value="/image_raw"/>    
   </include>
 
   <!-- imm_ukf_pda_track -->

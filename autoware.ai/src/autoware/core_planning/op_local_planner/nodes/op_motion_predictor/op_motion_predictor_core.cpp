@@ -19,7 +19,13 @@
 #include "op_ros_helpers/op_ROSHelpers.h"
 #include <sched.hpp>
 
-#define SPIN_PROFILING
+int scheduling_flag_;
+int profiling_flag_;
+std::string response_time_filename_;
+int rate_;
+double minimum_inter_release_time_;
+double execution_time_;
+double relative_deadline_;
 
 namespace MotionPredictorNS
 {
@@ -535,27 +541,39 @@ void MotionPrediction::VisualizePrediction()
 void MotionPrediction::MainLoop()
 {
 
-  ros::Rate loop_rate(25);
+  ros::NodeHandle private_nh("~");
 
-  #ifdef SPIN_PROFILING
-  #ifdef __aarch64__
-  std::string print_file_path("/home/nvidia/Documents/spin_profiling/ndt_matching.csv");
-  #endif
-  #ifndef __aarch64__
-  std::string print_file_path("/home/hypark/Documents/spin_profiling/ndt_matching.csv");
-  #endif
+  private_nh.param<int>("/op_motion_predictor/scheduling_flag", scheduling_flag_, 0);
+  private_nh.param<int>("/op_motion_predictor/profiling_flag", profiling_flag_, 0);
+  private_nh.param<std::string>("/op_motion_predictor/response_time_filename", response_time_filename_, "/home/hypark/Documents/profiling/response_time/op_motion_predictor.csv");
+  private_nh.param<int>("/op_motion_predictor/rate", rate_, 10);
+  private_nh.param("/op_motion_predictor/minimum_inter_release_time", minimum_inter_release_time_, (double)10);
+  private_nh.param("/op_motion_predictor/execution_time", execution_time_, (double)10);
+  private_nh.param("/op_motion_predictor/relative_deadline", relative_deadline_, (double)10);
 
   FILE *fp;
-  fp = fopen(print_file_path.c_str(), "a");
-  #endif
+  if(profiling_flag_){      
+    fp = fopen(response_time_filename_.c_str(), "a");
+  }
+
+  ros::Rate loop_rate(25);
+  if(scheduling_flag_) loop_rate = ros::Rate(rate_);
+
+  struct timespec start_time, end_time;
 
   while (ros::ok())
   {
-    #ifdef SPIN_PROFILING
-    struct timespec start_time, end_time;
-    clock_gettime(CLOCK_MONOTONIC, &start_time);
-    rubis::sched::set_sched_deadline(gettid(), static_cast<uint64_t>(1000000000), static_cast<uint64_t>(1000000000), static_cast<uint64_t>(1000000000));
-    #endif
+    if(profiling_flag_){        
+      clock_gettime(CLOCK_MONOTONIC, &start_time);
+    }
+    if(scheduling_flag_){
+      rubis::sched::set_sched_deadline(gettid(), 
+        static_cast<uint64_t>(execution_time_), 
+        static_cast<uint64_t>(relative_deadline_), 
+        static_cast<uint64_t>(minimum_inter_release_time_)
+      );
+    }      
+
     ros::spinOnce();
 
     if(m_MapType == PlannerHNS::MAP_KML_FILE && !bMap)
@@ -617,14 +635,15 @@ void MotionPrediction::MainLoop()
 //      pub_predicted_objects_trajectories.publish(m_PredictedResultsResults);
 //    }
 
-    #ifdef SPIN_PROFILING
-    clock_gettime(CLOCK_MONOTONIC, &end_time);
-    fprintf(fp, "%lld.%.9ld,%lld.%.9ld,%d\n",start_time.tv_sec,start_time.tv_nsec,end_time.tv_sec,end_time.tv_nsec,getpid());    
-    fflush(fp);
-    #endif
+    if(profiling_flag_){
+      clock_gettime(CLOCK_MONOTONIC, &end_time);
+      fprintf(fp, "%lld.%.9ld,%lld.%.9ld,%d\n",start_time.tv_sec,start_time.tv_nsec,end_time.tv_sec,end_time.tv_nsec,getpid());    
+      fflush(fp);
+    }
 
     loop_rate.sleep();
   }
+  fclose(fp);
 }
 
 void MotionPrediction::TransformPose(const geometry_msgs::PoseStamped &in_pose, geometry_msgs::PoseStamped& out_pose, const tf::StampedTransform &in_transform)

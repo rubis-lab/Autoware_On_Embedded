@@ -84,10 +84,20 @@
 #define Wb 0.3
 #define Wc 0.3
 
-static std::string _deadline_file_name;
-static std::string _execution_time_file_name;
-static std::string _response_time_file_name;
-static std::string _remain_time_file_name;
+int scheduling_flag_;
+int profiling_flag_;
+std::string response_time_filename_;
+int rate_;
+double minimum_inter_release_time_;
+double execution_time_;
+double relative_deadline_;
+int main_gpu_scheduling_flag_;
+std::string gpu_execution_time_filename_;
+std::string gpu_response_time_filename_;
+std::string gpu_deadline_filename_;
+std::string gpu_remain_time_filename_;
+int gpu_identical_deadline_;
+
 static std::shared_ptr<autoware_health_checker::HealthChecker> health_checker_ptr_;
 
 struct pose
@@ -1534,16 +1544,26 @@ int main(int argc, char** argv)
   health_checker_ptr_->ENABLE();
   health_checker_ptr_->NODE_ACTIVATE();
 
+  private_nh.param<int>("/ndt_matching/scheduling_flag", scheduling_flag_, 0);
+  private_nh.param<int>("/ndt_matching/profiling_flag", profiling_flag_, 0);
+  private_nh.param<std::string>("/ndt_matching/response_time_filename", response_time_filename_, "/home/hypark/Documents/profiling/response_time/ndt_matching.csv");
+  private_nh.param<int>("/ndt_matching/rate", rate_, 10);
+  private_nh.param("/ndt_matching/minimum_inter_release_time", minimum_inter_release_time_, (double)10);
+  private_nh.param("/ndt_matching/execution_time", execution_time_, (double)10);
+  private_nh.param("/ndt_matching/relative_deadline", relative_deadline_, (double)10);
+  private_nh.param("/ndt_matching/gpu_scheduling_flag", gpu_scheduling_flag_, 0);
+  private_nh.param<std::string>("/ndt_matching/gpu_execution_time_filename", gpu_execution_time_filename_, "/home/hypark/Documents/gpu_profiling/test_ndt_matching_execution_time.csv");
+  private_nh.param<std::string>("/ndt_matching/gpu_response_time_filename", gpu_response_time_filename_, "/home/hypark/Documents/gpu_profiling/test_ndt_matching_response_time.csv");
+  private_nh.param<std::string>("/ndt_matching/gpu_deadline_filename", gpu_deadline_filename_, "/home/hypark/Documents/gpu_deadline/ndt_matching_gpu_deadline.csv");
+  private_nh.param<std::string>("/ndt_matching/gpu_remain_time_filename", gpu_remain_time_filename_, "/home/hypark/Documents/gpu_profiling/test_ndt_matching_remain_time.csv");
+  private_nh.param<int>("/ndt_matching/gpu_identical_deadline", gpu_identical_deadline_, 0);
+
   #ifdef CUDA_FOUND
   int key_id = 0;  
-  int identical_deadline;
-  
-  private_nh.param<int>("gpu_scheduling_flag", gpu_scheduling_flag_, 0);
-  private_nh.param("identical_deadline", identical_deadline, 0);
-  private_nh.param<std::string>("deadline_file_name", _deadline_file_name, "./deadline/ndt_deadline.csv");
-  set_identical_deadline((unsigned long long)identical_deadline);
+    
+  set_identical_deadline((unsigned long long)gpu_identical_deadline_);
   set_gpu_scheduling_flag(gpu_scheduling_flag_);
-  init_scheduling("/tmp/ndt_matching", _deadline_file_name.c_str(), key_id);    
+  init_scheduling("/tmp/ndt_matching", gpu_deadline_filename_.c_str(), key_id);    
   #endif
 
   // Set log file name.
@@ -1576,13 +1596,7 @@ int main(int argc, char** argv)
   private_nh.param<double>("gnss_reinit_fitness", _gnss_reinit_fitness, 500.0);
   
   if(_method_type == MethodType::PCL_ANH_GPU){    
-    int slicing_flag;
-    private_nh.param<std::string>("execution_time_file_name", _execution_time_file_name, "~/GPU_profiling/cluster_execution_time.csv");
-    private_nh.param<std::string>("response_time_file_name", _response_time_file_name, "~/GPU_profiling/cluster_reponse_time.csv");    
-    private_nh.param<std::string>("remain_time_file_name", _remain_time_file_name, "~/GPU_profiling/cluster_remain_time.csv");    
-    private_nh.param<int>("slicing_flag", slicing_flag, 0);    
-    initialize_file(_execution_time_file_name.c_str(), _response_time_file_name.c_str(), _remain_time_file_name.c_str());    
-    // set_slicing_flag(slicing_flag);
+    initialize_file(gpu_execution_time_filename_.c_str(), gpu_response_time_filename_.c_str(), gpu_deadline_filename_.c_str());        
   }
 
 
@@ -1701,45 +1715,42 @@ int main(int argc, char** argv)
   pthread_t thread;
   pthread_create(&thread, NULL, thread_func, NULL);
 
-  #ifndef SPIN_PROFILING
-  ros::spin();
-  #endif
+  // SPIN
+  if(!scheduling_flag_ && !profiling_flag_){
+    ros::spin();
+  }
+  else{
+    FILE *fp;
+    if(profiling_flag_){      
+      fp = fopen(response_time_filename_.c_str(), "a");
+    }
 
-  #ifdef SPIN_PROFILING
-
-  #ifdef __aarch64__
-  std::string print_file_path("/home/nvidia/Documents/spin_profiling/ndt_matching.csv");
-  #endif
-  #ifndef __aarch64__
-  std::string print_file_path("/home/hypark/Documents/spin_profiling/ndt_matching.csv");
-  #endif
-  
-  #ifdef X86
-    std::cout<<"X86"<<std::endl;
-  #endif
-  #ifdef X86_64
-    std::cout<<"X86_64"<<std::endl;
-  #endif
-  #ifdef __hello__
-    std::cout<<"__hello__"<<std::endl;
-  #endif
-
-  FILE *fp;
-  fp = fopen(print_file_path.c_str(), "a");
-  ros::Rate r(10);
-  
-  while(ros::ok()){
+    ros::Rate r(rate_);
     struct timespec start_time, end_time;
-    clock_gettime(CLOCK_MONOTONIC, &start_time);
-    rubis::sched::set_sched_deadline(gettid(), static_cast<uint64_t>(1000000000), static_cast<uint64_t>(1000000000), static_cast<uint64_t>(1000000000)); // nano seconds
-    ros::spinOnce();
-    clock_gettime(CLOCK_MONOTONIC, &end_time);
-    fprintf(fp, "%lld.%.9ld,%lld.%.9ld,%d\n",start_time.tv_sec,start_time.tv_nsec,end_time.tv_sec,end_time.tv_nsec,getpid());    
-    fflush(fp);
-    r.sleep();
-  }  
+    while(ros::ok()){
+      if(profiling_flag_){        
+        clock_gettime(CLOCK_MONOTONIC, &start_time);
+      }
+      if(scheduling_flag_){
+        rubis::sched::set_sched_deadline(gettid(), 
+          static_cast<uint64_t>(execution_time_), 
+          static_cast<uint64_t>(relative_deadline_), 
+          static_cast<uint64_t>(minimum_inter_release_time_)
+        );
+      }      
+
+      ros::spinOnce();
+
+      if(profiling_flag_){
+        clock_gettime(CLOCK_MONOTONIC, &end_time);
+        fprintf(fp, "%lld.%.9ld,%lld.%.9ld,%d\n",start_time.tv_sec,start_time.tv_nsec,end_time.tv_sec,end_time.tv_nsec,getpid());    
+        fflush(fp);
+      }
+
+      r.sleep();
+    }  
   fclose(fp);
-  #endif
+  }
 
   close_file();
   return 0;

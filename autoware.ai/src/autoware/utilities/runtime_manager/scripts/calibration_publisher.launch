@@ -1,5 +1,5 @@
 <launch>
-    <arg name="file" default=""/>
+    <!-- <arg name="file" default=""/> -->
     <arg name="register_lidar2camera_tf" default="true"/>
     <arg name="publish_extrinsic_mat" default="true"/>
     <arg name="publish_camera_info" default="true"/>
@@ -15,7 +15,7 @@
         <param name="register_lidar2camera_tf" type="bool" value="$(arg register_lidar2camera_tf)"/>
         <param name="publish_extrinsic_mat" type="bool" value="$(arg publish_extrinsic_mat)"/>
         <param name="publish_camera_info" type="bool" value="$(arg publish_camera_info)"/>
-        <param name="calibration_file" type="str" value="$(arg file)"/>
+        <!-- <param name="calibration_file" type="str" value="$(arg file)"/> -->
         <param name="target_frame" type="str" value="$(arg target_frame)"/>
         <param name="camera_frame" type="str" value="$(arg camera_frame)"/>
         <param name="image_topic_src" type="str" value="$(arg image_topic_src)"/>

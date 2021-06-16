@@ -35,6 +35,14 @@
 
 #define MAX_MEASUREMENT_RANGE 200.0
 
+int scheduling_flag_;
+int profiling_flag_;
+std::string response_time_filename_;
+int rate_;
+double minimum_inter_release_time_;
+double execution_time_;
+double relative_deadline_;
+
 ros::Publisher filtered_points_pub;
 
 // Leaf size of VoxelGrid filter.
@@ -149,6 +157,14 @@ int main(int argc, char** argv)
   }
   private_nh.param<double>("measurement_range", measurement_range, MAX_MEASUREMENT_RANGE);
 
+  private_nh.param<int>("/voxel_grid_filter/scheduling_flag", scheduling_flag_, 0);
+  private_nh.param<int>("/voxel_grid_filter/profiling_flag", profiling_flag_, 0);
+  private_nh.param<std::string>("/voxel_grid_filter/response_time_filename", response_time_filename_, "/home/hypark/Documents/profiling/response_time/voxel_grid_filter.csv");
+  private_nh.param<int>("/voxel_grid_filter/rate", rate_, 10);
+  private_nh.param("/voxel_grid_filter/minimum_inter_release_time", minimum_inter_release_time_, (double)10);
+  private_nh.param("/voxel_grid_filter/execution_time", execution_time_, (double)10);
+  private_nh.param("/voxel_grid_filter/relative_deadline", relative_deadline_, (double)10);
+
   // Publishers
   filtered_points_pub = nh.advertise<sensor_msgs::PointCloud2>("/filtered_points", 10);
   points_downsampler_info_pub = nh.advertise<points_downsampler::PointsDownsamplerInfo>("/points_downsampler_info", 1000);
@@ -157,32 +173,41 @@ int main(int argc, char** argv)
   ros::Subscriber config_sub = nh.subscribe("config/voxel_grid_filter", 10, config_callback);
   ros::Subscriber scan_sub = nh.subscribe(POINTS_TOPIC, 10, scan_callback);
 
-  #ifndef SPIN_PROFILING
-  ros::spin();
-  #endif
-  #ifdef SPIN_PROFILING
-  #ifdef __aarch64__
-  std::string print_file_path("/home/nvidia/Documents/spin_profiling/voxel_grid_filter.csv");
-  #endif
-  #ifndef __aarch64__
-  std::string print_file_path("/home/hypark/Documents/spin_profiling/voxel_grid_filter.csv");
-  #endif
-  FILE *fp;
-  fp = fopen(print_file_path.c_str(), "a");
-  ros::Rate r(10);
+  if(!scheduling_flag_ && !profiling_flag_){
+    ros::spin();
+  }
+  else{
+    FILE *fp;
+    if(profiling_flag_){      
+      fp = fopen(response_time_filename_.c_str(), "a");
+    }
 
-  while(ros::ok()){
-      struct timespec start_time, end_time;
-      clock_gettime(CLOCK_MONOTONIC, &start_time);
-      rubis::sched::set_sched_deadline(gettid(), static_cast<uint64_t>(1000000000), static_cast<uint64_t>(1000000000), static_cast<uint64_t>(1000000000));
+    ros::Rate r(rate_);
+    struct timespec start_time, end_time;
+    while(ros::ok()){
+      if(profiling_flag_){        
+        clock_gettime(CLOCK_MONOTONIC, &start_time);
+      }
+      if(scheduling_flag_){
+        rubis::sched::set_sched_deadline(gettid(), 
+          static_cast<uint64_t>(execution_time_), 
+          static_cast<uint64_t>(relative_deadline_), 
+          static_cast<uint64_t>(minimum_inter_release_time_)
+        );
+      }      
+
       ros::spinOnce();
-      clock_gettime(CLOCK_MONOTONIC, &end_time);
-      fprintf(fp, "%lld.%.9ld,%lld.%.9ld,%d\n",start_time.tv_sec,start_time.tv_nsec,end_time.tv_sec,end_time.tv_nsec,getpid());    
-      fflush(fp);
+
+      if(profiling_flag_){
+        clock_gettime(CLOCK_MONOTONIC, &end_time);
+        fprintf(fp, "%lld.%.9ld,%lld.%.9ld,%d\n",start_time.tv_sec,start_time.tv_nsec,end_time.tv_sec,end_time.tv_nsec,getpid());    
+        fflush(fp);
+      }
+
       r.sleep();
-  }  
-  fclose(fp);  
-  #endif
+    }  
+  fclose(fp);
+  }
 
   return 0;
 }

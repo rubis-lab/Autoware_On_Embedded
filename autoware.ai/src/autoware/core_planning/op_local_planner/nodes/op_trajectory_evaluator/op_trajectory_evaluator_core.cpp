@@ -19,7 +19,13 @@
 #include "op_planner/MappingHelpers.h"
 #include <sched.hpp>
 
-#define SPIN_PROFILING
+int scheduling_flag_;
+int profiling_flag_;
+std::string response_time_filename_;
+int rate_;
+double minimum_inter_release_time_;
+double execution_time_;
+double relative_deadline_;
 
 namespace TrajectoryEvaluatorNS
 {
@@ -427,7 +433,14 @@ bool TrajectoryEval::UpdateTf()
 
 void TrajectoryEval::MainLoop()
 {
-  ros::Rate loop_rate(100);
+  ros::NodeHandle private_nh("~");
+  private_nh.param<int>("/op_trajectory_evaluator/scheduling_flag", scheduling_flag_, 0);
+  private_nh.param<int>("/op_trajectory_evaluator/profiling_flag", profiling_flag_, 0);
+  private_nh.param<std::string>("/op_trajectory_evaluator/response_time_filename", response_time_filename_, "/home/hypark/Documents/profiling/response_time/op_trajectory_evaluator.csv");
+  private_nh.param<int>("/op_trajectory_evaluator/rate", rate_, 10);
+  private_nh.param("/op_trajectory_evaluator/minimum_inter_release_time", minimum_inter_release_time_, (double)10);
+  private_nh.param("/op_trajectory_evaluator/execution_time", execution_time_, (double)10);
+  private_nh.param("/op_trajectory_evaluator/relative_deadline", relative_deadline_, (double)10);
 
   PlannerHNS::WayPoint prevState, state_change;
 
@@ -437,25 +450,28 @@ void TrajectoryEval::MainLoop()
   nh.getParam("/op_trajectory_evaluator/intersection_list", intersection_xml);
   PlannerHNS::MappingHelpers::ConstructIntersection_RUBIS(intersection_list, intersection_xml);
 
-  #ifdef SPIN_PROFILING
-  #ifdef __aarch64__
-  std::string print_file_path("/home/nvidia/Documents/spin_profiling/ndt_matching.csv");
-  #endif
-  #ifndef __aarch64__
-  std::string print_file_path("/home/hypark/Documents/spin_profiling/ndt_matching.csv");
-  #endif
-
   FILE *fp;
-  fp = fopen(print_file_path.c_str(), "a");
-  #endif
+  if(profiling_flag_){      
+    fp = fopen(response_time_filename_.c_str(), "a");
+  }
+
+  ros::Rate loop_rate(100);
+  if(scheduling_flag_) loop_rate = ros::Rate(rate_);
+
+  struct timespec start_time, end_time;
 
   while (ros::ok())
   {
-    #ifdef SPIN_PROFILING
-    struct timespec start_time, end_time;
-    clock_gettime(CLOCK_MONOTONIC, &start_time);
-    rubis::sched::set_sched_deadline(gettid(), static_cast<uint64_t>(1000000000), static_cast<uint64_t>(1000000000), static_cast<uint64_t>(1000000000));
-    #endif
+    if(profiling_flag_){        
+      clock_gettime(CLOCK_MONOTONIC, &start_time);
+    }
+    if(scheduling_flag_){
+      rubis::sched::set_sched_deadline(gettid(), 
+        static_cast<uint64_t>(execution_time_), 
+        static_cast<uint64_t>(relative_deadline_), 
+        static_cast<uint64_t>(minimum_inter_release_time_)
+      );
+    }      
 
     UpdateMyParams();
     UpdateTf();
@@ -550,13 +566,14 @@ void TrajectoryEval::MainLoop()
     else
       sub_GlobalPlannerPaths = nh.subscribe("/lane_waypoints_array",   1,    &TrajectoryEval::callbackGetGlobalPlannerPath,   this);
 
-    #ifdef SPIN_PROFILING
-    clock_gettime(CLOCK_MONOTONIC, &end_time);
-    fprintf(fp, "%lld.%.9ld,%lld.%.9ld,%d\n",start_time.tv_sec,start_time.tv_nsec,end_time.tv_sec,end_time.tv_nsec,getpid());    
-    fflush(fp);
-    #endif
+    if(profiling_flag_){
+      clock_gettime(CLOCK_MONOTONIC, &end_time);
+      fprintf(fp, "%lld.%.9ld,%lld.%.9ld,%d\n",start_time.tv_sec,start_time.tv_nsec,end_time.tv_sec,end_time.tv_nsec,getpid());    
+      fflush(fp);
+    }
     loop_rate.sleep();
   }
+  fclose(fp);
 }
 
 }

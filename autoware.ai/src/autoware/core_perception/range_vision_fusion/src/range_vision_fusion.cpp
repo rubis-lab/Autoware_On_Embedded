@@ -24,6 +24,14 @@
 #include <sched.hpp>
 #define SPIN_PROFILING
 
+int scheduling_flag_;
+int profiling_flag_;
+std::string response_time_filename_;
+int rate_;
+double minimum_inter_release_time_;
+double execution_time_;
+double relative_deadline_;
+
 cv::Point3f
 ROSRangeVisionFusionApp::TransformPoint(const geometry_msgs::Point &in_point, const tf::StampedTransform &in_transform)
 {
@@ -711,6 +719,23 @@ void
 ROSRangeVisionFusionApp::Run()
 {
   ros::NodeHandle private_node_handle("~");
+
+  private_node_handle.param<int>("/range_vision_fusion/scheduling_flag", scheduling_flag_, 0);
+  private_node_handle.param<int>("/range_vision_fusion/profiling_flag", profiling_flag_, 0);
+  private_node_handle.param<std::string>("/range_vision_fusion/response_time_filename", response_time_filename_, "/home/hypark/Documents/profiling/response_time/range_vision_fusion.csv");
+  private_node_handle.param<int>("/range_vision_fusion/rate", rate_, 10);
+  private_node_handle.param("/range_vision_fusion/minimum_inter_release_time", minimum_inter_release_time_, (double)10);
+  private_node_handle.param("/range_vision_fusion/execution_time", execution_time_, (double)10);
+  private_node_handle.param("/range_vision_fusion/relative_deadline", relative_deadline_, (double)10);
+
+  std::cout<<"scheduling_flag_"<<scheduling_flag_<<std::endl;
+  std::cout<<"profiling_flag_"<<profiling_flag_<<std::endl;
+  std::cout<<"response_time_filename_"<<response_time_filename_<<std::endl;
+  std::cout<<"rate_"<<rate_<<std::endl;
+  std::cout<<"minimum_inter_release_time_"<<minimum_inter_release_time_<<std::endl;
+  std::cout<<"execution_time_"<<execution_time_<<std::endl;
+  std::cout<<"relative_deadline_"<<relative_deadline_<<std::endl;
+
   tf::TransformListener transform_listener;
 
   transform_listener_ = &transform_listener;
@@ -719,32 +744,42 @@ ROSRangeVisionFusionApp::Run()
 
   ROS_INFO("[%s] Ready. Waiting for data...", __APP_NAME__);
 
-  #ifndef SPIN_PROFILING
-  ros::spin();
-  #endif
-  #ifdef SPIN_PROFILING
-  #ifdef __aarch64__
-  std::string print_file_path("/home/nvidia/Documents/spin_profiling/range_vision_fusion.csv");
-  #endif
-  #ifndef __aarch64__
-  std::string print_file_path("/home/hypark/Documents/spin_profiling/range_vision_fusion.csv");
-  #endif
-  FILE *fp;
-  fp = fopen(print_file_path.c_str(), "a");
-  ros::Rate r(10);
+  // SPIN
+  if(!scheduling_flag_ && !profiling_flag_){
+    ros::spin();
+  }
+  else{
+    FILE *fp;
+    if(profiling_flag_){      
+      fp = fopen(response_time_filename_.c_str(), "a");
+    }
 
-  while(ros::ok()){
+    ros::Rate r(rate_);
     struct timespec start_time, end_time;
-    clock_gettime(CLOCK_MONOTONIC, &start_time);
-    rubis::sched::set_sched_deadline(gettid(), static_cast<uint64_t>(1000000000), static_cast<uint64_t>(1000000000), static_cast<uint64_t>(1000000000));
-    ros::spinOnce();
-    clock_gettime(CLOCK_MONOTONIC, &end_time);
-    fprintf(fp, "%lld.%.9ld,%lld.%.9ld,%d\n",start_time.tv_sec,start_time.tv_nsec,end_time.tv_sec,end_time.tv_nsec,getpid());    
-    fflush(fp);
-    r.sleep();
-  }  
+    while(ros::ok()){
+      if(profiling_flag_){        
+        clock_gettime(CLOCK_MONOTONIC, &start_time);
+      }
+      if(scheduling_flag_){
+        rubis::sched::set_sched_deadline(gettid(), 
+          static_cast<uint64_t>(execution_time_), 
+          static_cast<uint64_t>(relative_deadline_), 
+          static_cast<uint64_t>(minimum_inter_release_time_)
+        );
+      }      
+
+      ros::spinOnce();
+
+      if(profiling_flag_){
+        clock_gettime(CLOCK_MONOTONIC, &end_time);
+        fprintf(fp, "%lld.%.9ld,%lld.%.9ld,%d\n",start_time.tv_sec,start_time.tv_nsec,end_time.tv_sec,end_time.tv_nsec,getpid());    
+        fflush(fp);
+      }
+
+      r.sleep();
+    }  
   fclose(fp);
-  #endif
+  }
 
   ROS_INFO("[%s] END", __APP_NAME__);
 }

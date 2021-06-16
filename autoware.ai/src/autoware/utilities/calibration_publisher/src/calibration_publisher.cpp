@@ -190,7 +190,7 @@ int main(int argc, char *argv[])
   ROS_INFO("[%s] target_frame: '%s'", __APP_NAME__, target_frame_.c_str());
 
   std::string calibration_file;
-  private_nh.param<std::string>("calibration_file", calibration_file, "");
+  private_nh.param<std::string>("/calibration_publisher/calibration_file", calibration_file, "");
   ROS_INFO("[%s] calibration_file: '%s'", __APP_NAME__, calibration_file.c_str());
   if (calibration_file.empty())
   {

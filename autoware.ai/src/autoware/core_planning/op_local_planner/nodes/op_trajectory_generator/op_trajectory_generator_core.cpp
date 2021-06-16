@@ -17,6 +17,15 @@
 #include "op_trajectory_generator_core.h"
 #include "op_ros_helpers/op_ROSHelpers.h"
 #include <sched.hpp>
+
+int scheduling_flag_;
+int profiling_flag_;
+std::string response_time_filename_;
+int rate_;
+double minimum_inter_release_time_;
+double execution_time_;
+double relative_deadline_;
+
 #define SPIN_PROFILING
 
 namespace TrajectoryGeneratorNS
@@ -196,28 +205,40 @@ void TrajectoryGen::callbackGetGlobalPlannerPath(const autoware_msgs::LaneArrayC
 
 void TrajectoryGen::MainLoop()
 {
-  ros::Rate loop_rate(100);
+  ros::NodeHandle private_nh("~");
+
+  private_nh.param<int>("/op_trajectory_generator/scheduling_flag", scheduling_flag_, 0);
+  private_nh.param<int>("/op_trajectory_generator/profiling_flag", profiling_flag_, 0);
+  private_nh.param<std::string>("/op_trajectory_generator/response_time_filename", response_time_filename_, "/home/hypark/Documents/profiling/response_time/op_trajectory_generator.csv");
+  private_nh.param<int>("/op_trajectory_generator/rate", rate_, 10);
+  private_nh.param("/op_trajectory_generator/minimum_inter_release_time", minimum_inter_release_time_, (double)10);
+  private_nh.param("/op_trajectory_generator/execution_time", execution_time_, (double)10);
+  private_nh.param("/op_trajectory_generator/relative_deadline", relative_deadline_, (double)10);
 
   PlannerHNS::WayPoint prevState, state_change;
 
-  #ifdef SPIN_PROFILING
-  #ifdef __aarch64__
-  std::string print_file_path("/home/nvidia/Documents/spin_profiling/op_trajectory_generator.csv");
-  #endif
-  #ifndef __aarch64__
-  std::string print_file_path("/home/hypark/Documents/spin_profiling/op_trajectory_generator.csv");
-  #endif
   FILE *fp;
-  fp = fopen(print_file_path.c_str(), "a");
-  #endif
+  if(profiling_flag_){      
+    fp = fopen(response_time_filename_.c_str(), "a");
+  }
+
+  ros::Rate loop_rate(100);
+  if(scheduling_flag_) loop_rate = ros::Rate(rate_);
+
+  struct timespec start_time, end_time;
 
   while (ros::ok())
   {
-    #ifdef SPIN_PROFILING
-    struct timespec start_time, end_time;
-    clock_gettime(CLOCK_MONOTONIC, &start_time);
-    rubis::sched::set_sched_deadline(gettid(), static_cast<uint64_t>(1000000000), static_cast<uint64_t>(1000000000), static_cast<uint64_t>(1000000000));
-    #endif
+    if(profiling_flag_){        
+      clock_gettime(CLOCK_MONOTONIC, &start_time);
+    }
+    if(scheduling_flag_){
+      rubis::sched::set_sched_deadline(gettid(), 
+        static_cast<uint64_t>(execution_time_), 
+        static_cast<uint64_t>(relative_deadline_), 
+        static_cast<uint64_t>(minimum_inter_release_time_)
+      );
+    }      
 
     ros::spinOnce();
 
@@ -279,13 +300,17 @@ void TrajectoryGen::MainLoop()
     visualization_msgs::MarkerArray all_rollOuts;
     PlannerHNS::ROSHelpers::TrajectoriesToMarkers(m_RollOuts, all_rollOuts);
     pub_LocalTrajectoriesRviz.publish(all_rollOuts);
-    #ifdef SPIN_PROFILING
-    clock_gettime(CLOCK_MONOTONIC, &end_time);
-    fprintf(fp, "%lld.%.9ld,%lld.%.9ld,%d\n",start_time.tv_sec,start_time.tv_nsec,end_time.tv_sec,end_time.tv_nsec,getpid());    
-    fflush(fp);
-    #endif
+
+    if(profiling_flag_){
+      clock_gettime(CLOCK_MONOTONIC, &end_time);
+      fprintf(fp, "%lld.%.9ld,%lld.%.9ld,%d\n",start_time.tv_sec,start_time.tv_nsec,end_time.tv_sec,end_time.tv_nsec,getpid());    
+      fflush(fp);
+    }
+
     loop_rate.sleep();
   }
+
+  fclose(fp);  
 }
 
 }

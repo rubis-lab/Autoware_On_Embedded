@@ -33,14 +33,6 @@
   <arg name="clustering_distances"
        default="[0.5,1.1,1.6,2.1,2.6]"/><!-- Euclidean Clustering threshold distance for each segment -->
 
-  <arg name="execution_time_file_name" default="$(env HOME)/GPU_profiling/cluster_execution_time.csv"/>
-  <arg name="response_time_file_name" default="$(env HOME)/GPU_profiling/cluster_response_time.csv"/>
-  <arg name="remain_time_file_name" default="$(env HOME)/GPU_profiling/cluster_remain_time.csv"/>
-  <arg name="deadline_file_name" default="$(env HOME)/GPU_profiling/cluster_deadline.csv" />
-  <arg name="gpu_scheduling_flag" default="0" />
-  <arg name="identical_deadline" default="0" />
-  <arg name="slicing_flag" default="0" />
-
   <node pkg="lidar_euclidean_cluster_detect" type="lidar_euclidean_cluster_detect" name="lidar_euclidean_cluster_detect_$(arg label)" output="screen">
     <param name="points_node"
            value="$(arg points_node)"/> <!-- Can be used to select which pointcloud node will be used as input for the clustering -->
@@ -68,14 +60,6 @@
            value="$(arg clustering_distances)"/><!-- Euclidean Clustering threshold distance for each segment -->
 
     <remap from="/points_raw" to="/sync_drivers/points_raw" if="$(arg sync)" />
-
-    <param name="execution_time_file_name" value="$(arg execution_time_file_name)" />
-    <param name="remain_time_file_name" value="$(arg remain_time_file_name)" />
-    <param name="response_time_file_name" value="$(arg response_time_file_name)" />
-    <param name="deadline_file_name" value="$(arg deadline_file_name)" />
-    <param name="gpu_scheduling_flag" value="$(arg gpu_scheduling_flag)" />
-    <param name="identical_deadline" value="$(arg identical_deadline)" />    
-    <param name="slicing_flag" value="$(arg slicing_flag)" />
   </node>
 
   <!-- <group if="$(arg use_vector_map)">

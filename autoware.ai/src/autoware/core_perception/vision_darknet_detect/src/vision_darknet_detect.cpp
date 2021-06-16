@@ -59,6 +59,20 @@ static std::string _response_time_file_name;
 static std::string _remain_time_file_name;
 static std::string _deadline_file_name;
 
+int scheduling_flag_;
+int profiling_flag_;
+std::string response_time_filename_;
+int rate_;
+double minimum_inter_release_time_;
+double execution_time_;
+double relative_deadline_;
+int main_gpu_scheduling_flag_;
+std::string gpu_execution_time_filename_;
+std::string gpu_response_time_filename_;
+std::string gpu_deadline_filename_;
+std::string gpu_remain_time_filename_;
+int gpu_identical_deadline_;
+
 namespace darknet
 {
     uint32_t Yolo3Detector::get_network_height()
@@ -345,20 +359,43 @@ void Yolo3DetectorNode::Run()
     ros::NodeHandle private_node_handle("~");//to receive args    
     int identical_deadline;
     int gpu_scheduling_flag;
-    private_node_handle.param<std::string>("execution_time_file_name",_execution_time_file_name,"./yolo_execution_time.csv");
-    private_node_handle.param<std::string>("response_time_file_name",_response_time_file_name,"./yolo_response_time.csv");
-    private_node_handle.param<std::string>("remain_time_file_name",_remain_time_file_name,"./yolo_remain_time.csv");
-    private_node_handle.param<std::string>("deadline_file_name",_deadline_file_name,"./deadline/yolo_deadline.csv");
-    private_node_handle.param("gpu_scheduling_flag", gpu_scheduling_flag, 0);
-    private_node_handle.param("identical_deadline", identical_deadline, 0);
-    set_identical_deadline((unsigned long long)identical_deadline);
+
+    private_node_handle.param<int>("/vision_darknet_detect/scheduling_flag", scheduling_flag_, 0);
+    private_node_handle.param<int>("/vision_darknet_detect/profiling_flag", profiling_flag_, 0);
+    private_node_handle.param<std::string>("/vision_darknet_detect/response_time_filename", response_time_filename_, "/home/hypark/Documents/profiling/response_time/vision_darknet_detect.csv");
+    private_node_handle.param<int>("/vision_darknet_detect/rate", rate_, 10);
+    private_node_handle.param("/vision_darknet_detect/minimum_inter_release_time", minimum_inter_release_time_, (double)10);
+    private_node_handle.param("/vision_darknet_detect/execution_time", execution_time_, (double)10);
+    private_node_handle.param("/vision_darknet_detect/relative_deadline", relative_deadline_, (double)10);
+    private_node_handle.param("/vision_darknet_detect/gpu_scheduling_flag", main_gpu_scheduling_flag_, 0);
+    private_node_handle.param<std::string>("/vision_darknet_detect/gpu_execution_time_filename", gpu_execution_time_filename_, "/home/hypark/Documents/gpu_profiling/test_vision_darknet_detect_execution_time.csv");
+    private_node_handle.param<std::string>("/vision_darknet_detect/gpu_response_time_filename", gpu_response_time_filename_, "/home/hypark/Documents/gpu_profiling/test_vision_darknet_detect_response_time.csv");
+    private_node_handle.param<std::string>("/vision_darknet_detect/gpu_deadline_filename", gpu_deadline_filename_, "/home/hypark/Documents/gpu_deadline/vision_darknet_detect_gpu_deadline.csv");
+    private_node_handle.param<std::string>("/vision_darknet_detect/gpu_remain_time_filename", gpu_remain_time_filename_, "/home/hypark/Documents/gpu_profiling/test_vision_darknet_detect_remain_time.csv");
+    private_node_handle.param<int>("/vision_darknet_detect/gpu_identical_deadline", gpu_identical_deadline_, 0);
+
+    std::cout<<"scheduling_flag:"<<scheduling_flag_<<std::endl;
+    std::cout<<"profiling_flag_:"<<profiling_flag_<<std::endl;
+    std::cout<<"response_time_filename_:"<<response_time_filename_<<std::endl;
+    std::cout<<"rate_:"<<rate_<<std::endl;
+    std::cout<<"minimum_inter_release_time_:"<<minimum_inter_release_time_<<std::endl;
+    std::cout<<"execution_time_:"<<execution_time_<<std::endl;
+    std::cout<<"relative_deadline_:"<<relative_deadline_<<std::endl;
+    std::cout<<"main_gpu_scheduling_flag_:"<<main_gpu_scheduling_flag_<<std::endl;
+    std::cout<<"gpu_execution_time_filename_:"<<gpu_execution_time_filename_<<std::endl;
+    std::cout<<"gpu_response_time_filename_:"<<gpu_response_time_filename_<<std::endl;
+    std::cout<<"gpu_deadline_filename_:"<<gpu_deadline_filename_<<std::endl;
+    std::cout<<"gpu_remain_time_filename_:"<<gpu_remain_time_filename_<<std::endl;
+    std::cout<<"gpu_identical_deadline_:"<<gpu_identical_deadline_<<std::endl;
+
+    set_identical_deadline((unsigned long long)gpu_identical_deadline_);
     //private_node_handle.getParam("profiling_file_name", _profiling_file_name);
     // fprintf(stderr,"%s\n", _profiling_file_name.c_str());
-    initialize_file(_execution_time_file_name.c_str(), _response_time_file_name.c_str(), _remain_time_file_name.c_str());    
+    initialize_file(gpu_execution_time_filename_.c_str(), gpu_response_time_filename_.c_str(), gpu_remain_time_filename_.c_str());    
     
     int key_id = 2;    
-    set_gpu_scheduling_flag(gpu_scheduling_flag);
-    init_scheduling("/tmp/yolo", _deadline_file_name.c_str(),key_id);
+    set_gpu_scheduling_flag(main_gpu_scheduling_flag_);
+    init_scheduling("/tmp/yolo", gpu_deadline_filename_.c_str(),key_id);
 
     
     //RECEIVE IMAGE TOPIC NAME
@@ -375,7 +412,7 @@ void Yolo3DetectorNode::Run()
 
     std::string network_definition_file;
     std::string pretrained_model_file, names_file;
-    if (private_node_handle.getParam("network_definition_file", network_definition_file))
+    if (private_node_handle.getParam("/vision_darknet_detect/network_definition_file", network_definition_file))
     {
         ROS_INFO("Network Definition File (Config): %s", network_definition_file.c_str());
     }
@@ -384,7 +421,7 @@ void Yolo3DetectorNode::Run()
         ROS_INFO("No Network Definition File was received. Finishing execution.");
         return;
     }
-    if (private_node_handle.getParam("pretrained_model_file", pretrained_model_file))
+    if (private_node_handle.getParam("/vision_darknet_detect/pretrained_model_file", pretrained_model_file))
     {
         ROS_INFO("Pretrained Model File (Weights): %s", pretrained_model_file.c_str());
     }
@@ -433,32 +470,42 @@ void Yolo3DetectorNode::Run()
 
     ROS_INFO_STREAM( __APP_NAME__ << "" );
 
-    #ifndef SPIN_PROFILING
-    ros::spin();
-    #endif
-    #ifdef SPIN_PROFILING
-    #ifdef __aarch64__
-    std::string print_file_path("/home/nvidia/Documents/spin_profiling/vision_darknet_detect.csv");
-    #endif
-    #ifndef __aarch64__
-    std::string print_file_path("/home/hypark/Documents/spin_profiling/vision_darknet_detect.csv");
-    #endif
-    FILE *fp;
-    fp = fopen(print_file_path.c_str(), "a");
-    ros::Rate r(10);
+    // SPIN
+    if(!scheduling_flag_ && !profiling_flag_){
+        ros::spin();
+    }
+    else{
+        FILE *fp;
+        if(profiling_flag_){      
+            fp = fopen(response_time_filename_.c_str(), "a");
+        }
 
-    while(ros::ok()){
+        ros::Rate r(rate_);
         struct timespec start_time, end_time;
-        clock_gettime(CLOCK_MONOTONIC, &start_time);
-        rubis::sched::set_sched_deadline(gettid(), static_cast<uint64_t>(1000000000), static_cast<uint64_t>(1000000000), static_cast<uint64_t>(1000000000));
-        ros::spinOnce();
-        clock_gettime(CLOCK_MONOTONIC, &end_time);
-        fprintf(fp, "%lld.%.9ld,%lld.%.9ld,%d\n",start_time.tv_sec,start_time.tv_nsec,end_time.tv_sec,end_time.tv_nsec,getpid());    
-        fflush(fp);
-        r.sleep();
-    }  
-    fclose(fp);  
-    #endif
+        while(ros::ok()){
+            if(profiling_flag_){        
+                clock_gettime(CLOCK_MONOTONIC, &start_time);
+            }
+            if(scheduling_flag_){
+                rubis::sched::set_sched_deadline(gettid(), 
+                static_cast<uint64_t>(execution_time_), 
+                static_cast<uint64_t>(relative_deadline_), 
+                static_cast<uint64_t>(minimum_inter_release_time_)
+                );
+            }      
+
+            ros::spinOnce();
+
+            if(profiling_flag_){
+                clock_gettime(CLOCK_MONOTONIC, &end_time);
+                fprintf(fp, "%lld.%.9ld,%lld.%.9ld,%d\n",start_time.tv_sec,start_time.tv_nsec,end_time.tv_sec,end_time.tv_nsec,getpid());    
+                fflush(fp);
+            }
+
+            r.sleep();
+        }  
+        fclose(fp);
+    }
     close_file();
     ROS_INFO("END Yolo");
 

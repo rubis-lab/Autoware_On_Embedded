@@ -1,4 +1,9 @@
 <launch>
+  <!--  Dynamic Pure Pursuit Param -->
+  <rosparam command="load" file="/home/hypark/autoware.ai/autoware_files/lgsvl_file/parameter/lgsvl_pure_pursuit.yaml" />
+
+  <rosparam command="load" file="/home/hypark/autoware.ai/autoware_files/data/yaml/hypark_scheduling_params.yaml" />
+  
   <!-- pure_pursuit  -->
   <include file="$(find pure_pursuit)/launch/pure_pursuit.launch">    
     <!-- Core Parameter -->
@@ -10,7 +15,6 @@
     <arg name="is_linear_interpolation"       value="True"/>
     <arg name="publishes_for_steering_robot"  value="True"/>
     <arg name="add_virtual_end_waypoints"     value="False"/>
-    <arg name="dynamic_params_path"           value="$(env HOME)/autoware.ai/autoware_files/lgsvl_file/parameter/lgsvl_pure_pursuit.yaml" />
   </include>
 
   <!-- twist_filter -->
