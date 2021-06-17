@@ -27,13 +27,13 @@ voxel_grid_filter:
   relative_deadline: 100000000
 
 ndt_matching:
-  scheduling_flag: 1
+  scheduling_flag: 0
   profiling_flag: 0
   response_time_filename: "/home/hypark/Documents/profiling/response_time/ndt_matching.csv"
   rate: 10
   minimum_inter_release_time: 100000000
-  execution_time: 100000000
-  relative_deadline: 100000000  
+  execution_time: 70000000
+  relative_deadline: 100000000
   gpu_scheduling_flag: 0
   gpu_execution_time_filename: "/home/hypark/Documents/gpu_profiling/test_ndt_matching_execution_time.csv"
   gpu_response_time_filename: "/home/hypark/Documents/gpu_profiling/test_ndt_matching_response_time.csv"

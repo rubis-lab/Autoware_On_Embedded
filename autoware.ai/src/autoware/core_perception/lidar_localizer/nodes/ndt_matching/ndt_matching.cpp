@@ -921,9 +921,11 @@ static void imu_callback(const sensor_msgs::Imu::Ptr& input)
 }
 
 static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
-{  
-  start_profiling_cpu_time();
-  set_absolute_deadline();
+{ 
+  if (_method_type == MethodType::PCL_ANH_GPU){
+    start_profiling_cpu_time();
+    set_absolute_deadline();
+  }
 
   // Check inital matching is success or not
   if(_is_init_match_finished == false && previous_score < USING_GPS_THRESHOLD && previous_score != 0.0)
@@ -1512,8 +1514,10 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
     previous_estimated_vel_kmph.data = estimated_vel_kmph.data;
   }
   
-  stop_cpu_profiling();
-  write_dummy_line();
+  if (_method_type == MethodType::PCL_ANH_GPU){
+    stop_cpu_profiling();
+    write_dummy_line();
+  }
 }
 
 void* thread_func(void* args)
