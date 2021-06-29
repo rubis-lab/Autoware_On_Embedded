@@ -1,5 +1,5 @@
-# hjw-Autoware
-My Little Autoware
+# Autoware On Embedded
+Autoware system for embedded boards
 
 ## Environment
 
