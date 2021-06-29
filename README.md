@@ -1,5 +1,5 @@
-# hjw-Autoware
-My Little Autoware
+# Autoware On Embedded
+Autoware system for embedded boards
 
 ## Environment
 
@@ -100,3 +100,6 @@ pip3 install --user .
 sudo chomod 755 {TARGET_SCRIPTS}
 ./{TARGET_SCRIPTS}
 ```
+
+---
+### Created by spiraline

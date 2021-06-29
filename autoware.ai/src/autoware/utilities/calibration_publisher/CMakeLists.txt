@@ -13,12 +13,14 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 find_package(OpenCV REQUIRED)
+find_package(yaml-cpp REQUIRED)
 
 catkin_package()
 
 include_directories(
   ${catkin_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
+  ${YAML_CPP_INCLUDE_DIRS}
 )
 
 add_executable(calibration_publisher
@@ -32,6 +34,7 @@ add_dependencies(calibration_publisher
 target_link_libraries(calibration_publisher
   ${catkin_LIBRARIES}
   ${OpenCV_LIBS}
+  ${YAML_CPP_LIBRARIES}
 )
 
 install(TARGETS calibration_publisher
