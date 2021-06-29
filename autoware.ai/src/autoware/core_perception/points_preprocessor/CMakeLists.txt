@@ -22,6 +22,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf2_eigen
   tf2_ros
   velodyne_pointcloud
+  rubis_sched
 )
 
 catkin_package()
@@ -49,7 +50,6 @@ link_directories(${YAML_CPP_LIBRARY_DIRS})
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
-  $ENV{HOME}/autoware.ai/src/rubis/rubis_sched/include
 )
 
 SET(CMAKE_CXX_FLAGS "-O2 -g -Wall ${CMAKE_CXX_FLAGS}")

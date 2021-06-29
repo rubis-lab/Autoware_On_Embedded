@@ -16,4 +16,5 @@
   <depend>roscpp</depend>
   <depend>roslint</depend>
   <depend>std_msgs</depend>
+  <depend>rubis_sched</depend>
 </package>

@@ -24,6 +24,7 @@ find_package(
     sensor_msgs
     tf
     vector_map_msgs
+    rubis_sched
 )
 
 find_package(PkgConfig REQUIRED)
@@ -39,7 +40,6 @@ include_directories(
   include
   ${catkin_INCLUDE_DIRS}
   ${YAML_CPP_INCLUDE_DIRS}
-  $ENV{HOME}/autoware.ai/src/rubis/rubis_sched/include
 )
 
 link_directories(lib)

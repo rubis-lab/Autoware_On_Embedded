@@ -21,6 +21,7 @@ find_package(
     std_msgs
     tf
     tf2
+    rubis_sched
 )
 
 catkin_package(
@@ -35,7 +36,6 @@ roslint_cpp()
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
-  $ENV{HOME}/autoware.ai/src/rubis/rubis_sched/include
 )
 
 add_executable(

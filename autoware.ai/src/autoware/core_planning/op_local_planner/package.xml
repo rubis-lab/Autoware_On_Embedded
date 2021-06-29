@@ -25,5 +25,5 @@
   <depend>std_msgs</depend>
   <depend>libwaypoint_follower</depend>
   <depend>yaml-cpp</depend>
-
+  <depend>rubis_sched</depend>
 </package>

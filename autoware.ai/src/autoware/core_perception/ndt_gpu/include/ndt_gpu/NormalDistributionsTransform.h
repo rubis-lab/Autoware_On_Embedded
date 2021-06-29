@@ -7,7 +7,9 @@
 #include "common.h"
 #include "VoxelGrid.h"
 #include "Eigen/Geometry"
+#include "rubis_sched/sched.hpp"
 
+using namespace rubis;
 
 namespace gpu {
 

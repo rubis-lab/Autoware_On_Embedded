@@ -4,6 +4,8 @@
 #include <iostream>
 #include <pcl/common/transforms.h>
 
+using namespace rubis::sched;
+
 namespace gpu {
 
 GNormalDistributionsTransform::GNormalDistributionsTransform()
@@ -145,19 +147,11 @@ void GNormalDistributionsTransform::setInputTarget(pcl::PointCloud<pcl::PointXYZ
 void GNormalDistributionsTransform::computeTransformation(const Eigen::Matrix<float, 4, 4> &guess)
 {
 	if (dj_ang_.isEmpty()) {
-		stop_cpu_profiling();
-		request_scheduling(21);
 		dj_ang_.memAlloc();
-		stop_profiling(21, HTOD);
-  		start_profiling_cpu_time();
 	}
 
 	if (dh_ang_.isEmpty()) {
-		stop_cpu_profiling();
-		request_scheduling(22);
 		dh_ang_.memAlloc();
-		stop_profiling(22, HTOD);
-  		start_profiling_cpu_time();
 	}
 	
 	nr_iterations_ = 0;
@@ -779,11 +773,7 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 
 	valid_points = voxel_id = starting_voxel_id = NULL;
 
-	// stop_cpu_profiling();
-	// request_scheduling(27);
 	voxel_grid_.radiusSearch(trans_x, trans_y, trans_z, points_num, resolution_, INT_MAX, &valid_points, &starting_voxel_id, &voxel_id, &valid_voxel_num, &valid_points_num);
-	// stop_profiling(27, LAUNCH);
-  	// start_profiling_cpu_time();
 
 	double *covariance = voxel_grid_.getCovarianceList();
 	double *inverse_covariance = voxel_grid_.getInverseCovarianceList();
@@ -798,59 +788,23 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 
 	double *gradients, *hessians, *point_gradients, *point_hessians, *score;
 
-	stop_cpu_profiling();
-	request_scheduling(28);
 	checkCudaErrors(cudaMalloc(&gradients, sizeof(double) * valid_points_num * 6));
-	stop_profiling(28, HTOD);
-  	start_profiling_cpu_time();
 
-	stop_cpu_profiling();
-	request_scheduling(29);
 	checkCudaErrors(cudaMalloc(&hessians, sizeof(double) * valid_points_num * 6 * 6));
-	stop_profiling(29, HTOD);
-  	start_profiling_cpu_time();
 
-	stop_cpu_profiling();
-	request_scheduling(30);
 	checkCudaErrors(cudaMalloc(&point_gradients, sizeof(double) * valid_points_num * 3 * 6));
-	stop_profiling(30, HTOD);
-  	start_profiling_cpu_time();
 
-	stop_cpu_profiling();
-	request_scheduling(31);
 	checkCudaErrors(cudaMalloc(&point_hessians, sizeof(double) * valid_points_num * 18 * 6));
-	stop_profiling(31, HTOD);
-  	start_profiling_cpu_time();
 
-	stop_cpu_profiling();
-	request_scheduling(32);
 	checkCudaErrors(cudaMalloc(&score, sizeof(double) * valid_points_num));
-	stop_profiling(32, HTOD);
-  	start_profiling_cpu_time();
 
-	stop_cpu_profiling();
-	request_scheduling(33);
 	checkCudaErrors(cudaMemset(gradients, 0, sizeof(double) * valid_points_num * 6));
-	stop_profiling(33, HTOD);
-  	start_profiling_cpu_time();
 
-	stop_cpu_profiling();
-	request_scheduling(34);
 	checkCudaErrors(cudaMemset(hessians, 0, sizeof(double) * valid_points_num * 6 * 6));
-	stop_profiling(34, HTOD);
-  	start_profiling_cpu_time();
 
-	stop_cpu_profiling();
-	request_scheduling(35);
 	checkCudaErrors(cudaMemset(point_gradients, 0, sizeof(double) * valid_points_num * 3 * 6));
-	stop_profiling(35, HTOD);
-  	start_profiling_cpu_time();
 
-	stop_cpu_profiling();
-	request_scheduling(36);
 	checkCudaErrors(cudaMemset(point_hessians, 0, sizeof(double) * valid_points_num * 18 * 6));
-	stop_profiling(36, HTOD);
-  	start_profiling_cpu_time();
 
 	int block_x = (valid_points_num > BLOCK_SIZE_X) ? BLOCK_SIZE_X : valid_points_num;
 
@@ -859,8 +813,6 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 	dim3 grid;
 
 
-	stop_cpu_profiling();
-	request_scheduling(37);
 	computePointGradients0<<<grid_x, block_x>>>(x_, y_, z_, points_number_,
 												valid_points, valid_points_num,
 												dj_ang_.buffer(),
@@ -872,12 +824,8 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 												point_gradients + valid_points_num * 4,
 												point_gradients + valid_points_num * 10);
 	
-	stop_profiling(37, LAUNCH);
-  	start_profiling_cpu_time();
 	checkCudaErrors(cudaGetLastError());
 	
-	stop_cpu_profiling();
-	request_scheduling(38);
 	computePointGradients1<<<grid_x, block_x>>>(x_, y_, z_, points_number_,
 												valid_points, valid_points_num,
 												dj_ang_.buffer(),
@@ -885,13 +833,9 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 												point_gradients + valid_points_num * 5,
 												point_gradients + valid_points_num * 11,
 												point_gradients + valid_points_num * 17);
-	stop_profiling(38, LAUNCH);
-  	start_profiling_cpu_time();
 	checkCudaErrors(cudaGetLastError());
 
 	if (compute_hessian) {
-		stop_cpu_profiling();
-		request_scheduling(39);
 		computePointHessian0<<<grid_x, block_x>>>(x_, y_, z_, points_number_,
 												valid_points, valid_points_num,
 												dh_ang_.buffer(),
@@ -902,31 +846,21 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 												point_hessians + valid_points_num * 93, point_hessians + valid_points_num * 59, point_hessians + valid_points_num * 99,
 												point_hessians + valid_points_num * 65, point_hessians + valid_points_num * 105, point_hessians + valid_points_num * 71);
 
-		stop_profiling(39, LAUNCH);
-		start_profiling_cpu_time();
 		checkCudaErrors(cudaGetLastError());
 
 
-		stop_cpu_profiling();
-		request_scheduling(40);
 		computePointHessian1<<<grid_x, block_x>>>(x_, y_, z_, points_number_,
 												valid_points, valid_points_num,
 												dh_ang_.buffer(),
 												point_hessians + valid_points_num * 76, point_hessians + valid_points_num * 82, point_hessians + valid_points_num * 88,
 												point_hessians + valid_points_num * 94, point_hessians + valid_points_num * 77, point_hessians + valid_points_num * 100,
 												point_hessians + valid_points_num * 83, point_hessians + valid_points_num * 106, point_hessians + valid_points_num * 89);
-		stop_profiling(40, LAUNCH);
-		start_profiling_cpu_time();
 		checkCudaErrors(cudaGetLastError());
 
-		stop_cpu_profiling();
-		request_scheduling(41);
 		computePointHessian2<<<grid_x, block_x>>>(x_, y_, z_, points_number_,
 												valid_points, valid_points_num,
 												dh_ang_.buffer(),
 												point_hessians + valid_points_num * 95, point_hessians + valid_points_num * 101, point_hessians + valid_points_num * 107);
-		stop_profiling(41, LAUNCH);
-		start_profiling_cpu_time();
 		checkCudaErrors(cudaGetLastError());
 
 	}
@@ -935,28 +869,14 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 
 
 	double *tmp_hessian;
-	stop_cpu_profiling();
-	request_scheduling(42);
 	checkCudaErrors(cudaMalloc(&tmp_hessian, sizeof(double) * valid_voxel_num * 6));
-	stop_profiling(42, HTOD);
-	start_profiling_cpu_time();
 	
 	double *e_x_cov_x;
-	stop_cpu_profiling();
-	request_scheduling(43);
 	checkCudaErrors(cudaMalloc(&e_x_cov_x, sizeof(double) * valid_voxel_num));
-	stop_profiling(43, HTOD);
-	start_profiling_cpu_time();
 
 	double *cov_dxd_pi;
-	stop_cpu_profiling();
-	request_scheduling(44);
 	checkCudaErrors(cudaMalloc(&cov_dxd_pi, sizeof(double) * valid_voxel_num * 3 * 6));
-	stop_profiling(44, HTOD);
-	start_profiling_cpu_time();
 
-	stop_cpu_profiling();
-	request_scheduling(45);
 	computeExCovX<<<grid_x, block_x>>>(trans_x, trans_y, trans_z, valid_points,
 										starting_voxel_id, voxel_id, valid_points_num,
 										centroid, centroid + voxel_num, centroid + 2 * voxel_num,
@@ -965,54 +885,36 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 										inverse_covariance, inverse_covariance + voxel_num, inverse_covariance + 2 * voxel_num,
 										inverse_covariance + 3 * voxel_num, inverse_covariance + 4 * voxel_num, inverse_covariance + 5 * voxel_num,
 										inverse_covariance + 6 * voxel_num, inverse_covariance + 7 * voxel_num, inverse_covariance + 8 * voxel_num);
-	stop_profiling(45, LAUNCH);
-	start_profiling_cpu_time();
 	checkCudaErrors(cudaGetLastError());
 
-	stop_cpu_profiling();
-	request_scheduling(46);
 	computeScoreList<<<grid_x, block_x>>>(starting_voxel_id, voxel_id, valid_points_num, e_x_cov_x, gauss_d1_, score);
-	stop_profiling(46, HTOD);
-	start_profiling_cpu_time();
 	checkCudaErrors(cudaGetLastError());
 
 	int block_x2 = (valid_voxel_num > BLOCK_SIZE_X) ? BLOCK_SIZE_X : valid_voxel_num;
 	int grid_x2 = (valid_voxel_num - 1) / block_x2 + 1;
 
-	stop_cpu_profiling();
-	request_scheduling(47);
 	updateExCovX<<<grid_x2, block_x2>>>(e_x_cov_x, gauss_d2_, valid_voxel_num);
-	stop_profiling(47, LAUNCH);
-	start_profiling_cpu_time();
 	checkCudaErrors(cudaGetLastError());
 
 	grid.x = grid_x;
 	grid.y = 3;
 	grid.z = 6;
 
-	stop_cpu_profiling();
-	request_scheduling(48);
 	computeCovDxdPi<<<grid, block_x>>>(valid_points, starting_voxel_id, voxel_id, valid_points_num,
 											inverse_covariance, voxel_num,
 											gauss_d1_, gauss_d2_, point_gradients,
 											cov_dxd_pi, valid_voxel_num);
-	stop_profiling(48, LAUNCH);
-	start_profiling_cpu_time();
 	checkCudaErrors(cudaGetLastError());
 
 	grid.x = grid_x;
 	grid.y = 6;
 	grid.z = 1;
 
-	stop_cpu_profiling();
-	request_scheduling(49);
 	computeScoreGradientList<<<grid, block_x>>>(trans_x, trans_y, trans_z, valid_points,
 													starting_voxel_id, voxel_id, valid_points_num,
 													centroid, centroid + voxel_num, centroid + 2 * voxel_num,
 													voxel_num, e_x_cov_x,
 													cov_dxd_pi, gauss_d1_, valid_voxel_num, gradients);
-	stop_profiling(49, LAUNCH);
-	start_profiling_cpu_time();
 	checkCudaErrors(cudaGetLastError());
 
 	if (compute_hessian) {
@@ -1020,8 +922,6 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 		grid.y = 6;
 		grid.z = 1;
 
-		stop_cpu_profiling();
-		request_scheduling(50);
 		computeHessianListS0<<<grid, block_x>>>(trans_x, trans_y, trans_z, valid_points,
 												starting_voxel_id, voxel_id, valid_points_num,
 												centroid, centroid + voxel_num, centroid + 2 * voxel_num,
@@ -1030,13 +930,9 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 												inverse_covariance + 6 * voxel_num, inverse_covariance + 7 * voxel_num, inverse_covariance + 8 * voxel_num,
 												point_gradients,
 												tmp_hessian, valid_voxel_num);
-		stop_profiling(50, LAUNCH);
-		start_profiling_cpu_time();
 		checkCudaErrors(cudaGetLastError());
 		grid.z = 6;
 
-		stop_cpu_profiling();
-		request_scheduling(51);
 		computeHessianListS1<<<grid, block_x>>>(trans_x, trans_y, trans_z, valid_points,
 													starting_voxel_id, voxel_id, valid_points_num,
 													centroid, centroid + voxel_num, centroid + 2 * voxel_num,
@@ -1044,13 +940,9 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 													e_x_cov_x, tmp_hessian, cov_dxd_pi,
 													point_gradients,
 													valid_voxel_num);
-		stop_profiling(51, LAUNCH);
-		start_profiling_cpu_time();
 		checkCudaErrors(cudaGetLastError());
 
 
-		stop_cpu_profiling();
-		request_scheduling(52);
 		computeHessianListS2<<<grid, block_x>>>(trans_x, trans_y, trans_z, valid_points,
 													starting_voxel_id, voxel_id, valid_points_num,
 													centroid, centroid + voxel_num, centroid + 2 * voxel_num,
@@ -1059,8 +951,6 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 													inverse_covariance + 3 * voxel_num, inverse_covariance + 4 * voxel_num, inverse_covariance + 5 * voxel_num,
 													inverse_covariance + 6 * voxel_num, inverse_covariance + 7 * voxel_num, inverse_covariance + 8 * voxel_num,
 													point_hessians, hessians, valid_voxel_num);
-		stop_profiling(52, LAUNCH);
-		start_profiling_cpu_time();
 		checkCudaErrors(cudaGetLastError());
 
 	}
@@ -1075,26 +965,14 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 		grid.x = grid_x;
 		grid.y = 1;
 		grid.z = 6;
-		stop_cpu_profiling();
-		request_scheduling(53);
 		matrixSum<<<grid, block_x>>>(gradients, full_size, half_size, 1, 6, valid_points_num);
-		stop_profiling(53, LAUNCH);
-		start_profiling_cpu_time();
 		checkCudaErrors(cudaGetLastError());
 
 		grid.y = 6;
-		stop_cpu_profiling();
-		request_scheduling(54);
 		matrixSum<<<grid, block_x>>>(hessians, full_size, half_size, 6, 6, valid_points_num);
-		stop_profiling(54, LAUNCH);
-		start_profiling_cpu_time();
 		checkCudaErrors(cudaGetLastError());
 
-		stop_cpu_profiling();
-		request_scheduling(55);
 		sumScore<<<grid_x, block_x>>>(score, full_size, half_size);
-		stop_profiling(55, LAUNCH);
-		start_profiling_cpu_time();
 		checkCudaErrors(cudaGetLastError());
 
 		full_size = half_size;
@@ -1106,17 +984,9 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 	MatrixDevice dgrad(1, 6, valid_points_num, gradients), dhess(6, 6, valid_points_num, hessians);
 	MatrixHost hgrad(1, 6), hhess(6, 6);
 
-	stop_cpu_profiling();
-	request_scheduling(56);
 	hgrad.moveToHost(dgrad);
-	stop_profiling(56, DTOH);
-	start_profiling_cpu_time();
 
-	stop_cpu_profiling();
-	request_scheduling(57);
 	hhess.moveToHost(dhess);
-	stop_profiling(57, DTOH);
-	start_profiling_cpu_time();
 
 	for (int i = 0; i < 6; i++) {
 		score_gradient(i) = hgrad(i);
@@ -1130,15 +1000,9 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 
 	double score_inc;
 
-	stop_cpu_profiling();
-	request_scheduling(58);
 	checkCudaErrors(cudaMemcpy(&score_inc, score, sizeof(double), cudaMemcpyDeviceToHost));
-	stop_profiling(58, DTOH);
-	start_profiling_cpu_time();
 	
 
-	stop_cpu_profiling();
-	request_scheduling(59);
 	checkCudaErrors(cudaFree(gradients));
 	checkCudaErrors(cudaFree(hessians));
 	checkCudaErrors(cudaFree(point_hessians));
@@ -1147,31 +1011,17 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 	checkCudaErrors(cudaFree(tmp_hessian));
 	checkCudaErrors(cudaFree(e_x_cov_x));
 	checkCudaErrors(cudaFree(cov_dxd_pi));
-	stop_profiling(59, DTOH);
-	start_profiling_cpu_time();
 
 	if (valid_points != NULL){
-		stop_cpu_profiling();
-		request_scheduling(60);
 		checkCudaErrors(cudaFree(valid_points));
-		stop_profiling(60, DTOH);
-		start_profiling_cpu_time();
 	}
 
 	if (voxel_id != NULL){
-		stop_cpu_profiling();
-		request_scheduling(61);
 		checkCudaErrors(cudaFree(voxel_id));
-		stop_profiling(61, DTOH);
-		start_profiling_cpu_time();
 	}
 
 	if (starting_voxel_id != NULL){
-		stop_cpu_profiling();
-		request_scheduling(62);
 		checkCudaErrors(cudaFree(starting_voxel_id));
-		stop_profiling(62, DTOH);
-		start_profiling_cpu_time();
 	}
 
 
@@ -1340,67 +1190,27 @@ void GNormalDistributionsTransform::transformPointCloud(float *in_x, float *in_y
 	MatrixDevice dtrans(3, 4);
 
 
-	#ifndef SLICING
-	stop_cpu_profiling();
-	request_scheduling(23);	
 	dtrans.memAlloc();
-	stop_profiling(23, HTOD);
-  	start_profiling_cpu_time();
-	#endif
-
-	#ifdef SLICING
-	stop_cpu_profiling();
-	request_scheduling(23);	
-	dtrans.memAlloc_free();
-	stop_profiling(23, HTOD);
-  	start_profiling_cpu_time();
-
-	stop_cpu_profiling();
-	request_scheduling(23);	
-	dtrans.memAlloc_malloc();
-	stop_profiling(23, HTOD);
-	start_profiling_cpu_time();
-
-	stop_cpu_profiling();
-	request_scheduling(23);	
-	dtrans.memAlloc_memset();
-	stop_profiling(23, HTOD);
-  	start_profiling_cpu_time();
-	checkCudaErrors(cudaDeviceSynchronize());
-	#endif
 
 	for (int i = 0; i < 3; i++) {
 		for (int j = 0; j < 4; j++) {
 			htrans(i, j) = t(i, j);
 		}
 	}
-	stop_cpu_profiling();
-	request_scheduling(24);
 	htrans.moveToGpu(dtrans);
-	stop_profiling(24, HTOD);
-  	start_profiling_cpu_time();
 
 	if (points_number > 0) {
 		int block_x = (points_number <= BLOCK_SIZE_X) ? points_number : BLOCK_SIZE_X;
 		int grid_x = (points_number - 1) / block_x + 1;
 		
-		stop_cpu_profiling();
-		request_scheduling(25);
 		gpuTransform<<<grid_x, block_x >>>(in_x, in_y, in_z, trans_x, trans_y, trans_z, points_number, dtrans);
-		stop_profiling(25, LAUNCH);
-  		start_profiling_cpu_time();
-		
 		
 		checkCudaErrors(cudaGetLastError());
 		checkCudaErrors(cudaDeviceSynchronize());
 
 	}
 
-	stop_cpu_profiling();
-	request_scheduling(26);
 	dtrans.memFree();
-	stop_profiling(26, HTOD);
-  	start_profiling_cpu_time();
 }
 
 double GNormalDistributionsTransform::computeStepLengthMT(const Eigen::Matrix<double, 6, 1> &x, Eigen::Matrix<double, 6, 1> &step_dir,
@@ -1648,48 +1458,22 @@ void GNormalDistributionsTransform::computeHessian(Eigen::Matrix<double, 6, 6> &
 	//Update score gradient and hessian matrix
 	double *hessians, *point_gradients, *point_hessians;
 	
-	stop_cpu_profiling();
-	request_scheduling(63);
 	checkCudaErrors(cudaMalloc(&hessians, sizeof(double) * valid_points_num * 6 * 6));
-	stop_profiling(63, HTOD);
-	start_profiling_cpu_time();
 	
-	stop_cpu_profiling();
-	request_scheduling(64);
 	checkCudaErrors(cudaMalloc(&point_gradients, sizeof(double) * valid_points_num * 3 * 6));
-	stop_profiling(64, HTOD);
-	start_profiling_cpu_time();
 
-	stop_cpu_profiling();
-	request_scheduling(65);
 	checkCudaErrors(cudaMalloc(&point_hessians, sizeof(double) * valid_points_num * 18 * 6));
-	stop_profiling(65, HTOD);
-	start_profiling_cpu_time();
 
-	stop_cpu_profiling();
-	request_scheduling(66);
 	checkCudaErrors(cudaMemset(hessians, 0, sizeof(double) * valid_points_num * 6 * 6));
-	stop_profiling(66, HTOD);
-	start_profiling_cpu_time();
 
-	stop_cpu_profiling();
-	request_scheduling(67);
 	checkCudaErrors(cudaMemset(point_gradients, 0, sizeof(double) * valid_points_num * 3 * 6));		
-	stop_profiling(67, HTOD);
-	start_profiling_cpu_time();
 
-	stop_cpu_profiling();
-	request_scheduling(68);
 	checkCudaErrors(cudaMemset(point_hessians, 0, sizeof(double) * valid_points_num * 18 * 6));
-	stop_profiling(68, HTOD);
-	start_profiling_cpu_time();
 
 	int block_x = (valid_points_num > BLOCK_SIZE_X) ? BLOCK_SIZE_X : valid_points_num;
 	int grid_x = (valid_points_num - 1) / block_x + 1;
 	dim3 grid;
 
-	stop_cpu_profiling();
-	request_scheduling(69);
 	computePointGradients0<<<grid_x, block_x>>>(x_, y_, z_, points_number_,
 												valid_points, valid_points_num,
 												dj_ang_.buffer(),
@@ -1700,12 +1484,8 @@ void GNormalDistributionsTransform::computeHessian(Eigen::Matrix<double, 6, 6> &
 												point_gradients + valid_points_num * 15,
 												point_gradients + valid_points_num * 4,
 												point_gradients + valid_points_num * 10);
-	stop_profiling(69, LAUNCH);
-	start_profiling_cpu_time();
 	checkCudaErrors(cudaGetLastError());
 
-	stop_cpu_profiling();
-	request_scheduling(70);
 	computePointGradients1<<<grid_x, block_x>>>(x_, y_, z_, points_number_,
 												valid_points, valid_points_num,
 												dj_ang_.buffer(),
@@ -1713,12 +1493,8 @@ void GNormalDistributionsTransform::computeHessian(Eigen::Matrix<double, 6, 6> &
 												point_gradients + valid_points_num * 5,
 												point_gradients + valid_points_num * 11,
 												point_gradients + valid_points_num * 17);
-	stop_profiling(70, LAUNCH);
-	start_profiling_cpu_time();
 	checkCudaErrors(cudaGetLastError());
 
-	stop_cpu_profiling();
-	request_scheduling(71);
 	computePointHessian0<<<grid_x, block_x>>>(x_, y_, z_, points_number_,
 												valid_points, valid_points_num,
 												dh_ang_.buffer(),
@@ -1727,58 +1503,34 @@ void GNormalDistributionsTransform::computeHessian(Eigen::Matrix<double, 6, 6> &
 												point_hessians + valid_points_num * 64, point_hessians + valid_points_num * 87, point_hessians + valid_points_num * 70,
 												point_hessians + valid_points_num * 93, point_hessians + valid_points_num * 59, point_hessians + valid_points_num * 99,
 												point_hessians + valid_points_num * 65, point_hessians + valid_points_num * 105, point_hessians + valid_points_num * 71);
-	stop_profiling(71, LAUNCH);
-	start_profiling_cpu_time();
 	checkCudaErrors(cudaGetLastError());
 
-	stop_cpu_profiling();
-	request_scheduling(72);
 	computePointHessian1<<<grid_x, block_x>>>(x_, y_, z_, points_number_,
 												valid_points, valid_points_num,
 												dh_ang_.buffer(),
 												point_hessians + valid_points_num * 76, point_hessians + valid_points_num * 82, point_hessians + valid_points_num * 88,
 												point_hessians + valid_points_num * 94, point_hessians + valid_points_num * 77, point_hessians + valid_points_num * 100,
 												point_hessians + valid_points_num * 83, point_hessians + valid_points_num * 106, point_hessians + valid_points_num * 89);
-	stop_profiling(72, LAUNCH);
-	start_profiling_cpu_time();
 	checkCudaErrors(cudaGetLastError());
 
-	stop_cpu_profiling();
-	request_scheduling(73);
 	computePointHessian2<<<grid_x, block_x>>>(x_, y_, z_, points_number_,
 												valid_points, valid_points_num,
 												dh_ang_.buffer(),
 												point_hessians + valid_points_num * 95, point_hessians + valid_points_num * 101, point_hessians + valid_points_num * 107);
-	stop_profiling(73, LAUNCH);
-	start_profiling_cpu_time();
 	checkCudaErrors(cudaGetLastError());
 
 	double *tmp_hessian;
 
-	stop_cpu_profiling();
-	request_scheduling(74);
 	checkCudaErrors(cudaMalloc(&tmp_hessian, sizeof(double) * valid_voxel_num * 6));
-	stop_profiling(74, HTOD);
-	start_profiling_cpu_time();
 
 	double *e_x_cov_x;
 
-	stop_cpu_profiling();
-	request_scheduling(75);
 	checkCudaErrors(cudaMalloc(&e_x_cov_x, sizeof(double) * valid_voxel_num));
-	stop_profiling(75, HTOD);
-	start_profiling_cpu_time();
 
 	double *cov_dxd_pi;
 
-	stop_cpu_profiling();
-	request_scheduling(76);
 	checkCudaErrors(cudaMalloc(&cov_dxd_pi, sizeof(double) * valid_voxel_num * 3 * 6));
-	stop_profiling(76, HTOD);
-	start_profiling_cpu_time();
 
-	stop_cpu_profiling();
-	request_scheduling(77);
 	computeExCovX<<<grid_x, block_x>>>(trans_x, trans_y, trans_z, valid_points,
 										starting_voxel_id, voxel_id, valid_points_num,
 										centroid, centroid + voxel_num, centroid + 2 * voxel_num,
@@ -1787,39 +1539,27 @@ void GNormalDistributionsTransform::computeHessian(Eigen::Matrix<double, 6, 6> &
 										inverse_covariance, inverse_covariance + voxel_num, inverse_covariance + 2 * voxel_num,
 										inverse_covariance + 3 * voxel_num, inverse_covariance + 4 * voxel_num, inverse_covariance + 5 * voxel_num,
 										inverse_covariance + 6 * voxel_num, inverse_covariance + 7 * voxel_num, inverse_covariance + 8 * voxel_num);
-	stop_profiling(77, LAUNCH);
-	start_profiling_cpu_time();
 	checkCudaErrors(cudaGetLastError());
 
 	grid.x = grid_x;
 	grid.y = 3;
 	grid.z = 6;
 
-	stop_cpu_profiling();
-	request_scheduling(78);
 	computeCovDxdPi<<<grid, block_x>>>(valid_points, starting_voxel_id, voxel_id, valid_points_num,
 											inverse_covariance, voxel_num,
 											gauss_d1_, gauss_d2_, point_gradients,
 											cov_dxd_pi, valid_voxel_num);
-	stop_profiling(78, LAUNCH);
-	start_profiling_cpu_time();
 	checkCudaErrors(cudaGetLastError());
 
 	int block_x2 = (valid_voxel_num > BLOCK_SIZE_X) ? BLOCK_SIZE_X : valid_voxel_num;
 	int grid_x2 = (valid_voxel_num - 1) / block_x2 + 1;
 
-	stop_cpu_profiling();
-	request_scheduling(79);
 	updateExCovX<<<grid_x2, block_x2>>>(e_x_cov_x, gauss_d2_, valid_voxel_num);
-	stop_profiling(79, LAUNCH);
-	start_profiling_cpu_time();
 	checkCudaErrors(cudaGetLastError());
 
 	grid.y = 6;
 	grid.z = 1;
 
-	stop_cpu_profiling();
-	request_scheduling(80);
 	computeHessianListS0<<<grid, block_x>>>(trans_x, trans_y, trans_z, valid_points,
 												starting_voxel_id, voxel_id, valid_points_num,
 												centroid, centroid + voxel_num, centroid + 2 * voxel_num,
@@ -1829,14 +1569,10 @@ void GNormalDistributionsTransform::computeHessian(Eigen::Matrix<double, 6, 6> &
 												point_gradients,
 												tmp_hessian, valid_voxel_num);
 	
-	stop_profiling(80, LAUNCH);
-	start_profiling_cpu_time();
 	checkCudaErrors(cudaGetLastError());
 
 	grid.z = 6;
 
-	stop_cpu_profiling();
-	request_scheduling(81);
 	computeHessianListS1<<<grid, block_x>>>(trans_x, trans_y, trans_z, valid_points,
 												starting_voxel_id, voxel_id, valid_points_num,
 												centroid, centroid + voxel_num, centroid + 2 * voxel_num,
@@ -1844,12 +1580,8 @@ void GNormalDistributionsTransform::computeHessian(Eigen::Matrix<double, 6, 6> &
 												e_x_cov_x, tmp_hessian, cov_dxd_pi,
 												point_gradients,
 												valid_voxel_num);
-	stop_profiling(81, LAUNCH);
-	start_profiling_cpu_time();
 	checkCudaErrors(cudaGetLastError());
 
-	stop_cpu_profiling();
-	request_scheduling(82);
 	computeHessianListS2<<<grid, block_x>>>(trans_x, trans_y, trans_z, valid_points,
 												starting_voxel_id, voxel_id, valid_points_num,
 												centroid, centroid + voxel_num, centroid + 2 * voxel_num,
@@ -1858,8 +1590,6 @@ void GNormalDistributionsTransform::computeHessian(Eigen::Matrix<double, 6, 6> &
 												inverse_covariance + 3 * voxel_num, inverse_covariance + 4 * voxel_num, inverse_covariance + 5 * voxel_num,
 												inverse_covariance + 6 * voxel_num, inverse_covariance + 7 * voxel_num, inverse_covariance + 8 * voxel_num,
 												point_hessians, hessians, valid_voxel_num);
-	stop_profiling(82, LAUNCH);
-	start_profiling_cpu_time();
 	checkCudaErrors(cudaGetLastError());
 
 
@@ -1873,11 +1603,7 @@ void GNormalDistributionsTransform::computeHessian(Eigen::Matrix<double, 6, 6> &
 		grid.x = grid_x;
 		grid.y = 6;
 		grid.z = 6;
-		stop_cpu_profiling();
-		request_scheduling(83);
 		matrixSum<<<grid_x, block_x>>>(hessians, full_size, half_size, 6, 6, valid_points_num);
-		stop_profiling(83, LAUNCH);
-		start_profiling_cpu_time();
 
 		full_size = half_size;
 		half_size = (full_size - 1) / 2 + 1;
@@ -1888,11 +1614,7 @@ void GNormalDistributionsTransform::computeHessian(Eigen::Matrix<double, 6, 6> &
 	MatrixDevice dhessian(6, 6, valid_points_num, hessians);
 	MatrixHost hhessian(6, 6);
 
-	stop_cpu_profiling();
-	request_scheduling(84);
 	hhessian.moveToHost(dhessian);
-	stop_profiling(84, DTOH);
-	start_profiling_cpu_time();
 
 	for (int i = 0; i < 6; i++) {
 		for (int j = 0; j < 6; j++) {
@@ -1900,71 +1622,31 @@ void GNormalDistributionsTransform::computeHessian(Eigen::Matrix<double, 6, 6> &
 		}
 	}
 
-	stop_cpu_profiling();
-	request_scheduling(85);
 	checkCudaErrors(cudaFree(hessians));
-	stop_profiling(85, DTOH);
-	start_profiling_cpu_time();
 
-	stop_cpu_profiling();
-	request_scheduling(86);
 	checkCudaErrors(cudaFree(point_hessians));
-	stop_profiling(86, DTOH);
-	start_profiling_cpu_time();
 
-	stop_cpu_profiling();
-	request_scheduling(87);
 	checkCudaErrors(cudaFree(point_gradients));
-	stop_profiling(87, DTOH);
-	start_profiling_cpu_time();
 
-	stop_cpu_profiling();
-	request_scheduling(88);
 	checkCudaErrors(cudaFree(tmp_hessian));
-	stop_profiling(88, DTOH);
-	start_profiling_cpu_time();
 
-	stop_cpu_profiling();
-	request_scheduling(89);
 	checkCudaErrors(cudaFree(e_x_cov_x));
-	stop_profiling(89, DTOH);
-	start_profiling_cpu_time();
 
-	stop_cpu_profiling();
-	request_scheduling(90);
 	checkCudaErrors(cudaFree(cov_dxd_pi));
-	stop_profiling(90, DTOH);
-	start_profiling_cpu_time();
 
 	if (valid_points != NULL) {
-		stop_cpu_profiling();
-		request_scheduling(91);
 		checkCudaErrors(cudaFree(valid_points));
-		stop_profiling(91, DTOH);
-		start_profiling_cpu_time();
 	}
 
 	if (voxel_id != NULL) {
-		stop_cpu_profiling();
-		request_scheduling(92);
 		checkCudaErrors(cudaFree(voxel_id));
-		stop_profiling(92, DTOH);
-		start_profiling_cpu_time();
 	}
 
 	if (starting_voxel_id != NULL) {
-		stop_cpu_profiling();
-		request_scheduling(93);
 		checkCudaErrors(cudaFree(starting_voxel_id));
-		stop_profiling(93, DTOH);
-		start_profiling_cpu_time();
 	}
 
-	stop_cpu_profiling();
-	request_scheduling(94);
 	dhessian.memFree();
-	stop_profiling(94, DTOH);
-	start_profiling_cpu_time();
 }
 
 template <typename T>
@@ -1986,39 +1668,19 @@ double GNormalDistributionsTransform::getFitnessScore(double max_range)
 
 	float *trans_x, *trans_y, *trans_z;
 
-	stop_cpu_profiling();
-	request_scheduling(95);
 	checkCudaErrors(cudaMalloc(&trans_x, sizeof(float) * points_number_));
-	stop_profiling(95, HTOD);
-	start_profiling_cpu_time();
 
-	stop_cpu_profiling();
-	request_scheduling(96);
 	checkCudaErrors(cudaMalloc(&trans_y, sizeof(float) * points_number_));
-	stop_profiling(96, HTOD);
-	start_profiling_cpu_time();
 
-	stop_cpu_profiling();
-	request_scheduling(97);
 	checkCudaErrors(cudaMalloc(&trans_z, sizeof(float) * points_number_));
-	stop_profiling(97, HTOD);
-	start_profiling_cpu_time();
 
 	transformPointCloud(x_, y_, z_, trans_x, trans_y, trans_z, points_number_, final_transformation_);
 
 	int *valid_distance;
-	stop_cpu_profiling();
-	request_scheduling(98);
 	checkCudaErrors(cudaMalloc(&valid_distance, sizeof(int) * points_number_));
-	stop_profiling(98, HTOD);
-	start_profiling_cpu_time();
 
 	double *min_distance;
-	stop_cpu_profiling();
-	request_scheduling(99);
 	checkCudaErrors(cudaMalloc(&min_distance, sizeof(double) * points_number_));
-	stop_profiling(99, HTOD);
-	start_profiling_cpu_time();
 
 	voxel_grid_.nearestNeighborSearch(trans_x, trans_y, trans_z, points_number_, valid_distance, min_distance, max_range);
 
@@ -2031,18 +1693,10 @@ double GNormalDistributionsTransform::getFitnessScore(double max_range)
 		int block_x = (half_size > BLOCK_SIZE_X) ? BLOCK_SIZE_X : half_size;
 		int grid_x = (half_size - 1) / block_x + 1;
 
-		stop_cpu_profiling();
-		request_scheduling(100);
 		gpuSum<double><<<grid_x, block_x>>>(min_distance, size, half_size);
-		stop_profiling(100, HTOD);
-		start_profiling_cpu_time();
 		checkCudaErrors(cudaGetLastError());
 
-		stop_cpu_profiling();
-		request_scheduling(101);
 		gpuSum<int><<<grid_x, block_x>>>(valid_distance, size, half_size);
-		stop_profiling(101, HTOD);
-		start_profiling_cpu_time();
 		checkCudaErrors(cudaGetLastError());
 
 		size = half_size;
@@ -2052,47 +1706,19 @@ double GNormalDistributionsTransform::getFitnessScore(double max_range)
 
 	int nr;
 
-	stop_cpu_profiling();
-	request_scheduling(102);
 	checkCudaErrors(cudaMemcpy(&nr, valid_distance, sizeof(int), cudaMemcpyDeviceToHost));
-	stop_profiling(102, HTOD);
-	start_profiling_cpu_time();
 
-	stop_cpu_profiling();
-	request_scheduling(103);
 	checkCudaErrors(cudaMemcpy(&fitness_score, min_distance, sizeof(double), cudaMemcpyDeviceToHost));
-	stop_profiling(103, HTOD);
-	start_profiling_cpu_time();
 
-	stop_cpu_profiling();
-	request_scheduling(104);
 	checkCudaErrors(cudaFree(trans_x));
-	stop_profiling(104, HTOD);
-	start_profiling_cpu_time();
 
-	stop_cpu_profiling();
-	request_scheduling(105);
 	checkCudaErrors(cudaFree(trans_y));
-	stop_profiling(105, HTOD);
-	start_profiling_cpu_time();
 
-	stop_cpu_profiling();
-	request_scheduling(106);
 	checkCudaErrors(cudaFree(trans_z));
-	stop_profiling(107, HTOD);
-	start_profiling_cpu_time();
 
-	stop_cpu_profiling();
-	request_scheduling(108);
 	checkCudaErrors(cudaFree(valid_distance));
-	stop_profiling(108, HTOD);
-	start_profiling_cpu_time();
 
-	stop_cpu_profiling();
-	request_scheduling(109);
 	checkCudaErrors(cudaFree(min_distance));
-	stop_profiling(109, HTOD);
-	start_profiling_cpu_time();
 
 	if (nr > 0)
 		return (fitness_score / nr);

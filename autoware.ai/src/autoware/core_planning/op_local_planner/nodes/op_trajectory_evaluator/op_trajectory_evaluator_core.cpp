@@ -17,7 +17,7 @@
 #include "op_trajectory_evaluator_core.h"
 #include "op_ros_helpers/op_ROSHelpers.h"
 #include "op_planner/MappingHelpers.h"
-#include <sched.hpp>
+#include <rubis_sched/sched.hpp>
 
 int scheduling_flag_;
 int profiling_flag_;
@@ -450,28 +450,28 @@ void TrajectoryEval::MainLoop()
   nh.getParam("/op_trajectory_evaluator/intersection_list", intersection_xml);
   PlannerHNS::MappingHelpers::ConstructIntersection_RUBIS(intersection_list, intersection_xml);
 
-  FILE *fp;
-  if(profiling_flag_){      
-    fp = fopen(response_time_filename_.c_str(), "a");
-  }
+  // FILE *fp;
+  // if(profiling_flag_){      
+  //   fp = fopen(response_time_filename_.c_str(), "a");
+  // }
 
   ros::Rate loop_rate(100);
-  if(scheduling_flag_) loop_rate = ros::Rate(rate_);
+  // if(scheduling_flag_) loop_rate = ros::Rate(rate_);
 
   struct timespec start_time, end_time;
 
   while (ros::ok())
   {
-    if(profiling_flag_){        
-      clock_gettime(CLOCK_MONOTONIC, &start_time);
-    }
-    if(scheduling_flag_){
-      rubis::sched::set_sched_deadline(gettid(), 
-        static_cast<uint64_t>(execution_time_), 
-        static_cast<uint64_t>(relative_deadline_), 
-        static_cast<uint64_t>(minimum_inter_release_time_)
-      );
-    }      
+    // if(profiling_flag_){        
+    //   clock_gettime(CLOCK_MONOTONIC, &start_time);
+    // }
+    // if(scheduling_flag_){
+    //   rubis::sched::set_sched_deadline(gettid(), 
+    //     static_cast<uint64_t>(execution_time_), 
+    //     static_cast<uint64_t>(relative_deadline_), 
+    //     static_cast<uint64_t>(minimum_inter_release_time_)
+    //   );
+    // }      
 
     UpdateMyParams();
     UpdateTf();
@@ -566,14 +566,14 @@ void TrajectoryEval::MainLoop()
     else
       sub_GlobalPlannerPaths = nh.subscribe("/lane_waypoints_array",   1,    &TrajectoryEval::callbackGetGlobalPlannerPath,   this);
 
-    if(profiling_flag_){
-      clock_gettime(CLOCK_MONOTONIC, &end_time);
-      fprintf(fp, "%lld.%.9ld,%lld.%.9ld,%d\n",start_time.tv_sec,start_time.tv_nsec,end_time.tv_sec,end_time.tv_nsec,getpid());    
-      fflush(fp);
-    }
+    // if(profiling_flag_){
+    //   clock_gettime(CLOCK_MONOTONIC, &end_time);
+    //   fprintf(fp, "%lld.%.9ld,%lld.%.9ld,%d\n",start_time.tv_sec,start_time.tv_nsec,end_time.tv_sec,end_time.tv_nsec,getpid());    
+    //   fflush(fp);
+    // }
     loop_rate.sleep();
   }
-  fclose(fp);
+  // fclose(fp);
 }
 
 }

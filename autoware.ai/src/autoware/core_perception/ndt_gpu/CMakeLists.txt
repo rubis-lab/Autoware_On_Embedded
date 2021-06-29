@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 2.8.3)
 project(ndt_gpu)
 
 find_package(autoware_build_flags REQUIRED)
-find_package(catkin REQUIRED)
 find_package(PCL REQUIRED)
 find_package(CUDA)
+find_package(catkin REQUIRED COMPONENTS rubis_sched)
 
 find_package(Eigen3 QUIET)
 
@@ -92,6 +92,7 @@ target_link_libraries(ndt_gpu
   ${CUDA_CUBLAS_LIBRARIES}
   ${CUDA_curand_LIBRARY}
   ${PCL_LIBRARIES}
+  ${catkin_LIBRARIES}
 )
 
 install(DIRECTORY include/${PROJECT_NAME}/

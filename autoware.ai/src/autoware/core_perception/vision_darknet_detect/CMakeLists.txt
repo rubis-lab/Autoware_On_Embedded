@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   sensor_msgs
   std_msgs
+  rubis_sched
 )
 
 find_package(CUDA)
@@ -107,7 +108,6 @@ if(USE_CUDA)
     ${PROJECT_SOURCE_DIR}/darknet
     ${PROJECT_SOURCE_DIR}/darknet/src
     ${PROJECT_SOURCE_DIR}/src
-    $ENV{HOME}/autoware.ai/src/rubis/rubis_sched/include
   )
 
   target_link_libraries(vision_darknet_detect_lib
@@ -142,7 +142,6 @@ if(USE_CUDA)
     ${PROJECT_SOURCE_DIR}/darknet
     ${PROJECT_SOURCE_DIR}/darknet/src
     ${PROJECT_SOURCE_DIR}/src
-    $ENV{HOME}/autoware.ai/src/rubis/rubis_sched/include
   )
 
   target_link_libraries(vision_darknet_detect
@@ -218,7 +217,6 @@ else()
     ${PROJECT_SOURCE_DIR}/darknet
     ${PROJECT_SOURCE_DIR}/darknet/src
     ${PROJECT_SOURCE_DIR}/src
-    $ENV{HOME}/autoware.ai/src/rubis/rubis_sched/include
   )
 
   target_link_libraries(vision_darknet_detect_lib
@@ -248,7 +246,6 @@ else()
     ${PROJECT_SOURCE_DIR}/darknet
     ${PROJECT_SOURCE_DIR}/darknet/src
     ${PROJECT_SOURCE_DIR}/src
-    $ENV{HOME}/autoware.ai/src/rubis/rubis_sched/include
   )
 
   target_link_libraries(vision_darknet_detect

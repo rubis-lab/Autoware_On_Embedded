@@ -24,4 +24,5 @@
   <depend>std_msgs</depend>
   <depend>vector_map_msgs</depend>
   <depend>libwaypoint_follower</depend>
+  <depend>rubis_sched</depend>
 </package>

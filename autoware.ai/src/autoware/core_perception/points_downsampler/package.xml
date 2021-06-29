@@ -17,6 +17,6 @@
   <depend>roscpp</depend>
   <depend>sensor_msgs</depend>
   <depend>velodyne_pointcloud</depend>
-
+  <depend>rubis_sched</depend>
   <exec_depend>message_runtime</exec_depend>
 </package>

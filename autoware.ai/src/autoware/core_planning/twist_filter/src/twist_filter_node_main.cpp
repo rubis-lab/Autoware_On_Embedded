@@ -15,7 +15,7 @@
  */
 
 #include "twist_filter/twist_filter_node.h"
-#include <sched.hpp>
+#include <rubis_sched/sched.hpp>
 
 int scheduling_flag_;
 int profiling_flag_;
@@ -40,41 +40,41 @@ int main(int argc, char** argv)
   private_nh.param("/twist_filter/relative_deadline", relative_deadline_, (double)10);
 
   // SPIN
-  if(!scheduling_flag_ && !profiling_flag_){
+  // if(!scheduling_flag_ && !profiling_flag_){
     ros::spin();
-  }
-  else{
-    FILE *fp;
-    if(profiling_flag_){      
-      fp = fopen(response_time_filename_.c_str(), "a");
-    }
+  // }
+  // else{
+  //   FILE *fp;
+  //   if(profiling_flag_){      
+  //     fp = fopen(response_time_filename_.c_str(), "a");
+  //   }
 
-    ros::Rate r(rate_);
-    struct timespec start_time, end_time;
-    while(ros::ok()){
-      if(profiling_flag_){        
-        clock_gettime(CLOCK_MONOTONIC, &start_time);
-      }
-      if(scheduling_flag_){
-        rubis::sched::set_sched_deadline(gettid(), 
-          static_cast<uint64_t>(execution_time_), 
-          static_cast<uint64_t>(relative_deadline_), 
-          static_cast<uint64_t>(minimum_inter_release_time_)
-        );
-      }      
+  //   ros::Rate r(rate_);
+  //   struct timespec start_time, end_time;
+  //   while(ros::ok()){
+  //     if(profiling_flag_){        
+  //       clock_gettime(CLOCK_MONOTONIC, &start_time);
+  //     }
+  //     if(scheduling_flag_){
+  //       rubis::sched::set_sched_deadline(gettid(), 
+  //         static_cast<uint64_t>(execution_time_), 
+  //         static_cast<uint64_t>(relative_deadline_), 
+  //         static_cast<uint64_t>(minimum_inter_release_time_)
+  //       );
+  //     }      
 
-      ros::spinOnce();
+  //     ros::spinOnce();
 
-      if(profiling_flag_){
-        clock_gettime(CLOCK_MONOTONIC, &end_time);
-        fprintf(fp, "%lld.%.9ld,%lld.%.9ld,%d\n",start_time.tv_sec,start_time.tv_nsec,end_time.tv_sec,end_time.tv_nsec,getpid());    
-        fflush(fp);
-      }
+  //     if(profiling_flag_){
+  //       clock_gettime(CLOCK_MONOTONIC, &end_time);
+  //       fprintf(fp, "%lld.%.9ld,%lld.%.9ld,%d\n",start_time.tv_sec,start_time.tv_nsec,end_time.tv_sec,end_time.tv_nsec,getpid());    
+  //       fflush(fp);
+  //     }
 
-      r.sleep();
-    }  
-  fclose(fp);
-  }
+  //     r.sleep();
+  //   }  
+  // fclose(fp);
+  // }
   
   return 0;
 }

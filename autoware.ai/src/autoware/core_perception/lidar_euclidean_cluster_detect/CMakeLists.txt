@@ -20,6 +20,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   tf
   vector_map_server
+  rubis_sched
 )
 
 find_package(OpenMP)
@@ -49,7 +50,6 @@ include_directories(
   include
   ${catkin_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
-  $ENV{HOME}/autoware.ai/src/rubis/rubis_sched/include
 )
 link_directories(${OpenCV_LIBRARY_DIRS})
 

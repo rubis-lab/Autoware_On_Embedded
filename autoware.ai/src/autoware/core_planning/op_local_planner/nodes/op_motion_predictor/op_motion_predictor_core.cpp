@@ -17,7 +17,7 @@
 #include "op_motion_predictor_core.h"
 #include "op_planner/MappingHelpers.h"
 #include "op_ros_helpers/op_ROSHelpers.h"
-#include <sched.hpp>
+#include <rubis_sched/sched.hpp>
 
 int scheduling_flag_;
 int profiling_flag_;
@@ -551,28 +551,28 @@ void MotionPrediction::MainLoop()
   private_nh.param("/op_motion_predictor/execution_time", execution_time_, (double)10);
   private_nh.param("/op_motion_predictor/relative_deadline", relative_deadline_, (double)10);
 
-  FILE *fp;
-  if(profiling_flag_){      
-    fp = fopen(response_time_filename_.c_str(), "a");
-  }
+  // FILE *fp;
+  // if(profiling_flag_){      
+  //   fp = fopen(response_time_filename_.c_str(), "a");
+  // }
 
   ros::Rate loop_rate(25);
-  if(scheduling_flag_) loop_rate = ros::Rate(rate_);
+  // if(scheduling_flag_) loop_rate = ros::Rate(rate_);
 
   struct timespec start_time, end_time;
 
   while (ros::ok())
   {
-    if(profiling_flag_){        
-      clock_gettime(CLOCK_MONOTONIC, &start_time);
-    }
-    if(scheduling_flag_){
-      rubis::sched::set_sched_deadline(gettid(), 
-        static_cast<uint64_t>(execution_time_), 
-        static_cast<uint64_t>(relative_deadline_), 
-        static_cast<uint64_t>(minimum_inter_release_time_)
-      );
-    }      
+    // if(profiling_flag_){        
+    //   clock_gettime(CLOCK_MONOTONIC, &start_time);
+    // }
+    // if(scheduling_flag_){
+    //   rubis::sched::set_sched_deadline(gettid(), 
+    //     static_cast<uint64_t>(execution_time_), 
+    //     static_cast<uint64_t>(relative_deadline_), 
+    //     static_cast<uint64_t>(minimum_inter_release_time_)
+    //   );
+    // }      
 
     ros::spinOnce();
 
@@ -635,15 +635,15 @@ void MotionPrediction::MainLoop()
 //      pub_predicted_objects_trajectories.publish(m_PredictedResultsResults);
 //    }
 
-    if(profiling_flag_){
-      clock_gettime(CLOCK_MONOTONIC, &end_time);
-      fprintf(fp, "%lld.%.9ld,%lld.%.9ld,%d\n",start_time.tv_sec,start_time.tv_nsec,end_time.tv_sec,end_time.tv_nsec,getpid());    
-      fflush(fp);
-    }
+    // if(profiling_flag_){
+    //   clock_gettime(CLOCK_MONOTONIC, &end_time);
+    //   fprintf(fp, "%lld.%.9ld,%lld.%.9ld,%d\n",start_time.tv_sec,start_time.tv_nsec,end_time.tv_sec,end_time.tv_nsec,getpid());    
+    //   fflush(fp);
+    // }
 
     loop_rate.sleep();
   }
-  fclose(fp);
+  // fclose(fp);
 }
 
 void MotionPrediction::TransformPose(const geometry_msgs::PoseStamped &in_pose, geometry_msgs::PoseStamped& out_pose, const tf::StampedTransform &in_transform)

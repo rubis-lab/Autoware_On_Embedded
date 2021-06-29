@@ -19,17 +19,13 @@ flags = [
 '-isystem',
 '/opt/ros/' + os.getenv('ROS_DISTRO') + '/include',
 '-isystem',
-'/home/hypark/git/RUBIS-SelfDriving/rubis_ws/devel/include',
+'/home/hypark/git/Autoware_On_Embedded/rubis_ws/devel/include',
 '-isystem',
-'/home/hypark/git/RUBIS-SelfDriving/rubis_ws/src/hellocm_msgs/include',
+'/home/hypark/git/Autoware_On_Embedded/rubis_ws/src/rubis_autorunner/include',
 '-isystem',
-'/home/hypark/git/RUBIS-SelfDriving/rubis_ws/src/robot_localization/include',
+'/home/hypark/git/Autoware_On_Embedded/rubis_ws/src/rubis_pkg/include',
 '-isystem',
-'/home/hypark/git/RUBIS-SelfDriving/rubis_ws/src/rubis_cm_pkg/include',
-'-isystem',
-'/home/hypark/git/RUBIS-SelfDriving/rubis_ws/src/rubis_pkg/include',
-'-isystem',
-'/home/hypark/git/RUBIS-SelfDriving/rubis_ws/src/test_package/include'
+'/home/hypark/git/Autoware_On_Embedded/rubis_ws/src/rubis_sched/include'
 ]
 
 compilation_database_folder = ''

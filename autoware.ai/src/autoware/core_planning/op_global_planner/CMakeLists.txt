@@ -23,6 +23,7 @@ find_package(
     std_msgs
     tf
     vector_map_msgs
+    rubis_sched
 )
 
 catkin_package(
@@ -33,7 +34,6 @@ catkin_package(
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
-  $ENV{HOME}/autoware.ai/src/rubis/rubis_sched/include
 )
 
 add_executable(

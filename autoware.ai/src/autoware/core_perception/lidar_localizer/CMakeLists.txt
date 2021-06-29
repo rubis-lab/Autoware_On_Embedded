@@ -3,10 +3,6 @@ project(lidar_localizer)
 
 find_package(PCL REQUIRED)
 
-if("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "aarch64")
-  add_definitions(-D__aarch64__)
-endif()
-
 if(NOT (PCL_VERSION VERSION_LESS "1.7.2"))
   SET(PCL_OPENMP_PACKAGES pcl_omp_registration)
 endif()
@@ -55,6 +51,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   tf
   velodyne_pointcloud
+  rubis_sched
 )
 
 catkin_package(
@@ -75,8 +72,9 @@ include_directories(
   include
   ${catkin_INCLUDE_DIRS}
   ${EIGEN3_INCLUDE_DIRS}
-  $ENV{HOME}/autoware.ai/src/rubis/rubis_sched/include
 )
+
+link_directories(lib)
 
 SET(CMAKE_CXX_FLAGS "-O2 -g -Wall ${CMAKE_CXX_FLAGS}")
 

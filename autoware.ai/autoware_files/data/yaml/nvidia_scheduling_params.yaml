@@ -6,6 +6,8 @@
 # 1us : 1000
 # 1ns : 1
 
+permission_changing_script_path: "/home/nvidia/autoware.ai/autoware_files/scripts/nvidia_change_profiing_file_permission.sh"
+
 # Sensing
 ray_ground_filter:
   scheduling_flag: 0

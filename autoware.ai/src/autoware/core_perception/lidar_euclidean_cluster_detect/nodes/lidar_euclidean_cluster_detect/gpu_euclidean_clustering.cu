@@ -1407,10 +1407,10 @@ void stop_profiling(int id, int type){
 	if(GPU_PROFILING == 1){		
 		float e_time, r_time;
     char gpu_id_buf[BUFFER_SIZE];
-	if(gpu_scheduling_flag_==1){
-    	sched_info_->scheduling_flag = 0;
-    	sched_info_->state = NONE;
-	}
+    if(gpu_scheduling_flag_==1){
+        sched_info_->scheduling_flag = 0;
+        sched_info_->state = NONE;
+    }
 
 		cudaEventRecord(e_event_stop, 0);
     cudaEventRecord(r_event_stop, 0);

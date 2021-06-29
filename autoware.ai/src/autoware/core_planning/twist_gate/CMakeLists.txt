@@ -17,6 +17,7 @@ find_package(
     roslint
     std_msgs
     tablet_socket_msgs
+    rubis_sched
 )
 
 catkin_package(
@@ -31,7 +32,6 @@ roslint_cpp()
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
-  $ENV{HOME}/autoware.ai/src/rubis/rubis_sched/include
 )
 
 add_executable(twist_gate src/twist_gate_node.cpp src/twist_gate.cpp)

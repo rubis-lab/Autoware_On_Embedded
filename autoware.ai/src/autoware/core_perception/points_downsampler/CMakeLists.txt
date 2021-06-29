@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   sensor_msgs
   velodyne_pointcloud
+  rubis_sched
 )
 
 add_message_files(
@@ -33,12 +34,12 @@ catkin_package(
   pcl_conversions
   pcl_ros
   sensor_msgs
+  rubis_sched
 )
 
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
-  $ENV{HOME}/autoware.ai/src/rubis/rubis_sched/include
 )
 SET(CMAKE_CXX_FLAGS "-O2 -g -Wall ${CMAKE_CXX_FLAGS}")
 

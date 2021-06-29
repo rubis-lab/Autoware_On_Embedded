@@ -30,4 +30,5 @@
   <depend>tf2_eigen</depend>
   <depend>velodyne_pointcloud</depend>
   <depend>yaml-cpp</depend>
+  <depend>rubis_sched</depend>
 </package>

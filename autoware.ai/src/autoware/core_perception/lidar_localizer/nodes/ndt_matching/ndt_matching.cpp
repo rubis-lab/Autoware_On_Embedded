@@ -72,7 +72,7 @@
 //headers in Autoware Health Checker
 #include <autoware_health_checker/health_checker/health_checker.h>
 
-#include <sched.hpp>
+#include <rubis_sched/sched.hpp>
 
 #define SPIN_PROFILING
 
@@ -83,20 +83,6 @@
 #define Wa 0.4
 #define Wb 0.3
 #define Wc 0.3
-
-int scheduling_flag_;
-int profiling_flag_;
-std::string response_time_filename_;
-int rate_;
-double minimum_inter_release_time_;
-double execution_time_;
-double relative_deadline_;
-int main_gpu_scheduling_flag_;
-std::string gpu_execution_time_filename_;
-std::string gpu_response_time_filename_;
-std::string gpu_deadline_filename_;
-std::string gpu_remain_time_filename_;
-int gpu_identical_deadline_;
 
 static std::shared_ptr<autoware_health_checker::HealthChecker> health_checker_ptr_;
 
@@ -922,11 +908,6 @@ static void imu_callback(const sensor_msgs::Imu::Ptr& input)
 
 static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
 { 
-  if (_method_type == MethodType::PCL_ANH_GPU){
-    start_profiling_cpu_time();
-    set_absolute_deadline();
-  }
-
   // Check inital matching is success or not
   if(_is_init_match_finished == false && previous_score < USING_GPS_THRESHOLD && previous_score != 0.0)
     _is_init_match_finished = true;
@@ -1513,11 +1494,7 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
 
     previous_estimated_vel_kmph.data = estimated_vel_kmph.data;
   }
-  
-  if (_method_type == MethodType::PCL_ANH_GPU){
-    stop_cpu_profiling();
-    write_dummy_line();
-  }
+
 }
 
 void* thread_func(void* args)
@@ -1548,27 +1525,37 @@ int main(int argc, char** argv)
   health_checker_ptr_->ENABLE();
   health_checker_ptr_->NODE_ACTIVATE();
 
-  private_nh.param<int>("/ndt_matching/scheduling_flag", scheduling_flag_, 0);
-  private_nh.param<int>("/ndt_matching/profiling_flag", profiling_flag_, 0);
-  private_nh.param<std::string>("/ndt_matching/response_time_filename", response_time_filename_, "/home/hypark/Documents/profiling/response_time/ndt_matching.csv");
-  private_nh.param<int>("/ndt_matching/rate", rate_, 10);
-  private_nh.param("/ndt_matching/minimum_inter_release_time", minimum_inter_release_time_, (double)10);
-  private_nh.param("/ndt_matching/execution_time", execution_time_, (double)10);
-  private_nh.param("/ndt_matching/relative_deadline", relative_deadline_, (double)10);
-  private_nh.param("/ndt_matching/gpu_scheduling_flag", gpu_scheduling_flag_, 0);
-  private_nh.param<std::string>("/ndt_matching/gpu_execution_time_filename", gpu_execution_time_filename_, "/home/hypark/Documents/gpu_profiling/test_ndt_matching_execution_time.csv");
-  private_nh.param<std::string>("/ndt_matching/gpu_response_time_filename", gpu_response_time_filename_, "/home/hypark/Documents/gpu_profiling/test_ndt_matching_response_time.csv");
-  private_nh.param<std::string>("/ndt_matching/gpu_deadline_filename", gpu_deadline_filename_, "/home/hypark/Documents/gpu_deadline/ndt_matching_gpu_deadline.csv");
-  private_nh.param<std::string>("/ndt_matching/gpu_remain_time_filename", gpu_remain_time_filename_, "/home/hypark/Documents/gpu_profiling/test_ndt_matching_remain_time.csv");
-  private_nh.param<int>("/ndt_matching/gpu_identical_deadline", gpu_identical_deadline_, 0);
+  // Scheduling Setup
+  int task_scheduling_flag;
+  int task_profiling_flag;
+  std::string task_response_time_filename;
+  int rate;
+  double task_minimum_inter_release_time;
+  double task_execution_time;
+  double task_relative_deadline;
 
-  #ifdef CUDA_FOUND
-  int key_id = 0;  
-    
-  set_identical_deadline((unsigned long long)gpu_identical_deadline_);
-  set_gpu_scheduling_flag(gpu_scheduling_flag_);
-  init_scheduling("/tmp/ndt_matching", gpu_deadline_filename_.c_str(), key_id);    
-  #endif
+  int gpu_scheduling_flag;
+  int gpu_profiling_flag;
+  std::string gpu_execution_time_filename;
+  std::string gpu_response_time_filename;
+  std::string gpu_deadline_filename;
+
+
+  private_nh.param<int>("/ndt_matching/task_scheduling_flag", task_scheduling_flag, 0);
+  private_nh.param<int>("/ndt_matching/task_profiling_flag", task_profiling_flag, 0);
+  private_nh.param<std::string>("/ndt_matching/task_response_time_filename", task_response_time_filename, "/home/hypark/Documents/profiling/response_time/ndt_matching.csv");
+  private_nh.param<int>("/ndt_matching/rate", rate, 10);
+  private_nh.param("/ndt_matching/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
+  private_nh.param("/ndt_matching/task_execution_time", task_execution_time, (double)10);
+  private_nh.param("/ndt_matching/task_relative_deadline", task_relative_deadline, (double)10);
+  private_nh.param("/ndt_matching/gpu_scheduling_flag", gpu_scheduling_flag, 0);
+  private_nh.param("/ndt_matching/gpu_profiling_flag", gpu_profiling_flag, 0);
+  private_nh.param<std::string>("/ndt_matching/gpu_execution_time_filename", gpu_execution_time_filename, "/home/hypark/Documents/gpu_profiling/test_ndt_matching_execution_time.csv");
+  private_nh.param<std::string>("/ndt_matching/gpu_response_time_filename", gpu_response_time_filename, "/home/hypark/Documents/gpu_profiling/test_ndt_matching_response_time.csv");
+  private_nh.param<std::string>("/ndt_matching/gpu_deadline_filename", gpu_deadline_filename, "/home/hypark/Documents/gpu_deadline/ndt_matching_gpu_deadline.csv");
+  
+  if(task_profiling_flag) sched::init_task_profiling(task_response_time_filename);
+  if(gpu_profiling_flag) sched::init_gpu_profiling(gpu_execution_time_filename, gpu_response_time_filename);
 
   // Set log file name.
   private_nh.getParam("output_log_data", _output_log_data);
@@ -1599,8 +1586,12 @@ int main(int argc, char** argv)
   private_nh.getParam("imu_topic", _imu_topic);
   private_nh.param<double>("gnss_reinit_fitness", _gnss_reinit_fitness, 500.0);
   
-  if(_method_type == MethodType::PCL_ANH_GPU){    
-    initialize_file(gpu_execution_time_filename_.c_str(), gpu_response_time_filename_.c_str(), gpu_deadline_filename_.c_str());        
+  if( (_method_type == MethodType::PCL_ANH_GPU) && (gpu_scheduling_flag == 1) ){
+    sched::init_gpu_scheduling("/tmp/ndt_matching", gpu_deadline_filename, 0);
+  }    
+  else if(_method_type != MethodType::PCL_ANH_GPU && gpu_scheduling_flag == 1){
+    ROS_ERROR("GPU scheduling flag is true but type doesn't set to GPU!");
+    exit(1);
   }
 
 
@@ -1720,42 +1711,24 @@ int main(int argc, char** argv)
   pthread_create(&thread, NULL, thread_func, NULL);
 
   // SPIN
-  if(!scheduling_flag_ && !profiling_flag_){
+  if(!task_scheduling_flag && !task_profiling_flag){
     ros::spin();
   }
-  else{
-    FILE *fp;
-    if(profiling_flag_){      
-      fp = fopen(response_time_filename_.c_str(), "a");
-    }
-
-    ros::Rate r(rate_);
-    struct timespec start_time, end_time;
+  else{    
+    ros::Rate r(rate);
     while(ros::ok()){
-      if(profiling_flag_){        
-        clock_gettime(CLOCK_MONOTONIC, &start_time);
-      }
-      if(scheduling_flag_){
-        rubis::sched::set_sched_deadline(gettid(), 
-          static_cast<uint64_t>(execution_time_), 
-          static_cast<uint64_t>(relative_deadline_), 
-          static_cast<uint64_t>(minimum_inter_release_time_)
-        );
-      }      
-
+      
+      if(task_profiling_flag) sched::start_task_profiling();
+      if(gpu_profiling_flag) sched::refresh_gpu_profiling();
+      if(task_scheduling_flag) sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline);
+      printf("after request_task_scheduling\n");
       ros::spinOnce();
-
-      if(profiling_flag_){
-        clock_gettime(CLOCK_MONOTONIC, &end_time);
-        fprintf(fp, "%lld.%.9ld,%lld.%.9ld,%d\n",start_time.tv_sec,start_time.tv_nsec,end_time.tv_sec,end_time.tv_nsec,getpid());    
-        fflush(fp);
-      }
+      if(task_scheduling_flag) sched::yield_task_scheduling();
+      if(task_profiling_flag) sched::stop_task_profiling();
 
       r.sleep();
     }  
-  fclose(fp);
   }
 
-  close_file();
   return 0;
 }

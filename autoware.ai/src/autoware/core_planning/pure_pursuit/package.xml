@@ -22,5 +22,6 @@
   <depend>tf2</depend>
   <depend>tf</depend>
   <depend>roslint</depend>
+  <depend>rubis_sched</depend>
 
 </package>

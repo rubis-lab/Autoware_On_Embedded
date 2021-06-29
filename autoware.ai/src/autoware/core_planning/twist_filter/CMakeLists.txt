@@ -16,6 +16,7 @@ find_package(
     roscpp
     roslint
     std_msgs
+    rubis_sched
 )
 
 catkin_package(
@@ -34,7 +35,6 @@ SET(CMAKE_CXX_FLAGS "-O2 -g -Wall ${CMAKE_CXX_FLAGS}")
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
-  $ENV{HOME}/autoware.ai/src/rubis/rubis_sched/include
 )
 
 add_executable(

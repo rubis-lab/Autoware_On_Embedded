@@ -6,6 +6,8 @@
 # 1us : 1000
 # 1ns : 1
 
+permission_changing_script_path: "/home/hypark/autoware.ai/autoware_files/scripts/hypark_change_profiing_file_permission.sh"
+
 # Sensing
 ray_ground_filter:
   scheduling_flag: 0
@@ -27,19 +29,18 @@ voxel_grid_filter:
   relative_deadline: 100000000
 
 ndt_matching:
-  scheduling_flag: 0
-  profiling_flag: 0
-  response_time_filename: "/home/hypark/Documents/profiling/response_time/ndt_matching.csv"
+  task_scheduling_flag: 0
+  task_profiling_flag: 0
+  task_response_time_filename: "/home/hypark/Documents/profiling/response_time/ndt_matching.csv"
   rate: 10
-  minimum_inter_release_time: 100000000
-  execution_time: 70000000
-  relative_deadline: 100000000
+  task_minimum_inter_release_time: 100000000
+  task_execution_time: 70000000
+  task_relative_deadline: 100000000
   gpu_scheduling_flag: 0
+  gpu_profiling_flag: 0
   gpu_execution_time_filename: "/home/hypark/Documents/gpu_profiling/test_ndt_matching_execution_time.csv"
   gpu_response_time_filename: "/home/hypark/Documents/gpu_profiling/test_ndt_matching_response_time.csv"
   gpu_deadline_filename: "/home/hypark/Documents/gpu_deadline/ndt_matching_gpu_deadline.csv"
-  gpu_remain_time_filename: "/home/hypark/Documents/gpu_profiling/test_ndt_matching_remain_time.csv"
-  gpu_identical_deadline: 0
 
 # Detection
 calibration_publisher:
@@ -57,8 +58,6 @@ lidar_euclidean_cluster_detect:
   gpu_execution_time_filename: "/home/hypark/Documents/gpu_profiling/test_clustering_execution_time.csv"
   gpu_response_time_filename: "/home/hypark/Documents/gpu_profiling/test_clustering_response_time.csv"
   gpu_deadline_filename: "/home/hypark/Documents/gpu_deadline/clustring_gpu_deadline.csv"
-  gpu_remain_time_filename: "/home/hypark/Documents/gpu_profiling/test_clustring_remain_time.csv"
-  gpu_identical_deadline: 0
 
 vision_darknet_detect:
   scheduling_flag: 0
@@ -72,10 +71,8 @@ vision_darknet_detect:
   gpu_execution_time_filename: "/home/hypark/Documents/gpu_profiling/test_yolo_execution_time.csv"
   gpu_response_time_filename: "/home/hypark/Documents/gpu_profiling/test_yolo_response_time.csv"
   gpu_deadline_filename: "/home/hypark/Documents/gpu_deadline/yolo_gpu_deadline.csv"
-  gpu_remain_time_filename: "/home/hypark/Documents/gpu_profiling/test_yolo_remain_time.csv"
-  gpu_identical_deadline: 0
-  network_definition_file: "/home/hypark/autoware.ai/autoware_files/vision/yolov3-tiny.cfg"
-  pretrained_model_file: "/home/hypark/autoware.ai/autoware_files/vision/yolov3-tiny.weights"
+  network_definition_file: "/home/hypark/autoware.ai/autoware_files/vision/yolov3-320.cfg"
+  pretrained_model_file: "/home/hypark/autoware.ai/autoware_files/vision/yolov3-320.weights"
 
 imm_ukf_pda_track:
   scheduling_flag: 0
@@ -87,7 +84,7 @@ imm_ukf_pda_track:
   relative_deadline: 100000000
 
 range_vision_fusion:
-  scheduling_flag: 1
+  scheduling_flag: 0
   profiling_flag: 0
   response_time_filename: "/home/hypark/Documents/profiling/response_time/range_vision_fusion.csv"
   rate: 10 

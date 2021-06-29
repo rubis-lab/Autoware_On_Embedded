@@ -21,4 +21,5 @@
   <depend>tf</depend>
   <depend>tf_conversions</depend>
   <depend>yaml-cpp</depend>
+  <depend>rubis_sched</depend>
 </package>
