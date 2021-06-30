@@ -22,16 +22,11 @@
   </include>
 
   <!-- op_common_params  -->
-  <include file="$(find op_local_planner)/launch/op_common_params.launch">
+  <include file="$(find op_local_planner)/launch/op_common_params_parameter.launch">
     <!-- Included in app window -->
     <arg name="horizonDistance"                 default="120"  />     <!-- Horizon -->
     <arg name="maxLocalPlanDistance"            default="80" />       <!-- Plan Distance-->
     <arg name="pathDensity"                     default="0.5" />      <!-- Path Density-->
-    <arg name="rollOutDensity"                  default="4" />      <!-- Horizontal Density -->
-    <arg name="rollOutsNumber"                  default="2"    />     <!-- Rollouts Number -->
-    <arg name="maxVelocity"                     default="15.0" />     <!-- Max Velocity -->
-    <arg name="maxAcceleration"                 default="15.0" />      <!-- Acceleration -->
-    <arg name="maxDeceleration"                 default="-15.0" />    <!-- Deceleration -->
     <arg name="enableFollowing"                 default="true" />     <!-- Enable Following -->
     <arg name="enableSwerving"                  default="true"  />    <!-- Enable Avoidance -->
     <arg name="minFollowingDistance"            default="30.0"  />    <!-- Follow Distance --> <!-- should be bigger than Distance to follow -->  
@@ -87,30 +82,23 @@
   </include>
 
   <!-- op_trajectory_evaluator -->
-  <include file="$(find op_local_planner)/launch/op_trajectory_evaluator.launch">
+  <include file="$(find op_local_planner)/launch/op_trajectory_evaluator_parameter.launch">
     <arg name="enablePrediction"                default="false" />                
     <arg name="horizontalSafetyDistance"        default="1.2" />
     <arg name="verticalSafetyDistance"          default="0.8" />
-    <arg name="weightPriority"                  default="0" />
-    <arg name="weightTransition"                default="5" />
-    <arg name="weightLong"                      default="4" />
-    <arg name="weightLat"                       default="4" />
     <arg name="LateralSkipDistance"             default="5.0" />
     
-    <arg name="ImageWidth" default="1920" />
-    <arg name="ImageHeight" default="1080" />
     <arg name="PedestrianRightThreshold" default="4.0" />
     <arg name="PedestrianLeftThreshold" default="4.0" />
     <arg name="PedestrianImageDetectionRange" default="0.75" /> <!-- (Ratio If pedestrian's center point is located in this range, our car will be stopped -->               
-    <arg name="VehicleImageDetectionRange" default="0.3" /> <!-- (Ratio) If vehicle's center point is located in this range, our car set speed as max velocity --> 
+    <arg name="VehicleImageDetectionRange" default="0.3" /> <!-- (Ratio) If vehicle's center point is not located in this range, our car set speed as max velocity --> 
     <arg name="VehicleImageWidthThreshold" default="0.018" /> <!-- (Ratio) If vehilce's width ratio is lower than this, it will be not detected -->
-    <arg name="SprintDecisionTime" default="9999999.0" /> <!-- Seconds -->
 
     <arg name="intersectionFile"                default="crossing_test/crossing_intersection.yaml" />
   </include>
 
   <!-- op_behavior_selector -->
-  <include file="$(find op_local_planner)/launch/op_behavior_selector.launch">
+  <include file="$(find op_local_planner)/launch/op_behavior_selector_parameter.launch">
     <arg name="evidence_tust_number"            default="25"/>
     <arg name="distanceToPedestrianThreshold"   default="15.0" />
     <arg name="sprintSpeed"                    default="10.0" />

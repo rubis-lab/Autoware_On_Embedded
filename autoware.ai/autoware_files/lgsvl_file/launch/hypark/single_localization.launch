@@ -1,9 +1,9 @@
 <launch>
   <rosparam command="load" file="/home/hypark/autoware.ai/autoware_files/data/yaml/hypark_scheduling_params.yaml" />
 
-  <arg name="init_x" value="-9.06" />
-  <arg name="init_y" value="50.56" />
-  <arg name="init_z" value="-0.70" />
+  <arg name="init_x" value="-8.72" />
+  <arg name="init_y" value="51.74" />
+  <arg name="init_z" value="-0.71" />
   <arg name="init_roll" value="0.0" />
   <arg name="init_pitch" value="0.0" />
   <arg name="init_yaw" value="-1.8" />

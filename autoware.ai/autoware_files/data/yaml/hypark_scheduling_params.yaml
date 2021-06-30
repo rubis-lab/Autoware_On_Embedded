@@ -6,8 +6,6 @@
 # 1us : 1000
 # 1ns : 1
 
-permission_changing_script_path: "/home/hypark/autoware.ai/autoware_files/scripts/hypark_change_profiing_file_permission.sh"
-
 # Sensing
 ray_ground_filter:
   scheduling_flag: 0
@@ -102,6 +100,13 @@ op_global_planner:
   execution_time: 100000000
   relative_deadline: 100000000
 
+op_common_params:
+  rollOutDensity: 4
+  rollOutsNumber: 2
+  maxVelocity: 10.0
+  maxAcceleration: 10.0
+  maxDeceleration: -10.0
+
 op_trajectory_generator:
   scheduling_flag: 0
   profiling_flag: 0
@@ -119,6 +124,13 @@ op_trajectory_evaluator:
   minimum_inter_release_time: 100000000
   execution_time: 100000000
   relative_deadline: 100000000
+  weightPriority: 0
+  weightTransition: 5
+  weightLong: 4
+  weightLat: 4
+  ImageWidth: 1920
+  ImageHeight: 1080
+  SprintDecisionTime: 9999999.0
 
 op_behavior_selector:
   scheduling_flag: 0
@@ -128,6 +140,10 @@ op_behavior_selector:
   minimum_inter_release_time: 10000000
   execution_time: 10000000
   relative_deadline: 10000000
+  distanceToPedestrianThreshold: 15.0
+  sprintSpeed: 10.0
+  obstacleWaitingTimeinIntersection: 2.0
+  turnThreshold: 30.0
 
 op_motion_predictor:
   scheduling_flag: 0
