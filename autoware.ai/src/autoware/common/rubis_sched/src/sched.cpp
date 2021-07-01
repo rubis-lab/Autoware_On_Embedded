@@ -162,11 +162,6 @@ void get_deadline_list(){
   }
   fclose(fp);
 
-  printf("in function\n");
-  for(int i = 0; i <= max_gpu_id_; i++){
-    printf("%d\n", gpu_deadline_list_[i]);
-  }
-
   return;  
 }
 
@@ -195,13 +190,14 @@ void termination(){
   exit(0);
 }
 
-void request_gpu(unsigned int id){
-  if(id > max_gpu_id_){
-    printf("[ERROR] GPU segment id bigger than max segment id!\n");
-    exit(1);
-  }
+void request_gpu(unsigned int id){  
   stop_profiling_cpu_seg_response_time();
   if(gpu_scheduling_flag_==1){
+    if(id > max_gpu_id_){
+      printf("[ERROR] GPU segment id bigger than max segment id!\n");
+      exit(1);
+    }
+    
     unsigned long long relative_deadline = gpu_deadline_list_[id];
     gpu_sched_info_->deadline = get_current_time_ns() + relative_deadline;
     gpu_sched_info_->state = WAIT;
