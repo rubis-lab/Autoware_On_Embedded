@@ -3,6 +3,17 @@
 namespace rubis{
 namespace sched{
 
+int key_id_;
+int is_scheduled_;
+int gpu_scheduling_flag_;
+GPUSchedInfo* gpu_sched_info_;
+int gpu_scheduler_pid_;
+std::string task_filename_;
+std::string gpu_deadline_filename_;
+// unsigned long long gpu_deadline_list_[1024];
+unsigned long long* gpu_deadline_list_;
+int max_gpu_id_ = 0;
+
 // system call hook to call SCHED_DEADLINE
 int sched_setattr(pid_t pid, const struct sched_attr *attr, unsigned int flags){
 	return syscall(__NR_sched_setattr, pid, attr, flags);
@@ -100,6 +111,7 @@ void init_gpu_scheduling(std::string task_filename, std::string gpu_deadline_fil
       printf("Cannot open /tmp/sm_key\n");
       termination();
   }
+
   key_t key;
   int shmid;
   key = ftok("/tmp/sm_key", key_id_);
@@ -109,6 +121,7 @@ void init_gpu_scheduling(std::string task_filename, std::string gpu_deadline_fil
   gpu_sched_info_->state = NONE;
   gpu_sched_info_->scheduling_flag = 0;
   printf("Task [%d] is ready to work\n", getpid());
+
   
   return;
 }
@@ -127,22 +140,16 @@ void get_deadline_list(){
 	  exit(1);
   }
   char buf[1024];
-
-  int max_id = 0;
+  
   while(1){
     int id;
     if(!fgets(buf, 1024, fp)) break;
     strtok(buf, "\n");
     sscanf(buf, "%d, %*llu", &id);
-    if(id > max_id) max_id = id;
+    if(id > max_gpu_id_) max_gpu_id_ = id;
   }
 
-  printf("max id: %d\n", max_id);
-  gpu_deadline_list_ = (unsigned long long *)malloc(sizeof(unsigned long long) * max_id);
-  for(int i = 0; i < max_id; i++){
-    gpu_deadline_list_[i] = (unsigned long long)(-1);
-  }
-
+  gpu_deadline_list_ = (unsigned long long *)malloc(sizeof(unsigned long long) * (max_gpu_id_+1));
   printf("file read is finished\n");
 
   rewind(fp);
@@ -154,6 +161,11 @@ void get_deadline_list(){
     gpu_deadline_list_[id] = deadline;
   }
   fclose(fp);
+
+  printf("in function\n");
+  for(int i = 0; i <= max_gpu_id_; i++){
+    printf("%d\n", gpu_deadline_list_[i]);
+  }
 
   return;  
 }
@@ -184,9 +196,12 @@ void termination(){
 }
 
 void request_gpu(unsigned int id){
-  std::cout<<"request_gpu"<<std::endl;
+  if(id > max_gpu_id_){
+    printf("[ERROR] GPU segment id bigger than max segment id!\n");
+    exit(1);
+  }
   stop_profiling_cpu_seg_response_time();
-  if(gpu_scheduling_flag_){
+  if(gpu_scheduling_flag_==1){
     unsigned long long relative_deadline = gpu_deadline_list_[id];
     gpu_sched_info_->deadline = get_current_time_ns() + relative_deadline;
     gpu_sched_info_->state = WAIT;
@@ -196,6 +211,7 @@ void request_gpu(unsigned int id){
 
   if(gpu_scheduling_flag_ == 1){
     while(1){
+      kill(gpu_scheduler_pid_, SIGUSR1);
       if(gpu_sched_info_->scheduling_flag == 1) break;
     }
   }
@@ -209,12 +225,10 @@ void request_gpu(unsigned int id){
 }
 
 void yield_gpu(unsigned int id, std::string remark){
-  std::cout<<"yield_gpu"<<std::endl;
   if(gpu_scheduling_flag_==1){
     gpu_sched_info_->scheduling_flag = 0;
     gpu_sched_info_->state = NONE;
   }
-  
   stop_profiling_cpu_seg_response_time();
   stop_profiling_gpu_seg_time(id, remark);
   start_profiling_cpu_seg_response_time();

@@ -88,7 +88,7 @@ struct sched_attr {
 	__u64 sched_period;
 };
 
-// GPU scheduling
+// GPU 
 typedef struct  gpuSchedInfo{
     int pid;
     unsigned long long deadline;
@@ -96,14 +96,16 @@ typedef struct  gpuSchedInfo{
     int scheduling_flag;
 } GPUSchedInfo;
 
-static int key_id_;
-static int is_scheduled_;
-static int gpu_scheduling_flag_;
-static GPUSchedInfo* gpu_sched_info_;
-static int gpu_scheduler_pid_;
-static std::string task_filename_;
-static std::string gpu_deadline_filename_;
-static unsigned long long* gpu_deadline_list_;
+extern int key_id_;
+extern int is_scheduled_;
+extern int gpu_scheduling_flag_;
+extern GPUSchedInfo* gpu_sched_info_;
+extern int gpu_scheduler_pid_;
+extern std::string task_filename_;
+extern std::string gpu_deadline_filename_;
+// extern unsigned long long gpu_deadline_list_[1024];
+extern unsigned long long* gpu_deadline_list_;
+extern int max_gpu_id_;
 
 // Task scheduling
 int sched_setattr(pid_t pid, const struct sched_attr *attr, unsigned int flags);

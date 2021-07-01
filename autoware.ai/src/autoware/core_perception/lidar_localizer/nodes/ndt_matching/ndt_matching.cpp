@@ -1554,8 +1554,9 @@ int main(int argc, char** argv)
   private_nh.param<std::string>("/ndt_matching/gpu_response_time_filename", gpu_response_time_filename, "/home/hypark/Documents/gpu_profiling/test_ndt_matching_response_time.csv");
   private_nh.param<std::string>("/ndt_matching/gpu_deadline_filename", gpu_deadline_filename, "/home/hypark/Documents/gpu_deadline/ndt_matching_gpu_deadline.csv");
   
-  if(task_profiling_flag) sched::init_task_profiling(task_response_time_filename);
-  if(gpu_profiling_flag) sched::init_gpu_profiling(gpu_execution_time_filename, gpu_response_time_filename);
+  if(task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
+  if(gpu_profiling_flag) rubis::sched::init_gpu_profiling(gpu_execution_time_filename, gpu_response_time_filename);
+  
 
   // Set log file name.
   private_nh.getParam("output_log_data", _output_log_data);
@@ -1586,45 +1587,50 @@ int main(int argc, char** argv)
   private_nh.getParam("imu_topic", _imu_topic);
   private_nh.param<double>("gnss_reinit_fitness", _gnss_reinit_fitness, 500.0);
   
-  if( (_method_type == MethodType::PCL_ANH_GPU) && (gpu_scheduling_flag == 1) ){
-    sched::init_gpu_scheduling("/tmp/ndt_matching", gpu_deadline_filename, 0);
-  }    
-  else if(_method_type != MethodType::PCL_ANH_GPU && gpu_scheduling_flag == 1){
-    ROS_ERROR("GPU scheduling flag is true but type doesn't set to GPU!");
-    exit(1);
-  }
-
+  // if( (_method_type == MethodType::PCL_ANH_GPU) && (gpu_scheduling_flag == 1) ){
+  //   sched::init_gpu_scheduling("/tmp/ndt_matching", gpu_deadline_filename, 0);
+  // }    
+  // else if(_method_type != MethodType::PCL_ANH_GPU && gpu_scheduling_flag == 1){
+  //   ROS_ERROR("GPU scheduling flag is true but type doesn't set to GPU!");
+  //   exit(1);
+  // }
 
   if (nh.getParam("localizer", _localizer) == false)
   {
     std::cout << "localizer is not set." << std::endl;
     return 1;
   }
+
   if (nh.getParam("tf_x", _tf_x) == false)
   {
     std::cout << "tf_x is not set." << std::endl;
     return 1;
   }
+
   if (nh.getParam("tf_y", _tf_y) == false)
   {
     std::cout << "tf_y is not set." << std::endl;
     return 1;
   }
+
   if (nh.getParam("tf_z", _tf_z) == false)
   {
     std::cout << "tf_z is not set." << std::endl;
     return 1;
   }
+
   if (nh.getParam("tf_roll", _tf_roll) == false)
   {
     std::cout << "tf_roll is not set." << std::endl;
     return 1;
   }
+
   if (nh.getParam("tf_pitch", _tf_pitch) == false)
   {
     std::cout << "tf_pitch is not set." << std::endl;
     return 1;
   }
+
   if (nh.getParam("tf_yaw", _tf_yaw) == false)
   {
     std::cout << "tf_yaw is not set." << std::endl;
@@ -1667,6 +1673,14 @@ int main(int argc, char** argv)
     exit(1);
   }
 #endif
+
+  if( (_method_type == MethodType::PCL_ANH_GPU) && (gpu_scheduling_flag == 1) ){
+    rubis::sched::init_gpu_scheduling("/tmp/ndt_matching", gpu_deadline_filename, 0);
+  }    
+  else if(_method_type != MethodType::PCL_ANH_GPU && gpu_scheduling_flag == 1){
+    ROS_ERROR("GPU scheduling flag is true but type doesn't set to GPU!");
+    exit(1);
+  }
 
   Eigen::Translation3f tl_btol(_tf_x, _tf_y, _tf_z);                 // tl: translation
   Eigen::AngleAxisf rot_x_btol(_tf_roll, Eigen::Vector3f::UnitX());  // rot: rotation
@@ -1718,13 +1732,12 @@ int main(int argc, char** argv)
     ros::Rate r(rate);
     while(ros::ok()){
       
-      if(task_profiling_flag) sched::start_task_profiling();
-      if(gpu_profiling_flag) sched::refresh_gpu_profiling();
-      if(task_scheduling_flag) sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline);
-      printf("after request_task_scheduling\n");
+      if(task_profiling_flag) rubis::sched::start_task_profiling();
+      if(gpu_profiling_flag) rubis::sched::refresh_gpu_profiling();
+      if(task_scheduling_flag) rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline);
       ros::spinOnce();
-      if(task_scheduling_flag) sched::yield_task_scheduling();
-      if(task_profiling_flag) sched::stop_task_profiling();
+      if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
+      if(task_profiling_flag) rubis::sched::stop_task_profiling();
 
       r.sleep();
     }  
