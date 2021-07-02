@@ -2,8 +2,33 @@
 
 namespace rubis{
 namespace sched{
+  int task_profiling_flag_;
+  int gpu_profiling_flag_;
+
+  FILE* task_response_time_fp_;
+  FILE* seg_execution_time_fp_;
+  FILE* seg_response_time_fp_;
+
+  unsigned int cpu_seg_id_;
+  int is_gpu_profiling_started_;
+
+  struct timespec task_start_time_;
+  struct timespec task_end_time_;
+  unsigned long long gpu_seg_response_time_;
+  unsigned long long gpu_seg_execution_time_;
+  unsigned long long cpu_seg_response_time_;
 
   void init_task_profiling(std::string task_reponse_time_filename){
+    if(task_reponse_time_filename.at(0) != '~'){
+      std::cout<<"[ERROR] task response time filepath should be started with '~'."<<std::endl;
+      exit(1);
+    }
+    else{
+      task_reponse_time_filename.erase(0, 1);
+      std::string user_home_str(std::getenv("USER_HOME"));
+      task_reponse_time_filename =  user_home_str + std::string("/") + task_reponse_time_filename;
+    }
+
     task_profiling_flag_ = 1;
     task_response_time_fp_ = fopen(task_reponse_time_filename.c_str(), "w+");
     chmod(task_reponse_time_filename.c_str(), strtol("0777", 0, 8));
@@ -22,6 +47,26 @@ namespace sched{
   }
 
   void init_gpu_profiling(std::string execution_time_filename, std::string response_time_filename){
+    if(execution_time_filename.at(0) != '~'){
+      std::cout<<"[ERROR] Segments execution time filepath should be started with '~'."<<std::endl;
+      exit(1);
+    }
+    else{
+      execution_time_filename.erase(0, 1);
+      std::string user_home_str(std::getenv("USER_HOME"));
+      execution_time_filename =  user_home_str + std::string("/") + execution_time_filename;
+    }
+
+    if(response_time_filename.at(0) != '~'){
+      std::cout<<"[ERROR] Segments response time filepath should be started with '~'."<<std::endl;
+      exit(1);
+    }
+    else{
+      response_time_filename.erase(0, 1);
+      std::string user_home_str(std::getenv("USER_HOME"));
+      response_time_filename =  user_home_str + std::string("/") + response_time_filename;
+    }
+
     gpu_profiling_flag_ = 1;
     seg_execution_time_fp_ = fopen(execution_time_filename.c_str(), "w+");
     chmod(execution_time_filename.c_str(), strtol("0777", 0, 8));

@@ -1,8 +1,8 @@
 <launch>
   <!--  Dynamic Pure Pursuit Param -->
-  <rosparam command="load" file="/home/hypark/autoware.ai/autoware_files/lgsvl_file/parameter/lgsvl_pure_pursuit.yaml" />
+  <rosparam command="load" file="$(env USER_HOME)/autoware.ai/autoware_files/lgsvl_file/parameter/lgsvl_pure_pursuit.yaml" />
 
-  <rosparam command="load" file="/home/hypark/autoware.ai/autoware_files/data/yaml/hypark_scheduling_params.yaml" />
+  <rosparam command="load" file="$(env USER_HOME)/autoware.ai/autoware_files/data/yaml/desktop_scheduling_params.yaml" />
   
   <!-- pure_pursuit  -->
   <include file="$(find pure_pursuit)/launch/pure_pursuit.launch">    

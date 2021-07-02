@@ -7,24 +7,25 @@
 #include <unistd.h>
 #include <string.h>
 #include <iostream>
+#include <cstdlib>
 
 namespace rubis {
 namespace sched {
-  static int task_profiling_flag_;
-  static int gpu_profiling_flag_;
+  extern int task_profiling_flag_;
+  extern int gpu_profiling_flag_;
 
-  static FILE* task_response_time_fp_;
-  static FILE* seg_execution_time_fp_;
-  static FILE* seg_response_time_fp_;
+  extern FILE* task_response_time_fp_;
+  extern FILE* seg_execution_time_fp_;
+  extern FILE* seg_response_time_fp_;
 
-  static unsigned int cpu_seg_id_;
-  static int is_gpu_profiling_started_;
+  extern unsigned int cpu_seg_id_;
+  extern int is_gpu_profiling_started_;
 
-  static struct timespec task_start_time_;
-  static struct timespec task_end_time_;
-  static unsigned long long gpu_seg_response_time_;
-  static unsigned long long gpu_seg_execution_time_;
-  static unsigned long long cpu_seg_response_time_;
+  extern struct timespec task_start_time_;
+  extern struct timespec task_end_time_;
+  extern unsigned long long gpu_seg_response_time_;
+  extern unsigned long long gpu_seg_execution_time_;
+  extern unsigned long long cpu_seg_response_time_;
 
   void init_task_profiling(std::string task_reponse_time_filename);
   void start_task_profiling();

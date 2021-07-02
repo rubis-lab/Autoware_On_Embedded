@@ -133,6 +133,16 @@ void sig_handler(int signum){
 }
 
 void get_deadline_list(){
+  if(gpu_deadline_filename_.at(0) != '~'){
+    std::cout<<"[ERROR] GPU segments deadline filepath should be started with '~'."<<std::endl;
+    exit(1);
+  }
+  else{
+    gpu_deadline_filename_.erase(0, 1);
+    std::string user_home_str(std::getenv("USER_HOME"));
+    gpu_deadline_filename_ =  user_home_str + std::string("/") + gpu_deadline_filename_;
+  }  
+
   FILE* fp;
   fp = fopen(gpu_deadline_filename_.c_str(), "r");
   if(fp==NULL){

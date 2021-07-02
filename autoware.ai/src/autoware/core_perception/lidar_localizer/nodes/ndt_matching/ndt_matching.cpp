@@ -1525,39 +1525,6 @@ int main(int argc, char** argv)
   health_checker_ptr_->ENABLE();
   health_checker_ptr_->NODE_ACTIVATE();
 
-  // Scheduling Setup
-  int task_scheduling_flag;
-  int task_profiling_flag;
-  std::string task_response_time_filename;
-  int rate;
-  double task_minimum_inter_release_time;
-  double task_execution_time;
-  double task_relative_deadline;
-
-  int gpu_scheduling_flag;
-  int gpu_profiling_flag;
-  std::string gpu_execution_time_filename;
-  std::string gpu_response_time_filename;
-  std::string gpu_deadline_filename;
-
-
-  private_nh.param<int>("/ndt_matching/task_scheduling_flag", task_scheduling_flag, 0);
-  private_nh.param<int>("/ndt_matching/task_profiling_flag", task_profiling_flag, 0);
-  private_nh.param<std::string>("/ndt_matching/task_response_time_filename", task_response_time_filename, "/home/hypark/Documents/profiling/response_time/ndt_matching.csv");
-  private_nh.param<int>("/ndt_matching/rate", rate, 10);
-  private_nh.param("/ndt_matching/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
-  private_nh.param("/ndt_matching/task_execution_time", task_execution_time, (double)10);
-  private_nh.param("/ndt_matching/task_relative_deadline", task_relative_deadline, (double)10);
-  private_nh.param("/ndt_matching/gpu_scheduling_flag", gpu_scheduling_flag, 0);
-  private_nh.param("/ndt_matching/gpu_profiling_flag", gpu_profiling_flag, 0);
-  private_nh.param<std::string>("/ndt_matching/gpu_execution_time_filename", gpu_execution_time_filename, "/home/hypark/Documents/gpu_profiling/test_ndt_matching_execution_time.csv");
-  private_nh.param<std::string>("/ndt_matching/gpu_response_time_filename", gpu_response_time_filename, "/home/hypark/Documents/gpu_profiling/test_ndt_matching_response_time.csv");
-  private_nh.param<std::string>("/ndt_matching/gpu_deadline_filename", gpu_deadline_filename, "/home/hypark/Documents/gpu_deadline/ndt_matching_gpu_deadline.csv");
-  
-  if(task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
-  if(gpu_profiling_flag) rubis::sched::init_gpu_profiling(gpu_execution_time_filename, gpu_response_time_filename);
-  
-
   // Set log file name.
   private_nh.getParam("output_log_data", _output_log_data);
   if(_output_log_data)
@@ -1595,11 +1562,11 @@ int main(int argc, char** argv)
   //   exit(1);
   // }
 
-  if (nh.getParam("localizer", _localizer) == false)
-  {
-    std::cout << "localizer is not set." << std::endl;
-    return 1;
-  }
+  // if (nh.getParam("localizer", _localizer) == false)
+  // {
+  //   std::cout << "localizer is not set." << std::endl;
+  //   return 1;
+  // }
 
   if (nh.getParam("tf_x", _tf_x) == false)
   {
@@ -1674,6 +1641,38 @@ int main(int argc, char** argv)
   }
 #endif
 
+  // Scheduling Setup
+  int task_scheduling_flag;
+  int task_profiling_flag;
+  std::string task_response_time_filename;
+  int rate;
+  double task_minimum_inter_release_time;
+  double task_execution_time;
+  double task_relative_deadline;
+
+  int gpu_scheduling_flag;
+  int gpu_profiling_flag;
+  std::string gpu_execution_time_filename;
+  std::string gpu_response_time_filename;
+  std::string gpu_deadline_filename;
+
+
+  private_nh.param<int>("/ndt_matching/task_scheduling_flag", task_scheduling_flag, 0);
+  private_nh.param<int>("/ndt_matching/task_profiling_flag", task_profiling_flag, 0);
+  private_nh.param<std::string>("/ndt_matching/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/ndt_matching.csv");
+  private_nh.param<int>("/ndt_matching/rate", rate, 10);
+  private_nh.param("/ndt_matching/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
+  private_nh.param("/ndt_matching/task_execution_time", task_execution_time, (double)10);
+  private_nh.param("/ndt_matching/task_relative_deadline", task_relative_deadline, (double)10);
+  private_nh.param("/ndt_matching/gpu_scheduling_flag", gpu_scheduling_flag, 0);
+  private_nh.param("/ndt_matching/gpu_profiling_flag", gpu_profiling_flag, 0);
+  private_nh.param<std::string>("/ndt_matching/gpu_execution_time_filename", gpu_execution_time_filename, "~/Documents/gpu_profiling/test_ndt_matching_execution_time.csv");
+  private_nh.param<std::string>("/ndt_matching/gpu_response_time_filename", gpu_response_time_filename, "~/Documents/gpu_profiling/test_ndt_matching_response_time.csv");
+  private_nh.param<std::string>("/ndt_matching/gpu_deadline_filename", gpu_deadline_filename, "~/Documents/gpu_deadline/ndt_matching_gpu_deadline.csv");
+  
+  if(task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
+  if(gpu_profiling_flag) rubis::sched::init_gpu_profiling(gpu_execution_time_filename, gpu_response_time_filename);
+  
   if( (_method_type == MethodType::PCL_ANH_GPU) && (gpu_scheduling_flag == 1) ){
     rubis::sched::init_gpu_scheduling("/tmp/ndt_matching", gpu_deadline_filename, 0);
   }    

@@ -1,5 +1,5 @@
 <launch>
-  <rosparam command="load" file="/home/hypark/autoware.ai/autoware_files/data/yaml/hypark_scheduling_params.yaml" />
+  <rosparam command="load" file="$(env USER_HOME)/autoware.ai/autoware_files/data/yaml/desktop_scheduling_params.yaml" />
   <!-- op_global_planning -->
   <include file="$(find op_global_planner)/launch/op_global_planner.launch">
     <arg name="pathDensity"           value="1" /> <!-- distance between each two waypoints-->

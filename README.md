@@ -54,7 +54,7 @@ AUTOWARE_COMPILE_WITH_CUDA=1 colcon build --cmake-args -DCMAKE_BUILD_TYPE=Releas
 colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release
 ```
 
-Since Autoware recommend to use directory name 'autoware.ai', you should make soft link with autoware.ai to this repository
+<!-- Since Autoware recommend to use directory name 'autoware.ai', you should make soft link with autoware.ai to this repository
 ```
 cd
 ln -s ${WORKSPACE_DIR}/RUBIS-SelfDriving ~/autoware.ai
@@ -63,7 +63,7 @@ ln -s ${WORKSPACE_DIR}/RUBIS-SelfDriving ~/autoware.ai
 And it is recommned to add below sourcing command in your `~/.bashrc` file.
 ```
 source ~/autoware.ai/install/setup.bash
-```
+``` -->
 
 ## How to build package in rubis_ws
 
@@ -77,16 +77,23 @@ catkin_init_workspace
 ```
 cd ${WORKSPACE_DIR}/rubis_ws
 catkin_make
-ln -s ${WORKSPACE_DIR}/rubis_ws ~/rubis_ws
-source ~/rubis_ws/devel/setup.bash
-
 ```
 
-## Create symoblic links
+## Launch script for additional setup
+```
+# Launch setup script
+cd ${WORKSPACE_DIR}/setup
+
+# USER_NAME: directory name of home
+./setup.sh ${USER_NAME} ${WORKSPACE_PATH} 
+```
+
+
+<!-- ## Create symoblic links
 ```
 ln -s ${WORKSPACE_DIR}/autoware.ai ~/autoware.ai
 ln -s ${WORKSPACE_DIR}/rubis_ws ~/rubis_ws
-```
+``` -->
 
 ## How to launch LGSVL scrips
 * Setup environments

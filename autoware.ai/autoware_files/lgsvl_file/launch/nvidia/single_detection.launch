@@ -1,5 +1,5 @@
 <launch>
-  <rosparam command="load" file="/home/nvidia/autoware.ai/autoware_files/data/yaml/nvidia_scheduling_params.yaml" />
+  <rosparam command="load" file="$(env USER_HOME)/autoware.ai/autoware_files/data/yaml/nvidia_scheduling_params.yaml" />
   <!-- setting of this launch file -->
   <arg name="car_detection" default="true" />
   <arg name="pedestrian_detection" default="false" />
