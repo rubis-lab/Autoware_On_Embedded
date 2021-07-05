@@ -1,10 +1,18 @@
 <launch>
-  <arg name="init_x" value="-8.72" />
+  <!-- testbed -->
+  <!-- <arg name="init_x" value="-8.72" />
   <arg name="init_y" value="51.74" />
   <arg name="init_z" value="-0.71" />
   <arg name="init_roll" value="0.0" />
   <arg name="init_pitch" value="0.0" />
-  <arg name="init_yaw" value="-1.8" />
+  <arg name="init_yaw" value="-1.8" /> -->
+  <!-- cubetown -->
+  <arg name="init_x" value="57.1" />
+  <arg name="init_y" value="1.38" />
+  <arg name="init_z" value="0.48" />
+  <arg name="init_roll" value="0.0" />
+  <arg name="init_pitch" value="0.0" />
+  <arg name="init_yaw" value="1.57" />
 
   <!-- vel/pose connect -->
   <arg name="topic_pose_stamped" default="/ndt_pose" />
@@ -20,7 +28,7 @@
 
   <!-- ndt_matching --><!-- pcl_generic=0, pcl_anh=1, pcl_anh_gpu=2, pcl_openmp=3 -->
   <include file="$(find lidar_localizer)/launch/ndt_matching.launch">
-    <arg name="method_type" value="2" /> 
+    <arg name="method_type" value="1" /> 
     <arg name="get_height" value="true" /> 
   </include>
 
@@ -36,11 +44,11 @@
     pitch: $(arg init_pitch),
     yaw: $(arg init_yaw),
     use_predict_pose: 1,
-    error_threshold: 50.0,
+    error_threshold: 0.01,
     resolution: 3.0,
     step_size: 0.5,
     trans_epsilon: 0.01,
-    max_iterations: 1}
+    max_iterations: 5}
   '"/>
 
   <!-- vel_pose_mux -->

@@ -85,7 +85,9 @@ catkin_make
 cd ${WORKSPACE_DIR}/setup
 
 # USER_NAME: directory name of home
-./setup.sh ${USER_NAME} ${WORKSPACE_PATH} 
+# WORTSPACE_PATH: path for Autoware_On_Embedded
+./setup.sh ${USER_NAME} ${WORKSPACE_PATH}
+sudo bash setup_bashrc.sh ${USER_NAME}
 ```
 
 
