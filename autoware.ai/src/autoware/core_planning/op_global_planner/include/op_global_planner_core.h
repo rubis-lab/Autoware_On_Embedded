@@ -151,7 +151,10 @@ private:
     PlannerHNS::RoadNetwork m_Map;
     bool  m_bKmlMap;
     PlannerHNS::PlannerH m_PlannerH;
-    std::vector<std::vector<PlannerHNS::WayPoint> > m_GeneratedTotalPaths;
+    // std::vector<std::vector<PlannerHNS::WayPoint> > m_GeneratedTotalPaths;
+
+    std::vector<std::vector<std::vector<PlannerHNS::WayPoint>>> m_GeneratedTotalPaths;
+    int selectedGlobalPathIdx;
 
     bool GenerateGlobalPlan(PlannerHNS::WayPoint& startPoint, PlannerHNS::WayPoint& goalPoint, std::vector<std::vector<PlannerHNS::WayPoint> >& generatedTotalPaths);
     void VisualizeAndSend(const std::vector<std::vector<PlannerHNS::WayPoint> > generatedTotalPaths);

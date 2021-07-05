@@ -14,6 +14,6 @@
     <!-- <rosparam command="load" file="$(find rubis_pkg)/cfg/$(arg intersectionFile)"/> -->
     
     <param name="evidence_tust_number"   value="$(arg evidence_tust_number)"/>        
-  </node>        
+  </node>       
       
 </launch>

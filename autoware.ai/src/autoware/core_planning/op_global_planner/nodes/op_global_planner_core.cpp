@@ -530,41 +530,44 @@ void GlobalPlanner::MainLoop()
 
     ClearOldCostFromMap();
 
+    // HJW updated for multi-lab
     if(m_GoalsPos.size() > 0)
     {
-      if(m_GeneratedTotalPaths.size() > 0 && m_GeneratedTotalPaths.at(0).size() > 3)
+      if(m_GeneratedTotalPaths.size() == 0) // initialize two paths
       {
-        if(m_params.bEnableReplanning)
-        {
-          PlannerHNS::RelativeInfo info;
-          bool ret = PlannerHNS::PlanningHelpers::GetRelativeInfoRange(m_GeneratedTotalPaths, m_CurrentPose, 0.75, info);
-          if(ret == true && info.iGlobalPath >= 0 &&  info.iGlobalPath < m_GeneratedTotalPaths.size() && info.iFront > 0 && info.iFront < m_GeneratedTotalPaths.at(info.iGlobalPath).size())
-          {
-            double remaining_distance =    m_GeneratedTotalPaths.at(info.iGlobalPath).at(m_GeneratedTotalPaths.at(info.iGlobalPath).size()-1).cost - (m_GeneratedTotalPaths.at(info.iGlobalPath).at(info.iFront).cost + info.to_front_distance);
-            if(remaining_distance <= REPLANNING_DISTANCE)
-            {
-              bMakeNewPlan = true;
-              if(m_GoalsPos.size() > 0)
-                m_iCurrentGoalIndex = (m_iCurrentGoalIndex + 1) % m_GoalsPos.size();
-              std::cout << "Current Goal Index = " << m_iCurrentGoalIndex << std::endl << std::endl;
-            }
-          }
-        }
-      }
-      else
-        bMakeNewPlan = true;
-
-      if(bMakeNewPlan || (m_params.bEnableDynamicMapUpdate && UtilityHNS::UtilityH::GetTimeDiffNow(m_ReplnningTimer) > REPLANNING_TIME))
-      {
-        UtilityHNS::UtilityH::GetTickCount(m_ReplnningTimer);
+        std::vector<std::vector<PlannerHNS::WayPoint>> tmp_path_list;
+        std::vector<std::vector<PlannerHNS::WayPoint>> tmp_path_list_2;
         PlannerHNS::WayPoint goalPoint = m_GoalsPos.at(m_iCurrentGoalIndex);
-        bool bNewPlan = GenerateGlobalPlan(m_CurrentPose, goalPoint, m_GeneratedTotalPaths);
 
+        bool bNewPlan = GenerateGlobalPlan(m_CurrentPose, goalPoint, tmp_path_list);
 
         if(bNewPlan)
         {
-          bMakeNewPlan = false;
-          VisualizeAndSend(m_GeneratedTotalPaths);
+          m_GeneratedTotalPaths.push_back(tmp_path_list);
+          int wp_size = tmp_path_list.at(0).size();
+
+          PlannerHNS::WayPoint path2_start_wp = tmp_path_list.at(0).at(wp_size / 2 + 10);
+          PlannerHNS::WayPoint path2_end_wp = tmp_path_list.at(0).at(wp_size / 2 - 10);
+          bool bNewPlan_2 = GenerateGlobalPlan(path2_start_wp, path2_end_wp, tmp_path_list_2);
+
+          if(bNewPlan_2){
+            m_GeneratedTotalPaths.push_back(tmp_path_list_2);
+          }
+          selectedGlobalPathIdx = 0;
+          VisualizeAndSend(m_GeneratedTotalPaths.at(selectedGlobalPathIdx));
+        }
+      }
+      else if(m_GeneratedTotalPaths.size() > 1){
+        PlannerHNS::RelativeInfo info;
+        bool ret = PlannerHNS::PlanningHelpers::GetRelativeInfoRange(m_GeneratedTotalPaths.at(selectedGlobalPathIdx), m_CurrentPose, 0.75, info);
+        if(ret == true && info.iGlobalPath >= 0 &&  info.iGlobalPath < m_GeneratedTotalPaths.at(selectedGlobalPathIdx).size() && info.iFront > 0 && info.iFront < m_GeneratedTotalPaths.at(selectedGlobalPathIdx).at(info.iGlobalPath).size())
+        {
+          double remaining_distance = m_GeneratedTotalPaths.at(selectedGlobalPathIdx).at(info.iGlobalPath).at(m_GeneratedTotalPaths.at(selectedGlobalPathIdx).at(info.iGlobalPath).size()-1).cost - (m_GeneratedTotalPaths.at(selectedGlobalPathIdx).at(info.iGlobalPath).at(info.iFront).cost + info.to_front_distance);
+          if(remaining_distance <= 50)
+          {
+            selectedGlobalPathIdx = 1 - selectedGlobalPathIdx;
+            VisualizeAndSend(m_GeneratedTotalPaths.at(selectedGlobalPathIdx));
+          }
         }
       }
       VisualizeDestinations(m_GoalsPos, m_iCurrentGoalIndex);
