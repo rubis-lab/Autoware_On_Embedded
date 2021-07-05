@@ -59,5 +59,5 @@ fi
 
 echo "Necessary directory paths are created to /home/${1}/Documents"
 
-# sudo ./setup_bashrc.sh $1
+sudo ./setup_bashrc.sh $1
 
