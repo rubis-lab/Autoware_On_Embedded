@@ -544,14 +544,18 @@ void GlobalPlanner::MainLoop()
         if(bNewPlan)
         {
           m_GeneratedTotalPaths.push_back(tmp_path_list);
-          int wp_size = tmp_path_list.at(0).size();
 
-          PlannerHNS::WayPoint path2_start_wp = tmp_path_list.at(0).at(wp_size / 2 + 10);
-          PlannerHNS::WayPoint path2_end_wp = tmp_path_list.at(0).at(wp_size / 2 - 10);
-          bool bNewPlan_2 = GenerateGlobalPlan(path2_start_wp, path2_end_wp, tmp_path_list_2);
+          // Do multi-lab driving only current position and goal point is close
+          // TODO : Add parameter for enable multi-lab driving
+          if(hypot(m_CurrentPose.pos.x - goalPoint.pos.x, m_CurrentPose.pos.y - goalPoint.pos.y) < 30){
+            int wp_size = tmp_path_list.at(0).size();
+            PlannerHNS::WayPoint path2_start_wp = tmp_path_list.at(0).at(wp_size / 2 + 10);
+            PlannerHNS::WayPoint path2_end_wp = tmp_path_list.at(0).at(wp_size / 2 - 10);
+            bool bNewPlan_2 = GenerateGlobalPlan(path2_start_wp, path2_end_wp, tmp_path_list_2);
 
-          if(bNewPlan_2){
-            m_GeneratedTotalPaths.push_back(tmp_path_list_2);
+            if(bNewPlan_2){
+              m_GeneratedTotalPaths.push_back(tmp_path_list_2);
+            }
           }
           selectedGlobalPathIdx = 0;
           VisualizeAndSend(m_GeneratedTotalPaths.at(selectedGlobalPathIdx));
