@@ -56,6 +56,7 @@ lidar_euclidean_cluster_detect:
   execution_time: 100000000
   relative_deadline: 100000000
   gpu_scheduling_flag: 0
+  gpu_profiling_flag: 0
   gpu_execution_time_filename: "~/Documents/gpu_profiling/test_clustering_execution_time.csv"
   gpu_response_time_filename: "~/Documents/gpu_profiling/test_clustering_response_time.csv"
   gpu_deadline_filename: "~/Documents/gpu_deadline/clustring_gpu_deadline.csv"
@@ -69,6 +70,7 @@ vision_darknet_detect:
   execution_time: 100000000
   relative_deadline: 100000000
   gpu_scheduling_flag: 0
+  gpu_profiling_flag: 0
   gpu_execution_time_filename: "~/Documents/gpu_profiling/test_yolo_execution_time.csv"
   gpu_response_time_filename: "~/Documents/gpu_profiling/test_yolo_response_time.csv"
   gpu_deadline_filename: "~/Documents/gpu_deadline/yolo_gpu_deadline.csv"

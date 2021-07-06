@@ -84,20 +84,6 @@
 
 using namespace cv;
 
-int scheduling_flag_;
-int profiling_flag_;
-std::string response_time_filename_;
-int rate_;
-double minimum_inter_release_time_;
-double execution_time_;
-double relative_deadline_;
-int main_gpu_scheduling_flag_;
-std::string gpu_execution_time_filename_;
-std::string gpu_response_time_filename_;
-std::string gpu_deadline_filename_;
-std::string gpu_remain_time_filename_;
-int gpu_identical_deadline_;
-
 ros::Publisher _pub_cluster_cloud;
 ros::Publisher _pub_ground_cloud;
 ros::Publisher _centroid_pub;
@@ -962,19 +948,33 @@ int main(int argc, char **argv)
   ros::NodeHandle h;
   ros::NodeHandle private_nh("~");
 
-  private_nh.param<int>("/lidar_euclidean_cluster_detect/scheduling_flag", scheduling_flag_, 0);
-  private_nh.param<int>("/lidar_euclidean_cluster_detect/profiling_flag", profiling_flag_, 0);
-  private_nh.param<std::string>("/lidar_euclidean_cluster_detect/response_time_filename", response_time_filename_, "/home/hypark/Documents/profiling/response_time/lidar_euclidean_cluster_detect.csv");
-  private_nh.param<int>("/lidar_euclidean_cluster_detect/rate", rate_, 10);
-  private_nh.param("/lidar_euclidean_cluster_detect/minimum_inter_release_time", minimum_inter_release_time_, (double)10);
-  private_nh.param("/lidar_euclidean_cluster_detect/execution_time", execution_time_, (double)10);
-  private_nh.param("/lidar_euclidean_cluster_detect/relative_deadline", relative_deadline_, (double)10);
-  private_nh.param("/lidar_euclidean_cluster_detect/gpu_scheduling_flag", gpu_scheduling_flag_, 0);
-  private_nh.param<std::string>("/lidar_euclidean_cluster_detect/gpu_execution_time_filename", gpu_execution_time_filename_, "/home/hypark/Documents/gpu_profiling/test_lidar_euclidean_cluster_detect_execution_time.csv");
-  private_nh.param<std::string>("/lidar_euclidean_cluster_detect/gpu_response_time_filename", gpu_response_time_filename_, "/home/hypark/Documents/gpu_profiling/test_lidar_euclidean_cluster_detect_response_time.csv");
-  private_nh.param<std::string>("/lidar_euclidean_cluster_detect/gpu_deadline_filename", gpu_deadline_filename_, "/home/hypark/Documents/gpu_deadline/lidar_euclidean_cluster_detect_gpu_deadline.csv");
-  private_nh.param<std::string>("/lidar_euclidean_cluster_detect/gpu_remain_time_filename", gpu_remain_time_filename_, "/home/hypark/Documents/gpu_profiling/test_lidar_euclidean_cluster_detect_remain_time.csv");
-  private_nh.param<int>("/lidar_euclidean_cluster_detect/gpu_identical_deadline", gpu_identical_deadline_, 0);
+  // Scheduling Setup
+  int task_scheduling_flag;
+  int task_profiling_flag;
+  std::string task_response_time_filename;
+  int rate;
+  double task_minimum_inter_release_time;
+  double task_execution_time;
+  double task_relative_deadline; 
+
+  int gpu_scheduling_flag;
+  int gpu_profiling_flag;
+  std::string gpu_execution_time_filename;
+  std::string gpu_response_time_filename;
+  std::string gpu_deadline_filename;
+
+  private_nh.param<int>("/lidar_euclidean_cluster_detect/task_scheduling_flag", task_scheduling_flag, 0);
+  private_nh.param<int>("/lidar_euclidean_cluster_detect/task_profiling_flag", task_profiling_flag, 0);
+  private_nh.param<std::string>("/lidar_euclidean_cluster_detect/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/lidar_euclidean_cluster_detect.csv");
+  private_nh.param<int>("/lidar_euclidean_cluster_detect/rate", rate, 10);
+  private_nh.param("/lidar_euclidean_cluster_detect/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
+  private_nh.param("/lidar_euclidean_cluster_detect/task_execution_time", task_execution_time, (double)10);
+  private_nh.param("/lidar_euclidean_cluster_detect/task_relative_deadline", task_relative_deadline, (double)10);
+  private_nh.param("/lidar_euclidean_cluster_detect/gpu_scheduling_flag", gpu_scheduling_flag, 0);
+  private_nh.param("/lidar_euclidean_cluster_detect/gpu_profiling_flag", gpu_profiling_flag, 0);
+  private_nh.param<std::string>("/lidar_euclidean_cluster_detect/gpu_execution_time_filename", gpu_execution_time_filename, "~/Documents/gpu_profiling/test_clustering_execution_time.csv");
+  private_nh.param<std::string>("/lidar_euclidean_cluster_detect/gpu_response_time_filename", gpu_response_time_filename, "~/Documents/gpu_profiling/test_clustering_response_time.csv");
+  private_nh.param<std::string>("/lidar_euclidean_cluster_detect/gpu_deadline_filename", gpu_deadline_filename, "~/Documents/gpu_deadline/cluster_gpu_deadline.csv");
 
   tf::StampedTransform transform;
   tf::TransformListener listener;
@@ -990,10 +990,16 @@ int main(int argc, char **argv)
   /* For GPU scheduling */
   #ifdef GPU_CLUSTERING
   int key_id = 1;    
-  int identical_deadline;
-  set_identical_deadline((unsigned long long)gpu_identical_deadline_);
-  set_gpu_scheduling_flag(gpu_scheduling_flag_);
-  init_scheduling("/tmp/cluster", gpu_deadline_filename_.c_str(), key_id);    
+  if(task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
+  if(gpu_profiling_flag) rubis::sched::init_gpu_profiling(gpu_execution_time_filename, gpu_response_time_filename);
+  
+  if(gpu_scheduling_flag){
+    rubis::sched::init_gpu_scheduling("/tmp/cluster", gpu_deadline_filename, key_id);
+  }    
+  else if(gpu_scheduling_flag){
+    ROS_ERROR("GPU scheduling flag is true but type doesn't set to GPU!");
+    exit(1);
+  }
   #endif
 
 
@@ -1092,12 +1098,7 @@ int main(int argc, char **argv)
   private_nh.param("clustering_ranges", str_ranges, std::string("[15,30,45,60]"));
     ROS_INFO("[%s] clustering_ranges: %s", __APP_NAME__, str_ranges.c_str());
 
-  #ifdef GPU_CLUSTERING
-  if(_use_gpu == true){        
-    initialize_file(gpu_execution_time_filename_.c_str(), gpu_response_time_filename_.c_str(), gpu_remain_time_filename_.c_str());
-  }
-  #endif
-
+ 
   if (_use_multiple_thres)
   {
     YAML::Node distances = YAML::Load(str_distances);
@@ -1132,41 +1133,23 @@ int main(int argc, char **argv)
   ros::Subscriber sub = h.subscribe(points_topic, 1, velodyne_callback);
 
   // SPIN
-  // if(!scheduling_flag_ && !profiling_flag_){
+  if(!task_scheduling_flag && !task_profiling_flag){
     ros::spin();
-  // }
-  // else{
-  //   FILE *fp;
-  //   if(profiling_flag_){      
-  //     fp = fopen(response_time_filename_.c_str(), "a");
-  //   }
+  }
+  else{    
+    ros::Rate r(rate);
+    while(ros::ok()){
+      
+      if(task_profiling_flag) rubis::sched::start_task_profiling();
+      if(gpu_profiling_flag) rubis::sched::refresh_gpu_profiling();
+      if(task_scheduling_flag) rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline);
+      ros::spinOnce();
+      if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
+      if(task_profiling_flag) rubis::sched::stop_task_profiling();
 
-  //   ros::Rate r(rate_);
-  //   struct timespec start_time, end_time;
-  //   while(ros::ok()){
-  //     if(profiling_flag_){        
-  //       clock_gettime(CLOCK_MONOTONIC, &start_time);
-  //     }
-  //     if(scheduling_flag_){
-  //       rubis::sched::set_sched_deadline(gettid(), 
-  //         static_cast<uint64_t>(execution_time_), 
-  //         static_cast<uint64_t>(relative_deadline_), 
-  //         static_cast<uint64_t>(minimum_inter_release_time_)
-  //       );
-  //     }      
+      r.sleep();
+    }  
+  }
 
-  //     ros::spinOnce();
-
-  //     if(profiling_flag_){
-  //       clock_gettime(CLOCK_MONOTONIC, &end_time);
-  //       fprintf(fp, "%lld.%.9ld,%lld.%.9ld,%d\n",start_time.tv_sec,start_time.tv_nsec,end_time.tv_sec,end_time.tv_nsec,getpid());    
-  //       fflush(fp);
-  //     }
-
-  //     r.sleep();
-  //   }  
-  // fclose(fp);
-  // }
-
-  // _gecl_cluster.close_file();
+  return 0;
 }
