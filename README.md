@@ -43,6 +43,10 @@ sudo make install
 ```
 
 Older versions may already be installed. If `/usr/lib/cmake/eigen3/Eigen3Config.cmake` is older than 3.3.7 version, copy files in `/usr/local/share/eigen3/cmake` to `/usr/lib/cmake/eigen3`.
+```
+sudo rm /usr/lib/cmake/eigen3/*
+sudo cp /usr/local/share/eigen3/cmake/* /usr/lib/cmake/eigen3
+```
 
 * Install dependent packages
 ```
@@ -85,12 +89,6 @@ cd ${WORKSPACE_DIR}/rubis_ws/src
 catkin_init_workspace
 ```
 
-* Build rubis_ws packages
-```
-cd ${WORKSPACE_DIR}/rubis_ws
-catkin_make
-```
-
 ## Launch script for additional setup
 ```
 # Launch setup script
@@ -101,17 +99,22 @@ cd ${WORKSPACE_DIR}/setup
 ./setup.sh ${USER_NAME} ${WORKSPACE_PATH}
 ```
 
-
 <!-- ## Create symoblic links
 ```
 ln -s ${WORKSPACE_DIR}/autoware.ai ~/autoware.ai
 ln -s ${WORKSPACE_DIR}/rubis_ws ~/rubis_ws
 ``` -->
 
+* Build rubis_ws packages
+```
+cd ${WORKSPACE_DIR}/rubis_ws
+catkin_make
+```
+
 ## How to launch LGSVL scrips
 * Setup environments
 ```
-cd ${WORKSPACE_DIR}/autoware_files/lgsvl_file/scripts
+cd ${WORKSPACE_DIR}/autoware.ai/autoware_files/lgsvl_file/scripts
 pip3 install --user .
 ```
 
