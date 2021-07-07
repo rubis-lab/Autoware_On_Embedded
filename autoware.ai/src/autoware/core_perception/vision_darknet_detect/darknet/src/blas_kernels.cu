@@ -7,11 +7,6 @@ extern "C" {
 #include "blas.h"
 #include "cuda.h"
 #include "utils.h"
-int count_bias = 0;
-int count_normalize = 0;
-int count_add = 0;
-int count_gpu = 0;
-int count_upsample = 0;
 }
 
 __global__ void scale_bias_kernel(float *output, float *biases, int n, int size)
@@ -27,18 +22,8 @@ void scale_bias_gpu(float *output, float *biases, int batch, int n, int size)
 {
     dim3 dimGrid((size-1)/BLOCK + 1, n, batch);
     dim3 dimBlock(BLOCK, 1, 1);
-    bias_id += 1;
 
-    stop_cpu_profiling();
-
-    request_scheduling(bias_id);
-    
     scale_bias_kernel<<<dimGrid, dimBlock>>>(output, biases, n, size);
-
-    stop_profiling(bias_id, LAUNCH);    
-
-    start_profiling_cpu_time();
-
     check_error(cudaPeekAtLastError());
 }
 
@@ -70,7 +55,6 @@ void backward_scale_gpu(float *x_norm, float *delta, int batch, int n, int size,
 
 __global__ void add_bias_kernel(float *output, float *biases, int batch, int n, int size)
 {
-
     int index = (blockIdx.x + blockIdx.y*gridDim.x) * blockDim.x + threadIdx.x;
     if (index >= n*size*batch) return;
     int i = index % size;
@@ -82,19 +66,11 @@ __global__ void add_bias_kernel(float *output, float *biases, int batch, int n, 
     output[(k*n+j)*size + i] += biases[j];
 }
 
-
-
 void add_bias_gpu(float *output, float *biases, int batch, int n, int size)
 {
     int num = n*size*batch;
-    add_id += 1;
 
-    stop_cpu_profiling();
-    request_scheduling(add_id);    
     add_bias_kernel<<<cuda_gridsize(num), BLOCK>>>(output, biases, batch, n, size);
-    stop_profiling(add_id, LAUNCH);    
-    start_profiling_cpu_time();
-
     check_error(cudaPeekAtLastError());
 }
 
@@ -222,24 +198,6 @@ __global__ void normalize_kernel(int N, float *x, float *mean, float *variance, 
     int f = (index/spatial)%filters;
     
     x[index] = (x[index] - mean[f])/(sqrtf(variance[f] + .00001f));
-}
-
-__global__ void normalize_kernel_1(int N, float *x, float *mean, int filters, int spatial)
-{
-    int index = (blockIdx.x + blockIdx.y*gridDim.x) * blockDim.x + threadIdx.x;
-    if (index >= N) return;
-    int f = (index/spatial)%filters;
-    
-    x[index] = (x[index] - mean[f]);
-}
-
-__global__ void normalize_kernel_2(int N, float *x, float *variance, int filters, int spatial)
-{
-    int index = (blockIdx.x + blockIdx.y*gridDim.x) * blockDim.x + threadIdx.x;
-    if (index >= N) return;
-    int f = (index/spatial)%filters;
-    
-    x[index] = x[index]/(sqrtf(variance[f] + .00001f));
 }
 
 __global__ void normalize_delta_kernel(int N, float *x, float *mean, float *variance, float *mean_delta, float *variance_delta, int batch, int filters, int spatial, float *delta)
@@ -507,31 +465,7 @@ __global__ void mul_kernel(int N, float *X, int INCX, float *Y, int INCY)
 extern "C" void normalize_gpu(float *x, float *mean, float *variance, int batch, int filters, int spatial)
 {
     size_t N = batch*filters*spatial;
-    normalize_id += 1;
-
-    #ifndef SLICING
-    stop_cpu_profiling();
-    request_scheduling(normalize_id);
     normalize_kernel<<<cuda_gridsize(N), BLOCK>>>(N, x, mean, variance, batch, filters, spatial);
-    stop_profiling(normalize_id, LAUNCH);
-    start_profiling_cpu_time();
-    #endif
-    
-    #ifdef SLICING
-    stop_cpu_profiling();
-    request_scheduling(normalize_id);
-    normalize_kernel_1<<<cuda_gridsize(N), BLOCK>>>(N, x, mean, filters, spatial);
-    stop_profiling(normalize_id, LAUNCH);
-    start_profiling_cpu_time();
-
-    stop_cpu_profiling();
-    request_scheduling(normalize_id);
-    normalize_kernel_2<<<cuda_gridsize(N), BLOCK>>>(N, x, variance, filters, spatial);
-    stop_profiling(normalize_id, LAUNCH);
-    start_profiling_cpu_time();
-    #endif
-
-
     check_error(cudaPeekAtLastError());
 }
 
@@ -672,29 +606,13 @@ extern "C" void copy_gpu(int N, float * X, int INCX, float * Y, int INCY)
 
 extern "C" void mul_gpu(int N, float * X, int INCX, float * Y, int INCY)
 {
-    fprintf(stderr, "mul_kernel\n");
     mul_kernel<<<cuda_gridsize(N), BLOCK>>>(N, X, INCX, Y, INCY);
     check_error(cudaPeekAtLastError());
 }
 
 extern "C" void copy_gpu_offset(int N, float * X, int OFFX, int INCX, float * Y, int OFFY, int INCY)
 {
-    copy_gpu_id += 1;
-
-    stop_cpu_profiling();
-
-    request_scheduling(copy_gpu_id);
-        
     copy_kernel<<<cuda_gridsize(N), BLOCK>>>(N, X, OFFX, INCX, Y, OFFY, INCY);
-
-    stop_profiling(copy_gpu_id, LAUNCH);
-
-    start_profiling_cpu_time();
-
-    // if(count_blas >= 533){        
-    //     file_write(filename, -1, -1, -1);
-    // }
-
     check_error(cudaPeekAtLastError());
 }
 
@@ -1112,17 +1030,6 @@ __global__ void upsample_kernel(size_t N, float *x, int w, int h, int c, int bat
 extern "C" void upsample_gpu(float *in, int w, int h, int c, int batch, int stride, int forward, float scale, float *out)
 {
     size_t size = w*h*c*batch*stride*stride;
-    upsample_id += 1;
-
-    stop_cpu_profiling();
-    
-    request_scheduling(upsample_id);
-    
     upsample_kernel<<<cuda_gridsize(size), BLOCK>>>(size, in, w, h, c, batch, stride, forward, scale, out);
-
-    stop_profiling(upsample_id, LAUNCH);
-
-    start_profiling_cpu_time();
-
     check_error(cudaPeekAtLastError());
 }

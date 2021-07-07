@@ -5,12 +5,7 @@
 extern "C" {
 #include "maxpool_layer.h"
 #include "cuda.h"
-#include <sys/types.h>
-#include <unistd.h>
-#include <sys/syscall.h>
-int count_max = 0;
 }
-
 
 __global__ void forward_maxpool_layer_kernel(int n, int in_h, int in_w, int in_c, int stride, int size, int pad, float *input, float *output, int *indexes)
 {
@@ -97,14 +92,7 @@ extern "C" void forward_maxpool_layer_gpu(maxpool_layer layer, network net)
 
     size_t n = h*w*c*layer.batch;
 
-    //max_id += 1;
-
-    //start_profiling();
-
     forward_maxpool_layer_kernel<<<cuda_gridsize(n), BLOCK>>>(n, layer.h, layer.w, layer.c, layer.stride, layer.size, layer.pad, net.input_gpu, layer.output_gpu, layer.indexes_gpu);
-
-    //stop_profiling(LAUNCH,"maxpool",max_id);
-
     check_error(cudaPeekAtLastError());
 }
 

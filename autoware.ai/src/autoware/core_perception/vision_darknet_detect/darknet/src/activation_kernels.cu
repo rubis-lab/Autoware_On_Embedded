@@ -5,11 +5,8 @@
 extern "C" {
 #include "activations.h"
 #include "cuda.h"
-#include <sys/types.h>
-#include <unistd.h>
-#include <sys/syscall.h>
-int count_activation = 0;
 }
+
 
 __device__ float lhtan_activate_kernel(float x)
 {
@@ -192,17 +189,7 @@ __global__ void gradient_array_kernel(float *x, int n, ACTIVATION a, float *delt
 
 extern "C" void activate_array_gpu(float *x, int n, ACTIVATION a) 
 {
-    activation_id += 1;
-    
-    stop_cpu_profiling();    
-
-    request_scheduling(activation_id);
-
     activate_array_kernel<<<cuda_gridsize(n), BLOCK>>>(x, n, a);
-
-    stop_profiling(activation_id, LAUNCH);
-    start_profiling_cpu_time();
-
     check_error(cudaPeekAtLastError());
 }
 
