@@ -19,14 +19,12 @@ unsigned long long cpu_seg_response_time_;
 void init_task_profiling(char* _task_response_time_filename){
   char task_response_time_filename[RUBIS_SCHED_BUFFER_SIZE];
   char* user_name = getenv("USER_HOME");
-  char separator[2] = "/";
 
   if(_task_response_time_filename[0] != '~'){
     strcpy(task_response_time_filename, _task_response_time_filename);
   }
   else{      
     strcpy(task_response_time_filename, user_name);
-    strcat(task_response_time_filename, separator);
     strcat(task_response_time_filename, &_task_response_time_filename[1]);
   }
 
@@ -50,7 +48,6 @@ void stop_task_profiling(){
 void init_gpu_profiling(char* _execution_time_filename, char* _response_time_filename){    
   char execution_time_filename[RUBIS_SCHED_BUFFER_SIZE];    
   char response_time_filename[RUBIS_SCHED_BUFFER_SIZE];    
-  char separator[2] = "/";
   char* user_name = getenv("USER_HOME");
 
 
@@ -59,7 +56,6 @@ void init_gpu_profiling(char* _execution_time_filename, char* _response_time_fil
   }
   else{      
     strcpy(execution_time_filename, user_name);
-    strcat(execution_time_filename, separator);
     strcat(execution_time_filename, &_execution_time_filename[1]);
   }
 
@@ -68,7 +64,6 @@ void init_gpu_profiling(char* _execution_time_filename, char* _response_time_fil
   }
   else{      
     strcpy(response_time_filename, user_name);
-    strcat(response_time_filename, separator);
     strcat(response_time_filename, &_response_time_filename[1]);
   }
 

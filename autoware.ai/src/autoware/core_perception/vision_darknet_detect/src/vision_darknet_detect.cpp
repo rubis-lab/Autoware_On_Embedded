@@ -24,7 +24,6 @@
 #include <unistd.h>
 #include <sys/syscall.h>
 #include "../darknet/src/cuda.h"
-#include <rubis_sched/sched.hpp>
 
 #define SPIN_PROFILING
 
@@ -33,43 +32,6 @@
 #else
 #include "gencolors.cpp"
 #endif
-extern"C" float htod_time;
-extern"C" float dtoh_time;
-extern"C" float launch_time;
-extern"C" cudaEvent_t e_event_start, e_event_stop, r_event_start, r_event_stop;
-extern"C" int is_scheduled_;
-extern"C" void start_profiling_cpu_time();
-extern"C" void stop_cpu_profiling();
-extern"C" void start_profiling_execution_time();
-extern"C" void start_profiling_response_time();
-extern"C" void stop_profiling(int id, int type);
-extern"C" void write_cpu_profiling_data(const char *id, long long int c_time);
-extern"C" void write_profiling_data(const char *id, float e_time, float r_time, int type);
-extern"C" void write_dummy_line();
-extern"C" void initialize_file(const char execution_time_filename[], const char response_time_filename[], const char remain_time_filename[]);
-extern"C" void close_file();
-extern"C" void sig_handler(int signum);
-extern"C" void set_gpu_scheduling_flag(int gpu_scheduling_flag);
-
-static std::string _execution_time_file_name;
-static std::string _response_time_file_name;
-static std::string _remain_time_file_name;
-static std::string _deadline_file_name;
-
-// Scheduling Setup
-int task_scheduling_flag;
-int task_profiling_flag;
-std::string task_response_time_filename;
-int rate;
-double task_minimum_inter_release_time;
-double task_execution_time;
-double task_relative_deadline;
-
-int gpu_scheduling_flag;
-int gpu_profiling_flag;
-std::string gpu_execution_time_filename;
-std::string gpu_response_time_filename;
-std::string gpu_deadline_filename;
 
 namespace darknet
 {
@@ -298,10 +260,6 @@ image Yolo3DetectorNode::convert_ipl_to_image(const sensor_msgs::ImageConstPtr& 
 
 void Yolo3DetectorNode::image_callback(const sensor_msgs::ImageConstPtr& in_image_message)
 {
-    start_profiling_cpu_time();
-
-    set_absolute_deadline();
-  
     std::vector< RectClassScore<float> > detections;
 
     
@@ -318,10 +276,6 @@ void Yolo3DetectorNode::image_callback(const sensor_msgs::ImageConstPtr& in_imag
     publisher_objects_.publish(output_message);
 
     free(darknet_image_.data);
-
-    stop_cpu_profiling();
-
-    write_dummy_line();//
 }
 
 void Yolo3DetectorNode::config_cb(const autoware_config_msgs::ConfigSSD::ConstPtr& param)
@@ -337,9 +291,20 @@ std::vector<std::string> Yolo3DetectorNode::read_custom_names_file(const std::st
     while (std::getline(file, str))
     {
         names.push_back(str);
-        std::cout << str <<  std::endl;
+        // std::cout << str <<  std::endl;
     }
     return names;
+}
+
+std::string Yolo3DetectorNode::convert_to_absolute_path(std::string relative_path){
+    std::string absolute_path;
+
+    if(relative_path.at(0) == '~'){
+      relative_path.erase(0, 1);
+      std::string user_home_str(std::getenv("USER_HOME"));
+      absolute_path =  user_home_str + relative_path;
+    }
+    return absolute_path;
 }
 
 void Yolo3DetectorNode::Run()
@@ -349,24 +314,49 @@ void Yolo3DetectorNode::Run()
 
     int key_id = 2;
 
+    // Scheduling Setup
+    int task_scheduling_flag;
+    int task_profiling_flag;
+    std::string task_response_time_filename_str;
+    int rate;
+    double task_minimum_inter_release_time;
+    double task_execution_time;
+    double task_relative_deadline;
+
+    int gpu_scheduling_flag;
+    int gpu_profiling_flag;
+    std::string gpu_execution_time_filename_str;
+    std::string gpu_response_time_filename_str;
+    std::string gpu_deadline_filename_str;
+
     private_node_handle.param<int>("/vision_darknet_detect/task_scheduling_flag", task_scheduling_flag, 0);
     private_node_handle.param<int>("/vision_darknet_detect/task_profiling_flag", task_profiling_flag, 0);
-    private_node_handle.param<std::string>("/vision_darknet_detect/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/vision_darknet_detect.csv");
+    private_node_handle.param<std::string>("/vision_darknet_detect/task_response_time_filename", task_response_time_filename_str, "~/Documents/profiling/response_time/vision_darknet_detect.csv");
     private_node_handle.param<int>("/vision_darknet_detect/rate", rate, 10);
     private_node_handle.param("/vision_darknet_detect/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
     private_node_handle.param("/vision_darknet_detect/task_execution_time", task_execution_time, (double)10);
     private_node_handle.param("/vision_darknet_detect/task_relative_deadline", task_relative_deadline, (double)10);
     private_node_handle.param("/vision_darknet_detect/gpu_scheduling_flag", gpu_scheduling_flag, 0);
     private_node_handle.param("/vision_darknet_detect/gpu_profiling_flag", gpu_profiling_flag, 0);
-    private_node_handle.param<std::string>("/vision_darknet_detect/gpu_execution_time_filename", gpu_execution_time_filename, "~/Documents/gpu_profiling/test_yolo_execution_time.csv");
-    private_node_handle.param<std::string>("/vision_darknet_detect/gpu_response_time_filename", gpu_response_time_filename, "~/Documents/gpu_profiling/test_yolo_response_time.csv");
-    private_node_handle.param<std::string>("/vision_darknet_detect/gpu_deadline_filename", gpu_deadline_filename, "~/Documents/gpu_deadline/yolo_gpu_deadline.csv");
+    private_node_handle.param<std::string>("/vision_darknet_detect/gpu_execution_time_filename", gpu_execution_time_filename_str, "~/Documents/gpu_profiling/test_yolo_execution_time.csv");
+    private_node_handle.param<std::string>("/vision_darknet_detect/gpu_response_time_filename", gpu_response_time_filename_str, "~/Documents/gpu_profiling/test_yolo_response_time.csv");
+    private_node_handle.param<std::string>("/vision_darknet_detect/gpu_deadline_filename", gpu_deadline_filename_str, "~/Documents/gpu_deadline/yolo_gpu_deadline.csv");
     
-    if(task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
-    if(gpu_profiling_flag) rubis::sched::init_gpu_profiling(gpu_execution_time_filename, gpu_response_time_filename);
+    char* task_response_time_filename = strdup(task_response_time_filename_str.c_str());
+    char* gpu_execution_time_filename = strdup(gpu_execution_time_filename_str.c_str());
+    char* gpu_response_time_filename = strdup(gpu_response_time_filename_str.c_str());
+    char* gpu_deadline_filename = strdup(gpu_deadline_filename_str.c_str());
+
+    std::cout<<"#### task_profiling_flag:"<<task_profiling_flag<<std::endl;
+    std::cout<<"#### gpu_profiling_flag:"<<gpu_profiling_flag<<std::endl;
+    std::cout<<"#### gpu_scheduling_flag:"<<gpu_scheduling_flag<<std::endl;
+    std::cout<<"#### task_scheduling_flag:"<<task_scheduling_flag<<std::endl;
+
+    if(task_profiling_flag) init_task_profiling(task_response_time_filename);
+    if(gpu_profiling_flag) init_gpu_profiling(gpu_execution_time_filename, gpu_response_time_filename);
 
     if(gpu_scheduling_flag){
-        rubis::sched::init_gpu_scheduling("/tmp/yolo", gpu_deadline_filename, key_id);
+        init_gpu_scheduling("/tmp/yolo", gpu_deadline_filename, key_id);
     }else if(gpu_scheduling_flag){
         ROS_ERROR("GPU scheduling flag is true but type doesn't set to GPU!");
         exit(1);
@@ -409,8 +399,10 @@ void Yolo3DetectorNode::Run()
     if (private_node_handle.getParam("names_file", names_file))
     {
         ROS_INFO("Names File: %s", names_file.c_str());
-        use_coco_names_ = false;
-        custom_names_ = read_custom_names_file(names_file);
+        use_coco_names_ = false;        
+        std::string _names_file = convert_to_absolute_path(names_file);
+
+        custom_names_ = read_custom_names_file(_names_file);
     }
     else
     {
@@ -426,7 +418,10 @@ void Yolo3DetectorNode::Run()
 
 
     ROS_INFO("Initializing Yolo on Darknet...");
-    yolo_detector_.load(network_definition_file, pretrained_model_file, score_threshold_, nms_threshold_);
+    std::string _network_definition_file = convert_to_absolute_path(network_definition_file);
+    std::string _pretrained_model_file = convert_to_absolute_path(pretrained_model_file);
+
+    yolo_detector_.load(_network_definition_file, _pretrained_model_file, score_threshold_, nms_threshold_);
     ROS_INFO("Initialization complete.");
 
     #if (CV_MAJOR_VERSION <= 2)
@@ -447,16 +442,17 @@ void Yolo3DetectorNode::Run()
 
     if(!task_scheduling_flag && !task_profiling_flag){
        ros::spin();
-    }else{       
+    }
+    else{       
         ros::Rate r(rate);        
         while(ros::ok()){
 
-            if(task_profiling_flag) rubis::sched::start_task_profiling();
-            if(gpu_profiling_flag) rubis::sched::refresh_gpu_profiling();
-            if(task_scheduling_flag) rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline);
+            if(task_profiling_flag) start_task_profiling();
+            if(gpu_profiling_flag) refresh_gpu_profiling();
+            if(task_scheduling_flag) request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline);
             ros::spinOnce();
-            if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
-            if(task_profiling_flag) rubis::sched::stop_task_profiling();
+            if(task_scheduling_flag) yield_task_scheduling();
+            if(task_profiling_flag) stop_task_profiling();
             
             r.sleep();
         }          

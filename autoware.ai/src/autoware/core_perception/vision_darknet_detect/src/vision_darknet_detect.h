@@ -55,6 +55,7 @@ extern "C"
 #include "utils.h"
 #include "image.h"
 #include "../darknet/src/cuda.h"
+#include "rubis_sched/sched_c.h"
 #define __cplusplus
 }
 
@@ -115,8 +116,10 @@ class Yolo3DetectorNode {
     void                            image_callback(const sensor_msgs::ImageConstPtr& in_image_message);
     void                            config_cb(const autoware_config_msgs::ConfigSSD::ConstPtr& param);
     std::vector<std::string>        read_custom_names_file(const std::string& in_path);
+    std::string                     convert_to_absolute_path(std::string relative_path);
 public:
     void    Run();
+    
 };
 
 #endif  // DARKNET_YOLO3_H

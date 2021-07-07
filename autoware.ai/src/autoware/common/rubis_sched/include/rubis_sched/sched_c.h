@@ -12,7 +12,7 @@
 #include <sys/ipc.h>
 #include <string.h>
 #include <time.h>
-#include <sched.h>
+// #include <sched.h>
 #include <signal.h>
 #include <sys/shm.h>
 
@@ -106,8 +106,8 @@ extern unsigned long long* gpu_deadline_list_;
 extern int max_gpu_id_;
 
 // Task scheduling
-int sched_setattr(pid_t pid, const struct sched_attr *attr, unsigned int flags);
-int sched_getattr(pid_t pid, struct sched_attr *attr, unsigned int size, unsigned int flags);
+// int sched_setattr(pid_t pid, const struct sched_attr *attr, unsigned int flags);
+// int sched_getattr(pid_t pid, struct sched_attr *attr, unsigned int size, unsigned int flags);
 int set_sched_deadline(int _tid, __u64 _exec_time, __u64 _deadline, __u64 _period);
 void request_task_scheduling(double task_minimum_inter_release_time, double task_execution_time, double task_relative_deadline);
 void yield_task_scheduling();

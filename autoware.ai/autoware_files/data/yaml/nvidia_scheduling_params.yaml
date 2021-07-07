@@ -11,9 +11,9 @@
 
 # Sensing
 ray_ground_filter:
-  scheduling_flag: 0
-  profiling_flag: 0
-  response_time_filename: "~/Documents/profiling/response_time/ray_ground_filter.csv"
+  task_scheduling_flag: 0
+  task_profiling_flag: 0
+  task_response_time_filename: "~/Documents/profiling/response_time/ray_ground_filter.csv"
   rate: 10 
   minimum_inter_release_time: 100000000
   execution_time: 100000000
@@ -21,9 +21,9 @@ ray_ground_filter:
   
 # Localization
 voxel_grid_filter:
-  scheduling_flag: 0
-  profiling_flag: 0
-  response_time_filename: "~/Documents/profiling/response_time/voxel_grid_filter.csv"
+  task_scheduling_flag: 0
+  task_profiling_flag: 0
+  task_response_time_filename: "~/Documents/profiling/response_time/voxel_grid_filter.csv"
   rate: 10 
   minimum_inter_release_time: 100000000
   execution_time: 100000000
@@ -48,27 +48,29 @@ calibration_publisher:
   calibration_file: "~/autoware.ai/autoware_files/data/calibration/single_lidar/Lexus2016RXHybrid.yaml"
 
 lidar_euclidean_cluster_detect:
-  scheduling_flag: 0
-  profiling_flag: 0
-  response_time_filename: "~/Documents/profiling/response_time/lidar_euclidean_cluster_detect.csv"
+  task_scheduling_flag: 0
+  task_profiling_flag: 0
+  task_response_time_filename: "~/Documents/profiling/response_time/lidar_euclidean_cluster_detect.csv"
   rate: 10 
   minimum_inter_release_time: 100000000
   execution_time: 100000000
   relative_deadline: 100000000
   gpu_scheduling_flag: 0
+  gpu_profiling_flag: 0
   gpu_execution_time_filename: "~/Documents/gpu_profiling/test_clustering_execution_time.csv"
   gpu_response_time_filename: "~/Documents/gpu_profiling/test_clustering_response_time.csv"
   gpu_deadline_filename: "~/Documents/gpu_deadline/clustring_gpu_deadline.csv"
 
 vision_darknet_detect:
-  scheduling_flag: 0
-  profiling_flag: 0
-  response_time_filename: "~/Documents/profiling/response_time/vision_darknet_detect.csv"
+  task_scheduling_flag: 0
+  task_profiling_flag: 0
+  task_response_time_filename: "~/Documents/profiling/response_time/vision_darknet_detect.csv"
   rate: 10 
   minimum_inter_release_time: 100000000
   execution_time: 100000000
   relative_deadline: 100000000
-  gpu_scheduling_flag: 0
+  gpu_scheduling_flag: 1
+  gpu_profiling_flag: 0
   gpu_execution_time_filename: "~/Documents/gpu_profiling/test_yolo_execution_time.csv"
   gpu_response_time_filename: "~/Documents/gpu_profiling/test_yolo_response_time.csv"
   gpu_deadline_filename: "~/Documents/gpu_deadline/yolo_gpu_deadline.csv"
@@ -76,18 +78,18 @@ vision_darknet_detect:
   pretrained_model_file: "~/autoware.ai/autoware_files/vision/yolov3-tiny.weights"
 
 imm_ukf_pda_track:
-  scheduling_flag: 0
-  profiling_flag: 0
-  response_time_filename: "~/Documents/profiling/response_time/imm_ukf_pda_track.csv"
+  task_scheduling_flag: 0
+  task_profiling_flag: 0
+  task_response_time_filename: "~/Documents/profiling/response_time/imm_ukf_pda_track.csv"
   rate: 10 
   minimum_inter_release_time: 100000000
   execution_time: 100000000
   relative_deadline: 100000000
 
 range_vision_fusion:
-  scheduling_flag: 0
-  profiling_flag: 0
-  response_time_filename: "~/Documents/profiling/response_time/range_vision_fusion.csv"
+  task_scheduling_flag: 0
+  task_profiling_flag: 0
+  task_response_time_filename: "~/Documents/profiling/response_time/range_vision_fusion.csv"
   rate: 10 
   minimum_inter_release_time: 100000000
   execution_time: 100000000
@@ -95,9 +97,9 @@ range_vision_fusion:
 
 # Planning
 op_global_planner:
-  scheduling_flag: 0
-  profiling_flag: 0
-  response_time_filename: "~/Documents/profiling/response_time/op_global_planner.csv"
+  task_scheduling_flag: 0
+  task_profiling_flag: 0
+  task_response_time_filename: "~/Documents/profiling/response_time/op_global_planner.csv"
   rate: 25 #25
   minimum_inter_release_time: 100000000
   execution_time: 100000000
@@ -111,18 +113,18 @@ op_common_params:
   maxDeceleration: -10.0
 
 op_trajectory_generator:
-  scheduling_flag: 0
-  profiling_flag: 0
-  response_time_filename: "~/Documents/profiling/response_time/op_trajectory_generator.csv"
+  task_scheduling_flag: 0
+  task_profiling_flag: 0
+  task_response_time_filename: "~/Documents/profiling/response_time/op_trajectory_generator.csv"
   rate: 100 #100
   minimum_inter_release_time: 10000000
   execution_time: 10000000
   relative_deadline: 10000000
 
 op_trajectory_evaluator:
-  scheduling_flag: 0
-  profiling_flag: 0
-  response_time_filename: "~/Documents/profiling/response_time/op_trajectory_evaluator.csv"
+  task_scheduling_flag: 0
+  task_profiling_flag: 0
+  task_response_time_filename: "~/Documents/profiling/response_time/op_trajectory_evaluator.csv"
   rate: 10 #100
   minimum_inter_release_time: 100000000
   execution_time: 100000000
@@ -136,9 +138,9 @@ op_trajectory_evaluator:
   SprintDecisionTime: 9999999.0
 
 op_behavior_selector:
-  scheduling_flag: 0
-  profiling_flag: 0
-  response_time_filename: "~/Documents/profiling/response_time/op_behavior_selector.csv"
+  task_scheduling_flag: 0
+  task_profiling_flag: 0
+  task_response_time_filename: "~/Documents/profiling/response_time/op_behavior_selector.csv"
   rate: 10 #100
   minimum_inter_release_time: 10000000
   execution_time: 10000000
@@ -149,9 +151,9 @@ op_behavior_selector:
   turnThreshold: 30.0
 
 op_motion_predictor:
-  scheduling_flag: 0
-  profiling_flag: 0
-  response_time_filename: "~/Documents/profiling/response_time/op_motion_predictor.csv"
+  task_scheduling_flag: 0
+  task_profiling_flag: 0
+  task_response_time_filename: "~/Documents/profiling/response_time/op_motion_predictor.csv"
   rate: 10 #25
   minimum_inter_release_time: 40000000
   execution_time: 40000000
@@ -159,9 +161,9 @@ op_motion_predictor:
 
 # Control
 pure_pursuit:
-  scheduling_flag: 0
-  profiling_flag: 0
-  response_time_filename: "~/Documents/profiling/response_time/pure_pursuit.csv"
+  task_scheduling_flag: 0
+  task_profiling_flag: 0
+  task_response_time_filename: "~/Documents/profiling/response_time/pure_pursuit.csv"
   rate: 1 #30
   minimum_inter_release_time: 33333333
   execution_time: 33333333
@@ -170,18 +172,18 @@ pure_pursuit:
   dynamic_params_path: "~/autoware.ai/autoware_files/lgsvl_file/parameter/lgsvl_pure_pursuit.yaml"
 
 twist_filter:
-  scheduling_flag: 0
-  profiling_flag: 0
-  response_time_filename: "~/Documents/profiling/response_time/twist_filter.csv"
+  task_scheduling_flag: 0
+  task_profiling_flag: 0
+  task_response_time_filename: "~/Documents/profiling/response_time/twist_filter.csv"
   rate: 1 
   minimum_inter_release_time: 100000000
   execution_time: 100000000
   relative_deadline: 100000000
 
 twist_gate:
-  scheduling_flag: 0
-  profiling_flag: 0
-  response_time_filename: "~/Documents/profiling/response_time/twist_gate.csv"
+  task_scheduling_flag: 0
+  task_profiling_flag: 0
+  task_response_time_filename: "~/Documents/profiling/response_time/twist_gate.csv"
   rate: 1 
   minimum_inter_release_time: 100000000
   execution_time: 100000000

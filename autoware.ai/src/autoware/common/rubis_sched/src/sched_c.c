@@ -62,7 +62,7 @@ void init_gpu_scheduling(char* task_filename, char* gpu_deadline_filename, int k
   task_filename_ = (char *)malloc(strlen(task_filename) * sizeof(char));
   gpu_deadline_filename_ = (char *)malloc(strlen(gpu_deadline_filename) * sizeof(char));
 
-  strcpy(task_filename, task_filename);
+  strcpy(task_filename_, task_filename);
   strcpy(gpu_deadline_filename_, gpu_deadline_filename);
   key_id_ = key_id;
 
@@ -132,7 +132,6 @@ void sig_handler(int signum){
 
 void get_deadline_list(){
   char gpu_deadline_filename[RUBIS_SCHED_BUFFER_SIZE];
-  char separator[2] = "/";
   char* user_name = getenv("USER_HOME");
 
   if(gpu_deadline_filename_[0] != '~'){
@@ -140,7 +139,6 @@ void get_deadline_list(){
   }
   else{
     strcpy(gpu_deadline_filename, user_name);
-    strcat(gpu_deadline_filename, separator);
     strcat(gpu_deadline_filename, &gpu_deadline_filename_[1]);
   }  
 

@@ -19,14 +19,10 @@ namespace sched{
   unsigned long long cpu_seg_response_time_;
 
   void init_task_profiling(std::string task_reponse_time_filename){
-    if(task_reponse_time_filename.at(0) != '~'){
-      std::cout<<"[ERROR] task response time filepath should be started with '~'."<<std::endl;
-      exit(1);
-    }
-    else{
+    if(task_reponse_time_filename.at(0) == '~'){
       task_reponse_time_filename.erase(0, 1);
       std::string user_home_str(std::getenv("USER_HOME"));
-      task_reponse_time_filename =  user_home_str + std::string("/") + task_reponse_time_filename;
+      task_reponse_time_filename =  user_home_str + task_reponse_time_filename;
     }
 
     task_profiling_flag_ = 1;
@@ -47,24 +43,16 @@ namespace sched{
   }
 
   void init_gpu_profiling(std::string execution_time_filename, std::string response_time_filename){
-    if(execution_time_filename.at(0) != '~'){
-      std::cout<<"[ERROR] Segments execution time filepath should be started with '~'."<<std::endl;
-      exit(1);
-    }
-    else{
+    if(execution_time_filename.at(0) == '~'){
       execution_time_filename.erase(0, 1);
       std::string user_home_str(std::getenv("USER_HOME"));
-      execution_time_filename =  user_home_str + std::string("/") + execution_time_filename;
+      execution_time_filename =  user_home_str + execution_time_filename;
     }
 
-    if(response_time_filename.at(0) != '~'){
-      std::cout<<"[ERROR] Segments response time filepath should be started with '~'."<<std::endl;
-      exit(1);
-    }
-    else{
+    if(response_time_filename.at(0) == '~'){
       response_time_filename.erase(0, 1);
       std::string user_home_str(std::getenv("USER_HOME"));
-      response_time_filename =  user_home_str + std::string("/") + response_time_filename;
+      response_time_filename =  user_home_str + response_time_filename;
     }
 
     gpu_profiling_flag_ = 1;

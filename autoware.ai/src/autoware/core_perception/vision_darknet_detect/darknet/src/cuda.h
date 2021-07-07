@@ -2,6 +2,7 @@
 #define CUDA_H
 
 #include "darknet.h"
+#include "rubis_sched/sched_c.h"
 
 #ifdef GPU
 
