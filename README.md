@@ -7,15 +7,26 @@ Autoware system for embedded boards
 - ROS Melodic
 
 ## How to install ROS melodic
-* ROS Melodic Install
 ```
+sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
+sudo apt install curl -y
+curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
 sudo apt update
+sudo apt install ros-melodic-desktop-full -y
+echo "source /opt/ros/melodic/setup.bash" >> ~/.bashrc
+sudo apt install python-rosdep python-rosinstall python-rosinstall-generator python-wstool build-essential python-rosdep -y
+sudo rosdep init
+rosdep update
+```
+
+## How to build Autoware
+* System Dependencies of Ubuntu 18.04 / ROS Melodic
+```
+sudo apt-get update
 sudo apt install -y python-catkin-pkg python-rosdep ros-$ROS_DISTRO-catkin
 sudo apt install -y python3-pip python3-colcon-common-extensions python3-setuptools python3-vcstool
 pip3 install -U setuptools
 ```
-
-## How to build Autoware
 
 * Eigen build
 ```
