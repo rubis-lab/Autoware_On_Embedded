@@ -18,6 +18,8 @@ include_directories(
 )
 
 add_library(rubis_sched SHARED
+  src/sched_c.c
+  src/sched_profiling_c.c
   src/sched.cpp
   src/sched_profiling.cpp
 )
@@ -34,5 +36,7 @@ install(TARGETS rubis_sched
 
 install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-  FILES_MATCHING PATTERN "*.hpp"
+  FILES_MATCHING
+  PATTERN "*.hpp"
+  PATTERN "*.h"
 )
