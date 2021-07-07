@@ -1,4 +1,0 @@
-- Continuous planning(Updated by spiraline)
-global planner에서 initial pose와 goal pose를 기준으로 만드는 path의 절반 지점으로부터 시작하는 circle path를 만들어 두 path에서 남은 거리가 50m보다 짧아지면 다른 path로 전환되게 하여 circle map을 계속하여 주행할 수 있게 하였다.
-이 때 publish는 path가 바뀔 때에만 하게 하여 overhead를 줄였다.
-multi-lab driving에 대한 flag parameter를 추가하여 flag가 true일 때만 이 작업을 진행하고 아닌 경우에는 한 path만 만들 필요가 있다.
