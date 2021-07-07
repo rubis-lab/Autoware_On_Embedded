@@ -30,7 +30,7 @@ voxel_grid_filter:
   relative_deadline: 100000000
 
 ndt_matching:
-  task_scheduling_flag: 1
+  task_scheduling_flag: 0
   task_profiling_flag: 0
   task_response_time_filename: "~/Documents/profiling/response_time/ndt_matching.csv"
   rate: 10
@@ -55,14 +55,14 @@ lidar_euclidean_cluster_detect:
   minimum_inter_release_time: 100000000
   execution_time: 100000000
   relative_deadline: 100000000
-  gpu_scheduling_flag: 0
+  gpu_scheduling_flag: 1
   gpu_profiling_flag: 0
   gpu_execution_time_filename: "~/Documents/gpu_profiling/test_clustering_execution_time.csv"
   gpu_response_time_filename: "~/Documents/gpu_profiling/test_clustering_response_time.csv"
   gpu_deadline_filename: "~/Documents/gpu_deadline/clustring_gpu_deadline.csv"
 
 vision_darknet_detect:
-  task_scheduling_flag: 1
+  task_scheduling_flag: 0
   task_profiling_flag: 0
   task_response_time_filename: "~/Documents/profiling/response_time/vision_darknet_detect.csv"
   rate: 10 

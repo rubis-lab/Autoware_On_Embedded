@@ -66,8 +66,6 @@
 
 #include <autoware_msgs/DetectedObjectArray.h>
 
-#include <rubis_sched/sched.hpp>
-
 #include "cluster.h"
 
 #define SPIN_PROFILING
@@ -859,8 +857,6 @@ void removePointsUpTo(const pcl::PointCloud<pcl::PointXYZ>::Ptr in_cloud_ptr,
 
 void velodyne_callback(const sensor_msgs::PointCloud2ConstPtr& in_sensor_cloud)
 {
-  start_profiling_cpu_time();
-  set_absolute_deadline();
   //_start = std::chrono::system_clock::now();  
 
   if (!_using_sensor_cloud)
@@ -936,8 +932,6 @@ void velodyne_callback(const sensor_msgs::PointCloud2ConstPtr& in_sensor_cloud)
     publishCloudClusters(&_pub_clusters_message, cloud_clusters, _output_frame, _velodyne_header);
 
     _using_sensor_cloud = false;
-    stop_cpu_profiling();
-    write_dummy_line();
   }
 }
 int main(int argc, char **argv)
