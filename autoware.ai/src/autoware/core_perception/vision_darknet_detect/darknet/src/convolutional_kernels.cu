@@ -22,7 +22,10 @@ __global__ void binarize_kernel(float *x, int n, float *binary)
 
 void binarize_gpu(float *x, int n, float *binary)
 {
+    //request_gpu(53);
     binarize_kernel<<<cuda_gridsize(n), BLOCK>>>(x, n, binary);
+    //yield_gpu_with_remark(53,"binarize_kernel");
+
     check_error(cudaPeekAtLastError());
 }
 
@@ -43,7 +46,10 @@ __global__ void binarize_input_kernel(float *input, int n, int size, float *bina
 
 void binarize_input_gpu(float *input, int n, int size, float *binary)
 {
+    //request_gpu(54);
     binarize_input_kernel<<<cuda_gridsize(size), BLOCK>>>(input, n, size, binary);
+    //yield_gpu_with_remark(54,"binarize_input_kernel");
+
     check_error(cudaPeekAtLastError());
 }
 
@@ -66,7 +72,10 @@ __global__ void binarize_weights_kernel(float *weights, int n, int size, float *
 
 void binarize_weights_gpu(float *weights, int n, int size, float *binary)
 {
+    //request_gpu(55);
     binarize_weights_kernel<<<cuda_gridsize(n), BLOCK>>>(weights, n, size, binary);
+    //yield_gpu_with_remark(55,"binarize_weights_kernel");
+
     check_error(cudaPeekAtLastError());
 }
 
@@ -168,7 +177,10 @@ extern "C" void smooth_layer(layer l, int size, float rate)
 
     size_t n = h*w*c*l.batch;
 
+    //request_gpu(56);
     smooth_kernel<<<cuda_gridsize(n), BLOCK>>>(l.output_gpu, n, l.w, l.h, l.c, size, rate, l.delta_gpu);
+    //yield_gpu_with_remark(56,"smooth_kernel");
+    
     check_error(cudaPeekAtLastError());
 }
 

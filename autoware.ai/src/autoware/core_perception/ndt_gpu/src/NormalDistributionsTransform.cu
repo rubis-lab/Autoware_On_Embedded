@@ -3,6 +3,7 @@
 #include <cmath>
 #include <iostream>
 #include <pcl/common/transforms.h>
+#include "rubis_sched/sched.hpp"
 
 using namespace rubis::sched;
 
@@ -788,23 +789,41 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 
 	double *gradients, *hessians, *point_gradients, *point_hessians, *score;
 
+	//rubis::sched::request_gpu(18);
 	checkCudaErrors(cudaMalloc(&gradients, sizeof(double) * valid_points_num * 6));
+	//rubis::sched::yield_gpu(18,"cudaMalloc");
 
+	//rubis::sched::request_gpu(19);
 	checkCudaErrors(cudaMalloc(&hessians, sizeof(double) * valid_points_num * 6 * 6));
+	//rubis::sched::yield_gpu(19,"cudaMalloc");
 
+	//rubis::sched::request_gpu(20);
 	checkCudaErrors(cudaMalloc(&point_gradients, sizeof(double) * valid_points_num * 3 * 6));
+	//rubis::sched::yield_gpu(20,"cudaMalloc");
 
+	//rubis::sched::request_gpu(21);
 	checkCudaErrors(cudaMalloc(&point_hessians, sizeof(double) * valid_points_num * 18 * 6));
+	//rubis::sched::yield_gpu(21,"cudaMalloc");
 
+	//rubis::sched::request_gpu(22);
 	checkCudaErrors(cudaMalloc(&score, sizeof(double) * valid_points_num));
+	//rubis::sched::yield_gpu(22,"cudaMalloc");
 
+	//rubis::sched::request_gpu(23);
 	checkCudaErrors(cudaMemset(gradients, 0, sizeof(double) * valid_points_num * 6));
+	//rubis::sched::yield_gpu(23,"cudaMemset");
 
+	//rubis::sched::request_gpu(24);
 	checkCudaErrors(cudaMemset(hessians, 0, sizeof(double) * valid_points_num * 6 * 6));
+	//rubis::sched::yield_gpu(24,"cudaMemset");
 
+	//rubis::sched::request_gpu(25);
 	checkCudaErrors(cudaMemset(point_gradients, 0, sizeof(double) * valid_points_num * 3 * 6));
+	//rubis::sched::yield_gpu(25,"cudaMemset");
 
+	//rubis::sched::request_gpu(26);
 	checkCudaErrors(cudaMemset(point_hessians, 0, sizeof(double) * valid_points_num * 18 * 6));
+	//rubis::sched::yield_gpu(26,"cudaMemset");
 
 	int block_x = (valid_points_num > BLOCK_SIZE_X) ? BLOCK_SIZE_X : valid_points_num;
 
@@ -813,6 +832,7 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 	dim3 grid;
 
 
+	//rubis::sched::request_gpu(27);
 	computePointGradients0<<<grid_x, block_x>>>(x_, y_, z_, points_number_,
 												valid_points, valid_points_num,
 												dj_ang_.buffer(),
@@ -823,9 +843,10 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 												point_gradients + valid_points_num * 15,
 												point_gradients + valid_points_num * 4,
 												point_gradients + valid_points_num * 10);
-	
+	//rubis::sched::yied_gpu(27,"computePointGradients0");
 	checkCudaErrors(cudaGetLastError());
 	
+	//rubis::sched::request_gpu(28);
 	computePointGradients1<<<grid_x, block_x>>>(x_, y_, z_, points_number_,
 												valid_points, valid_points_num,
 												dj_ang_.buffer(),
@@ -833,9 +854,11 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 												point_gradients + valid_points_num * 5,
 												point_gradients + valid_points_num * 11,
 												point_gradients + valid_points_num * 17);
+	//rubis::sched::yied_gpu(28,"computePointGradients1");
 	checkCudaErrors(cudaGetLastError());
 
 	if (compute_hessian) {
+		//rubis::sched::request_gpu(29);
 		computePointHessian0<<<grid_x, block_x>>>(x_, y_, z_, points_number_,
 												valid_points, valid_points_num,
 												dh_ang_.buffer(),
@@ -845,22 +868,26 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 												point_hessians + valid_points_num * 64, point_hessians + valid_points_num * 87, point_hessians + valid_points_num * 70,
 												point_hessians + valid_points_num * 93, point_hessians + valid_points_num * 59, point_hessians + valid_points_num * 99,
 												point_hessians + valid_points_num * 65, point_hessians + valid_points_num * 105, point_hessians + valid_points_num * 71);
-
+		//rubis::sched::yied_gpu(29,"computePointHessian0");
 		checkCudaErrors(cudaGetLastError());
 
 
+		//rubis::sched::request_gpu(30);
 		computePointHessian1<<<grid_x, block_x>>>(x_, y_, z_, points_number_,
 												valid_points, valid_points_num,
 												dh_ang_.buffer(),
 												point_hessians + valid_points_num * 76, point_hessians + valid_points_num * 82, point_hessians + valid_points_num * 88,
 												point_hessians + valid_points_num * 94, point_hessians + valid_points_num * 77, point_hessians + valid_points_num * 100,
 												point_hessians + valid_points_num * 83, point_hessians + valid_points_num * 106, point_hessians + valid_points_num * 89);
+		//rubis::sched::yied_gpu(30,"computePointHessian1");
 		checkCudaErrors(cudaGetLastError());
 
+		//rubis::sched::request_gpu(31);
 		computePointHessian2<<<grid_x, block_x>>>(x_, y_, z_, points_number_,
 												valid_points, valid_points_num,
 												dh_ang_.buffer(),
 												point_hessians + valid_points_num * 95, point_hessians + valid_points_num * 101, point_hessians + valid_points_num * 107);
+		//rubis::sched::yied_gpu(31,"computePointHessian2");
 		checkCudaErrors(cudaGetLastError());
 
 	}
@@ -869,14 +896,24 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 
 
 	double *tmp_hessian;
+
+	//rubis::sched::request_gpu(32);
 	checkCudaErrors(cudaMalloc(&tmp_hessian, sizeof(double) * valid_voxel_num * 6));
+	//rubis::sched::yield_gpu(32,"cudaMalloc");
 	
 	double *e_x_cov_x;
+
+	//rubis::sched::request_gpu(32);
 	checkCudaErrors(cudaMalloc(&e_x_cov_x, sizeof(double) * valid_voxel_num));
+	//rubis::sched::yield_gpu(32,"cudaMalloc");
 
 	double *cov_dxd_pi;
-	checkCudaErrors(cudaMalloc(&cov_dxd_pi, sizeof(double) * valid_voxel_num * 3 * 6));
 
+	//rubis::sched::request_gpu(33);
+	checkCudaErrors(cudaMalloc(&cov_dxd_pi, sizeof(double) * valid_voxel_num * 3 * 6));
+	//rubis::sched::yield_gpu(33,"cudaMalloc");
+
+	//rubis::sched::request_gpu(34);
 	computeExCovX<<<grid_x, block_x>>>(trans_x, trans_y, trans_z, valid_points,
 										starting_voxel_id, voxel_id, valid_points_num,
 										centroid, centroid + voxel_num, centroid + 2 * voxel_num,
@@ -885,36 +922,47 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 										inverse_covariance, inverse_covariance + voxel_num, inverse_covariance + 2 * voxel_num,
 										inverse_covariance + 3 * voxel_num, inverse_covariance + 4 * voxel_num, inverse_covariance + 5 * voxel_num,
 										inverse_covariance + 6 * voxel_num, inverse_covariance + 7 * voxel_num, inverse_covariance + 8 * voxel_num);
+	//rubis::sched::yield_gpu(34,"computeExCovX");
 	checkCudaErrors(cudaGetLastError());
 
+	//rubis::sched::request_gpu(35);
 	computeScoreList<<<grid_x, block_x>>>(starting_voxel_id, voxel_id, valid_points_num, e_x_cov_x, gauss_d1_, score);
+	//rubis::sched::yield_gpu(35,"computeScoreList");
+
 	checkCudaErrors(cudaGetLastError());
 
 	int block_x2 = (valid_voxel_num > BLOCK_SIZE_X) ? BLOCK_SIZE_X : valid_voxel_num;
 	int grid_x2 = (valid_voxel_num - 1) / block_x2 + 1;
 
+	//rubis::sched::request_gpu(36);
 	updateExCovX<<<grid_x2, block_x2>>>(e_x_cov_x, gauss_d2_, valid_voxel_num);
+	//rubis::sched::yield_gpu(36,"computeScoreList");
+
 	checkCudaErrors(cudaGetLastError());
 
 	grid.x = grid_x;
 	grid.y = 3;
 	grid.z = 6;
 
+	//rubis::sched::request_gpu(37);
 	computeCovDxdPi<<<grid, block_x>>>(valid_points, starting_voxel_id, voxel_id, valid_points_num,
 											inverse_covariance, voxel_num,
 											gauss_d1_, gauss_d2_, point_gradients,
 											cov_dxd_pi, valid_voxel_num);
+	//rubis::sched::yield_gpu(37,"computeCovDxdPi");
 	checkCudaErrors(cudaGetLastError());
 
 	grid.x = grid_x;
 	grid.y = 6;
 	grid.z = 1;
 
+	//rubis::sched::request_gpu(38);
 	computeScoreGradientList<<<grid, block_x>>>(trans_x, trans_y, trans_z, valid_points,
 													starting_voxel_id, voxel_id, valid_points_num,
 													centroid, centroid + voxel_num, centroid + 2 * voxel_num,
 													voxel_num, e_x_cov_x,
 													cov_dxd_pi, gauss_d1_, valid_voxel_num, gradients);
+	//rubis::sched::yield_gpu(38,"computeCovDxdPi");
 	checkCudaErrors(cudaGetLastError());
 
 	if (compute_hessian) {
@@ -922,6 +970,7 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 		grid.y = 6;
 		grid.z = 1;
 
+		//rubis::sched::request_gpu(39);
 		computeHessianListS0<<<grid, block_x>>>(trans_x, trans_y, trans_z, valid_points,
 												starting_voxel_id, voxel_id, valid_points_num,
 												centroid, centroid + voxel_num, centroid + 2 * voxel_num,
@@ -930,9 +979,12 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 												inverse_covariance + 6 * voxel_num, inverse_covariance + 7 * voxel_num, inverse_covariance + 8 * voxel_num,
 												point_gradients,
 												tmp_hessian, valid_voxel_num);
+		//rubis::sched::yield_gpu(39,"computeHessianListS0");
+
 		checkCudaErrors(cudaGetLastError());
 		grid.z = 6;
 
+		//rubis::sched::request_gpu(40);
 		computeHessianListS1<<<grid, block_x>>>(trans_x, trans_y, trans_z, valid_points,
 													starting_voxel_id, voxel_id, valid_points_num,
 													centroid, centroid + voxel_num, centroid + 2 * voxel_num,
@@ -940,9 +992,10 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 													e_x_cov_x, tmp_hessian, cov_dxd_pi,
 													point_gradients,
 													valid_voxel_num);
+		//rubis::sched::yield_gpu(40,"computeHessianListS1");
 		checkCudaErrors(cudaGetLastError());
-
-
+		
+		//rubis::sched::request_gpu(41);
 		computeHessianListS2<<<grid, block_x>>>(trans_x, trans_y, trans_z, valid_points,
 													starting_voxel_id, voxel_id, valid_points_num,
 													centroid, centroid + voxel_num, centroid + 2 * voxel_num,
@@ -951,6 +1004,7 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 													inverse_covariance + 3 * voxel_num, inverse_covariance + 4 * voxel_num, inverse_covariance + 5 * voxel_num,
 													inverse_covariance + 6 * voxel_num, inverse_covariance + 7 * voxel_num, inverse_covariance + 8 * voxel_num,
 													point_hessians, hessians, valid_voxel_num);
+		//rubis::sched::yield_gpu(41,"computeHessianListS2");
 		checkCudaErrors(cudaGetLastError());
 
 	}
@@ -965,14 +1019,25 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 		grid.x = grid_x;
 		grid.y = 1;
 		grid.z = 6;
+
+		//rubis::sched::request_gpu(42);
 		matrixSum<<<grid, block_x>>>(gradients, full_size, half_size, 1, 6, valid_points_num);
+		//rubis::sched::yield_gpu(42,"matrixSum");
+
 		checkCudaErrors(cudaGetLastError());
 
 		grid.y = 6;
+
+		//rubis::sched::request_gpu(43);
 		matrixSum<<<grid, block_x>>>(hessians, full_size, half_size, 6, 6, valid_points_num);
+		//rubis::sched::yield_gpu(43,"matrixSum");
+
 		checkCudaErrors(cudaGetLastError());
 
+		//rubis::sched::request_gpu(44);
 		sumScore<<<grid_x, block_x>>>(score, full_size, half_size);
+		//rubis::sched::yield_gpu(44,"sumScore");
+
 		checkCudaErrors(cudaGetLastError());
 
 		full_size = half_size;
@@ -1000,28 +1065,59 @@ double GNormalDistributionsTransform::computeDerivatives(Eigen::Matrix<double, 6
 
 	double score_inc;
 
+	//rubis::sched::request_gpu(45);
 	checkCudaErrors(cudaMemcpy(&score_inc, score, sizeof(double), cudaMemcpyDeviceToHost));
+	//rubis::sched::yield_gpu(45,"dtoh");
 	
 
+	//rubis::sched::request_gpu(46);
 	checkCudaErrors(cudaFree(gradients));
+	//rubis::sched::yield_gpu(46,"free");
+
+	//rubis::sched::request_gpu(47);
 	checkCudaErrors(cudaFree(hessians));
+	//rubis::sched::yield_gpu(47,"free");
+
+	//rubis::sched::request_gpu(48);
 	checkCudaErrors(cudaFree(point_hessians));
+	//rubis::sched::yield_gpu(48,"free");
+
+	//rubis::sched::request_gpu(49);
 	checkCudaErrors(cudaFree(point_gradients));
+	//rubis::sched::yield_gpu(49,"free");
+
+	//rubis::sched::request_gpu(50);
 	checkCudaErrors(cudaFree(score));
+	//rubis::sched::yield_gpu(50,"free");
+
+	//rubis::sched::request_gpu(51);
 	checkCudaErrors(cudaFree(tmp_hessian));
+	//rubis::sched::yield_gpu(51,"free");
+
+	//rubis::sched::request_gpu(52);
 	checkCudaErrors(cudaFree(e_x_cov_x));
+	//rubis::sched::yield_gpu(52,"free");
+
+	//rubis::sched::request_gpu(53);
 	checkCudaErrors(cudaFree(cov_dxd_pi));
+	//rubis::sched::yield_gpu(53,"free");
 
 	if (valid_points != NULL){
+		//rubis::sched::request_gpu(54);
 		checkCudaErrors(cudaFree(valid_points));
+		//rubis::sched::yield_gpu(54,"free");
 	}
 
 	if (voxel_id != NULL){
+		//rubis::sched::request_gpu(55);
 		checkCudaErrors(cudaFree(voxel_id));
+		//rubis::sched::yield_gpu(55,"free");
 	}
 
 	if (starting_voxel_id != NULL){
+		//rubis::sched::request_gpu(56);
 		checkCudaErrors(cudaFree(starting_voxel_id));
+		//rubis::sched::yield_gpu(56,"free");
 	}
 
 
@@ -1202,8 +1298,10 @@ void GNormalDistributionsTransform::transformPointCloud(float *in_x, float *in_y
 	if (points_number > 0) {
 		int block_x = (points_number <= BLOCK_SIZE_X) ? points_number : BLOCK_SIZE_X;
 		int grid_x = (points_number - 1) / block_x + 1;
-		
+
+		//rubis::sched::request_gpu(57);
 		gpuTransform<<<grid_x, block_x >>>(in_x, in_y, in_z, trans_x, trans_y, trans_z, points_number, dtrans);
+		//rubis::sched::yield_gpu(57,"gpuTransform");
 		
 		checkCudaErrors(cudaGetLastError());
 		checkCudaErrors(cudaDeviceSynchronize());
@@ -1458,22 +1556,35 @@ void GNormalDistributionsTransform::computeHessian(Eigen::Matrix<double, 6, 6> &
 	//Update score gradient and hessian matrix
 	double *hessians, *point_gradients, *point_hessians;
 	
+	//rubis::sched::request_gpu(58);
 	checkCudaErrors(cudaMalloc(&hessians, sizeof(double) * valid_points_num * 6 * 6));
+	//rubis::sched::yield_gpu(58,"cudaMalloc");
 	
+	//rubis::sched::request_gpu(59);
 	checkCudaErrors(cudaMalloc(&point_gradients, sizeof(double) * valid_points_num * 3 * 6));
+	//rubis::sched::yield_gpu(59,"cudaMalloc");
 
+	//rubis::sched::request_gpu(60);
 	checkCudaErrors(cudaMalloc(&point_hessians, sizeof(double) * valid_points_num * 18 * 6));
+	//rubis::sched::yield_gpu(60,"cudaMalloc");
 
+	//rubis::sched::request_gpu(61);
 	checkCudaErrors(cudaMemset(hessians, 0, sizeof(double) * valid_points_num * 6 * 6));
+	//rubis::sched::yield_gpu(61,"cudaMemset");
 
+	//rubis::sched::request_gpu(62);
 	checkCudaErrors(cudaMemset(point_gradients, 0, sizeof(double) * valid_points_num * 3 * 6));		
+	//rubis::sched::yield_gpu(62,"cudaMemset");
 
+	//rubis::sched::request_gpu(63);
 	checkCudaErrors(cudaMemset(point_hessians, 0, sizeof(double) * valid_points_num * 18 * 6));
+	//rubis::sched::yield_gpu(63,"cudaMemset");
 
 	int block_x = (valid_points_num > BLOCK_SIZE_X) ? BLOCK_SIZE_X : valid_points_num;
 	int grid_x = (valid_points_num - 1) / block_x + 1;
 	dim3 grid;
 
+	//rubis::sched::request_gpu(64);
 	computePointGradients0<<<grid_x, block_x>>>(x_, y_, z_, points_number_,
 												valid_points, valid_points_num,
 												dj_ang_.buffer(),
@@ -1484,8 +1595,10 @@ void GNormalDistributionsTransform::computeHessian(Eigen::Matrix<double, 6, 6> &
 												point_gradients + valid_points_num * 15,
 												point_gradients + valid_points_num * 4,
 												point_gradients + valid_points_num * 10);
+	//rubis::sched::yield_gpu(64,"computePointGradients0");
 	checkCudaErrors(cudaGetLastError());
 
+	//rubis::sched::request_gpu(65);
 	computePointGradients1<<<grid_x, block_x>>>(x_, y_, z_, points_number_,
 												valid_points, valid_points_num,
 												dj_ang_.buffer(),
@@ -1493,8 +1606,10 @@ void GNormalDistributionsTransform::computeHessian(Eigen::Matrix<double, 6, 6> &
 												point_gradients + valid_points_num * 5,
 												point_gradients + valid_points_num * 11,
 												point_gradients + valid_points_num * 17);
+	//rubis::sched::yield_gpu(65,"computePointGradients1");
 	checkCudaErrors(cudaGetLastError());
 
+	//rubis::sched::request_gpu(66);
 	computePointHessian0<<<grid_x, block_x>>>(x_, y_, z_, points_number_,
 												valid_points, valid_points_num,
 												dh_ang_.buffer(),
@@ -1503,34 +1618,46 @@ void GNormalDistributionsTransform::computeHessian(Eigen::Matrix<double, 6, 6> &
 												point_hessians + valid_points_num * 64, point_hessians + valid_points_num * 87, point_hessians + valid_points_num * 70,
 												point_hessians + valid_points_num * 93, point_hessians + valid_points_num * 59, point_hessians + valid_points_num * 99,
 												point_hessians + valid_points_num * 65, point_hessians + valid_points_num * 105, point_hessians + valid_points_num * 71);
+	//rubis::sched::yield_gpu(66,"computePointHessian0");
 	checkCudaErrors(cudaGetLastError());
 
+	//rubis::sched::request_gpu(67);
 	computePointHessian1<<<grid_x, block_x>>>(x_, y_, z_, points_number_,
 												valid_points, valid_points_num,
 												dh_ang_.buffer(),
 												point_hessians + valid_points_num * 76, point_hessians + valid_points_num * 82, point_hessians + valid_points_num * 88,
 												point_hessians + valid_points_num * 94, point_hessians + valid_points_num * 77, point_hessians + valid_points_num * 100,
 												point_hessians + valid_points_num * 83, point_hessians + valid_points_num * 106, point_hessians + valid_points_num * 89);
+	//rubis::sched::yield_gpu(67,"computePointHessian1");
 	checkCudaErrors(cudaGetLastError());
 
+	//rubis::sched::request_gpu(68);
 	computePointHessian2<<<grid_x, block_x>>>(x_, y_, z_, points_number_,
 												valid_points, valid_points_num,
 												dh_ang_.buffer(),
 												point_hessians + valid_points_num * 95, point_hessians + valid_points_num * 101, point_hessians + valid_points_num * 107);
+	//rubis::sched::yield_gpu(68,"computePointHessian2");
 	checkCudaErrors(cudaGetLastError());
 
 	double *tmp_hessian;
 
+	//rubis::sched::request_gpu(69);
 	checkCudaErrors(cudaMalloc(&tmp_hessian, sizeof(double) * valid_voxel_num * 6));
+	//rubis::sched::yield_gpu(69,"cudaMalloc");
 
 	double *e_x_cov_x;
 
+	//rubis::sched::request_gpu(70);
 	checkCudaErrors(cudaMalloc(&e_x_cov_x, sizeof(double) * valid_voxel_num));
+	//rubis::sched::yield_gpu(70,"cudaMalloc");
 
 	double *cov_dxd_pi;
 
+	//rubis::sched::request_gpu(71);
 	checkCudaErrors(cudaMalloc(&cov_dxd_pi, sizeof(double) * valid_voxel_num * 3 * 6));
+	//rubis::sched::yield_gpu(71,"cudaMalloc");
 
+	//rubis::sched::request_gpu(72);
 	computeExCovX<<<grid_x, block_x>>>(trans_x, trans_y, trans_z, valid_points,
 										starting_voxel_id, voxel_id, valid_points_num,
 										centroid, centroid + voxel_num, centroid + 2 * voxel_num,
@@ -1539,27 +1666,33 @@ void GNormalDistributionsTransform::computeHessian(Eigen::Matrix<double, 6, 6> &
 										inverse_covariance, inverse_covariance + voxel_num, inverse_covariance + 2 * voxel_num,
 										inverse_covariance + 3 * voxel_num, inverse_covariance + 4 * voxel_num, inverse_covariance + 5 * voxel_num,
 										inverse_covariance + 6 * voxel_num, inverse_covariance + 7 * voxel_num, inverse_covariance + 8 * voxel_num);
+	//rubis::sched::yield_gpu(72,"computeExCovX");
 	checkCudaErrors(cudaGetLastError());
 
 	grid.x = grid_x;
 	grid.y = 3;
 	grid.z = 6;
 
+	//rubis::sched::request_gpu(73);
 	computeCovDxdPi<<<grid, block_x>>>(valid_points, starting_voxel_id, voxel_id, valid_points_num,
 											inverse_covariance, voxel_num,
 											gauss_d1_, gauss_d2_, point_gradients,
 											cov_dxd_pi, valid_voxel_num);
+	//rubis::sched::yield_gpu(73,"computeCovDxdPi");
 	checkCudaErrors(cudaGetLastError());
 
 	int block_x2 = (valid_voxel_num > BLOCK_SIZE_X) ? BLOCK_SIZE_X : valid_voxel_num;
 	int grid_x2 = (valid_voxel_num - 1) / block_x2 + 1;
 
+	//rubis::sched::request_gpu(74);
 	updateExCovX<<<grid_x2, block_x2>>>(e_x_cov_x, gauss_d2_, valid_voxel_num);
+	//rubis::sched::yield_gpu(74,"updateExCovX");
 	checkCudaErrors(cudaGetLastError());
 
 	grid.y = 6;
 	grid.z = 1;
 
+	//rubis::sched::request_gpu(75);
 	computeHessianListS0<<<grid, block_x>>>(trans_x, trans_y, trans_z, valid_points,
 												starting_voxel_id, voxel_id, valid_points_num,
 												centroid, centroid + voxel_num, centroid + 2 * voxel_num,
@@ -1569,10 +1702,12 @@ void GNormalDistributionsTransform::computeHessian(Eigen::Matrix<double, 6, 6> &
 												point_gradients,
 												tmp_hessian, valid_voxel_num);
 	
+	//rubis::sched::yield_gpu(75,"computeHessianListS0");
 	checkCudaErrors(cudaGetLastError());
 
 	grid.z = 6;
 
+	//rubis::sched::request_gpu(76);
 	computeHessianListS1<<<grid, block_x>>>(trans_x, trans_y, trans_z, valid_points,
 												starting_voxel_id, voxel_id, valid_points_num,
 												centroid, centroid + voxel_num, centroid + 2 * voxel_num,
@@ -1580,8 +1715,10 @@ void GNormalDistributionsTransform::computeHessian(Eigen::Matrix<double, 6, 6> &
 												e_x_cov_x, tmp_hessian, cov_dxd_pi,
 												point_gradients,
 												valid_voxel_num);
+	//rubis::sched::yield_gpu(76,"computeHessianListS1");
 	checkCudaErrors(cudaGetLastError());
 
+	//rubis::sched::request_gpu(77);
 	computeHessianListS2<<<grid, block_x>>>(trans_x, trans_y, trans_z, valid_points,
 												starting_voxel_id, voxel_id, valid_points_num,
 												centroid, centroid + voxel_num, centroid + 2 * voxel_num,
@@ -1590,6 +1727,8 @@ void GNormalDistributionsTransform::computeHessian(Eigen::Matrix<double, 6, 6> &
 												inverse_covariance + 3 * voxel_num, inverse_covariance + 4 * voxel_num, inverse_covariance + 5 * voxel_num,
 												inverse_covariance + 6 * voxel_num, inverse_covariance + 7 * voxel_num, inverse_covariance + 8 * voxel_num,
 												point_hessians, hessians, valid_voxel_num);
+	//rubis::sched::yield_gpu(77,"computeHessianListS2");
+
 	checkCudaErrors(cudaGetLastError());
 
 
@@ -1622,28 +1761,46 @@ void GNormalDistributionsTransform::computeHessian(Eigen::Matrix<double, 6, 6> &
 		}
 	}
 
+	//rubis::sched::request_gpu(78);
 	checkCudaErrors(cudaFree(hessians));
+	//rubis::sched::yield_gpu(78,"free");
 
+	//rubis::sched::request_gpu(79);
 	checkCudaErrors(cudaFree(point_hessians));
+	//rubis::sched::yield_gpu(79,"free");
 
+	//rubis::sched::request_gpu(80);
 	checkCudaErrors(cudaFree(point_gradients));
+	//rubis::sched::yield_gpu(80,"free");
 
+	//rubis::sched::request_gpu(81);
 	checkCudaErrors(cudaFree(tmp_hessian));
+	//rubis::sched::yield_gpu(81,"free");
 
+	//rubis::sched::request_gpu(82);
 	checkCudaErrors(cudaFree(e_x_cov_x));
+	//rubis::sched::yield_gpu(82,"free");
 
+	//rubis::sched::request_gpu(83);
 	checkCudaErrors(cudaFree(cov_dxd_pi));
+	//rubis::sched::yield_gpu(83,"free");
 
 	if (valid_points != NULL) {
+		//rubis::sched::request_gpu(84);
 		checkCudaErrors(cudaFree(valid_points));
+		//rubis::sched::yield_gpu(84,"free");
 	}
 
 	if (voxel_id != NULL) {
+		//rubis::sched::request_gpu(85);
 		checkCudaErrors(cudaFree(voxel_id));
+		//rubis::sched::yield_gpu(85,"free");
 	}
 
 	if (starting_voxel_id != NULL) {
+		//rubis::sched::request_gpu(86);
 		checkCudaErrors(cudaFree(starting_voxel_id));
+		//rubis::sched::yield_gpu(86,"free");
 	}
 
 	dhessian.memFree();
@@ -1668,19 +1825,31 @@ double GNormalDistributionsTransform::getFitnessScore(double max_range)
 
 	float *trans_x, *trans_y, *trans_z;
 
+	//rubis::sched::request_gpu(87);
 	checkCudaErrors(cudaMalloc(&trans_x, sizeof(float) * points_number_));
+	//rubis::sched::yield_gpu(87,"cudaMalloc");
 
+	//rubis::sched::request_gpu(88);
 	checkCudaErrors(cudaMalloc(&trans_y, sizeof(float) * points_number_));
+	//rubis::sched::yield_gpu(88,"cudaMalloc");
 
+	//rubis::sched::request_gpu(89);
 	checkCudaErrors(cudaMalloc(&trans_z, sizeof(float) * points_number_));
+	//rubis::sched::yield_gpu(89,"cudaMalloc");
 
 	transformPointCloud(x_, y_, z_, trans_x, trans_y, trans_z, points_number_, final_transformation_);
-
+	
 	int *valid_distance;
+
+	//rubis::sched::request_gpu(90);
 	checkCudaErrors(cudaMalloc(&valid_distance, sizeof(int) * points_number_));
+	//rubis::sched::yield_gpu(90,"cudaMalloc");
 
 	double *min_distance;
+
+	//rubis::sched::request_gpu(91);
 	checkCudaErrors(cudaMalloc(&min_distance, sizeof(double) * points_number_));
+	//rubis::sched::yield_gpu(91,"cudaMalloc");
 
 	voxel_grid_.nearestNeighborSearch(trans_x, trans_y, trans_z, points_number_, valid_distance, min_distance, max_range);
 
@@ -1693,10 +1862,16 @@ double GNormalDistributionsTransform::getFitnessScore(double max_range)
 		int block_x = (half_size > BLOCK_SIZE_X) ? BLOCK_SIZE_X : half_size;
 		int grid_x = (half_size - 1) / block_x + 1;
 
+		//rubis::sched::request_gpu(92);
 		gpuSum<double><<<grid_x, block_x>>>(min_distance, size, half_size);
+		//rubis::sched::yield_gpu(92,"gpuSum");
+
 		checkCudaErrors(cudaGetLastError());
 
+		//rubis::sched::request_gpu(93);
 		gpuSum<int><<<grid_x, block_x>>>(valid_distance, size, half_size);
+		//rubis::sched::yield_gpu(93,"gpuSum");
+
 		checkCudaErrors(cudaGetLastError());
 
 		size = half_size;
@@ -1706,19 +1881,33 @@ double GNormalDistributionsTransform::getFitnessScore(double max_range)
 
 	int nr;
 
+	//rubis::sched::request_gpu(94);
 	checkCudaErrors(cudaMemcpy(&nr, valid_distance, sizeof(int), cudaMemcpyDeviceToHost));
+	//rubis::sched::yield_gpu(94,"dtoh");
 
+	//rubis::sched::request_gpu(95);
 	checkCudaErrors(cudaMemcpy(&fitness_score, min_distance, sizeof(double), cudaMemcpyDeviceToHost));
+	//rubis::sched::yield_gpu(95,"dtoh");
 
+	//rubis::sched::request_gpu(96);
 	checkCudaErrors(cudaFree(trans_x));
+	//rubis::sched::yield_gpu(96,"free");
 
+	//rubis::sched::request_gpu(97);
 	checkCudaErrors(cudaFree(trans_y));
+	//rubis::sched::yield_gpu(97,"free");
 
+	//rubis::sched::request_gpu(98);
 	checkCudaErrors(cudaFree(trans_z));
+	//rubis::sched::yield_gpu(98,"free");
 
+	//rubis::sched::request_gpu(99);
 	checkCudaErrors(cudaFree(valid_distance));
+	//rubis::sched::yield_gpu(99,"free");
 
+	//rubis::sched::request_gpu(100);
 	checkCudaErrors(cudaFree(min_distance));
+	//rubis::sched::yield_gpu(100,"free");
 
 	if (nr > 0)
 		return (fitness_score / nr);

@@ -15,6 +15,7 @@
  #include <thrust/copy.h>
  #include <thrust/scan.h>
  #include <thrust/fill.h>
+ #include "rubis_sched/sched.hpp"
  
  #include <time.h>
  #include <sys/time.h>
@@ -54,15 +55,34 @@
  void GpuEuclideanCluster::setInputPoints(float *x, float *y, float *z, int size)
  {
    size_ = size;
+   //rubis::sched::request_gpu(1);
    checkCudaErrors(cudaMalloc(&x_, size_ * sizeof(float)));
+   //rubis::sched::yield_gpu(1,"htod");
+
+   //rubis::sched::request_gpu(2);
    checkCudaErrors(cudaMalloc(&y_, size_ * sizeof(float)));
+   //rubis::sched::yield_gpu(2,"htod");
+
+   //rubis::sched::request_gpu(3);
    checkCudaErrors(cudaMalloc(&z_, size_ * sizeof(float)));
- 
+   //rubis::sched::yield_gpu(3,"htod");
+
+   //rubis::sched::request_gpu(4);
    checkCudaErrors(cudaMemcpy(x_, x, size_ * sizeof(float), cudaMemcpyHostToDevice));
+   //rubis::sched::yield_gpu(4,"htod");
+
+   //rubis::sched::request_gpu(5);
    checkCudaErrors(cudaMemcpy(y_, y, size_ * sizeof(float), cudaMemcpyHostToDevice));
+   //rubis::sched::yield_gpu(5,"htod");
+
+   //rubis::sched::request_gpu(6);
    checkCudaErrors(cudaMemcpy(z_, z, size_ * sizeof(float), cudaMemcpyHostToDevice));
+   //rubis::sched::yield_gpu(6,"htod");
  
+   //rubis::sched::request_gpu(7);
    checkCudaErrors(cudaMalloc(&cluster_indices_, size_ * sizeof(int)));
+   //rubis::sched::yield_gpu(7,"htod");
+
    cluster_indices_host_ = (int *) malloc(size_ * sizeof(int));
  }
  
@@ -343,8 +363,9 @@
  void GpuEuclideanCluster::exclusiveScan(int *input, int ele_num, int *sum)
  {
    thrust::device_ptr<int> dev_ptr(input);
- 
+   //rubis::sched::request_gpu(71); 
    thrust::exclusive_scan(dev_ptr, dev_ptr + ele_num, dev_ptr);
+   //rubis::sched::yield_gpu(71,"exclusive_scan"); 
    checkCudaErrors(cudaDeviceSynchronize());
  
    *sum = *(dev_ptr + ele_num - 1);
@@ -386,35 +407,66 @@
  
    int *cluster_offset;
    int cluster_num, old_cluster_num;
- 
+
+   //rubis::sched::request_gpu(8); 
    pclEuclideanInitialize << < grid_x, block_x >> > (cluster_indices_, size_);
+   //rubis::sched::yield_gpu(8,"pclEuclideanInitialize");
    checkCudaErrors(cudaDeviceSynchronize());
  
    old_cluster_num = cluster_num = size_;
- 
+  
+   //rubis::sched::request_gpu(9); 
    checkCudaErrors(cudaMalloc(&cluster_offset, (size_ + 1) * sizeof(int)));
+   //rubis::sched::yield_gpu(9,"cudaMalloc");
+
+   //rubis::sched::request_gpu(10);
    checkCudaErrors(cudaMemset(cluster_offset, 0, (size_ + 1) * sizeof(int)));
+   //rubis::sched::yield_gpu(10, "cudaMemset");
+
+   //rubis::sched::request_gpu(11);
    blockLabelling << < grid_x, block_x >> > (x_, y_, z_, cluster_indices_, size_, threshold_);
+   //rubis::sched::yield_gpu(11,"blockLabelling");
+
+   //rubis::sched::request_gpu(12);
    clusterMark << < grid_x, block_x >> > (cluster_indices_, cluster_offset, size_);
+   //rubis::sched::yield_gpu(12,"clusterMark");
+
+
    exclusiveScan(cluster_offset, size_ + 1, &cluster_num);
  
    int *cluster_list, *new_cluster_list, *tmp;
- 
+
+   //rubis::sched::request_gpu(13);
    checkCudaErrors(cudaMalloc(&cluster_list, cluster_num * sizeof(int)));
+   //rubis::sched::yield_gpu(13,"cudaMalloc");
+
+   //rubis::sched::request_gpu(14);
    clusterCollector << < grid_x, block_x >> > (cluster_indices_, cluster_list, cluster_offset, size_);
+   //rubis::sched::yield_gpu(14,"clusterCollector");
+
    checkCudaErrors(cudaDeviceSynchronize());
  
    int *cluster_matrix;
    int *new_cluster_matrix;
- 
+  
+   //rubis::sched::request_gpu(15);
    checkCudaErrors(cudaMalloc(&cluster_matrix, cluster_num * cluster_num * sizeof(int)));
+   //rubis::sched::yield_gpu(15,"cudaMalloc");
+
+   //rubis::sched::request_gpu(16);
    checkCudaErrors(cudaMemset(cluster_matrix, 0, cluster_num * cluster_num * sizeof(int)));
+   //rubis::sched::yield_gpu(16,"cudaMemset");
+
    checkCudaErrors(cudaDeviceSynchronize());
- 
+
+   //rubis::sched::request_gpu(17);
    checkCudaErrors(cudaMalloc(&new_cluster_list, cluster_num * sizeof(int)));
+   //rubis::sched::yield_gpu(17,"cudaMalloc");
  
+   //rubis::sched::request_gpu(18);
    buildClusterMatrix << < grid_x, block_x >> >
                                    (x_, y_, z_, cluster_indices_, cluster_matrix, cluster_offset, size_, cluster_num, threshold_);
+   //rubis::sched::yield_gpu(18,"buildClusterMatrix");
    checkCudaErrors(cudaDeviceSynchronize());
  
    int block_x2 = 0, grid_x2 = 0;
@@ -427,25 +479,52 @@
      block_x2 = (cluster_num > BLOCK_SIZE_X) ? BLOCK_SIZE_X : cluster_num;
      grid_x2 = (cluster_num - 1) / block_x2 + 1;
  
+     //rubis::sched::request_gpu(19);
      mergeClusters << < grid_x2, block_x2 >> > (cluster_matrix, cluster_list, cluster_num);
+     //rubis::sched::yield_gpu(19,"mergeClusters");
+
+     //rubis::sched::request_gpu(20);
      reflexClusterChanges << < grid_x, block_x >> > (cluster_indices_, cluster_offset, cluster_list, size_);
+     //rubis::sched::yield_gpu(20,"reflexClusterChanges");
+
+     //rubis::sched::request_gpu(21);
      checkCudaErrors(cudaMemset(cluster_offset, 0, (size_ + 1) * sizeof(int)));
+     //rubis::sched::yield_gpu(21,"cudaMemset");
+
+     //rubis::sched::request_gpu(22);
      clusterMark << < grid_x2, block_x2 >> > (cluster_list, cluster_offset, cluster_num);
+     //rubis::sched::yield_gpu(22,"clusterMark");
+
      exclusiveScan(cluster_offset, size_ + 1, &cluster_num);
  
      if (grid_x2 == 1 && cluster_num == old_cluster_num)
        break;
- 
+    
+     //rubis::sched::request_gpu(23);
      clusterCollector << < grid_x2, block_x2 >> > (cluster_list, new_cluster_list, cluster_offset, old_cluster_num);
+     //rubis::sched::yield_gpu(23,"clusterCollector");
+
      checkCudaErrors(cudaDeviceSynchronize());
  
+     //rubis::sched::request_gpu(24);
      checkCudaErrors(cudaMalloc(&new_cluster_matrix, cluster_num * cluster_num * sizeof(int)));
+     //rubis::sched::yield_gpu(24, "cudaMalloc");
+
+     //rubis::sched::request_gpu(25);
      checkCudaErrors(cudaMemset(new_cluster_matrix, 0, cluster_num * cluster_num * sizeof(int)));
+     //rubis::sched::yield_gpu(25,"cudaMemset");
+
+     //rubis::sched::request_gpu(26);
      rebuildClusterMatrix << < grid_x2, block_x2 >> >
                                         (cluster_matrix, cluster_list, new_cluster_matrix, cluster_offset, old_cluster_num, cluster_num);
+     //rubis::sched::yield_gpu(26,"rebuildClusterMatrix");
+
      checkCudaErrors(cudaDeviceSynchronize());
- 
+    
+     //rubis::sched::request_gpu(27);
      checkCudaErrors(cudaFree(cluster_matrix));
+     //rubis::sched::yield_gpu(27,"free");
+     
      cluster_matrix = new_cluster_matrix;
      tmp = cluster_list;
      cluster_list = new_cluster_list;
@@ -454,16 +533,32 @@
  
    cluster_num_ = cluster_num;
  
+   //rubis::sched::request_gpu(28);
    resetClusterIndexes << < grid_x, block_x >> > (cluster_indices_, cluster_offset, size_);
+   //rubis::sched::yield_gpu(28,"resetClusterIndexes");
+
    checkCudaErrors(cudaDeviceSynchronize());
  
+   //rubis::sched::request_gpu(29);
    checkCudaErrors(cudaMemcpy(cluster_indices_host_, cluster_indices_, size_ * sizeof(int), cudaMemcpyDeviceToHost));
+   //rubis::sched::yield_gpu(29,"dtoh");
  
  
+   //rubis::sched::request_gpu(30);
    checkCudaErrors(cudaFree(cluster_matrix));
+   //rubis::sched::yield_gpu(30,"free");
+
+   //rubis::sched::request_gpu(31);
    checkCudaErrors(cudaFree(cluster_list));
+   //rubis::sched::yield_gpu(31,"free");
+
+   //rubis::sched::request_gpu(32);
    checkCudaErrors(cudaFree(new_cluster_list));
+   //rubis::sched::yield_gpu(32,"free");
+
+   //rubis::sched::request_gpu(33);
    checkCudaErrors(cudaFree(cluster_offset));
+   //rubis::sched::yield_gpu(33,"free");
  }
  
  extern "C" __global__ void mergeSelfClusters(int *cluster_matrix, int *cluster_list, int cluster_num, bool *changed)
@@ -633,46 +728,80 @@
    int *cluster_offset;
    int cluster_num, old_cluster_num;
  
+   //rubis::sched::request_gpu(34);
    pclEuclideanInitialize << < grid_x, block_x >> > (cluster_indices_, size_);
+   //rubis::sched::yield_gpu(34,"pclEuclideanInitialize");
+   
    checkCudaErrors(cudaDeviceSynchronize());
  
    old_cluster_num = cluster_num = size_;
  
+   //rubis::sched::request_gpu(35);
    checkCudaErrors(cudaMalloc(&cluster_offset, (size_ + 1) * sizeof(int)));
+   //rubis::sched::yield_gpu(35,"cudaMalloc");
+
+   //rubis::sched::request_gpu(36);
    checkCudaErrors(cudaMemset(cluster_offset, 0, (size_ + 1) * sizeof(int)));
+   //rubis::sched::yield_gpu(36);
+
+   //rubis::sched::request_gpu(37);
    blockLabelling << < grid_x, block_x >> > (x_, y_, z_, cluster_indices_, size_, threshold_);
+   //rubis::sched::yield_gpu(37,"blockLabelling");
+   
+   //rubis::sched::request_gpu(38);
    clusterMark << < grid_x, block_x >> > (cluster_indices_, cluster_offset, size_);
+   //rubis::sched::yield_gpu(38,"clusterMark");
+
+  
    exclusiveScan(cluster_offset, size_ + 1, &cluster_num);
  
    int *cluster_list, *new_cluster_list, *tmp;
  
+   //rubis::sched::request_gpu(39);
    checkCudaErrors(cudaMalloc(&cluster_list, cluster_num * sizeof(int)));
+   //rubis::sched::yield_gpu(39);
+
+   //rubis::sched::request_gpu(40);
    clusterCollector << < grid_x, block_x >> > (cluster_indices_, cluster_list, cluster_offset, size_);
+   //rubis::sched::yield_gpu(40,"clusterCollector");
    checkCudaErrors(cudaDeviceSynchronize());
  
    int *cluster_matrix;
    int *new_cluster_matrix;
  
+   //rubis::sched::request_gpu(41);
    checkCudaErrors(cudaMalloc(&cluster_matrix, cluster_num * cluster_num * sizeof(int)));
+   //rubis::sched::yield_gpu(41,"cudaMalloc");
+
+   //rubis::sched::request_gpu(42);
    checkCudaErrors(cudaMemset(cluster_matrix, 0, cluster_num * cluster_num * sizeof(int)));
+   //rubis::sched::yield_gpu(42,"cudaMemset");
+   
    checkCudaErrors(cudaDeviceSynchronize());
  
+   //rubis::sched::request_gpu(43);
    checkCudaErrors(cudaMalloc(&new_cluster_list, cluster_num * sizeof(int)));
+   //rubis::sched::yield_gpu(43, "cudaMalloc");
  
+   //rubis::sched::request_gpu(44);
    buildClusterMatrix << < grid_x, block_x >> >
                                    (x_, y_, z_, cluster_indices_, cluster_matrix, cluster_offset, size_, cluster_num, threshold_);
+   //rubis::sched::yield_gpu(44,"buildClusterMatrix");
    checkCudaErrors(cudaDeviceSynchronize());
  
    int block_x2 = 0, grid_x2 = 0;
  
    bool *changed;
  
+   //rubis::sched::request_gpu(45);
    checkCudaErrors(cudaMallocHost(&changed, sizeof(bool)));
+   //rubis::sched::yield_gpu(45,"cudaMallocHost");
  
  #ifndef SERIAL
    int *changed_diag;
- 
+   //rubis::sched::request_gpu(46);
    checkCudaErrors(cudaMallocHost(&changed_diag, sizeof(int)));
+   //rubis::sched::yield_gpu(46,"cudaMallocHost");
  #endif
  
    int max_base_row = 0;
@@ -683,7 +812,10 @@
      block_x2 = (cluster_num > BLOCK_SIZE_X) ? BLOCK_SIZE_X : cluster_num;
      grid_x2 = (cluster_num - 1) / block_x2 + 1;
  
+     //rubis::sched::request_gpu(47);
      mergeSelfClusters << < grid_x2, block_x2 >> > (cluster_matrix, cluster_list, cluster_num, changed);
+     //rubis::sched::yield_gpu(47,"mergeSelfClusters");
+
      checkCudaErrors(cudaDeviceSynchronize());
  
      int base_row = 1, base_column = 0;
@@ -705,12 +837,14 @@
  #ifdef SERIAL
        //Merge clusters in each sub-matrix by moving from top to bottom of the similarity sub-matrix
        for (int shift_level = 0; !(*changed) && shift_level < sub_matrix_col; shift_level++) {
+         //rubis::sched::request_gpu(48);
          mergeInterClusters<<<grid_x2, block_x2>>>(cluster_matrix, cluster_list,
                                  shift_level,
                                  base_row, base_column,
                                  sub_matrix_row, sub_matrix_col,
                                  sub_matrix_offset_row, sub_matrix_offset_col,
                                  cluster_num, changed);
+         //rubis::sched::yield_gpu(48,"mergeInterClusters");
          checkCudaErrors(cudaDeviceSynchronize());
        }
  #else
@@ -720,22 +854,28 @@
        dim3 grid_size(grid_x2, grid_y2, 1);
  
        *changed_diag = -1;
- 
+
+       //rubis::sched::request_gpu(49); 
        clustersIntersecCheck << < grid_size, block_size >> > (cluster_matrix, changed_diag,
          base_row, base_column,
          sub_matrix_row, sub_matrix_col,
          sub_matrix_offset_row, sub_matrix_offset_col,
          cluster_num);
+       //rubis::sched::yield_gpu(49,"clustersIntersecCheck");
+
        checkCudaErrors(cudaDeviceSynchronize());
  
        if (*changed_diag > 0)
        {
          //Merge clusters in sub-matrix that stay in the changed_diag diagonal by moving from top to bottom of the matrix.
+
+         //rubis::sched::request_gpu(50);
          mergeInterClusters << < grid_x2, block_x2 >> > (cluster_matrix, cluster_list, *changed_diag,
            base_row, base_column,
            sub_matrix_row, sub_matrix_col,
            sub_matrix_offset_row, sub_matrix_offset_col,
            cluster_num, changed);
+         //rubis::sched::yield_gpu(50,"mergeInterClusters");
          checkCudaErrors(cudaDeviceSynchronize());
        }
  
@@ -751,26 +891,49 @@
  
      if (*changed)
      {
+       //rubis::sched::request_gpu(51);
        reflexClusterChanges << < grid_x, block_x >> > (cluster_indices_, cluster_offset, cluster_list, size_);
+       //rubis::sched::yield_gpu(51,"reflexClusterChanges");
+
+       //rubis::sched::request_gpu(52);
        checkCudaErrors(cudaMemset(cluster_offset, 0, (size_ + 1) * sizeof(int)));
+       //rubis::sched::yield_gpu(52,"cudaMemset");
  
        block_x2 = (cluster_num > BLOCK_SIZE_X) ? BLOCK_SIZE_X : cluster_num;
        grid_x2 = (cluster_num - 1) / block_x2 + 1;
  
+       //rubis::sched::request_gpu(53);
        clusterMark << < grid_x2, block_x2 >> > (cluster_list, cluster_offset, cluster_num);
+       //rubis::sched::yield_gpu(53,"clusterMark");
  
        old_cluster_num = cluster_num;
+       
        exclusiveScan(cluster_offset, size_ + 1, &cluster_num);
+
+       //rubis::sched::request_gpu(54);
        clusterCollector << < grid_x2, block_x2 >> > (cluster_list, new_cluster_list, cluster_offset, old_cluster_num);
+       //rubis::sched::yield_gpu(54,"clusterCollector");
+
        checkCudaErrors(cudaDeviceSynchronize());
  
+       //rubis::sched::request_gpu(55);
        checkCudaErrors(cudaMalloc(&new_cluster_matrix, cluster_num * cluster_num * sizeof(int)));
+       //rubis::sched::yield_gpu(55,"cudaMalloc");
+
+       //rubis::sched::request_gpu(56);
        checkCudaErrors(cudaMemset(new_cluster_matrix, 0, cluster_num * cluster_num * sizeof(int)));
+       //rubis::sched::yield_gpu(56);
+
+       //rubis::sched::request_gpu(57);
        rebuildClusterMatrix << < grid_x2, block_x2 >> >
                                           (cluster_matrix, cluster_list, new_cluster_matrix, cluster_offset, old_cluster_num, cluster_num);
+       //rubis::sched::yield_gpu(57,"rebuildClusterMatrix");
        checkCudaErrors(cudaDeviceSynchronize());
- 
+
+       //rubis::sched::request_gpu(58); 
        checkCudaErrors(cudaFree(cluster_matrix));
+       //rubis::sched::yield_gpu(58,"cudaFree");
+
        cluster_matrix = new_cluster_matrix;
        tmp = cluster_list;
        cluster_list = new_cluster_list;
@@ -781,18 +944,40 @@
    cluster_num_ = cluster_num;
  
    //Reset all cluster indexes to make them start from 0
+
+   //rubis::sched::request_gpu(59);
    resetClusterIndexes << < grid_x, block_x >> > (cluster_indices_, cluster_offset, size_);
+   //rubis::sched::yield_gpu(59,"resetClusterIndexes");
+
    checkCudaErrors(cudaDeviceSynchronize());
  
+   //rubis::sched::request_gpu(60);
    checkCudaErrors(cudaMemcpy(cluster_indices_host_, cluster_indices_, size_ * sizeof(int), cudaMemcpyDeviceToHost));
+   //rubis::sched::yield_gpu(60,"cudaMemcpy");
  
+   //rubis::sched::request_gpu(61);
    checkCudaErrors(cudaFree(cluster_matrix));
+   //rubis::sched::yield_gpu(61,"free");
+
+   //rubis::sched::request_gpu(62);
    checkCudaErrors(cudaFree(cluster_list));
+   //rubis::sched::yield_gpu(62,"free");
+
+   //rubis::sched::request_gpu(63);
    checkCudaErrors(cudaFree(new_cluster_list));
+   //rubis::sched::yield_gpu(63,"free");
+
+   //rubis::sched::request_gpu(64);
    checkCudaErrors(cudaFree(cluster_offset));
+   //rubis::sched::yield_gpu(64,"free");
+
+   //rubis::sched::request_gpu(65);
    checkCudaErrors(cudaFreeHost(changed));
+   //rubis::sched::yield_gpu(65,"free");
  #ifndef SERIAL
+   //rubis::sched::request_gpu(66);
    checkCudaErrors(cudaFreeHost(changed_diag));
+   //rubis::sched::yield_gpu(66,"free");
  #endif
  }
  
@@ -858,9 +1043,21 @@
  
  GpuEuclideanCluster::~GpuEuclideanCluster()
  {
+   //rubis::sched::request_gpu(67);
    checkCudaErrors(cudaFree(x_));
+   //rubis::sched::yield_gpu(67,"free");
+
+   //rubis::sched::request_gpu(68);
    checkCudaErrors(cudaFree(y_));
+   //rubis::sched::yield_gpu(68,"free");
+
+   //rubis::sched::request_gpu(69);
    checkCudaErrors(cudaFree(z_));
+   //rubis::sched::yield_gpu(69,"free");
+
+   //rubis::sched::request_gpu(70);
    checkCudaErrors(cudaFree(cluster_indices_));
+   //rubis::sched::yield_gpu(70,"free");
+
    free(cluster_indices_host_);
  }
