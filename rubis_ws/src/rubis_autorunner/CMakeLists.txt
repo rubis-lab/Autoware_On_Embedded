@@ -25,9 +25,9 @@ include_directories(
 )
 
 add_library(ros_autorunner_lib
-  include/ros_autorunner/ros_autorunner_def.h
-  include/ros_autorunner/ros_autorunner.h
-  src/ros_autorunner/ros_autorunner.cpp
+  include/ros_autorunner_lib/ros_autorunner_def.h
+  include/ros_autorunner_lib/ros_autorunner.h
+  src/ros_autorunner_lib/ros_autorunner.cpp
 )
 
 add_executable(lgsvl_triple_lidar_autorunner
@@ -36,8 +36,20 @@ add_executable(lgsvl_triple_lidar_autorunner
   src/lgsvl_triple_lidar_autorunner/lgsvl_triple_lidar_autorunner.cpp
 )
 
+add_executable(desktop_lane_keeping
+  include/desktop_lane_keeping/desktop_lane_keeping.h
+  src/desktop_lane_keeping/desktop_lane_keeping_node.cpp
+  src/desktop_lane_keeping/desktop_lane_keeping.cpp
+)
+
 add_dependencies(lgsvl_triple_lidar_autorunner ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(lgsvl_triple_lidar_autorunner
+  ${catkin_LIBRARIES}
+  ros_autorunner_lib
+)
+
+add_dependencies(desktop_lane_keeping ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(desktop_lane_keeping
   ${catkin_LIBRARIES}
   ros_autorunner_lib
 )

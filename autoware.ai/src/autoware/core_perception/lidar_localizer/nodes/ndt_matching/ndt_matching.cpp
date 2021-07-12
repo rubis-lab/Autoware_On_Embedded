@@ -1554,51 +1554,43 @@ int main(int argc, char** argv)
   private_nh.getParam("imu_topic", _imu_topic);
   private_nh.param<double>("gnss_reinit_fitness", _gnss_reinit_fitness, 500.0);
   
-  // if( (_method_type == MethodType::PCL_ANH_GPU) && (gpu_scheduling_flag == 1) ){
-  //   sched::init_gpu_scheduling("/tmp/ndt_matching", gpu_deadline_filename, 0);
-  // }    
-  // else if(_method_type != MethodType::PCL_ANH_GPU && gpu_scheduling_flag == 1){
-  //   ROS_ERROR("GPU scheduling flag is true but type doesn't set to GPU!");
-  //   exit(1);
-  // }
+  if (nh.getParam("/ndt_matching/localizer", _localizer) == false)
+  {
+    std::cout << "localizer is not set." << std::endl;
+    return 1;
+  }
 
-  // if (nh.getParam("localizer", _localizer) == false)
-  // {
-  //   std::cout << "localizer is not set." << std::endl;
-  //   return 1;
-  // }
-
-  if (nh.getParam("tf_x", _tf_x) == false)
+  if (nh.getParam("/ndt_matching/tf_x", _tf_x) == false)
   {
     std::cout << "tf_x is not set." << std::endl;
     return 1;
   }
 
-  if (nh.getParam("tf_y", _tf_y) == false)
+  if (nh.getParam("/ndt_matching/tf_y", _tf_y) == false)
   {
     std::cout << "tf_y is not set." << std::endl;
     return 1;
   }
 
-  if (nh.getParam("tf_z", _tf_z) == false)
+  if (nh.getParam("/ndt_matching/tf_z", _tf_z) == false)
   {
     std::cout << "tf_z is not set." << std::endl;
     return 1;
   }
 
-  if (nh.getParam("tf_roll", _tf_roll) == false)
+  if (nh.getParam("/ndt_matching/tf_roll", _tf_roll) == false)
   {
     std::cout << "tf_roll is not set." << std::endl;
     return 1;
   }
 
-  if (nh.getParam("tf_pitch", _tf_pitch) == false)
+  if (nh.getParam("/ndt_matching/tf_pitch", _tf_pitch) == false)
   {
     std::cout << "tf_pitch is not set." << std::endl;
     return 1;
   }
 
-  if (nh.getParam("tf_yaw", _tf_yaw) == false)
+  if (nh.getParam("/ndt_matching/tf_yaw", _tf_yaw) == false)
   {
     std::cout << "tf_yaw is not set." << std::endl;
     return 1;

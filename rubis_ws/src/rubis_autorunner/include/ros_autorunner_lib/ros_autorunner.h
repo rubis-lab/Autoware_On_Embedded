@@ -1,7 +1,7 @@
 #include <ros/ros.h>
 #include <stdlib.h>
 #include <sys/wait.h>
-#include <ros_autorunner/ros_autorunner_def.h>
+#include <ros_autorunner_lib/ros_autorunner_def.h>
 #include <signal.h>
 
 class StepInfo{
