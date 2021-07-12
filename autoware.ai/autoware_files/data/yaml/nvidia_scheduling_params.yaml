@@ -30,6 +30,14 @@ voxel_grid_filter:
   relative_deadline: 100000000
 
 ndt_matching:
+  tf_x: 1.0510799 
+  tf_y: 0
+  tf_z: 1.96
+  tf_roll: 0
+  tf_pitch: 0
+  tf_yaw: 0
+  localizer: "velodyne"
+
   task_scheduling_flag: 0
   task_profiling_flag: 0
   task_response_time_filename: "~/Documents/profiling/response_time/ndt_matching.csv"

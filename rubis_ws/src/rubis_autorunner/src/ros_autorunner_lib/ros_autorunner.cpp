@@ -1,4 +1,4 @@
-#include <ros_autorunner/ros_autorunner.h>
+#include <ros_autorunner_lib/ros_autorunner.h>
 
 void ROSAutorunner::init(ros::NodeHandle nh, Sub_v sub_v){
     if(signal(SIGINT, sig_handler) == SIG_ERR){
@@ -21,8 +21,8 @@ void ROSAutorunner::init(ros::NodeHandle nh, Sub_v sub_v){
 
     if(sub_v.size() != total_step_num_){
         ROS_WARN("Subscriber list size : %d / total_step_number : %d", (int)sub_v.size(), total_step_num_);
-        ROS_ERROR("Subscriber list size is not equal to total step number");
-        exit(1);
+        // ROS_ERROR("Subscriber list size is not equal to total step number");
+        // exit(1);
     }
 
     for(auto it = step_info_list_.begin(); it != step_info_list_.end(); ++it){
