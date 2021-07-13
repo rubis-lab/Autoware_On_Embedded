@@ -36,6 +36,7 @@ catkin_package(
     grid_map_cv
     grid_map_msgs
     jsk_rviz_plugins
+    rubis_sched
 )
 
 # Resolve system dependency on yaml-cpp, which apparently does not
@@ -75,6 +76,10 @@ target_compile_definitions(lidar_euclidean_cluster_detect PRIVATE
 cuda_add_library(gpu_euclidean_clustering
   include/gpu_euclidean_clustering.h
   nodes/lidar_euclidean_cluster_detect/gpu_euclidean_clustering.cu
+)
+
+target_link_libraries(gpu_euclidean_clustering
+  ${catkin_LIBRARIES}
 )
 
 target_link_libraries(lidar_euclidean_cluster_detect
