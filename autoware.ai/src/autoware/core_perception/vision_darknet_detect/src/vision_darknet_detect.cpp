@@ -33,6 +33,8 @@
 #include "gencolors.cpp"
 #endif
 
+int is_topic_ready = 0;
+
 namespace darknet
 {
     uint32_t Yolo3Detector::get_network_height()
@@ -276,6 +278,8 @@ void Yolo3DetectorNode::image_callback(const sensor_msgs::ImageConstPtr& in_imag
     publisher_objects_.publish(output_message);
 
     free(darknet_image_.data);
+
+    is_topic_ready = 1;
 }
 
 void Yolo3DetectorNode::config_cb(const autoware_config_msgs::ConfigSSD::ConstPtr& param)
@@ -449,7 +453,9 @@ void Yolo3DetectorNode::Run()
 
             if(task_profiling_flag) start_task_profiling();
             if(gpu_profiling_flag) refresh_gpu_profiling();
-            if(task_scheduling_flag) request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline);
+            if(task_scheduling_flag && is_topic_ready){
+                request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline);
+            }
             ros::spinOnce();
             if(task_scheduling_flag) yield_task_scheduling();
             if(task_profiling_flag) stop_task_profiling();

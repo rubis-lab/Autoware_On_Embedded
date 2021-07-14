@@ -142,6 +142,8 @@ static std::string _response_time_filename;
 static std::string _remain_time_filename;
 static std::string _deadline_file_name;
 
+int is_topic_ready = 0;
+
 /* For GPU Profiling */
 #ifdef GPU_CLUSTERING
 static GpuEuclideanCluster _gecl_cluster;  
@@ -278,6 +280,8 @@ void publishCloudClusters(const ros::Publisher *in_publisher, const autoware_msg
     in_publisher->publish(in_clusters);
     publishDetectedObjects(in_clusters);
   }
+
+  is_topic_ready = 1;
 }
 
 void publishCentroids(const ros::Publisher *in_publisher, const autoware_msgs::Centroids &in_centroids,
@@ -1136,7 +1140,9 @@ int main(int argc, char **argv)
       
       if(task_profiling_flag) rubis::sched::start_task_profiling();
       if(gpu_profiling_flag) rubis::sched::refresh_gpu_profiling();
-      if(task_scheduling_flag) rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline);
+      if(task_scheduling_flag && is_topic_ready){        
+        rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline);
+      }
       ros::spinOnce();
       if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
       if(task_profiling_flag) rubis::sched::stop_task_profiling();

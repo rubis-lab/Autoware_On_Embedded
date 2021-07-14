@@ -15,9 +15,9 @@ ray_ground_filter:
   task_profiling_flag: 0
   task_response_time_filename: "~/Documents/profiling/response_time/ray_ground_filter.csv"
   rate: 10 
-  minimum_inter_release_time: 100000000
-  execution_time: 100000000
-  relative_deadline: 100000000
+  task_minimum_inter_release_time: 100000000
+  task_execution_time: 100000000
+  task_relative_deadline: 100000000
   
 # Localization
 voxel_grid_filter:
@@ -25,9 +25,9 @@ voxel_grid_filter:
   task_profiling_flag: 0
   task_response_time_filename: "~/Documents/profiling/response_time/voxel_grid_filter.csv"
   rate: 10 
-  minimum_inter_release_time: 100000000
-  execution_time: 100000000
-  relative_deadline: 100000000
+  task_minimum_inter_release_time: 100000000
+  task_execution_time: 100000000
+  task_relative_deadline: 100000000
 
 ndt_matching:
   task_scheduling_flag: 0
@@ -52,10 +52,10 @@ lidar_euclidean_cluster_detect:
   task_profiling_flag: 0
   task_response_time_filename: "~/Documents/profiling/response_time/lidar_euclidean_cluster_detect.csv"
   rate: 10 
-  minimum_inter_release_time: 100000000
-  execution_time: 100000000
-  relative_deadline: 100000000
-  gpu_scheduling_flag: 1
+  task_minimum_inter_release_time: 100000000
+  task_execution_time: 100000000
+  task_relative_deadline: 100000000
+  gpu_scheduling_flag: 0
   gpu_profiling_flag: 0
   gpu_execution_time_filename: "~/Documents/gpu_profiling/test_clustering_execution_time.csv"
   gpu_response_time_filename: "~/Documents/gpu_profiling/test_clustering_response_time.csv"
@@ -66,34 +66,34 @@ vision_darknet_detect:
   task_profiling_flag: 0
   task_response_time_filename: "~/Documents/profiling/response_time/vision_darknet_detect.csv"
   rate: 10 
-  minimum_inter_release_time: 100000000
-  execution_time: 100000000
-  relative_deadline: 100000000
+  task_minimum_inter_release_time: 100000000
+  task_execution_time: 100000000
+  task_relative_deadline: 100000000
   gpu_scheduling_flag: 0
   gpu_profiling_flag: 0
   gpu_execution_time_filename: "~/Documents/gpu_profiling/test_yolo_execution_time.csv"
   gpu_response_time_filename: "~/Documents/gpu_profiling/test_yolo_response_time.csv"
   gpu_deadline_filename: "~/Documents/gpu_deadline/yolo_gpu_deadline.csv"
-  network_definition_file: "~/autoware.ai/autoware_files/vision/yolov3-320.cfg"
-  pretrained_model_file: "~/autoware.ai/autoware_files/vision/yolov3-320.weights"
+  network_definition_file: "~/autoware.ai/autoware_files/vision/yolov3-tiny.cfg"
+  pretrained_model_file: "~/autoware.ai/autoware_files/vision/yolov3-tiny.weights"
 
 imm_ukf_pda_track:
   task_scheduling_flag: 0
   task_profiling_flag: 0
   task_response_time_filename: "~/Documents/profiling/response_time/imm_ukf_pda_track.csv"
   rate: 10 
-  minimum_inter_release_time: 100000000
-  execution_time: 100000000
-  relative_deadline: 100000000
+  task_minimum_inter_release_time: 100000000
+  task_execution_time: 100000000
+  task_relative_deadline: 100000000
 
 range_vision_fusion:
   task_scheduling_flag: 0
   task_profiling_flag: 0
   task_response_time_filename: "~/Documents/profiling/response_time/range_vision_fusion.csv"
   rate: 10 
-  minimum_inter_release_time: 100000000
-  execution_time: 100000000
-  relative_deadline: 100000000
+  task_minimum_inter_release_time: 100000000
+  task_execution_time: 100000000
+  task_relative_deadline: 100000000
 
 # Planning
 op_global_planner:
@@ -101,9 +101,9 @@ op_global_planner:
   task_profiling_flag: 0
   task_response_time_filename: "~/Documents/profiling/response_time/op_global_planner.csv"
   rate: 25 #25
-  minimum_inter_release_time: 100000000
-  execution_time: 100000000
-  relative_deadline: 100000000
+  task_minimum_inter_release_time: 100000000
+  task_execution_time: 100000000
+  task_relative_deadline: 100000000
 
 op_common_params:
   rollOutDensity: 4
@@ -117,18 +117,18 @@ op_trajectory_generator:
   task_profiling_flag: 0
   task_response_time_filename: "~/Documents/profiling/response_time/op_trajectory_generator.csv"
   rate: 100 #100
-  minimum_inter_release_time: 10000000
-  execution_time: 10000000
-  relative_deadline: 10000000
+  task_minimum_inter_release_time: 10000000
+  task_execution_time: 10000000
+  task_relative_deadline: 10000000
 
 op_trajectory_evaluator:
   task_scheduling_flag: 0
   task_profiling_flag: 0
   task_response_time_filename: "~/Documents/profiling/response_time/op_trajectory_evaluator.csv"
   rate: 10 #100
-  minimum_inter_release_time: 100000000
-  execution_time: 100000000
-  relative_deadline: 100000000
+  task_minimum_inter_release_time: 100000000
+  task_execution_time: 100000000
+  task_relative_deadline: 100000000
   weightPriority: 0
   weightTransition: 5
   weightLong: 4
@@ -142,9 +142,9 @@ op_behavior_selector:
   task_profiling_flag: 0
   task_response_time_filename: "~/Documents/profiling/response_time/op_behavior_selector.csv"
   rate: 10 #100
-  minimum_inter_release_time: 10000000
-  execution_time: 10000000
-  relative_deadline: 10000000
+  task_minimum_inter_release_time: 10000000
+  task_execution_time: 10000000
+  task_relative_deadline: 10000000
   distanceToPedestrianThreshold: 15.0
   sprintSpeed: 10.0
   obstacleWaitingTimeinIntersection: 2.0
@@ -155,9 +155,9 @@ op_motion_predictor:
   task_profiling_flag: 0
   task_response_time_filename: "~/Documents/profiling/response_time/op_motion_predictor.csv"
   rate: 10 #25
-  minimum_inter_release_time: 40000000
-  execution_time: 40000000
-  relative_deadline: 40000000
+  task_minimum_inter_release_time: 40000000
+  task_execution_time: 40000000
+  task_relative_deadline: 40000000
 
 # Control
 pure_pursuit:
@@ -165,9 +165,9 @@ pure_pursuit:
   task_profiling_flag: 0
   task_response_time_filename: "~/Documents/profiling/response_time/pure_pursuit.csv"
   rate: 1 #30
-  minimum_inter_release_time: 33333333
-  execution_time: 33333333
-  relative_deadline: 33333333
+  task_minimum_inter_release_time: 33333333
+  task_execution_time: 33333333
+  task_relative_deadline: 33333333
   dynamic_params_flag: False
   dynamic_params_path: "~/autoware.ai/autoware_files/lgsvl_file/parameter/lgsvl_pure_pursuit.yaml"
 
@@ -176,15 +176,15 @@ twist_filter:
   task_profiling_flag: 0
   task_response_time_filename: "~/Documents/profiling/response_time/twist_filter.csv"
   rate: 1 
-  minimum_inter_release_time: 100000000
-  execution_time: 100000000
-  relative_deadline: 100000000
+  task_minimum_inter_release_time: 100000000
+  task_execution_time: 100000000
+  task_relative_deadline: 100000000
 
 twist_gate:
   task_scheduling_flag: 0
   task_profiling_flag: 0
   task_response_time_filename: "~/Documents/profiling/response_time/twist_gate.csv"
   rate: 1 
-  minimum_inter_release_time: 100000000
-  execution_time: 100000000
-  relative_deadline: 100000000
+  task_minimum_inter_release_time: 100000000
+  task_execution_time: 100000000
+  task_relative_deadline: 100000000
