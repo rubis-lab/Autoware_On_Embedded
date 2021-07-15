@@ -70,7 +70,7 @@ private:
       const WayPoint& currState, const PlanningParams& params, const CAR_BASIC_INFO& carInfo,
       const VehicleState& vehicleState, const double& c_lateral_d, const double& c_long_front_d, const double& c_long_back_d );
 
-  double CalculateTurnAngle(const std::vector<WayPoint>& path, const WayPoint& currState);
+  double CalculateTurnAngle(const std::vector<WayPoint>& path, const WayPoint& currState, int distance);
 
 };
 
