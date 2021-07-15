@@ -1688,7 +1688,7 @@ int main(int argc, char** argv)
   initial_pose.yaw = 0.0;
 
   // Publishers
-  predict_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/predict_pose", 10);
+  predict_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/predict_pose", 10); 
   predict_pose_imu_pub = nh.advertise<geometry_msgs::PoseStamped>("/predict_pose_imu", 10);
   predict_pose_odom_pub = nh.advertise<geometry_msgs::PoseStamped>("/predict_pose_odom", 10);
   predict_pose_imu_odom_pub = nh.advertise<geometry_msgs::PoseStamped>("/predict_pose_imu_odom", 10);
