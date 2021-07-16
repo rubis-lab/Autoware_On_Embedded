@@ -25,6 +25,7 @@ int rate_;
 double minimum_inter_release_time_;
 double execution_time_;
 double relative_deadline_;
+int multilap_flag_; //multilap trigger
 
 #define SPIN_PROFILING
 
@@ -438,6 +439,7 @@ void GlobalPlanner::MainLoop()
   private_nh.param("/op_global_planner/minimum_inter_release_time", minimum_inter_release_time_, (double)10);
   private_nh.param("/op_global_planner/execution_time", execution_time_, (double)10);
   private_nh.param("/op_global_planner/relative_deadline", relative_deadline_, (double)10);
+  private_nh.param("/op_global_planner/multilap_flag", multilap_flag_, 0);
 
   std::cout<<"scheduling_flag_"<<scheduling_flag_<<std::endl;
   std::cout<<"profiling_flag_"<<profiling_flag_<<std::endl;
@@ -446,6 +448,7 @@ void GlobalPlanner::MainLoop()
   std::cout<<"minimum_inter_release_time_"<<minimum_inter_release_time_<<std::endl;
   std::cout<<"execution_time_"<<execution_time_<<std::endl;
   std::cout<<"relative_deadline_"<<relative_deadline_<<std::endl;
+  std::cout<<"multilap_flag_"<<multilap_flag_<<std::endl;
 
 
   timespec animation_timer;
@@ -531,6 +534,7 @@ void GlobalPlanner::MainLoop()
     ClearOldCostFromMap();
 
     // HJW updated for multi-lab
+    // goal pose is appended at goal pose callback function
     if(m_GoalsPos.size() > 0)
     {
       if(m_GeneratedTotalPaths.size() == 0) // initialize two paths
@@ -539,6 +543,7 @@ void GlobalPlanner::MainLoop()
         std::vector<std::vector<PlannerHNS::WayPoint>> tmp_path_list_2;
         PlannerHNS::WayPoint goalPoint = m_GoalsPos.at(m_iCurrentGoalIndex);
 
+        // Generate path from initial pose to goal pose (rviz axis) and save to tmp_path_list
         bool bNewPlan = GenerateGlobalPlan(m_CurrentPose, goalPoint, tmp_path_list);
 
         if(bNewPlan)
@@ -547,14 +552,16 @@ void GlobalPlanner::MainLoop()
 
           // Do multi-lab driving only current position and goal point is close
           // TODO : Add parameter for enable multi-lab driving
-          if(hypot(m_CurrentPose.pos.x - goalPoint.pos.x, m_CurrentPose.pos.y - goalPoint.pos.y) < 30){
-            int wp_size = tmp_path_list.at(0).size();
-            PlannerHNS::WayPoint path2_start_wp = tmp_path_list.at(0).at(wp_size / 2 + 10);
-            PlannerHNS::WayPoint path2_end_wp = tmp_path_list.at(0).at(wp_size / 2 - 10);
-            bool bNewPlan_2 = GenerateGlobalPlan(path2_start_wp, path2_end_wp, tmp_path_list_2);
+          if(multilap_flag_){
+            if(hypot(m_CurrentPose.pos.x - goalPoint.pos.x, m_CurrentPose.pos.y - goalPoint.pos.y) < 30){
+              int wp_size = tmp_path_list.at(0).size();
+              PlannerHNS::WayPoint path2_start_wp = tmp_path_list.at(0).at(wp_size / 2 + 10);
+              PlannerHNS::WayPoint path2_end_wp = tmp_path_list.at(0).at(wp_size / 2 - 10);
+              bool bNewPlan_2 = GenerateGlobalPlan(path2_start_wp, path2_end_wp, tmp_path_list_2);
 
-            if(bNewPlan_2){
-              m_GeneratedTotalPaths.push_back(tmp_path_list_2);
+              if(bNewPlan_2){
+                m_GeneratedTotalPaths.push_back(tmp_path_list_2);
+              }
             }
           }
           selectedGlobalPathIdx = 0;

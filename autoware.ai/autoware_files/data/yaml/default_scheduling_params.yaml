@@ -110,6 +110,7 @@ op_global_planner:
   minimum_inter_release_time: 100000000
   execution_time: 100000000
   relative_deadline: 100000000
+  multilap_flag: 1 #multilap trigger
 
 op_common_params:
   rollOutDensity: 4
