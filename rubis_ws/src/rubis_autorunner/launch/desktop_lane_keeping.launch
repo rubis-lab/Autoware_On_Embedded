@@ -1,0 +1,4 @@
+<launch>
+    <rosparam command="load" file="$(env USER_HOME)/rubis_ws/src/rubis_autorunner/cfg/desktop_lane_keeping/desktop_lane_keeping.yaml" />
+    <node pkg="rubis_autorunner" type="desktop_lane_keeping" name="desktop_lane_keeping" output="screen" />
+</launch>
