@@ -19,13 +19,7 @@
 #include "op_ros_helpers/op_ROSHelpers.h"
 #include <rubis_sched/sched.hpp>
 
-int scheduling_flag_;
-int profiling_flag_;
-std::string response_time_filename_;
-int rate_;
-double minimum_inter_release_time_;
-double execution_time_;
-double relative_deadline_;
+int is_topic_ready = 0;
 
 namespace MotionPredictorNS
 {
@@ -77,16 +71,16 @@ MotionPrediction::MotionPrediction()
     object_msg_list_.push_back(msg);
   }
   
-  sub_current_pose   = nh.subscribe("/current_pose", 10,  &MotionPrediction::callbackGetCurrentPose,     this);
+  sub_current_pose   = nh.subscribe("/current_pose", 1,  &MotionPrediction::callbackGetCurrentPose,     this); //origin 10
 
   int bVelSource = 1;
   _nh.getParam("/op_motion_predictor/velocitySource", bVelSource);
   if(bVelSource == 0)
-    sub_robot_odom = nh.subscribe("/odom", 10, &MotionPrediction::callbackGetRobotOdom, this);
+    sub_robot_odom = nh.subscribe("/odom", 1, &MotionPrediction::callbackGetRobotOdom, this); //origin 10
   else if(bVelSource == 1)
-    sub_current_velocity = nh.subscribe("/current_velocity", 10, &MotionPrediction::callbackGetVehicleStatus, this);
+    sub_current_velocity = nh.subscribe("/current_velocity", 1, &MotionPrediction::callbackGetVehicleStatus, this); //origin 10
   else if(bVelSource == 2)
-    sub_can_info = nh.subscribe("/can_info", 10, &MotionPrediction::callbackGetCANInfo, this);
+    sub_can_info = nh.subscribe("/can_info", 1, &MotionPrediction::callbackGetCANInfo, this); //origin 10
 
   UtilityHNS::UtilityH::GetTickCount(m_VisualizationTimer);
   PlannerHNS::ROSHelpers::InitPredMarkers(100, m_PredictedTrajectoriesDummy);
@@ -246,6 +240,8 @@ void MotionPrediction::callbackGetVehicleStatus(const geometry_msgs::TwistStampe
     m_VehicleStatus.steer = atan(m_CarInfo.wheel_base * msg->twist.angular.z/msg->twist.linear.x);
   UtilityHNS::UtilityH::GetTickCount(m_VehicleStatus.tStamp);
   bVehicleStatus = true;
+
+  is_topic_ready = 1;
 }
 
 void MotionPrediction::callbackGetCANInfo(const autoware_can_msgs::CANInfoConstPtr &msg)
@@ -543,36 +539,34 @@ void MotionPrediction::MainLoop()
 
   ros::NodeHandle private_nh("~");
 
-  private_nh.param<int>("/op_motion_predictor/scheduling_flag", scheduling_flag_, 0);
-  private_nh.param<int>("/op_motion_predictor/profiling_flag", profiling_flag_, 0);
-  private_nh.param<std::string>("/op_motion_predictor/response_time_filename", response_time_filename_, "/home/hypark/Documents/profiling/response_time/op_motion_predictor.csv");
-  private_nh.param<int>("/op_motion_predictor/rate", rate_, 10);
-  private_nh.param("/op_motion_predictor/minimum_inter_release_time", minimum_inter_release_time_, (double)10);
-  private_nh.param("/op_motion_predictor/execution_time", execution_time_, (double)10);
-  private_nh.param("/op_motion_predictor/relative_deadline", relative_deadline_, (double)10);
+  // Scheduling Setup
+  int task_scheduling_flag;
+  int task_profiling_flag;
+  std::string task_response_time_filename;
+  int rate;
+  double task_minimum_inter_release_time;
+  double task_execution_time;
+  double task_relative_deadline; 
 
-  // FILE *fp;
-  // if(profiling_flag_){      
-  //   fp = fopen(response_time_filename_.c_str(), "a");
-  // }
+  private_nh.param<int>("/op_motion_predictor/task_scheduling_flag", task_scheduling_flag, 0);
+  private_nh.param<int>("/op_motion_predictor/task_profiling_flag", task_profiling_flag, 0);
+  private_nh.param<std::string>("/op_motion_predictor/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/op_motion_predictor.csv");
+  private_nh.param<int>("/op_motion_predictor/rate", rate, 10);
+  private_nh.param("/op_motion_predictor/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
+  private_nh.param("/op_motion_predictor/task_execution_time", task_execution_time, (double)10);
+  private_nh.param("/op_motion_predictor/task_relative_deadline", task_relative_deadline, (double)10);
+
+  if(task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
 
   ros::Rate loop_rate(25);
-  // if(scheduling_flag_) loop_rate = ros::Rate(rate_);
-
-  struct timespec start_time, end_time;
+  if(!task_scheduling_flag && !task_profiling_flag) loop_rate = ros::Rate(rate);
 
   while (ros::ok())
   {
-    // if(profiling_flag_){        
-    //   clock_gettime(CLOCK_MONOTONIC, &start_time);
-    // }
-    // if(scheduling_flag_){
-    //   rubis::sched::set_sched_deadline(gettid(), 
-    //     static_cast<uint64_t>(execution_time_), 
-    //     static_cast<uint64_t>(relative_deadline_), 
-    //     static_cast<uint64_t>(minimum_inter_release_time_)
-    //   );
-    // }      
+    if(task_profiling_flag) rubis::sched::start_task_profiling();
+    if(task_scheduling_flag && is_topic_ready){        
+      rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline);
+    }
 
     ros::spinOnce();
 
@@ -635,15 +629,11 @@ void MotionPrediction::MainLoop()
 //      pub_predicted_objects_trajectories.publish(m_PredictedResultsResults);
 //    }
 
-    // if(profiling_flag_){
-    //   clock_gettime(CLOCK_MONOTONIC, &end_time);
-    //   fprintf(fp, "%lld.%.9ld,%lld.%.9ld,%d\n",start_time.tv_sec,start_time.tv_nsec,end_time.tv_sec,end_time.tv_nsec,getpid());    
-    //   fflush(fp);
-    // }
+    if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
+    if(task_profiling_flag) rubis::sched::stop_task_profiling();
 
     loop_rate.sleep();
   }
-  // fclose(fp);
 }
 
 void MotionPrediction::TransformPose(const geometry_msgs::PoseStamped &in_pose, geometry_msgs::PoseStamped& out_pose, const tf::StampedTransform &in_transform)

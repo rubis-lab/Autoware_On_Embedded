@@ -19,13 +19,7 @@
 #include "op_planner/MappingHelpers.h"
 #include <rubis_sched/sched.hpp>
 
-int scheduling_flag_;
-int profiling_flag_;
-std::string response_time_filename_;
-int rate_;
-double minimum_inter_release_time_;
-double execution_time_;
-double relative_deadline_;
+int is_topic_ready = 0;
 
 namespace TrajectoryEvaluatorNS
 {
@@ -57,17 +51,17 @@ TrajectoryEval::TrajectoryEval()
   pub_IntersectionCondition = nh.advertise<autoware_msgs::IntersectionCondition>("intersection_condition", 1);
   pub_SprintSwitch = nh.advertise<std_msgs::Bool>("sprint_switch", 1);
 
-  sub_current_pose = nh.subscribe("/current_pose", 10, &TrajectoryEval::callbackGetCurrentPose, this);
-  sub_current_state = nh.subscribe("/current_state", 10, &TrajectoryEval::callbackGetCurrentState, this);
+  sub_current_pose = nh.subscribe("/current_pose", 1, &TrajectoryEval::callbackGetCurrentPose, this); //origin 10
+  sub_current_state = nh.subscribe("/current_state", 1, &TrajectoryEval::callbackGetCurrentState, this); //origin 10
 
   int bVelSource = 1;
   _nh.getParam("/op_trajectory_evaluator/velocitySource", bVelSource);
   if(bVelSource == 0)
-    sub_robot_odom = nh.subscribe("/odom", 10, &TrajectoryEval::callbackGetRobotOdom, this);
+    sub_robot_odom = nh.subscribe("/odom", 1, &TrajectoryEval::callbackGetRobotOdom, this); //origin 10
   else if(bVelSource == 1)
-    sub_current_velocity = nh.subscribe("/current_velocity", 10, &TrajectoryEval::callbackGetVehicleStatus, this);
+    sub_current_velocity = nh.subscribe("/current_velocity", 1, &TrajectoryEval::callbackGetVehicleStatus, this); //origin 10
   else if(bVelSource == 2)
-    sub_can_info = nh.subscribe("/can_info", 10, &TrajectoryEval::callbackGetCANInfo, this);
+    sub_can_info = nh.subscribe("/can_info", 1, &TrajectoryEval::callbackGetCANInfo, this); //origin 10
 
   sub_GlobalPlannerPaths = nh.subscribe("/lane_waypoints_array", 1, &TrajectoryEval::callbackGetGlobalPlannerPath, this);
   sub_LocalPlannerPaths = nh.subscribe("/local_trajectories", 1, &TrajectoryEval::callbackGetLocalPlannerPath, this);
@@ -162,6 +156,8 @@ void TrajectoryEval::callbackGetVehicleStatus(const geometry_msgs::TwistStampedC
     m_VehicleStatus.steer = atan(m_CarInfo.wheel_base * msg->twist.angular.z/msg->twist.linear.x);
   UtilityHNS::UtilityH::GetTickCount(m_VehicleStatus.tStamp);
   bVehicleStatus = true;
+
+  is_topic_ready = 1;
 }
 
 void TrajectoryEval::callbackGetCANInfo(const autoware_can_msgs::CANInfoConstPtr &msg)
@@ -434,13 +430,25 @@ bool TrajectoryEval::UpdateTf()
 void TrajectoryEval::MainLoop()
 {
   ros::NodeHandle private_nh("~");
-  private_nh.param<int>("/op_trajectory_evaluator/scheduling_flag", scheduling_flag_, 0);
-  private_nh.param<int>("/op_trajectory_evaluator/profiling_flag", profiling_flag_, 0);
-  private_nh.param<std::string>("/op_trajectory_evaluator/response_time_filename", response_time_filename_, "/home/hypark/Documents/profiling/response_time/op_trajectory_evaluator.csv");
-  private_nh.param<int>("/op_trajectory_evaluator/rate", rate_, 10);
-  private_nh.param("/op_trajectory_evaluator/minimum_inter_release_time", minimum_inter_release_time_, (double)10);
-  private_nh.param("/op_trajectory_evaluator/execution_time", execution_time_, (double)10);
-  private_nh.param("/op_trajectory_evaluator/relative_deadline", relative_deadline_, (double)10);
+
+  // Scheduling Setup
+  int task_scheduling_flag;
+  int task_profiling_flag;
+  std::string task_response_time_filename;
+  int rate;
+  double task_minimum_inter_release_time;
+  double task_execution_time;
+  double task_relative_deadline; 
+
+  private_nh.param<int>("/op_trajectory_evaluator/task_scheduling_flag", task_scheduling_flag, 0);
+  private_nh.param<int>("/op_trajectory_evaluator/task_profiling_flag", task_profiling_flag, 0);
+  private_nh.param<std::string>("/op_trajectory_evaluator/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/op_trajectory_evaluator.csv");
+  private_nh.param<int>("/op_trajectory_evaluator/rate", rate, 10);
+  private_nh.param("/op_trajectory_evaluator/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
+  private_nh.param("/op_trajectory_evaluator/task_execution_time", task_execution_time, (double)10);
+  private_nh.param("/op_trajectory_evaluator/task_relative_deadline", task_relative_deadline, (double)10);
+
+  if(task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
 
   PlannerHNS::WayPoint prevState, state_change;
 
@@ -450,28 +458,19 @@ void TrajectoryEval::MainLoop()
   nh.getParam("/op_trajectory_evaluator/intersection_list", intersection_xml);
   PlannerHNS::MappingHelpers::ConstructIntersection_RUBIS(intersection_list, intersection_xml);
 
-  // FILE *fp;
-  // if(profiling_flag_){      
-  //   fp = fopen(response_time_filename_.c_str(), "a");
-  // }
+  
 
   ros::Rate loop_rate(100);
-  // if(scheduling_flag_) loop_rate = ros::Rate(rate_);
+  if(!task_scheduling_flag && !task_profiling_flag) loop_rate = ros::Rate(rate);
 
   struct timespec start_time, end_time;
 
   while (ros::ok())
   {
-    // if(profiling_flag_){        
-    //   clock_gettime(CLOCK_MONOTONIC, &start_time);
-    // }
-    // if(scheduling_flag_){
-    //   rubis::sched::set_sched_deadline(gettid(), 
-    //     static_cast<uint64_t>(execution_time_), 
-    //     static_cast<uint64_t>(relative_deadline_), 
-    //     static_cast<uint64_t>(minimum_inter_release_time_)
-    //   );
-    // }      
+    if(task_profiling_flag) rubis::sched::start_task_profiling();
+    if(task_scheduling_flag && is_topic_ready){        
+      rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline);
+    }     
 
     UpdateMyParams();
     UpdateTf();
@@ -566,14 +565,10 @@ void TrajectoryEval::MainLoop()
     else
       sub_GlobalPlannerPaths = nh.subscribe("/lane_waypoints_array",   1,    &TrajectoryEval::callbackGetGlobalPlannerPath,   this);
 
-    // if(profiling_flag_){
-    //   clock_gettime(CLOCK_MONOTONIC, &end_time);
-    //   fprintf(fp, "%lld.%.9ld,%lld.%.9ld,%d\n",start_time.tv_sec,start_time.tv_nsec,end_time.tv_sec,end_time.tv_nsec,getpid());    
-    //   fflush(fp);
-    // }
+    if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
+    if(task_profiling_flag) rubis::sched::stop_task_profiling();
     loop_rate.sleep();
   }
-  // fclose(fp);
 }
 
 }

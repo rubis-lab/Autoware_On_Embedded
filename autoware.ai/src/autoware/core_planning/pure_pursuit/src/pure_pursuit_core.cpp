@@ -18,13 +18,7 @@
 #include <pure_pursuit/pure_pursuit_core.h>
 #include <rubis_sched/sched.hpp>
 
-int scheduling_flag_;
-int profiling_flag_;
-std::string response_time_filename_;
-int rate_;
-double minimum_inter_release_time_;
-double execution_time_;
-double relative_deadline_;
+int is_topic_ready = 0;
 
 namespace waypoint_follower
 {
@@ -101,19 +95,19 @@ void PurePursuitNode::initForROS()
       param.lookahead_distance = (double)(xml_param[3]);
       dynamic_params.push_back(param);
     }
-
+  
   }
 
 
   // setup subscriber
   sub1_ = nh_.subscribe("final_waypoints", 10,
-    &PurePursuitNode::callbackFromWayPoints, this);
+    &PurePursuitNode::callbackFromWayPoints, this); // origin 10
   sub2_ = nh_.subscribe("current_pose", 10,
-    &PurePursuitNode::callbackFromCurrentPose, this);
+    &PurePursuitNode::callbackFromCurrentPose, this); // origin 10
   sub3_ = nh_.subscribe("config/waypoint_follower", 10,
-    &PurePursuitNode::callbackFromConfig, this);
+    &PurePursuitNode::callbackFromConfig, this); // origin 10
   sub4_ = nh_.subscribe("current_velocity", 10,
-    &PurePursuitNode::callbackFromCurrentVelocity, this);
+    &PurePursuitNode::callbackFromCurrentVelocity, this); // origin 10
 
   // setup publisher
   pub1_ = nh_.advertise<geometry_msgs::TwistStamped>("twist_raw", 10);
@@ -130,54 +124,52 @@ void PurePursuitNode::initForROS()
   pub18_ =
     nh_.advertise<visualization_msgs::Marker>("expanded_waypoints_mark", 0);
   // pub7_ = nh.advertise<std_msgs::Bool>("wf_stat", 0);
+
+  is_topic_ready = 1;
 }
 
 void PurePursuitNode::run()
 {
   ros::NodeHandle private_nh("~");
 
-  private_nh.param<int>("/pure_pursuit/scheduling_flag", scheduling_flag_, 0);
-  private_nh.param<int>("/pure_pursuit/profiling_flag", profiling_flag_, 0);
-  private_nh.param<std::string>("/pure_pursuit/response_time_filename", response_time_filename_, "/home/hypark/Documents/profiling/response_time/pure_pursuit.csv");
-  private_nh.param<int>("/pure_pursuit/rate", rate_, 10);
-  private_nh.param("/pure_pursuit/minimum_inter_release_time", minimum_inter_release_time_, (double)10);
-  private_nh.param("/pure_pursuit/execution_time", execution_time_, (double)10);
-  private_nh.param("/pure_pursuit/relative_deadline", relative_deadline_, (double)10);
+  // Scheduling Setup
+  int task_scheduling_flag;
+  int task_profiling_flag;
+  std::string task_response_time_filename;
+  int rate;
+  double task_minimum_inter_release_time;
+  double task_execution_time;
+  double task_relative_deadline;
+
+  private_nh.param<int>("/pure_pursuit/task_scheduling_flag", task_scheduling_flag, 0);
+  private_nh.param<int>("/pure_pursuit/task_profiling_flag", task_profiling_flag, 0);
+  private_nh.param<std::string>("/pure_pursuit/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/pure_pursuit.csv");
+  private_nh.param<int>("/pure_pursuit/rate", rate, 10);
+  private_nh.param("/pure_pursuit/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
+  private_nh.param("/pure_pursuit/task_execution_time", task_execution_time, (double)10);
+  private_nh.param("/pure_pursuit/task_relative_deadline", task_relative_deadline, (double)10);
 
   ROS_INFO_STREAM("pure pursuit start");
 
-  // FILE *fp;
-  // if(profiling_flag_){      
-  //   fp = fopen(response_time_filename_.c_str(), "a");
-  // }
+  if(task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
 
   ros::Rate loop_rate(LOOP_RATE_);
-  // if(scheduling_flag_) loop_rate = ros::Rate(rate_);
-  struct timespec start_time, end_time;
+  if(!task_scheduling_flag && !task_profiling_flag) loop_rate = ros::Rate(rate);
 
   while (ros::ok())
   {
-    // if(profiling_flag_){        
-    //   clock_gettime(CLOCK_MONOTONIC, &start_time);
-    // }
-    // if(scheduling_flag_){
-    //   rubis::sched::set_sched_deadline(gettid(), 
-    //     static_cast<uint64_t>(execution_time_), 
-    //     static_cast<uint64_t>(relative_deadline_), 
-    //     static_cast<uint64_t>(minimum_inter_release_time_)
-    //   );
-    // }      
+    if(task_profiling_flag) rubis::sched::start_task_profiling();
+    if(task_scheduling_flag && is_topic_ready){        
+      rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline);
+    }     
 
     ros::spinOnce();
     if (!is_pose_set_ || !is_waypoint_set_ || !is_velocity_set_)
     {
       ROS_WARN("Necessary topics are not subscribed yet ... ");
       
-      // if(profiling_flag_){
-      //   clock_gettime(CLOCK_MONOTONIC, &end_time);
-      //   fprintf(fp, "%lld.%.9ld,%lld.%.9ld,%d\n",start_time.tv_sec,start_time.tv_nsec,end_time.tv_sec,end_time.tv_nsec,getpid());    
-      //   fflush(fp);
-      // }
+      if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
+      if(task_profiling_flag) rubis::sched::stop_task_profiling();
 
       loop_rate.sleep();
       continue;
@@ -219,15 +211,11 @@ void PurePursuitNode::run()
     is_velocity_set_ = false;
     is_waypoint_set_ = false;
 
-    // if(profiling_flag_){
-    //   clock_gettime(CLOCK_MONOTONIC, &end_time);
-    //   fprintf(fp, "%lld.%.9ld,%lld.%.9ld,%d\n",start_time.tv_sec,start_time.tv_nsec,end_time.tv_sec,end_time.tv_nsec,getpid());    
-    //   fflush(fp);
-    // }
+    if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
+    if(task_profiling_flag) rubis::sched::stop_task_profiling();
 
     loop_rate.sleep();
   }
-  // fclose(fp);
 }
 
 void PurePursuitNode::publishTwistStamped(
@@ -357,6 +345,8 @@ void PurePursuitNode::callbackFromCurrentPose(
 {
   pp_.setCurrentPose(msg);
   is_pose_set_ = true;
+
+  is_topic_ready = 1;
 }
 
 void PurePursuitNode::callbackFromCurrentVelocity(

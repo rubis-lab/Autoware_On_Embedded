@@ -24,13 +24,7 @@
 #include <rubis_sched/sched.hpp>
 #define SPIN_PROFILING
 
-int scheduling_flag_;
-int profiling_flag_;
-std::string response_time_filename_;
-int rate_;
-double minimum_inter_release_time_;
-double execution_time_;
-double relative_deadline_;
+int is_topic_ready = 0;
 
 cv::Point3f
 ROSRangeVisionFusionApp::TransformPoint(const geometry_msgs::Point &in_point, const tf::StampedTransform &in_transform)
@@ -572,6 +566,8 @@ ROSRangeVisionFusionApp::IntrinsicsCallback(const sensor_msgs::CameraInfo &in_me
   camera_area_ = in_message.height * in_message.width;
   ROS_INFO("[%d] Camera Area Size.", camera_area_);
   ROS_INFO("[%s] CameraIntrinsics obtained.", __APP_NAME__);
+
+  is_topic_ready = 1;
 }
 
 tf::StampedTransform
@@ -720,22 +716,25 @@ ROSRangeVisionFusionApp::Run()
 {
   ros::NodeHandle private_node_handle("~");
 
-  private_node_handle.param<int>("/range_vision_fusion/scheduling_flag", scheduling_flag_, 0);
-  private_node_handle.param<int>("/range_vision_fusion/profiling_flag", profiling_flag_, 0);
-  private_node_handle.param<std::string>("/range_vision_fusion/response_time_filename", response_time_filename_, "/home/hypark/Documents/profiling/response_time/range_vision_fusion.csv");
-  private_node_handle.param<int>("/range_vision_fusion/rate", rate_, 10);
-  private_node_handle.param("/range_vision_fusion/minimum_inter_release_time", minimum_inter_release_time_, (double)10);
-  private_node_handle.param("/range_vision_fusion/execution_time", execution_time_, (double)10);
-  private_node_handle.param("/range_vision_fusion/relative_deadline", relative_deadline_, (double)10);
+  // Scheduling Setup
+  int task_scheduling_flag;
+  int task_profiling_flag;
+  std::string task_response_time_filename;
+  int rate;
+  double task_minimum_inter_release_time;
+  double task_execution_time;
+  double task_relative_deadline;
 
-  std::cout<<"scheduling_flag_"<<scheduling_flag_<<std::endl;
-  std::cout<<"profiling_flag_"<<profiling_flag_<<std::endl;
-  std::cout<<"response_time_filename_"<<response_time_filename_<<std::endl;
-  std::cout<<"rate_"<<rate_<<std::endl;
-  std::cout<<"minimum_inter_release_time_"<<minimum_inter_release_time_<<std::endl;
-  std::cout<<"execution_time_"<<execution_time_<<std::endl;
-  std::cout<<"relative_deadline_"<<relative_deadline_<<std::endl;
+  private_node_handle.param<int>("/range_vision_fusion/task_scheduling_flag", task_scheduling_flag, 0);
+  private_node_handle.param<int>("/range_vision_fusion/task_profiling_flag", task_profiling_flag, 0);
+  private_node_handle.param<std::string>("/range_vision_fusion/task_response_time_filename", task_response_time_filename, "/home/hypark/Documents/profiling/response_time/range_vision_fusion.csv");
+  private_node_handle.param<int>("/range_vision_fusion/rate", rate, 10);
+  private_node_handle.param("/range_vision_fusion/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
+  private_node_handle.param("/range_vision_fusion/task_execution_time", task_execution_time, (double)10);
+  private_node_handle.param("/range_vision_fusion/task_relative_deadline", task_relative_deadline, (double)10);
 
+  if(task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
+  
   tf::TransformListener transform_listener;
 
   transform_listener_ = &transform_listener;
@@ -745,41 +744,25 @@ ROSRangeVisionFusionApp::Run()
   ROS_INFO("[%s] Ready. Waiting for data...", __APP_NAME__);
 
   // SPIN
-  // if(!scheduling_flag_ && !profiling_flag_){
+  if(!task_scheduling_flag && !task_profiling_flag){
     ros::spin();
-  // }
-  // else{
-  //   FILE *fp;
-  //   if(profiling_flag_){      
-  //     fp = fopen(response_time_filename_.c_str(), "a");
-  //   }
+  }
+  else{
+    ros::Rate r(rate);    
+    while(ros::ok()){
+      if(task_profiling_flag) rubis::sched::start_task_profiling();
+      if(task_scheduling_flag && is_topic_ready){        
+        rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline);
+      }
+      ros::spinOnce();
+      if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
+      if(task_profiling_flag) rubis::sched::stop_task_profiling();
 
-  //   ros::Rate r(rate_);
-  //   struct timespec start_time, end_time;
-  //   while(ros::ok()){
-  //     if(profiling_flag_){        
-  //       clock_gettime(CLOCK_MONOTONIC, &start_time);
-  //     }
-  //     if(scheduling_flag_){
-  //       rubis::sched::set_sched_deadline(gettid(), 
-  //         static_cast<uint64_t>(execution_time_), 
-  //         static_cast<uint64_t>(relative_deadline_), 
-  //         static_cast<uint64_t>(minimum_inter_release_time_)
-  //       );
-  //     }      
+      
 
-  //     ros::spinOnce();
-
-  //     if(profiling_flag_){
-  //       clock_gettime(CLOCK_MONOTONIC, &end_time);
-  //       fprintf(fp, "%lld.%.9ld,%lld.%.9ld,%d\n",start_time.tv_sec,start_time.tv_nsec,end_time.tv_sec,end_time.tv_nsec,getpid());    
-  //       fflush(fp);
-  //     }
-
-  //     r.sleep();
-  //   }  
-  // fclose(fp);
-  // }
+      r.sleep();
+    }
+  }
 
   ROS_INFO("[%s] END", __APP_NAME__);
 }

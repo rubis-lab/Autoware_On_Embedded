@@ -21,13 +21,7 @@
 #include "twist_gate/twist_gate.h"
 #include <rubis_sched/sched.hpp>
 
-int scheduling_flag_;
-int profiling_flag_;
-std::string response_time_filename_;
-int rate_;
-double minimum_inter_release_time_;
-double execution_time_;
-double relative_deadline_;
+int is_topic_ready = 0;
 
 int main(int argc, char** argv)
 {
@@ -36,52 +30,46 @@ int main(int argc, char** argv)
   ros::NodeHandle nh;
   ros::NodeHandle private_nh("~");
 
-  private_nh.param<int>("/twist_gate/scheduling_flag", scheduling_flag_, 0);
-  private_nh.param<int>("/twist_gate/profiling_flag", profiling_flag_, 0);
-  private_nh.param<std::string>("/twist_gate/response_time_filename", response_time_filename_, "/home/hypark/Documents/profiling/response_time/twist_gate.csv");
-  private_nh.param<int>("/twist_gate/rate", rate_, 10);
-  private_nh.param("/twist_gate/minimum_inter_release_time", minimum_inter_release_time_, (double)10);
-  private_nh.param("/twist_gate/execution_time", execution_time_, (double)10);
-  private_nh.param("/twist_gate/relative_deadline", relative_deadline_, (double)10);
+  // Scheduling Setup
+  int task_scheduling_flag;
+  int task_profiling_flag;
+  std::string task_response_time_filename;
+  int rate;
+  double task_minimum_inter_release_time;
+  double task_execution_time;
+  double task_relative_deadline;
+
+  private_nh.param<int>("/twist_gate/task_scheduling_flag", task_scheduling_flag, 0);
+  private_nh.param<int>("/twist_gate/task_profiling_flag", task_profiling_flag, 0);
+  private_nh.param<std::string>("/twist_gate/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/twist_gate.csv");
+  private_nh.param<int>("/twist_gate/rate", rate, 10);
+  private_nh.param("/twist_gate/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
+  private_nh.param("/twist_gate/task_execution_time", task_execution_time, (double)10);
+  private_nh.param("/twist_gate/task_relative_deadline", task_relative_deadline, (double)10);
 
   TwistGate twist_gate(nh, private_nh);
+  is_topic_ready = 1;
+
+  if(task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
 
   // SPIN
-  // if(!scheduling_flag_ && !profiling_flag_){
+  if(!task_scheduling_flag && !task_profiling_flag){
     ros::spin();
-  // }
-  // else{
-  //   FILE *fp;
-  //   if(profiling_flag_){      
-  //     fp = fopen(response_time_filename_.c_str(), "a");
-  //   }
+  }
+  else{
+    ros::Rate r(rate);    
+    while(ros::ok()){
+      if(task_profiling_flag) rubis::sched::start_task_profiling();
+      if(task_scheduling_flag && is_topic_ready){        
+        rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline);
+      }      
+      ros::spinOnce();
+      if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
+      if(task_profiling_flag) rubis::sched::stop_task_profiling();
 
-  //   ros::Rate r(rate_);
-  //   struct timespec start_time, end_time;
-  //   while(ros::ok()){
-  //     if(profiling_flag_){        
-  //       clock_gettime(CLOCK_MONOTONIC, &start_time);
-  //     }
-  //     if(scheduling_flag_){
-  //       rubis::sched::set_sched_deadline(gettid(), 
-  //         static_cast<uint64_t>(execution_time_), 
-  //         static_cast<uint64_t>(relative_deadline_), 
-  //         static_cast<uint64_t>(minimum_inter_release_time_)
-  //       );
-  //     }      
-
-  //     ros::spinOnce();
-
-  //     if(profiling_flag_){
-  //       clock_gettime(CLOCK_MONOTONIC, &end_time);
-  //       fprintf(fp, "%lld.%.9ld,%lld.%.9ld,%d\n",start_time.tv_sec,start_time.tv_nsec,end_time.tv_sec,end_time.tv_nsec,getpid());    
-  //       fflush(fp);
-  //     }
-
-  //     r.sleep();
-  //   }  
-  // fclose(fp);
-  // }
+      r.sleep();
+    }
+  }
 
   return 0;
 }

@@ -18,15 +18,9 @@
 #include "op_ros_helpers/op_ROSHelpers.h"
 #include <rubis_sched/sched.hpp>
 
-int scheduling_flag_;
-int profiling_flag_;
-std::string response_time_filename_;
-int rate_;
-double minimum_inter_release_time_;
-double execution_time_;
-double relative_deadline_;
-
 #define SPIN_PROFILING
+
+int is_topic_ready = 0;
 
 namespace GlobalPlanningNS
 {
@@ -234,6 +228,8 @@ void GlobalPlanner::callbackGetVehicleStatus(const geometry_msgs::TwistStampedCo
   if(fabs(msg->twist.linear.x) > 0.25)
     m_VehicleState.steer = atan(2.7 * msg->twist.angular.z/msg->twist.linear.x);
   UtilityHNS::UtilityH::GetTickCount(m_VehicleState.tStamp);
+
+  is_topic_ready = 1;
 }
 
 void GlobalPlanner::callbackGetCANInfo(const autoware_can_msgs::CANInfoConstPtr &msg)
@@ -431,48 +427,38 @@ int GlobalPlanner::LoadSimulationData()
 void GlobalPlanner::MainLoop()
 {
   ros::NodeHandle private_nh("~");
-  private_nh.param<int>("/op_global_planner/scheduling_flag", scheduling_flag_, 0);
-  private_nh.param<int>("/op_global_planner/profiling_flag", profiling_flag_, 0);
-  private_nh.param<std::string>("/op_global_planner/response_time_filename", response_time_filename_, "/home/hypark/Documents/profiling/response_time/op_global_planner.csv");
-  private_nh.param<int>("/op_global_planner/rate", rate_, 10);
-  private_nh.param("/op_global_planner/minimum_inter_release_time", minimum_inter_release_time_, (double)10);
-  private_nh.param("/op_global_planner/execution_time", execution_time_, (double)10);
-  private_nh.param("/op_global_planner/relative_deadline", relative_deadline_, (double)10);
 
-  std::cout<<"scheduling_flag_"<<scheduling_flag_<<std::endl;
-  std::cout<<"profiling_flag_"<<profiling_flag_<<std::endl;
-  std::cout<<"response_time_filename_"<<response_time_filename_<<std::endl;
-  std::cout<<"rate_"<<rate_<<std::endl;
-  std::cout<<"minimum_inter_release_time_"<<minimum_inter_release_time_<<std::endl;
-  std::cout<<"execution_time_"<<execution_time_<<std::endl;
-  std::cout<<"relative_deadline_"<<relative_deadline_<<std::endl;
+  // Scheduling Setup
+  int task_scheduling_flag;
+  int task_profiling_flag;
+  std::string task_response_time_filename;
+  int rate;
+  double task_minimum_inter_release_time;
+  double task_execution_time;
+  double task_relative_deadline; 
 
+  private_nh.param<int>("/op_global_planner/task_scheduling_flag", task_scheduling_flag, 0);
+  private_nh.param<int>("/op_global_planner/task_profiling_flag", task_profiling_flag, 0);
+  private_nh.param<std::string>("/op_global_planner/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/op_global_planner.csv");
+  private_nh.param<int>("/op_global_planner/rate", rate, 10);
+  private_nh.param("/op_global_planner/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
+  private_nh.param("/op_global_planner/task_execution_time", task_execution_time, (double)10);
+  private_nh.param("/op_global_planner/task_relative_deadline", task_relative_deadline, (double)10);
+
+  if(task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
 
   timespec animation_timer;
   UtilityHNS::UtilityH::GetTickCount(animation_timer);
 
-  // FILE *fp;
-  // if(profiling_flag_){      
-  //   fp = fopen(response_time_filename_.c_str(), "a");
-  // }
-
   ros::Rate loop_rate(25);
-  // if(scheduling_flag_) loop_rate = ros::Rate(rate_);
-
-  struct timespec start_time, end_time;
-
+  if(!task_scheduling_flag && !task_profiling_flag) loop_rate = ros::Rate(rate);
+  
   while (ros::ok())
   {
-    // if(profiling_flag_){        
-    //   clock_gettime(CLOCK_MONOTONIC, &start_time);
-    // }
-    // if(scheduling_flag_){
-    //   rubis::sched::set_sched_deadline(gettid(), 
-    //     static_cast<uint64_t>(execution_time_), 
-    //     static_cast<uint64_t>(relative_deadline_), 
-    //     static_cast<uint64_t>(minimum_inter_release_time_)
-    //   );
-    // }      
+    if(task_profiling_flag) rubis::sched::start_task_profiling();
+    if(task_scheduling_flag && is_topic_ready){        
+      rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline);
+    }      
     ros::spinOnce();
     bool bMakeNewPlan = false;
 
@@ -569,14 +555,10 @@ void GlobalPlanner::MainLoop()
       }
       VisualizeDestinations(m_GoalsPos, m_iCurrentGoalIndex);
     }
-    // if(profiling_flag_){
-    //   clock_gettime(CLOCK_MONOTONIC, &end_time);
-    //   fprintf(fp, "%lld.%.9ld,%lld.%.9ld,%d\n",start_time.tv_sec,start_time.tv_nsec,end_time.tv_sec,end_time.tv_nsec,getpid());    
-    //   fflush(fp);
-    // }
+    if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
+    if(task_profiling_flag) rubis::sched::stop_task_profiling();
     loop_rate.sleep();
   }
-  // fclose(fp);
 }
 
 
