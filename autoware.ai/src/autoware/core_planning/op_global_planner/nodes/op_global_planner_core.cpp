@@ -427,26 +427,6 @@ int GlobalPlanner::LoadSimulationData()
 void GlobalPlanner::MainLoop()
 {
   ros::NodeHandle private_nh("~");
-<<<<<<< HEAD
-=======
-  private_nh.param<int>("/op_global_planner/scheduling_flag", scheduling_flag_, 0);
-  private_nh.param<int>("/op_global_planner/profiling_flag", profiling_flag_, 0);
-  private_nh.param<std::string>("/op_global_planner/response_time_filename", response_time_filename_, "/home/hypark/Documents/profiling/response_time/op_global_planner.csv");
-  private_nh.param<int>("/op_global_planner/rate", rate_, 10);
-  private_nh.param("/op_global_planner/minimum_inter_release_time", minimum_inter_release_time_, (double)10);
-  private_nh.param("/op_global_planner/execution_time", execution_time_, (double)10);
-  private_nh.param("/op_global_planner/relative_deadline", relative_deadline_, (double)10);
-  private_nh.param("/op_global_planner/multilap_flag", multilap_flag_, 0);
-
-  std::cout<<"scheduling_flag_"<<scheduling_flag_<<std::endl;
-  std::cout<<"profiling_flag_"<<profiling_flag_<<std::endl;
-  std::cout<<"response_time_filename_"<<response_time_filename_<<std::endl;
-  std::cout<<"rate_"<<rate_<<std::endl;
-  std::cout<<"minimum_inter_release_time_"<<minimum_inter_release_time_<<std::endl;
-  std::cout<<"execution_time_"<<execution_time_<<std::endl;
-  std::cout<<"relative_deadline_"<<relative_deadline_<<std::endl;
-  std::cout<<"multilap_flag_"<<multilap_flag_<<std::endl;
->>>>>>> 83f2c5a7e440dd4d57f34dbf3b053a1b36bac46d
 
   // Scheduling Setup
   int task_scheduling_flag;
@@ -456,6 +436,7 @@ void GlobalPlanner::MainLoop()
   double task_minimum_inter_release_time;
   double task_execution_time;
   double task_relative_deadline; 
+  int multilap_flag;
 
   private_nh.param<int>("/op_global_planner/task_scheduling_flag", task_scheduling_flag, 0);
   private_nh.param<int>("/op_global_planner/task_profiling_flag", task_profiling_flag, 0);
@@ -464,6 +445,7 @@ void GlobalPlanner::MainLoop()
   private_nh.param("/op_global_planner/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
   private_nh.param("/op_global_planner/task_execution_time", task_execution_time, (double)10);
   private_nh.param("/op_global_planner/task_relative_deadline", task_relative_deadline, (double)10);
+  private_nh.param("/op_global_planner/multilap_flag", multilap_flag, 0);
 
   if(task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
 
@@ -555,7 +537,7 @@ void GlobalPlanner::MainLoop()
 
           // Do multi-lab driving only current position and goal point is close
           // TODO : Add parameter for enable multi-lab driving
-          if(multilap_flag_){
+          if(multilap_flag){
             if(hypot(m_CurrentPose.pos.x - goalPoint.pos.x, m_CurrentPose.pos.y - goalPoint.pos.y) < 30){
               int wp_size = tmp_path_list.at(0).size();
               PlannerHNS::WayPoint path2_start_wp = tmp_path_list.at(0).at(wp_size / 2 + 10);
