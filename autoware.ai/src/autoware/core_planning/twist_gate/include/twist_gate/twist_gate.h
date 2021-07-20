@@ -42,6 +42,8 @@
 #include <autoware_health_checker/health_checker/health_checker.h>
 
 
+extern int zero_flag_;
+
 class TwistGate
 {
   using remote_msgs_t = autoware_msgs::RemoteCmd;
@@ -90,7 +92,7 @@ private:
   ros::Time remote_cmd_time_, emergency_handling_time_;
   ros::Time state_time_;
   ros::Duration timeout_period_;
-  double loop_rate_;
+  double loop_rate_;  
 
   std::thread watchdog_timer_thread_;
   bool is_alive;

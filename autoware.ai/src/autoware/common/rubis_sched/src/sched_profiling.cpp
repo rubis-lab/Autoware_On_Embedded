@@ -17,6 +17,11 @@ namespace sched{
   unsigned long long gpu_seg_response_time_;
   unsigned long long gpu_seg_execution_time_;
   unsigned long long cpu_seg_response_time_;
+  int is_gpu_profiling_ready_ = 0;
+
+  void set_is_gpu_profiling_ready(){
+    is_gpu_profiling_ready_ = 1;
+  }
 
   void init_task_profiling(std::string task_reponse_time_filename){
     if(task_reponse_time_filename.at(0) == '~'){
@@ -109,7 +114,7 @@ namespace sched{
   void refresh_gpu_profiling(){
     printf("refresh gpu profiling\n");
     if(is_gpu_profiling_started_ == 0) is_gpu_profiling_started_ = 1;
-    else if(is_gpu_profiling_started_ == 1){
+    else if( (is_gpu_profiling_started_ == 1) && (is_gpu_profiling_ready_ == 1) ){
       stop_profiling_cpu_seg_response_time();
       fprintf(seg_response_time_fp_, "-1, -1, -1\n");
       fprintf(seg_execution_time_fp_, "-1, -1, -1\n");

@@ -37,6 +37,8 @@
 
 using AwDiagStatus = autoware_system_msgs::DiagnosticStatus;
 
+int zero_flag_ = 0;
+
 TwistGate::TwistGate(const ros::NodeHandle& nh, const ros::NodeHandle& private_nh)
   : nh_(nh)
   , private_nh_(private_nh)
@@ -333,6 +335,9 @@ void TwistGate::emergencyCmdCallback(const vehicle_cmd_msg_t::ConstPtr& input_ms
 
 void TwistGate::timerCallback(const ros::TimerEvent& e)
 {
+  if(zero_flag_ == 1)
+    resetVehicleCmdMsg();
+
   vehicle_cmd_pub_.publish(twist_gate_msg_);
 }
 

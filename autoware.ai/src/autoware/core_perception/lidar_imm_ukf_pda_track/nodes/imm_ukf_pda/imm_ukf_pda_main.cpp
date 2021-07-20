@@ -54,13 +54,13 @@ int main(int argc, char** argv)
   else{
     ros::Rate r(rate);    
     while(ros::ok()){
-      if(task_profiling_flag) rubis::sched::start_task_profiling();
+      if(task_profiling_flag && is_topic_ready) rubis::sched::start_task_profiling();
       if(task_scheduling_flag && is_topic_ready){        
         rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline);
       }
       ros::spinOnce();
-      if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
-      if(task_profiling_flag) rubis::sched::stop_task_profiling();
+      if(task_scheduling_flag && is_topic_ready) rubis::sched::yield_task_scheduling();
+      if(task_profiling_flag && is_topic_ready) rubis::sched::stop_task_profiling();
 
       
 

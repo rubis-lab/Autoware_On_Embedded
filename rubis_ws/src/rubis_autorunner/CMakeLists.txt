@@ -42,6 +42,12 @@ add_executable(desktop_lane_keeping
   src/desktop_lane_keeping/desktop_lane_keeping.cpp
 )
 
+add_executable(cubetown_autorunner
+  include/cubetown_autorunner/cubetown_autorunner.h
+  src/cubetown_autorunner/cubetown_autorunner_node.cpp
+  src/cubetown_autorunner/cubetown_autorunner.cpp
+)
+
 add_dependencies(lgsvl_triple_lidar_autorunner ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(lgsvl_triple_lidar_autorunner
   ${catkin_LIBRARIES}
@@ -50,6 +56,12 @@ target_link_libraries(lgsvl_triple_lidar_autorunner
 
 add_dependencies(desktop_lane_keeping ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(desktop_lane_keeping
+  ${catkin_LIBRARIES}
+  ros_autorunner_lib
+)
+
+add_dependencies(cubetown_autorunner ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(cubetown_autorunner
   ${catkin_LIBRARIES}
   ros_autorunner_lib
 )
