@@ -7,15 +7,27 @@ Autoware system for embedded boards
 - ROS Melodic
 
 ## How to install ROS melodic
-* ROS Melodic Install
 ```
+sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
+sudo apt install curl -y
+curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
 sudo apt update
+sudo apt install ros-melodic-desktop-full -y
+echo "source /opt/ros/melodic/setup.bash" >> ~/.bashrc
+source ~/.bashrc
+sudo apt install python-rosdep python-rosinstall python-rosinstall-generator python-wstool build-essential python-rosdep -y
+sudo rosdep init
+rosdep update
+```
+
+## How to build Autoware
+* System Dependencies of Ubuntu 18.04 / ROS Melodic
+```
+sudo apt-get update
 sudo apt install -y python-catkin-pkg python-rosdep ros-$ROS_DISTRO-catkin
 sudo apt install -y python3-pip python3-colcon-common-extensions python3-setuptools python3-vcstool
 pip3 install -U setuptools
 ```
-
-## How to build Autoware
 
 * Eigen build
 ```
@@ -31,6 +43,10 @@ sudo make install
 ```
 
 Older versions may already be installed. If `/usr/lib/cmake/eigen3/Eigen3Config.cmake` is older than 3.3.7 version, copy files in `/usr/local/share/eigen3/cmake` to `/usr/lib/cmake/eigen3`.
+```
+sudo rm /usr/lib/cmake/eigen3/*
+sudo cp /usr/local/share/eigen3/cmake/* /usr/lib/cmake/eigen3
+```
 
 * Install dependent packages
 ```
@@ -73,21 +89,15 @@ cd ${WORKSPACE_DIR}/rubis_ws/src
 catkin_init_workspace
 ```
 
-* Build rubis_ws packages
-```
-cd ${WORKSPACE_DIR}/rubis_ws
-catkin_make
-```
-
 ## Launch script for additional setup
 ```
 # Launch setup script
 cd ${WORKSPACE_DIR}/setup
 
 # USER_NAME: directory name of home
-./setup.sh ${USER_NAME} ${WORKSPACE_PATH} 
+# WORTSPACE_PATH: path for Autoware_On_Embedded
+./setup.sh ${USER_NAME} ${WORKSPACE_PATH}
 ```
-
 
 <!-- ## Create symoblic links
 ```
@@ -95,10 +105,16 @@ ln -s ${WORKSPACE_DIR}/autoware.ai ~/autoware.ai
 ln -s ${WORKSPACE_DIR}/rubis_ws ~/rubis_ws
 ``` -->
 
+* Build rubis_ws packages
+```
+cd ${WORKSPACE_DIR}/rubis_ws
+catkin_make
+```
+
 ## How to launch LGSVL scrips
 * Setup environments
 ```
-cd ${WORKSPACE_DIR}/autoware_files/lgsvl_file/scripts
+cd ${WORKSPACE_DIR}/autoware.ai/autoware_files/lgsvl_file/scripts
 pip3 install --user .
 ```
 

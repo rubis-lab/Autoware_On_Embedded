@@ -427,6 +427,26 @@ int GlobalPlanner::LoadSimulationData()
 void GlobalPlanner::MainLoop()
 {
   ros::NodeHandle private_nh("~");
+<<<<<<< HEAD
+=======
+  private_nh.param<int>("/op_global_planner/scheduling_flag", scheduling_flag_, 0);
+  private_nh.param<int>("/op_global_planner/profiling_flag", profiling_flag_, 0);
+  private_nh.param<std::string>("/op_global_planner/response_time_filename", response_time_filename_, "/home/hypark/Documents/profiling/response_time/op_global_planner.csv");
+  private_nh.param<int>("/op_global_planner/rate", rate_, 10);
+  private_nh.param("/op_global_planner/minimum_inter_release_time", minimum_inter_release_time_, (double)10);
+  private_nh.param("/op_global_planner/execution_time", execution_time_, (double)10);
+  private_nh.param("/op_global_planner/relative_deadline", relative_deadline_, (double)10);
+  private_nh.param("/op_global_planner/multilap_flag", multilap_flag_, 0);
+
+  std::cout<<"scheduling_flag_"<<scheduling_flag_<<std::endl;
+  std::cout<<"profiling_flag_"<<profiling_flag_<<std::endl;
+  std::cout<<"response_time_filename_"<<response_time_filename_<<std::endl;
+  std::cout<<"rate_"<<rate_<<std::endl;
+  std::cout<<"minimum_inter_release_time_"<<minimum_inter_release_time_<<std::endl;
+  std::cout<<"execution_time_"<<execution_time_<<std::endl;
+  std::cout<<"relative_deadline_"<<relative_deadline_<<std::endl;
+  std::cout<<"multilap_flag_"<<multilap_flag_<<std::endl;
+>>>>>>> 83f2c5a7e440dd4d57f34dbf3b053a1b36bac46d
 
   // Scheduling Setup
   int task_scheduling_flag;
@@ -516,41 +536,52 @@ void GlobalPlanner::MainLoop()
 
     ClearOldCostFromMap();
 
+    // HJW updated for multi-lab
+    // goal pose is appended at goal pose callback function
     if(m_GoalsPos.size() > 0)
     {
-      if(m_GeneratedTotalPaths.size() > 0 && m_GeneratedTotalPaths.at(0).size() > 3)
+      if(m_GeneratedTotalPaths.size() == 0) // initialize two paths
       {
-        if(m_params.bEnableReplanning)
-        {
-          PlannerHNS::RelativeInfo info;
-          bool ret = PlannerHNS::PlanningHelpers::GetRelativeInfoRange(m_GeneratedTotalPaths, m_CurrentPose, 0.75, info);
-          if(ret == true && info.iGlobalPath >= 0 &&  info.iGlobalPath < m_GeneratedTotalPaths.size() && info.iFront > 0 && info.iFront < m_GeneratedTotalPaths.at(info.iGlobalPath).size())
-          {
-            double remaining_distance =    m_GeneratedTotalPaths.at(info.iGlobalPath).at(m_GeneratedTotalPaths.at(info.iGlobalPath).size()-1).cost - (m_GeneratedTotalPaths.at(info.iGlobalPath).at(info.iFront).cost + info.to_front_distance);
-            if(remaining_distance <= REPLANNING_DISTANCE)
-            {
-              bMakeNewPlan = true;
-              if(m_GoalsPos.size() > 0)
-                m_iCurrentGoalIndex = (m_iCurrentGoalIndex + 1) % m_GoalsPos.size();
-              std::cout << "Current Goal Index = " << m_iCurrentGoalIndex << std::endl << std::endl;
-            }
-          }
-        }
-      }
-      else
-        bMakeNewPlan = true;
-
-      if(bMakeNewPlan || (m_params.bEnableDynamicMapUpdate && UtilityHNS::UtilityH::GetTimeDiffNow(m_ReplnningTimer) > REPLANNING_TIME))
-      {
-        UtilityHNS::UtilityH::GetTickCount(m_ReplnningTimer);
+        std::vector<std::vector<PlannerHNS::WayPoint>> tmp_path_list;
+        std::vector<std::vector<PlannerHNS::WayPoint>> tmp_path_list_2;
         PlannerHNS::WayPoint goalPoint = m_GoalsPos.at(m_iCurrentGoalIndex);
-        bool bNewPlan = GenerateGlobalPlan(m_CurrentPose, goalPoint, m_GeneratedTotalPaths);
 
+        // Generate path from initial pose to goal pose (rviz axis) and save to tmp_path_list
+        bool bNewPlan = GenerateGlobalPlan(m_CurrentPose, goalPoint, tmp_path_list);
 
         if(bNewPlan)
         {
-          bMakeNewPlan = false;
-          VisualizeAndSend(m_GeneratedTotalPaths);
+          m_GeneratedTotalPaths.push_back(tmp_path_list);
+
+          // Do multi-lab driving only current position and goal point is close
+          // TODO : Add parameter for enable multi-lab driving
+          if(multilap_flag_){
+            if(hypot(m_CurrentPose.pos.x - goalPoint.pos.x, m_CurrentPose.pos.y - goalPoint.pos.y) < 30){
+              int wp_size = tmp_path_list.at(0).size();
+              PlannerHNS::WayPoint path2_start_wp = tmp_path_list.at(0).at(wp_size / 2 + 10);
+              PlannerHNS::WayPoint path2_end_wp = tmp_path_list.at(0).at(wp_size / 2 - 10);
+              bool bNewPlan_2 = GenerateGlobalPlan(path2_start_wp, path2_end_wp, tmp_path_list_2);
+
+              if(bNewPlan_2){
+                m_GeneratedTotalPaths.push_back(tmp_path_list_2);
+              }
+            }
+          }
+          selectedGlobalPathIdx = 0;
+          VisualizeAndSend(m_GeneratedTotalPaths.at(selectedGlobalPathIdx));
+        }
+      }
+      else if(m_GeneratedTotalPaths.size() > 1){
+        PlannerHNS::RelativeInfo info;
+        bool ret = PlannerHNS::PlanningHelpers::GetRelativeInfoRange(m_GeneratedTotalPaths.at(selectedGlobalPathIdx), m_CurrentPose, 0.75, info);
+        if(ret == true && info.iGlobalPath >= 0 &&  info.iGlobalPath < m_GeneratedTotalPaths.at(selectedGlobalPathIdx).size() && info.iFront > 0 && info.iFront < m_GeneratedTotalPaths.at(selectedGlobalPathIdx).at(info.iGlobalPath).size())
+        {
+          double remaining_distance = m_GeneratedTotalPaths.at(selectedGlobalPathIdx).at(info.iGlobalPath).at(m_GeneratedTotalPaths.at(selectedGlobalPathIdx).at(info.iGlobalPath).size()-1).cost - (m_GeneratedTotalPaths.at(selectedGlobalPathIdx).at(info.iGlobalPath).at(info.iFront).cost + info.to_front_distance);
+          if(remaining_distance <= 50)
+          {
+            selectedGlobalPathIdx = 1 - selectedGlobalPathIdx;
+            VisualizeAndSend(m_GeneratedTotalPaths.at(selectedGlobalPathIdx));
+          }
         }
       }
       VisualizeDestinations(m_GoalsPos, m_iCurrentGoalIndex);

@@ -327,7 +327,7 @@ void DecisionMaker::InitBehaviorStates()
 
    pValues->bTrafficIsRed = !bShouldForward;
 
-   if(bEmergencyStop)
+  if(bEmergencyStop)
   {
     pValues->bFullyBlock = true;
     pValues->distanceToNext = 1;

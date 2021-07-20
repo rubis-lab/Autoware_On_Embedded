@@ -166,7 +166,7 @@ void PurePursuitNode::run()
     ros::spinOnce();
     if (!is_pose_set_ || !is_waypoint_set_ || !is_velocity_set_)
     {
-      ROS_WARN("Necessary topics are not subscribed yet ... ");
+      // ROS_WARN("Necessary topics are not subscribed yet ... ");
       
       if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
       if(task_profiling_flag) rubis::sched::stop_task_profiling();
