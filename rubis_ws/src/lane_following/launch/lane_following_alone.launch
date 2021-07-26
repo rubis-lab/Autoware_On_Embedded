@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+
+<launch>
+ <!-- ZED node -->
+  <include file="$(find zed_wrapper)/launch/zed.launch">
+    <arg name="camera_model"        value="zed" />
+    <!--arg name="resolution"          default="2" /--> <!--0=RESOLUTION_HD2K, 1=RESOLUTION_HD1080, 2=RESOLUTION_HD720, 3=RESOLUTION_VGA -->
+    <arg name="frame_rate"          default="30" />
+    <!-- RESOLUTION_HD2K   -> 2208*1242, available framerates: 15 fps.
+         RESOLUTION_HD1080 -> 1920*1080, available framerates: 15, 30 fps.
+         RESOLUTION_HD720  -> 1280*720,  available framerates: 15, 30, 60 fps.
+         RESOLUTION_VGA    -> 672*376,   available framerates: 15, 30, 60, 100 fps. -->
+  </include>
+  <!-- VESC nodes -->
+
+  <rosparam>
+    speed_to_erpm_gain: 4614
+    speed_to_erpm_offset: 0.0
+    tachometer_ticks_to_meters_gain: 0.00225
+    max_servo_speed: 3.2
+    servo_smoother_rate: 75.0
+    max_acceleration: 2.5
+    throttle_smoother_rate: 75.0
+    steering_angle_to_servo_gain: -1.2135
+    steering_angle_to_servo_offset: 0.5304
+    vesc_to_odom/publish_tf: false
+    wheelbase: .25
+    vesc_driver:
+      port: /dev/ttyACM0
+      duty_cycle_min: 0.0
+      duty_cycle_max: 0.0
+      current_min: 0.0
+      current_max: 20.0
+      brake_min: -20000.0
+      brake_max: 200000.0
+      speed_min: -3250
+      speed_max: 3250
+      position_min: 0.0
+      position_max: 0.0
+      servo_min: 0.15
+      servo_max: 0.85
+  </rosparam>
+  <node pkg="vesc_driver" type="vesc_driver_node" name="vesc_driver"/>
+
+  <!-- Lane Line Detection -->
+  <node pkg="lane_following" type="lane_following_node" name="lane_following" output="screen"/>
+</launch>

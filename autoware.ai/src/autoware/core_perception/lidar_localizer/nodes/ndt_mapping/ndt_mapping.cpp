@@ -20,7 +20,7 @@
  Yuki KITSUKAWA
  */
 
-#define OUTPUT  // If you want to output "position_log.txt", "#define OUTPUT".
+#define OUTPUT // If you want to output "position_log.txt", "#define OUTPUT".
 
 #include <fstream>
 #include <iostream>
@@ -86,7 +86,7 @@ static ros::Time previous_scan_time;
 static ros::Duration scan_duration;
 
 static double diff = 0.0;
-static double diff_x = 0.0, diff_y = 0.0, diff_z = 0.0, diff_yaw;  // current_pose - previous_pose
+static double diff_x = 0.0, diff_y = 0.0, diff_z = 0.0, diff_yaw; // current_pose - previous_pose
 static double offset_imu_x, offset_imu_y, offset_imu_z, offset_imu_roll, offset_imu_pitch, offset_imu_yaw;
 static double offset_odom_x, offset_odom_y, offset_odom_z, offset_odom_roll, offset_odom_pitch, offset_odom_yaw;
 static double offset_imu_odom_x, offset_imu_odom_y, offset_imu_odom_z, offset_imu_odom_roll, offset_imu_odom_pitch,
@@ -112,10 +112,10 @@ static pcl_omp::NormalDistributionsTransform<pcl::PointXYZI, pcl::PointXYZI> omp
 #endif
 
 // Default values
-static int max_iter = 30;        // Maximum iterations
-static float ndt_res = 1.0;      // Resolution
-static double step_size = 0.1;   // Step size
-static double trans_eps = 0.01;  // Transformation epsilon
+static int max_iter = 30;       // Maximum iterations
+static float ndt_res = 1.0;     // Resolution
+static double step_size = 0.1;  // Step size
+static double trans_eps = 0.01; // Transformation epsilon
 
 // Leaf size of VoxelGrid filter.
 static double voxel_leaf_size = 2.0;
@@ -162,7 +162,7 @@ static nav_msgs::Odometry odom;
 static std::ofstream ofs;
 static std::string filename;
 
-static void param_callback(const autoware_config_msgs::ConfigNDTMapping::ConstPtr& input)
+static void param_callback(const autoware_config_msgs::ConfigNDTMapping::ConstPtr &input)
 {
   ndt_res = input->resolution;
   step_size = input->step_size;
@@ -184,7 +184,7 @@ static void param_callback(const autoware_config_msgs::ConfigNDTMapping::ConstPt
   std::cout << "min_add_scan_shift: " << min_add_scan_shift << std::endl;
 }
 
-static void output_callback(const autoware_config_msgs::ConfigNDTMappingOutput::ConstPtr& input)
+static void output_callback(const autoware_config_msgs::ConfigNDTMappingOutput::ConstPtr &input)
 {
   double filter_res = input->filter_res;
   std::string filename = input->filename;
@@ -366,7 +366,7 @@ static double calcDiffForRadian(const double lhs_rad, const double rhs_rad)
     diff_rad = diff_rad + 2 * M_PI;
   return diff_rad;
 }
-static void odom_callback(const nav_msgs::Odometry::ConstPtr& input)
+static void odom_callback(const nav_msgs::Odometry::ConstPtr &input)
 {
   // std::cout << __func__ << std::endl;
 
@@ -397,7 +397,7 @@ static void imuUpsideDown(const sensor_msgs::Imu::Ptr input)
   input->orientation = tf::createQuaternionMsgFromRollPitchYaw(input_roll, input_pitch, input_yaw);
 }
 
-static void imu_callback(const sensor_msgs::Imu::Ptr& input)
+static void imu_callback(const sensor_msgs::Imu::Ptr &input)
 {
   // std::cout << __func__ << std::endl;
 
@@ -450,7 +450,7 @@ static void imu_callback(const sensor_msgs::Imu::Ptr& input)
   previous_imu_yaw = imu_yaw;
 }
 
-static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
+static void points_callback(const sensor_msgs::PointCloud2::ConstPtr &input)
 {
   double r;
   pcl::PointXYZI p;
@@ -842,7 +842,7 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
   std::cout << "-----------------------------------------------------------------" << std::endl;
 }
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
   previous_pose.x = 0.0;
   previous_pose.y = 0.0;
@@ -920,7 +920,7 @@ int main(int argc, char** argv)
   // Set log file name.
   char buffer[80];
   std::time_t now = std::time(NULL);
-  std::tm* pnow = std::localtime(&now);
+  std::tm *pnow = std::localtime(&now);
   std::strftime(buffer, 80, "%Y%m%d_%H%M%S", pnow);
   filename = "ndt_mapping_" + std::string(buffer) + ".csv";
   ofs.open(filename.c_str(), std::ios::app);
@@ -932,26 +932,46 @@ int main(int argc, char** argv)
     exit(1);
   }
 
-  ofs << "input->header.seq" << ","
-      << "input->header.stamp" << ","
-      << "input->header.frame_id" << ","
-      << "scan_ptr->size()" << ","
-      << "filtered_scan_ptr->size()" << ","
-      << "current_pose.x" << ","
-      << "current_pose.y" << ","
-      << "current_pose.z" << ","
-      << "current_pose.roll" << ","
-      << "current_pose.pitch" << ","
-      << "current_pose.yaw" << ","
-      << "final_num_iteration" << ","
-      << "fitness_score" << ","
-      << "ndt_res" << ","
-      << "step_size" << ","
-      << "trans_eps" << ","
-      << "max_iter" << ","
-      << "voxel_leaf_size" << ","
-      << "min_scan_range" << ","
-      << "max_scan_range" << ","
+  ofs << "input->header.seq"
+      << ","
+      << "input->header.stamp"
+      << ","
+      << "input->header.frame_id"
+      << ","
+      << "scan_ptr->size()"
+      << ","
+      << "filtered_scan_ptr->size()"
+      << ","
+      << "current_pose.x"
+      << ","
+      << "current_pose.y"
+      << ","
+      << "current_pose.z"
+      << ","
+      << "current_pose.roll"
+      << ","
+      << "current_pose.pitch"
+      << ","
+      << "current_pose.yaw"
+      << ","
+      << "final_num_iteration"
+      << ","
+      << "fitness_score"
+      << ","
+      << "ndt_res"
+      << ","
+      << "step_size"
+      << ","
+      << "trans_eps"
+      << ","
+      << "max_iter"
+      << ","
+      << "voxel_leaf_size"
+      << ","
+      << "min_scan_range"
+      << ","
+      << "max_scan_range"
+      << ","
       << "min_add_scan_shift" << std::endl;
 
   // setting parameters
@@ -1024,8 +1044,8 @@ int main(int argc, char** argv)
   }
 #endif
 
-  Eigen::Translation3f tl_btol(_tf_x, _tf_y, _tf_z);                 // tl: translation
-  Eigen::AngleAxisf rot_x_btol(_tf_roll, Eigen::Vector3f::UnitX());  // rot: rotation
+  Eigen::Translation3f tl_btol(_tf_x, _tf_y, _tf_z);                // tl: translation
+  Eigen::AngleAxisf rot_x_btol(_tf_roll, Eigen::Vector3f::UnitX()); // rot: rotation
   Eigen::AngleAxisf rot_y_btol(_tf_pitch, Eigen::Vector3f::UnitY());
   Eigen::AngleAxisf rot_z_btol(_tf_yaw, Eigen::Vector3f::UnitZ());
   tf_btol = (tl_btol * rot_z_btol * rot_y_btol * rot_x_btol).matrix();
@@ -1038,7 +1058,7 @@ int main(int argc, char** argv)
 
   ros::Subscriber param_sub = nh.subscribe("config/ndt_mapping", 10, param_callback);
   ros::Subscriber output_sub = nh.subscribe("config/ndt_mapping_output", 10, output_callback);
-  ros::Subscriber points_sub = nh.subscribe("points_raw", 100000, points_callback);
+  ros::Subscriber points_sub = nh.subscribe("filtered_points", 100000, points_callback);
   ros::Subscriber odom_sub = nh.subscribe("/vehicle/odom", 100000, odom_callback);
   ros::Subscriber imu_sub = nh.subscribe(_imu_topic, 100000, imu_callback);
 
