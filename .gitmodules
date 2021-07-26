@@ -1,0 +1,3 @@
+[submodule "rubis_ws/src/image_common"]
+	path = rubis_ws/src/image_common
+	url = https://github.com/ros-perception/image_common.git

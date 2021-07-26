@@ -40,6 +40,8 @@
 
 #include "ukf.h"
 
+extern int is_topic_ready;
+
 class ImmUkfPda
 {
 private:

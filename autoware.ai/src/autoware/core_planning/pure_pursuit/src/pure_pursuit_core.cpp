@@ -100,13 +100,13 @@ void PurePursuitNode::initForROS()
 
 
   // setup subscriber
-  sub1_ = nh_.subscribe("final_waypoints", 10,
+  sub1_ = nh_.subscribe("final_waypoints", 1,
     &PurePursuitNode::callbackFromWayPoints, this); // origin 10
-  sub2_ = nh_.subscribe("current_pose", 10,
+  sub2_ = nh_.subscribe("current_pose", 1,
     &PurePursuitNode::callbackFromCurrentPose, this); // origin 10
-  sub3_ = nh_.subscribe("config/waypoint_follower", 10,
+  sub3_ = nh_.subscribe("config/waypoint_follower", 1,
     &PurePursuitNode::callbackFromConfig, this); // origin 10
-  sub4_ = nh_.subscribe("current_velocity", 10,
+  sub4_ = nh_.subscribe("current_velocity", 1,
     &PurePursuitNode::callbackFromCurrentVelocity, this); // origin 10
 
   // setup publisher
@@ -158,7 +158,7 @@ void PurePursuitNode::run()
 
   while (ros::ok())
   {
-    if(task_profiling_flag) rubis::sched::start_task_profiling();
+    if(task_profiling_flag && is_topic_ready) rubis::sched::start_task_profiling();
     if(task_scheduling_flag && is_topic_ready){        
       rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline);
     }     
@@ -168,8 +168,8 @@ void PurePursuitNode::run()
     {
       // ROS_WARN("Necessary topics are not subscribed yet ... ");
       
-      if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
-      if(task_profiling_flag) rubis::sched::stop_task_profiling();
+      if(task_scheduling_flag && is_topic_ready) rubis::sched::yield_task_scheduling();
+      if(task_profiling_flag && is_topic_ready) rubis::sched::stop_task_profiling();
 
       loop_rate.sleep();
       continue;
@@ -211,8 +211,8 @@ void PurePursuitNode::run()
     is_velocity_set_ = false;
     is_waypoint_set_ = false;
 
-    if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
-    if(task_profiling_flag) rubis::sched::stop_task_profiling();
+    if(task_scheduling_flag && is_topic_ready) rubis::sched::yield_task_scheduling();
+    if(task_profiling_flag && is_topic_ready) rubis::sched::stop_task_profiling();
 
     loop_rate.sleep();
   }

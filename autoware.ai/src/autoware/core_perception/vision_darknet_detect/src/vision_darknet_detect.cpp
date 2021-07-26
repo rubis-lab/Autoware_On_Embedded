@@ -279,7 +279,10 @@ void Yolo3DetectorNode::image_callback(const sensor_msgs::ImageConstPtr& in_imag
 
     free(darknet_image_.data);
 
-    is_topic_ready = 1;
+    if(is_topic_ready != 1){
+        is_topic_ready = 1;
+        set_is_gpu_profiling_ready();
+    }    
 }
 
 void Yolo3DetectorNode::config_cb(const autoware_config_msgs::ConfigSSD::ConstPtr& param)
@@ -350,11 +353,6 @@ void Yolo3DetectorNode::Run()
     char* gpu_execution_time_filename = strdup(gpu_execution_time_filename_str.c_str());
     char* gpu_response_time_filename = strdup(gpu_response_time_filename_str.c_str());
     char* gpu_deadline_filename = strdup(gpu_deadline_filename_str.c_str());
-
-    std::cout<<"#### task_profiling_flag:"<<task_profiling_flag<<std::endl;
-    std::cout<<"#### gpu_profiling_flag:"<<gpu_profiling_flag<<std::endl;
-    std::cout<<"#### gpu_scheduling_flag:"<<gpu_scheduling_flag<<std::endl;
-    std::cout<<"#### task_scheduling_flag:"<<task_scheduling_flag<<std::endl;
 
     if(task_profiling_flag) init_task_profiling(task_response_time_filename);
     if(gpu_profiling_flag) init_gpu_profiling(gpu_execution_time_filename, gpu_response_time_filename);
@@ -451,14 +449,14 @@ void Yolo3DetectorNode::Run()
         ros::Rate r(rate);        
         while(ros::ok()){
 
-            if(task_profiling_flag) start_task_profiling();
+            if(task_profiling_flag && is_topic_ready) start_task_profiling();
             if(gpu_profiling_flag) refresh_gpu_profiling();
             if(task_scheduling_flag && is_topic_ready){
                 request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline);
             }
             ros::spinOnce();
-            if(task_scheduling_flag) yield_task_scheduling();
-            if(task_profiling_flag) stop_task_profiling();
+            if(task_scheduling_flag && is_topic_ready) yield_task_scheduling();
+            if(task_profiling_flag && is_topic_ready) stop_task_profiling();
             
             r.sleep();
         }          

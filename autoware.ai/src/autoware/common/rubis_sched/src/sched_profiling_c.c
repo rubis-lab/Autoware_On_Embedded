@@ -15,6 +15,11 @@ struct timespec task_end_time_;
 unsigned long long gpu_seg_response_time_;
 unsigned long long gpu_seg_execution_time_;
 unsigned long long cpu_seg_response_time_;
+int is_gpu_profiling_ready_ = 0;
+
+void set_is_gpu_profiling_ready(){
+  is_gpu_profiling_ready_ = 1;
+}
 
 void init_task_profiling(char* _task_response_time_filename){
   char task_response_time_filename[RUBIS_SCHED_BUFFER_SIZE];
@@ -131,7 +136,7 @@ unsigned long long get_current_time_ns(){
 
 void refresh_gpu_profiling(){
   if(is_gpu_profiling_started_ == 0) is_gpu_profiling_started_ = 1;
-  else if(is_gpu_profiling_started_ == 1){
+  else if( (is_gpu_profiling_started_ == 1) && (is_gpu_profiling_ready_ == 1) ){
     stop_profiling_cpu_seg_response_time();
     fprintf(seg_response_time_fp_, "-1, -1, -1\n");
     fprintf(seg_execution_time_fp_, "-1, -1, -1\n");

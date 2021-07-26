@@ -1497,7 +1497,10 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
     previous_estimated_vel_kmph.data = estimated_vel_kmph.data;
   }
 
-  is_topic_ready = 1;
+  if(is_topic_ready != 1){
+    is_topic_ready = 1;
+    rubis::sched::set_is_gpu_profiling_ready();
+  }
 }
 
 void* thread_func(void* args)
@@ -1506,7 +1509,7 @@ void* thread_func(void* args)
   ros::CallbackQueue map_callback_queue;
   nh_map.setCallbackQueue(&map_callback_queue);
 
-  ros::Subscriber map_sub = nh_map.subscribe("points_map", 10, map_callback);
+  ros::Subscriber map_sub = nh_map.subscribe("points_map", 10, map_callback); 
   ros::Rate ros_rate(10);
   while (nh_map.ok())
   {
@@ -1707,11 +1710,11 @@ int main(int argc, char** argv)
   ndt_reliability_pub = nh.advertise<std_msgs::Float32>("/ndt_reliability", 10);
 
   // Subscribers
-  ros::Subscriber param_sub = nh.subscribe("config/ndt", 10, param_callback);
-  ros::Subscriber gnss_sub = nh.subscribe("gnss_pose", 10, gnss_callback);
+  ros::Subscriber param_sub = nh.subscribe("config/ndt", 1, param_callback); // origin: 10
+  ros::Subscriber gnss_sub = nh.subscribe("gnss_pose", 1, gnss_callback); // origin: 10
   //  ros::Subscriber map_sub = nh.subscribe("points_map", 1, map_callback);
-  ros::Subscriber initialpose_sub = nh.subscribe("initialpose", 10, initialpose_callback);
-  ros::Subscriber points_sub = nh.subscribe("filtered_points", _queue_size, points_callback);
+  ros::Subscriber initialpose_sub = nh.subscribe("initialpose", 1, initialpose_callback); // origin: 10
+  ros::Subscriber points_sub = nh.subscribe("filtered_points", 1, points_callback); // origin: _queue_size
   // ros::Subscriber odom_sub = nh.subscribe("/vehicle/odom", _queue_size * 10, odom_callback);
   // ros::Subscriber imu_sub = nh.subscribe(_imu_topic.c_str(), _queue_size * 10, imu_callback);
 
@@ -1726,14 +1729,14 @@ int main(int argc, char** argv)
     ros::Rate r(rate);
     while(ros::ok()){
       
-      if(task_profiling_flag) rubis::sched::start_task_profiling();
+      if(task_profiling_flag && is_topic_ready) rubis::sched::start_task_profiling();
       if(gpu_profiling_flag) rubis::sched::refresh_gpu_profiling();
       if(task_scheduling_flag && is_topic_ready){        
         rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline);
       }
       ros::spinOnce();
-      if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
-      if(task_profiling_flag) rubis::sched::stop_task_profiling();
+      if(task_scheduling_flag && is_topic_ready) rubis::sched::yield_task_scheduling();
+      if(task_profiling_flag && is_topic_ready) rubis::sched::stop_task_profiling();
 
       r.sleep();
     }  

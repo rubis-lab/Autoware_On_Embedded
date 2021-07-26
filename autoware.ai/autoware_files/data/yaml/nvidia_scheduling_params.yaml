@@ -56,7 +56,7 @@ calibration_publisher:
   calibration_file: "~/autoware.ai/autoware_files/data/calibration/single_lidar/Lexus2016RXHybrid.yaml"
 
 lidar_euclidean_cluster_detect:
-  task_scheduling_flag: 1
+  task_scheduling_flag: 0
   task_profiling_flag: 0
   task_response_time_filename: "~/Documents/profiling/response_time/lidar_euclidean_cluster_detect.csv"
   rate: 10 
@@ -112,10 +112,11 @@ op_global_planner:
   task_minimum_inter_release_time: 100000000
   task_execution_time: 100000000
   task_relative_deadline: 100000000
+  multilap_flag: 1
 
 op_common_params:
   rollOutDensity: 4
-  rollOutsNumber: 2
+  rollOutsNumber: 0
   maxVelocity: 10.0
   maxAcceleration: 10.0
   maxDeceleration: -10.0
@@ -172,7 +173,7 @@ pure_pursuit:
   task_scheduling_flag: 0
   task_profiling_flag: 0
   task_response_time_filename: "~/Documents/profiling/response_time/pure_pursuit.csv"
-  rate: 1 #30
+  rate: 10 #30
   task_minimum_inter_release_time: 33333333
   task_execution_time: 33333333
   task_relative_deadline: 33333333
@@ -183,7 +184,7 @@ twist_filter:
   task_scheduling_flag: 0
   task_profiling_flag: 0
   task_response_time_filename: "~/Documents/profiling/response_time/twist_filter.csv"
-  rate: 1 
+  rate: 10 
   task_minimum_inter_release_time: 100000000
   task_execution_time: 100000000
   task_relative_deadline: 100000000
@@ -192,7 +193,8 @@ twist_gate:
   task_scheduling_flag: 0
   task_profiling_flag: 0
   task_response_time_filename: "~/Documents/profiling/response_time/twist_gate.csv"
-  rate: 1 
+  rate: 10 
   task_minimum_inter_release_time: 100000000
   task_execution_time: 100000000
   task_relative_deadline: 100000000
+  zero_flag: 1 # Set vehilce's command as 0

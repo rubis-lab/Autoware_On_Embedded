@@ -7,7 +7,7 @@ terminate_script_path: "~/rubis_ws/src/rubis_autorunner/scripts/desktop_lane_kee
 #     [3] state that check constraint topic or not ( "true" or "false" )
 #     [4] target type( RUN or LAUNCH )
 
-step_1: ["rubis_autorunner", "1_sensing.launch", "true", "false", "LAUNCH"]
-step_2: ["rubis_autorunner", "2_localization.launch", "true", "true", "LAUNCH"]
-step_3: ["rubis_autorunner", "3_planning.launch", "true", "true", "LAUNCH"]
-step_4: ["rubis_autorunner", "4_control.launch", "false", "true", "LAUNCH"]
+step_1: ["rubis_autorunner", "desktop_lane_keeping_1_sensing.launch", "true", "false", "LAUNCH"]
+step_2: ["rubis_autorunner", "desktop_lane_keeping_2_localization.launch", "true", "true", "LAUNCH"]
+step_3: ["rubis_autorunner", "desktop_lane_keeping_3_planning.launch", "true", "true", "LAUNCH"]
+step_4: ["rubis_autorunner", "desktop_lane_keeping_4_control.launch", "false", "true", "LAUNCH"]
