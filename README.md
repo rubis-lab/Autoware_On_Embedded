@@ -100,6 +100,11 @@ source ~/autoware.ai/install/setup.bash
 ``` -->
 
 ## How to build package in rubis_ws
+* Install some dependency
+```
+sudo apt-get ros-melodic-ackermann-msgs ros-melodic-serial -y
+```
+
 
 * Initialize ROS workspace
 ```
