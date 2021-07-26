@@ -17,7 +17,7 @@ void CubetownAutorunner::register_subscribers(){
     // Set the check function(subscriber)
     sub_v_[STEP(1)] = nh_.subscribe("/points_no_ground_center", 1, &CubetownAutorunner::points_no_ground_cb, this);   
     sub_v_[STEP(2)] = nh_.subscribe("/ndt_stat", 1, &CubetownAutorunner::ndt_stat_cb, this);   
-    sub_v_[STEP(3)] = nh_.subscribe("/detection/fusion_tools/objects_center", 1, &CubetownAutorunner::detection_cb, this);   
+    sub_v_[STEP(3)] = nh_.subscribe("/detection/object_tracker/objects_center", 1, &CubetownAutorunner::detection_cb, this);   
     sub_v_[STEP(4)] = nh_.subscribe("/behavior_state", 1, &CubetownAutorunner::behavior_state_cb, this);   
 }
 
@@ -30,7 +30,7 @@ void CubetownAutorunner::register_subscribers(){
  }
 
  void CubetownAutorunner::ndt_stat_cb(const autoware_msgs::NDTStat& msg){
-    if(msg.score < 0.3 && !ros_autorunner_.step_info_list_[STEP(3)].is_prepared){
+    if(msg.score < 0.2 && !ros_autorunner_.step_info_list_[STEP(3)].is_prepared){
         ROS_WARN("[STEP 2] Localization is success");
     	sleep(SLEEP_PERIOD);
         ros_autorunner_.step_info_list_[STEP(3)].is_prepared = true;
