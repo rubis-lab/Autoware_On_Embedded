@@ -1,5 +1,4 @@
 <launch>
-  <!-- testbed -->
   <arg name="init_x" value="0.0" />
   <arg name="init_y" value="0.0" />
   <arg name="init_z" value="0.0" />
