@@ -18,6 +18,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   tf
   gnss
+  rubis_sched
 )
 
 catkin_package(

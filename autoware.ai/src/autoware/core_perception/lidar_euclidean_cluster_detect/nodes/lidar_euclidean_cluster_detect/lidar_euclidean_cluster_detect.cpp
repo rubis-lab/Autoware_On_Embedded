@@ -281,7 +281,7 @@ void publishCloudClusters(const ros::Publisher *in_publisher, const autoware_msg
     publishDetectedObjects(in_clusters);
   }
 
-  if(is_topic_raedy != 1){
+  if(is_topic_ready != 1){
     is_topic_ready = 1;
     rubis::sched::set_is_gpu_profiling_ready();
   }

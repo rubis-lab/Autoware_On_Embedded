@@ -97,6 +97,8 @@ void ImmUkfPda::callback(const autoware_msgs::DetectedObjectArray& input)
   {
     dumpResultText(detected_objects_output);
   }
+
+  if(!is_topic_ready) is_topic_ready = 1;
 }
 
 void ImmUkfPda::checkVectormapSubscription()

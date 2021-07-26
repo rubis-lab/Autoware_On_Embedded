@@ -354,11 +354,6 @@ void Yolo3DetectorNode::Run()
     char* gpu_response_time_filename = strdup(gpu_response_time_filename_str.c_str());
     char* gpu_deadline_filename = strdup(gpu_deadline_filename_str.c_str());
 
-    std::cout<<"#### task_profiling_flag:"<<task_profiling_flag<<std::endl;
-    std::cout<<"#### gpu_profiling_flag:"<<gpu_profiling_flag<<std::endl;
-    std::cout<<"#### gpu_scheduling_flag:"<<gpu_scheduling_flag<<std::endl;
-    std::cout<<"#### task_scheduling_flag:"<<task_scheduling_flag<<std::endl;
-
     if(task_profiling_flag) init_task_profiling(task_response_time_filename);
     if(gpu_profiling_flag) init_gpu_profiling(gpu_execution_time_filename, gpu_response_time_filename);
 

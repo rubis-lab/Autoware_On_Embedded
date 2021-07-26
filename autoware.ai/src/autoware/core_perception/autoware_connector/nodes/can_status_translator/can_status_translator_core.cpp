@@ -15,9 +15,11 @@
  */
 
 #include "can_status_translator_core.h"
+int is_topic_ready = 0;
 
 namespace autoware_connector
 {
+
 // Constructor
 CanStatusTranslatorNode::CanStatusTranslatorNode() : private_nh_("~"), v_info_()
 {
@@ -64,7 +66,47 @@ void CanStatusTranslatorNode::initForROS()
 
 void CanStatusTranslatorNode::run()
 {
-  ros::spin();
+  // scheduling
+  int task_scheduling_flag;
+  int task_profiling_flag;
+  std::string task_response_time_filename;
+  int rate;
+  double task_minimum_inter_release_time;
+  double task_execution_time;
+  double task_relative_deadline;
+
+  private_nh_.param<int>("/can_status_translator/task_scheduling_flag", task_scheduling_flag, 0);
+  private_nh_.param<int>("/can_status_translator/task_profiling_flag", task_profiling_flag, 0);
+  private_nh_.param<std::string>("/can_status_translator/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/lidar_euclidean_cluster_detect.csv");
+  private_nh_.param<int>("/can_status_translator/rate", rate, 10);
+  private_nh_.param("/can_status_translator/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)100000000);
+  private_nh_.param("/can_status_translator/task_execution_time", task_execution_time, (double)100000000);
+  private_nh_.param("/can_status_translator/task_relative_deadline", task_relative_deadline, (double)100000000);
+ 
+  // SPIN
+  if(!task_scheduling_flag && !task_profiling_flag){
+    std::cout<<"can status translatr / task_scheduling_flag:"<<task_scheduling_flag<<std::endl;
+    std::cout<<"can status translatr / is_topic_ready:"<<is_topic_ready<<std::endl;
+    ros::spin();
+  }
+  else{    
+    std::cout<<"can status translatr / task_scheduling_flag:"<<task_scheduling_flag<<std::endl;
+    std::cout<<"can status translatr / is_topic_ready:"<<is_topic_ready<<std::endl;
+    ros::Rate r(rate);
+    while(ros::ok()){
+      
+      if(task_profiling_flag && is_topic_ready) rubis::sched::start_task_profiling();
+      if(task_scheduling_flag && is_topic_ready){        
+        rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline);
+      }
+      ros::spinOnce();
+      if(task_scheduling_flag && is_topic_ready) rubis::sched::yield_task_scheduling();
+      if(task_profiling_flag && is_topic_ready) rubis::sched::stop_task_profiling();
+
+      r.sleep();
+    }  
+  }
+  
 }
 
 void CanStatusTranslatorNode::publishVelocity(const autoware_msgs::VehicleStatusConstPtr& msg)
@@ -80,6 +122,7 @@ void CanStatusTranslatorNode::publishVelocity(const autoware_msgs::VehicleStatus
       kmph2mps(msg->speed), v_info_.getCurrentSteeringAngle(deg2rad(msg->angle)));
 
   pub1_.publish(tw);
+  if(!is_topic_ready) is_topic_ready = 1;
 }
 
 void CanStatusTranslatorNode::publishVelocityViz(const autoware_msgs::VehicleStatusConstPtr& msg)

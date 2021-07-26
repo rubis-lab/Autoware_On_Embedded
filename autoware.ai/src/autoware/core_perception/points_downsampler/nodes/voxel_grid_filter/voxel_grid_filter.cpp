@@ -171,7 +171,7 @@ int main(int argc, char** argv)
   private_nh.param("/voxel_grid_filter/task_relative_deadline", task_relative_deadline, (double)10);
 
   /* For Task scheduling */
-  if(task_profiling_flag && is_topic_ready) rubis::sched::init_task_profiling(task_response_time_filename);
+  if(task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
   
 
   // Publishers
@@ -195,9 +195,6 @@ int main(int argc, char** argv)
       ros::spinOnce();
       if(task_scheduling_flag && is_topic_ready) rubis::sched::yield_task_scheduling();
       if(task_profiling_flag && is_topic_ready) rubis::sched::stop_task_profiling();
-
-      
-
       r.sleep();
     }
   }

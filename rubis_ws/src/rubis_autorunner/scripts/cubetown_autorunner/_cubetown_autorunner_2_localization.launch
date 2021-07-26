@@ -1,11 +1,4 @@
 <launch>
-  <!-- testbed -->
-  <!-- <arg name="init_x" value="-8.72" />
-  <arg name="init_y" value="51.74" />
-  <arg name="init_z" value="-0.71" />
-  <arg name="init_roll" value="0.0" />
-  <arg name="init_pitch" value="0.0" />
-  <arg name="init_yaw" value="-1.8" /> -->
   <!-- cubetown -->
   <arg name="init_x" value="57.1" />
   <arg name="init_y" value="1.38" />
@@ -20,11 +13,6 @@
 
   <!-- points downsampler -->
   <include file="$(find points_downsampler)/launch/points_downsample.launch" />
-
-  <!-- nmea2tfpose -->
-  <!-- <include file="$(find gnss_localizer)/launch/nmea2tfpose.launch">
-    <arg name="plane" value="0" />
-  </include> -->
 
   <!-- ndt_matching --><!-- pcl_generic=0, pcl_anh=1, pcl_anh_gpu=2, pcl_openmp=3 -->
   <include file="$(find lidar_localizer)/launch/ndt_matching.launch">
