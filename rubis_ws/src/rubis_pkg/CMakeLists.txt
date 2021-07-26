@@ -71,3 +71,12 @@ add_dependencies(gnss_localizer ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXP
 target_link_libraries(gnss_localizer
   ${catkin_LIBRARIES}
 )
+
+add_executable(fake_current_pose
+  src/fake_current_pose.cpp
+)
+add_dependencies(fake_current_pose ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+target_link_libraries(fake_current_pose
+  ${catkin_LIBRARIES}
+)
