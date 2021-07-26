@@ -22,7 +22,7 @@ private:
 public:
     Sub_v               sub_v_;
 public:
-    DesktopLaneKeeping() {}
-    DesktopLaneKeeping(ros::NodeHandle nh) : nh_(nh){}
+    MinicarLaneKeeping() {}
+    MinicarLaneKeeping(ros::NodeHandle nh) : nh_(nh){}
     virtual void Run();
 };
