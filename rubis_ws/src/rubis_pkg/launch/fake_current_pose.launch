@@ -1,0 +1,3 @@
+<launch>    
+    <node pkg="rubis_pkg" type="fake_current_pose" name="fake_current_pose" output="screen"/>            
+</launch>
