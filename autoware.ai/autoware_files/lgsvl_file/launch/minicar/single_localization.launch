@@ -1,11 +1,12 @@
 <launch>
-  <!-- testbed -->
-  <arg name="init_x" value="0" />
-  <arg name="init_y" value="0" />
-  <arg name="init_z" value="0" />
-  <arg name="init_roll" value="0" />
-  <arg name="init_pitch" value="0" />
-  <arg name="init_yaw" value="0" />
+  <rosparam command="load" file="$(env USER_HOME)/autoware.ai/autoware_files/data/yaml/nvidia_scheduling_params.yaml" />
+
+  <arg name="init_x" value="-8.72" />
+  <arg name="init_y" value="51.74" />
+  <arg name="init_z" value="-0.71" />
+  <arg name="init_roll" value="0.0" />
+  <arg name="init_pitch" value="0.0" />
+  <arg name="init_yaw" value="-1.8" />
 
   <!-- vel/pose connect -->
   <arg name="topic_pose_stamped" default="/ndt_pose" />
@@ -38,10 +39,10 @@
     yaw: $(arg init_yaw),
     use_predict_pose: 1,
     error_threshold: 0.01,
-    resolution: 3.0,
-    step_size: 0.5,
-    trans_epsilon: 0.01,
-    max_iterations: 5}
+    resolution: 2.0,
+    step_size: 0.1,
+    trans_epsilon: 0.05,
+    max_iterations: 10}
   '"/>
 
   <!-- vel_pose_mux -->
