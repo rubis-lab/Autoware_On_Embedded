@@ -5,6 +5,8 @@ Autoware system for embedded boards
 
 - Ubuntu 18.04
 - ROS Melodic
+- CUDA 10.x
+- OpenCV 4.x
 
 ## How to install ROS melodic
 ```
@@ -21,7 +23,7 @@ rosdep update
 ```
 
 ## How to build Autoware
-* System Dependencies of Ubuntu 18.04 / ROS Melodic
+### System Dependencies of Ubuntu 18.04 / ROS Melodic
 ```
 sudo apt-get update
 sudo apt install -y python-catkin-pkg python-rosdep ros-$ROS_DISTRO-catkin
@@ -29,7 +31,7 @@ sudo apt install -y python3-pip python3-colcon-common-extensions python3-setupto
 pip3 install -U setuptools
 ```
 
-* Eigen build
+### Eigen build
 ```
 wget https://gitlab.com/libeigen/eigen/-/archive/3.3.7/eigen-3.3.7.tar.gz
 mkdir eigen
@@ -48,14 +50,30 @@ sudo rm /usr/lib/cmake/eigen3/*
 sudo cp /usr/local/share/eigen3/cmake/* /usr/lib/cmake/eigen3
 ```
 
-* Install dependent packages
+### Install dependent packages
 ```
 cd {$WORKSPACE_DIR}/autoware.ai
 rosdep update
 rosdep install -y --from-paths src --ignore-src --rosdistro $ROS_DISTRO
 ```
 
-* Autoware Build
+### Resolving OpenCV version issue
+You should change some code to use OpenCV 4.x
+
+```
+sudo apt-get install libopencv3.2 -y
+```
+
+Change `set(_include_dirs "include;/usr/include;/usr/include/opencv")`
+
+to `set(_include_dirs "include;/usr/include;/usr/include/opencv4")`
+
+in below three files (`sudo` required)
+  - `/opt/ros/melodic/share/cv_bridge/cmake/cv_bridgeConfig.cmake`
+  - `/opt/ros/melodic/share/image_geometry/cmake/image_geometryConfig.cmake`
+  - `/opt/ros/melodic/share/grid_map_cv/cmake/grid_map_cvConfig.cmake`
+
+### Autoware Build
 ```
 # If you have CUDA
 AUTOWARE_COMPILE_WITH_CUDA=1 colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release
