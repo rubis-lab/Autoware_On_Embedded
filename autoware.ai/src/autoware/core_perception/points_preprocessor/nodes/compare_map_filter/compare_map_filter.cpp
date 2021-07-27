@@ -232,13 +232,13 @@ int main(int argc, char** argv)
   double task_execution_time = 0;
   double task_relative_deadline = 0;
 
-  pnh.param<int>("/points_concat_filter/task_scheduling_flag", task_scheduling_flag, 0);
-  pnh.param<int>("/points_concat_filter/task_profiling_flag", task_profiling_flag, 0);
-  pnh.param<std::string>("/points_concat_filter/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/points_concat_filter.csv");
-  pnh.param<int>("/points_concat_filter/rate", rate, 10);
-  pnh.param("/points_concat_filter/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)100000000);
-  pnh.param("/points_concat_filter/task_execution_time", task_execution_time, (double)100000000);
-  pnh.param("/points_concat_filter/task_relative_deadline", task_relative_deadline, (double)100000000);
+  pnh.param<int>("/compare_map_filter/task_scheduling_flag", task_scheduling_flag, 0);
+  pnh.param<int>("/compare_map_filter/task_profiling_flag", task_profiling_flag, 0);
+  pnh.param<std::string>("/compare_map_filter/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/compare_map_filter.csv");
+  pnh.param<int>("/compare_map_filter/rate", rate, 10);
+  pnh.param("/compare_map_filter/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)100000000);
+  pnh.param("/compare_map_filter/task_execution_time", task_execution_time, (double)100000000);
+  pnh.param("/compare_map_filter/task_relative_deadline", task_relative_deadline, (double)100000000);
 
   if(task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
 
