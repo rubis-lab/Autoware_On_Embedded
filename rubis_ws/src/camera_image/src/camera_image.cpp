@@ -2,6 +2,7 @@
 #include "opencv2/opencv.hpp"
 #include "image_transport/image_transport.h"
 #include "cv_bridge/cv_bridge.h"
+#include "rubis_sched/sched.hpp"
 
 // argv[0] : camera_id, argv[1] : frequency
 
@@ -57,8 +58,8 @@ int main(int argc, char** argv){
 
     ros::NodeHandle pnh("~");
 
-    pnh.param<int>)"/camera_image/camera_id", camera_id, 0);
-    pnh.param<int>)"/camera_image/frequency", frequency, 10);
+    pnh.param<int>("/camera_image/camera_id", camera_id, 0);
+    pnh.param<int>("/camera_image/frequency", frequency, 10);
     pnh.param<int>("/camera_image/task_scheduling_flag", task_scheduling_flag, 0);
     pnh.param<int>("/camera_image/task_profiling_flag", task_profiling_flag, 0);
     pnh.param<std::string>("/camera_image/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/camera_image.csv");
