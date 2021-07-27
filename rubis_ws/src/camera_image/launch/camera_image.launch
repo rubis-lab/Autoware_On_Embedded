@@ -1,0 +1,3 @@
+<launch>
+      <node pkg="camera_image" type="camera_image" name="camera_image"/>
+</launch>

@@ -3,11 +3,20 @@
 #include "image_transport/image_transport.h"
 #include "cv_bridge/cv_bridge.h"
 
-// argv[0] : camera_number, argv[1] : frequency
-
+// argv[0] : camera_id, argv[1] : frequency
 
 static const bool DEBUG = false; // 디버깅 스위치
 static const std::string OPENCV_WINDOW = "Raw Image Window";
+
+static int camera_id = 0;
+static int frequency = 0;
+static int task_scheduling_flag = 0;
+static int task_profiling_flag = 0;
+static std::string task_response_time_filename;
+// static int rate = 0; // Frequency replaces rate
+static double task_minimum_inter_release_time = 0;
+static double task_execution_time = 0;
+static double task_relative_deadline = 0;
 
 template < typename T > std::string to_string( const T& n );
 
@@ -18,12 +27,12 @@ class CameraImage{
 
 public:
     CameraImage(int par_camera_num,int par_frequency)
-        : it_(nh_), camera_number(par_camera_num), frequency(par_frequency)
+        : it_(nh_), camera_id(par_camera_num), frequency(par_frequency)
     { 
         createTopicName();  
         if(DEBUG) std::cout<<"topic_name : "<<topic_name<<std::endl;
         camera_image_pub_ = it_.advertise(topic_name,1);
-        cap.open(camera_number);
+        cap.open(camera_id);
     }
 
     ~CameraImage()
@@ -35,7 +44,7 @@ public:
     std::string createTopicName();// topic이름 생성
 
 private:
-    int camera_number;
+    int camera_id;
     int frequency;    
     cv::VideoCapture cap;
     std::string topic_name;
@@ -43,29 +52,30 @@ private:
     
 };
 
-int main(int argc, char** argv){
-    
-    if(DEBUG)
-    {   
-        ROS_INFO("DEBUG MODE ACTIVATED!");
-        ROS_INFO("argc : %d",argc);
-        for(int i=0; i<argc; i++){
-            ROS_INFO("argv[%d] : %s",i,argv[i]);
-        }
-    }
-
+int main(int argc, char** argv){        
     ros::init(argc, argv, "camera_image");
 
-    int camera_number = atoi(argv[1]);
-    int frequency = atoi(argv[2]);
+    ros::NodeHandle pnh("~");
 
-    ROS_INFO("camera_number : %d / frequency : %d",camera_number, frequency);
+    pnh.param<int>)"/camera_image/camera_id", camera_id, 0);
+    pnh.param<int>)"/camera_image/frequency", frequency, 10);
+    pnh.param<int>("/camera_image/task_scheduling_flag", task_scheduling_flag, 0);
+    pnh.param<int>("/camera_image/task_profiling_flag", task_profiling_flag, 0);
+    pnh.param<std::string>("/camera_image/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/camera_image.csv");
+    // pnh.param<int>("/camera_image/rate", rate, 10); // Frequency replaces rate
+    pnh.param("/camera_image/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)100000000);
+    pnh.param("/camera_image/task_execution_time", task_execution_time, (double)100000000);
+    pnh.param("/camera_image/task_relative_deadline", task_relative_deadline, (double)100000000);
+    
+    if(task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
+
+    ROS_INFO("camera_id : %d / frequency : %d",camera_id, frequency);
     if(!frequency){
         ROS_INFO("Frequency is number more than 0");
         return 1;
     }
 
-    CameraImage cimage(camera_number, frequency);
+    CameraImage cimage(camera_id, frequency);
 
     if(DEBUG) ROS_INFO("Start publishing");
    
@@ -85,22 +95,31 @@ int main(int argc, char** argv){
 void CameraImage::sendImage(){
     ros::Rate loop_rate(frequency);
         cv::Mat frame;
+
     while(nh_.ok()){
+        if(task_profiling_flag) rubis::sched::start_task_profiling();
+        if(task_scheduling_flag){        
+            rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline);
+        }
+
         cap >> frame;
         if(!frame.empty()){
-        if(DEBUG) cv::imshow(OPENCV_WINDOW,frame);
+            if(DEBUG) cv::imshow(OPENCV_WINDOW,frame);
 
-        msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", frame).toImageMsg();
-        camera_image_pub_.publish(msg);                
+            msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", frame).toImageMsg();
+            camera_image_pub_.publish(msg);                
         }                        
-        int ckey = cv::waitKey(1);
-        if(ckey == 27)break;
+        // int ckey = cv::waitKey(1);
+        // if(ckey == 27)break;
+
+        if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
+        if(task_profiling_flag) rubis::sched::stop_task_profiling();
         loop_rate.sleep();
     }
 }
 
 std::string CameraImage::createTopicName(){
-    topic_name =  "/cam"+ to_string(camera_number) +"/raw_image";
+    topic_name =  "/cam"+ to_string(camera_id) +"/raw_image";
 }
 
 template < typename T > 
