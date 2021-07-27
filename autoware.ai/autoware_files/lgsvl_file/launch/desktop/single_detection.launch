@@ -1,20 +1,13 @@
 <launch>
-  <rosparam command="load" file="$(env USER_HOME)/autoware.ai/autoware_files/data/yaml/desktop_scheduling_params.yaml" />
-  <!-- setting of this launch file -->
-  <arg name="car_detection" default="true" />
-  <arg name="pedestrian_detection" default="false" />
-  <arg name="is_use_gpu" default="true" />
-  <arg name="is_register_lidar2camera_tf" default="true" />
-  <arg name="is_publish_projection_matrix" default="true" />
-  <arg name="is_publish_camera_info" default="true" />
+  <rosparam command="load" file="$(env USER_HOME)/autoware.ai/autoware_files/data/yaml/desktop_lgsvl_params.yaml" />
 
-  <!-- calibration_publisher -->
-  <include file="$(find runtime_manager)/launch_files/calibration_publisher.launch">
-    <arg name="register_lidar2camera_tf" value="$(arg is_register_lidar2camera_tf)" />
-    <arg name="publish_extrinsic_mat" value="$(arg is_publish_projection_matrix)" />
-    <arg name="publish_camera_info" value="$(arg is_publish_camera_info)" />
-  </include>
-  
+  <!-- Ground Filter -->
+  <include file="$(find points_preprocessor)/launch/compare_map_filter_params.launch">
+     <arg name="input_point_topic" value="/points_raw" />
+    <arg name="input_map_topic" value="/points_map" />
+    <arg name="output_match_topic" value="/points_ground_center" />
+    <arg name="output_unmatch_topic" value="/points_no_ground_center" />
+  </include>  
 
   <!-- lidar_euclidean_cluster_detect-->
   <include file="$(find lidar_euclidean_cluster_detect)/launch/lidar_euclidean_cluster_detect.launch">
@@ -46,17 +39,17 @@
   </include>
   
   <!-- vision_darknet_detect -->
-  <!-- <include file="$(find vision_darknet_detect)/launch/vision_darknet_detect_parameter.launch">
+  <include file="$(find vision_darknet_detect)/launch/vision_darknet_detect_parameter.launch">
     <arg name="gpu_device_id" value="0"/>
     <arg name="score_threshold" value="0.5"/>
     <arg name="nms_threshold" value="0.45"/>
     <arg name="names_file" value="$(find vision_darknet_detect)/darknet/cfg/coco.names"/>
     <arg name="camera_id" value="/"/>
     <arg name="image_src" value="/image_raw"/>    
-  </include> -->
+  </include>
 
   <!-- imm_ukf_pda_track -->
-  <!-- <include file="$(find imm_ukf_pda_track)/launch/imm_ukf_pda_track.launch">
+  <include file="$(find imm_ukf_pda_track)/launch/imm_ukf_pda_track.launch">
     <arg name="namespace" default="/detection/object_tracker"/>
     <arg name="tracker_input_topic" default="/detection/lidar_detector/objects_center" />
     <arg name="tracker_output_topic" default="/detection/object_tracker/objects_center" />
@@ -74,10 +67,10 @@
     <arg name="lane_direction_chi_threshold" default="2.71" />
     <arg name="nearest_lane_distance_threshold" default="1.0" />
     <arg name="vectormap_frame" default="/map" />
-  </include> -->
+  </include>
 
   <!-- range_fusion -->
-  <!-- <include file="$(find range_vision_fusion)/launch/range_vision_fusion.launch">
+  <include file="$(find range_vision_fusion)/launch/range_vision_fusion.launch">
     <arg name="detected_objects_range" default="/detection/object_tracker/objects_center"/>
     <arg name="detected_objects_vision" default="/detection/image_detector/objects"/>
     <arg name="camera_info_src" default="/camera_info"/>
@@ -88,6 +81,6 @@
     <arg name="overlap_threshold" default="0"/>
     <arg name="use_vector_map" default="false"/>
     <arg name="namespace" default="/detection/fusion_tools"/>
-  </include> -->
+  </include>
 
 </launch>

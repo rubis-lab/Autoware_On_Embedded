@@ -9,16 +9,6 @@
 #rate = hz
 # other time unut = ns
 
-# Sensing
-ray_ground_filter:
-  task_scheduling_flag: 0
-  task_profiling_flag: 0
-  task_response_time_filename: "~/Documents/profiling/response_time/ray_ground_filter.csv"
-  rate: 10 
-  task_minimum_inter_release_time: 100000000
-  task_execution_time: 100000000
-  task_relative_deadline: 100000000
-  
 # Localization
 voxel_grid_filter:
   task_scheduling_flag: 0
@@ -52,8 +42,19 @@ ndt_matching:
   gpu_deadline_filename: "~/Documents/gpu_deadline/ndt_matching_gpu_deadline.csv"
 
 # Detection
-calibration_publisher:
-  calibration_file: "~/autoware.ai/autoware_files/data/calibration/single_lidar/Lexus2016RXHybrid.yaml"
+compare_map_filter:
+  distance_threshold: 0.4
+  min_clipping_height: -1.7
+  max_clipping_height: 0.5
+
+  task_scheduling_flag: 0
+  task_profiling_flag: 0
+  task_response_time_filename: "~/Documents/profiling/response_time/compare_map_filter.csv"
+  rate: 10
+  task_minimum_inter_release_time: 100000000
+  task_execution_time: 70000000
+  task_relative_deadline: 100000000
+
 
 lidar_euclidean_cluster_detect:
   task_scheduling_flag: 0

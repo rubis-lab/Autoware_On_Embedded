@@ -1,5 +1,5 @@
 <launch>
-  <rosparam command="load" file="$(env USER_HOME)/autoware.ai/autoware_files/data/yaml/nvidia_scheduling_params.yaml" />
+  <rosparam command="load" file="$(env USER_HOME)/autoware.ai/autoware_files/data/yaml/nvidia_lgsvl_params.yaml" />
 
   <arg name="init_x" value="-8.72" />
   <arg name="init_y" value="51.74" />

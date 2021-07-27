@@ -1,12 +1,12 @@
 <launch>
-  <!-- setting of this launch file -->
-  <arg name="car_detection" default="true" />
-  <arg name="pedestrian_detection" default="false" />
-  <arg name="is_use_gpu" default="true" />
-  <arg name="is_register_lidar2camera_tf" default="true" />
-  <arg name="is_publish_projection_matrix" default="true" />
-  <arg name="is_publish_camera_info" default="true" /> 
-
+  <!-- Ground Filter -->
+  <include file="$(find points_preprocessor)/launch/compare_map_filter_params.launch">
+     <arg name="input_point_topic" value="/points_raw" />
+    <arg name="input_map_topic" value="/points_map" />
+    <arg name="output_match_topic" value="/points_ground_center" />
+    <arg name="output_unmatch_topic" value="/points_no_ground_center" />
+  </include>  
+  
   <!-- lidar_euclidean_cluster_detect-->
   <include file="$(find lidar_euclidean_cluster_detect)/launch/lidar_euclidean_cluster_detect.launch">
     <arg name="points_node" value="/points_no_ground_center" />
