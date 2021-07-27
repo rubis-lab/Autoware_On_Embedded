@@ -46,6 +46,7 @@ add_executable(minicar_lane_keeping
   include/minicar_lane_keeping/minicar_lane_keeping.h
   src/minicar_lane_keeping/minicar_lane_keeping_node.cpp
   src/minicar_lane_keeping/minicar_lane_keeping.cpp
+)
   
 add_executable(cubetown_autorunner
   include/cubetown_autorunner/cubetown_autorunner.h
@@ -67,6 +68,9 @@ target_link_libraries(desktop_lane_keeping
 
 add_dependencies(minicar_lane_keeping ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(minicar_lane_keeping
+  ${catkin_LIBRARIES}
+  ros_autorunner_lib
+)
 
 add_dependencies(cubetown_autorunner ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(cubetown_autorunner
