@@ -3,12 +3,12 @@ import threading
 import rospy
 from geometry_msgs.msg import TwistStamped
 
-ACC_MIN = -10
-ACC_MAX = 10
+ACC_MIN = 0
+ACC_MAX = 0.2
 ACC_EMG = -100
 PI = 3.141592
-STEER_MIN = -PI
-STEER_MAX = PI
+STEER_MIN = -PI/2
+STEER_MAX = PI/2
 
 current_pressed = set()
 global current_acc
