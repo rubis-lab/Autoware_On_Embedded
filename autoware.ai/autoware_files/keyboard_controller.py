@@ -3,9 +3,8 @@ import threading
 import rospy
 from geometry_msgs.msg import TwistStamped
 
-ACC_MIN = 0
+ACC_MIN = -0.2
 ACC_MAX = 0.2
-ACC_EMG = -100
 PI = 3.141592
 STEER_MIN = -PI/2
 STEER_MAX = PI/2
@@ -36,7 +35,7 @@ def on_press(key):
     
     if keyboard.KeyCode(char='f') in current_pressed:
         current_steer = 0
-        current_acc = ACC_EMG
+        current_acc = 0
 
 def keyboard_routine():
     print('Press P to Quit')
