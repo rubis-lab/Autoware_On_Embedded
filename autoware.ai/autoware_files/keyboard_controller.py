@@ -38,6 +38,7 @@ def on_press(key):
         current_acc = 0
 
 def keyboard_routine():
+    print('W, A, S, D : Move, F : Stop')
     print('Press P to Quit')
     with keyboard.Listener(
         on_press=on_press,
