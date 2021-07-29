@@ -127,6 +127,9 @@ void CompareMapFilter::sensorPointsCallback(const sensor_msgs::PointCloud2::Cons
   sensorTF_clipping_height_cloud_ptr->header = sensorTF_cloud_ptr->header;
   for (size_t i = 0; i < sensorTF_cloud_ptr->points.size(); ++i)
   {
+    if(sensorTF_cloud_ptr->points[i].x < 4 && sensorTF_cloud_ptr->points[i].x > -2) continue; // Ego length filtering
+    if(abs(sensorTF_cloud_ptr->points[i].y) < 1.5) continue; // Ego width filtering
+
     if (sensorTF_cloud_ptr->points[i].z > min_clipping_height_ &&
         sensorTF_cloud_ptr->points[i].z < max_clipping_height_)
     {
