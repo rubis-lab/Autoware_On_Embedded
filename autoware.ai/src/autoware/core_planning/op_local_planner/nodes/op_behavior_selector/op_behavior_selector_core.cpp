@@ -624,6 +624,8 @@ void BehaviorGen::MainLoop()
 
   struct timespec start_time, end_time;
 
+  m_sprintSwitch = false;
+
   while (ros::ok())
   {
     if(task_profiling_flag && is_topic_ready) rubis::sched::start_task_profiling();
