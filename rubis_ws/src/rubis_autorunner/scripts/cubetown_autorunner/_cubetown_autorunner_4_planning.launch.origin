@@ -101,5 +101,6 @@
     <arg name="evidence_tust_number"            default="25"/>
     <arg name="trafficLightFile"                default="crossing_test/crossing_traffic_light.yaml" />
     <arg name="stopLineFile"                    default="crossing_test/crossing_stop_line.yaml" />
+    <!-- <arg name="intersectionFile"                default="crossing_test/crossing_intersection.yaml" /> -->
   </include>
 </launch>
