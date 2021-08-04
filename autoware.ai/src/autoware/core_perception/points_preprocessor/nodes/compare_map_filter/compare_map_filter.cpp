@@ -92,11 +92,11 @@ CompareMapFilter::CompareMapFilter()
   nh_private_.param("min_clipping_height", min_clipping_height_, min_clipping_height_);
   nh_private_.param("max_clipping_height", max_clipping_height_, max_clipping_height_);
 
-  config_sub_ = nh_.subscribe("/config/compare_map_filter", 10, &CompareMapFilter::configCallback, this);
+  config_sub_ = nh_.subscribe("/config/compare_map_filter", 1, &CompareMapFilter::configCallback, this);
   sensor_points_sub_ = nh_.subscribe("/points_raw", 1, &CompareMapFilter::sensorPointsCallback, this);
-  map_sub_ = nh_.subscribe("/points_map", 10, &CompareMapFilter::pointsMapCallback, this);
-  match_points_pub_ = nh_.advertise<sensor_msgs::PointCloud2>("/points_ground", 10);
-  unmatch_points_pub_ = nh_.advertise<sensor_msgs::PointCloud2>("/points_no_ground", 10);
+  map_sub_ = nh_.subscribe("/points_map", 1, &CompareMapFilter::pointsMapCallback, this);
+  match_points_pub_ = nh_.advertise<sensor_msgs::PointCloud2>("/points_ground", 1);
+  unmatch_points_pub_ = nh_.advertise<sensor_msgs::PointCloud2>("/points_no_ground", 1);
 }
 
 void CompareMapFilter::configCallback(const autoware_config_msgs::ConfigCompareMapFilter::ConstPtr& config_msg_ptr)

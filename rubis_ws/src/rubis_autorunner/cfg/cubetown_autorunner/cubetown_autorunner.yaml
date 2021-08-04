@@ -9,6 +9,6 @@ terminate_script_path: "~/rubis_ws/src/rubis_autorunner/scripts/cubetown_autorun
 
 step_1: ["rubis_autorunner", "_cubetown_autorunner_1_sensing.launch", "true", "false", "LAUNCH"]
 step_2: ["rubis_autorunner", "_cubetown_autorunner_2_localization.launch", "true", "true", "LAUNCH"]
-step_3: ["rubis_autorunner", "_cubetown_autorunner_3_detection.launch", "false", "true", "LAUNCH"]
-step_4: ["rubis_autorunner", "_cubetown_autorunner_4_planning.launch", "true", "false", "LAUNCH"]
+step_3: ["rubis_autorunner", "_cubetown_autorunner_3_detection.launch", "true", "true", "LAUNCH"]
+step_4: ["rubis_autorunner", "_cubetown_autorunner_4_planning.launch", "true", "true", "LAUNCH"]
 step_5: ["rubis_autorunner", "_cubetown_autorunner_5_control.launch", "false", "true", "LAUNCH"]
