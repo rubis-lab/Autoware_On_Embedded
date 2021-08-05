@@ -552,6 +552,9 @@ void GlobalPlanner::MainLoop()
           selectedGlobalPathIdx = 0;
           VisualizeAndSend(m_GeneratedTotalPaths.at(selectedGlobalPathIdx));
         }
+        else{
+          m_GoalsPos.clear();
+        }
       }
       else if(m_GeneratedTotalPaths.size() > 1){
         PlannerHNS::RelativeInfo info;

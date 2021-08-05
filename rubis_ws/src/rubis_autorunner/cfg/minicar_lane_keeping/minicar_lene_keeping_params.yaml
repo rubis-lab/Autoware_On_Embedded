@@ -115,7 +115,7 @@ op_behavior_selector:
   task_execution_time: 10000000
   task_relative_deadline: 10000000
   distanceToPedestrianThreshold: 15.0
-  sprintSpeed: 10.0
+  sprintSpeed: 1.0
   obstacleWaitingTimeinIntersection: 2.0
   turnThreshold: 30.0
 
