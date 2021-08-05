@@ -559,7 +559,7 @@ void GlobalPlanner::MainLoop()
         if(ret == true && info.iGlobalPath >= 0 &&  info.iGlobalPath < m_GeneratedTotalPaths.at(selectedGlobalPathIdx).size() && info.iFront > 0 && info.iFront < m_GeneratedTotalPaths.at(selectedGlobalPathIdx).at(info.iGlobalPath).size())
         {
           double remaining_distance = m_GeneratedTotalPaths.at(selectedGlobalPathIdx).at(info.iGlobalPath).at(m_GeneratedTotalPaths.at(selectedGlobalPathIdx).at(info.iGlobalPath).size()-1).cost - (m_GeneratedTotalPaths.at(selectedGlobalPathIdx).at(info.iGlobalPath).at(info.iFront).cost + info.to_front_distance);
-          if(remaining_distance <= 50)
+          if(remaining_distance <= 5)
           {
             selectedGlobalPathIdx = 1 - selectedGlobalPathIdx;
             VisualizeAndSend(m_GeneratedTotalPaths.at(selectedGlobalPathIdx));

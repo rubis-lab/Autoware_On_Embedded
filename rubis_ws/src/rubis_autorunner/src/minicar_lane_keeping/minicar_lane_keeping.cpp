@@ -29,7 +29,7 @@ void MinicarLaneKeeping::register_subscribers(){
  }
 
  void MinicarLaneKeeping::ndt_stat_cb(const autoware_msgs::NDTStat& msg){
-    if(msg.score < 0.55 && !ros_autorunner_.step_info_list_[STEP(3)].is_prepared){
+    if(msg.score < 1.0 && !ros_autorunner_.step_info_list_[STEP(3)].is_prepared){
         ROS_WARN("[STEP 2] Localization is success");
     	sleep(SLEEP_PERIOD);
         ros_autorunner_.step_info_list_[STEP(3)].is_prepared = true;

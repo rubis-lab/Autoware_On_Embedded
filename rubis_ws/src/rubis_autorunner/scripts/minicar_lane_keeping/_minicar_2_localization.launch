@@ -37,9 +37,9 @@
     yaw: $(arg init_yaw),
     use_predict_pose: 1,
     error_threshold: 1,
-    resolution: 1,
+    resolution: 3,
     step_size: 0.1,
-    trans_epsilon: 0.05,
+    trans_epsilon: 0.01,
     max_iterations: 20}
   '"/>
 

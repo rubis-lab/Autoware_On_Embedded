@@ -1,12 +1,13 @@
 <launch>
   <!--  Dynamic Pure Pursuit Param -->
+
   <rosparam command="load" file="$(env USER_HOME)/autoware.ai/autoware_files/lgsvl_file/parameter/lgsvl_pure_pursuit.yaml" />
   
   <!-- pure_pursuit  -->
   <include file="$(find pure_pursuit)/launch/pure_pursuit.launch">    
     <!-- Core Parameter -->
-    <arg name="lookahead_ratio"               value="1.0"/>
-    <arg name="minimum_lookahead_distance"    value="12.0"/>
+    <arg name="lookahead_ratio"               value="0"/>
+    <arg name="minimum_lookahead_distance"    value="1.1"/>
     
     <arg name="const_velocity"                value="5.0"/>     
     <arg name="const_lookahead_distance"      value="4.0"/>

@@ -11,34 +11,25 @@
     <arg name="mapFileName"           value="" /> <!-- incase of kml map source -->
     <!-- 138-216 -->
     <arg name="use_static_goal"       value="true" />
-    <arg name="goal_pose_x"           value="1.78" />
-    <arg name="goal_pose_y"           value="6.45" />
+    <arg name="goal_pose_x"           value="-0.498" />
+    <arg name="goal_pose_y"           value="2.370" />
     <arg name="goal_pose_z"           value="0.0" />
     <arg name="goal_ori_x"            value="0.0" />
     <arg name="goal_ori_y"            value="0.0" />
-    <arg name="goal_ori_z"            value="0.97" />
-    <arg name="goal_ori_w"            value="-0.21" />
-<!--
-    <arg name="goal_pose_x"           value="0.7175" />
-    <arg name="goal_pose_y"           value="0.1944" />
-    <arg name="goal_pose_z"           value="0.0" />
-    <arg name="goal_ori_x"            value="0.0" />
-    <arg name="goal_ori_y"            value="0.0" />
-    <arg name="goal_ori_z"            value="0.2249" />
-    <arg name="goal_ori_w"            value="0.9743" />
--->
+    <arg name="goal_ori_z"            value="0.9791" />
+    <arg name="goal_ori_w"            value="-0.2032" />
   </include>
 
   <!-- op_common_params  -->
   <include file="$(find op_local_planner)/launch/op_common_params_parameter.launch">
     <!-- Included in app window -->
-    <arg name="horizonDistance"                 default="120"  />     <!-- Horizon -->
-    <arg name="maxLocalPlanDistance"            default="80" />       <!-- Plan Distance-->
-    <arg name="pathDensity"                     default="0.5" />      <!-- Path Density-->
+    <arg name="horizonDistance"                 default="7.5"  />     <!-- Horizon -->
+    <arg name="maxLocalPlanDistance"            default="12" />       <!-- Plan Distance-->
+    <arg name="pathDensity"                     default="0.02" />      <!-- Path Density-->
     <arg name="enableFollowing"                 default="false" />     <!-- Enable Following -->
     <arg name="enableSwerving"                  default="false"  />    <!-- Enable Avoidance -->
-    <arg name="minFollowingDistance"            default="30.0"  />    <!-- Follow Distance --> <!-- should be bigger than Distance to follow -->  
-    <arg name="minDistanceToAvoid"              default="20.0" />     <!-- Avoiding Distance --> <!-- should be smaller than minFollowingDistance and larger than maxDistanceToAvoid -->
+    <arg name="minFollowingDistance"            default="3.0"  />    <!-- Follow Distance --> <!-- should be bigger than Distance to follow -->  
+    <arg name="minDistanceToAvoid"              default="3.0" />     <!-- Avoiding Distance --> <!-- should be smaller than minFollowingDistance and larger than maxDistanceToAvoid -->
     <arg name="maxDistanceToAvoid"              default="0.1"  />     <!-- Avoidnace Limit--> <!-- should be smaller than minDistanceToAvoid -->
     <arg name="enableStopSignBehavior"          default="false" />    <!-- Enable Stop Sign Stop-->
     <arg name="enableTrafficLightBehavior"      default="true" />     <!-- Enable Traffic Light -->
@@ -47,16 +38,16 @@
     <arg name="verticalSafetyDistance"          default="2"  />       <!-- Longitudinal Safet y-->
     <arg name="velocitySource"                  default="1" />        <!-- read velocities from (0- Odometry, 1- autoware current_velocities, 2- car_info) "" -->   
     <!-- Vehicle Specification -->
-    <arg name="width"                           default="1.85"  />
-    <arg name="length"                          default="4.2"  />
-    <arg name="wheelBaseLength"                 default="2.7"  />
-    <arg name="turningRadius"                   default="5.2"  />
+    <arg name="width"                           default="0.3"  />
+    <arg name="length"                          default="0.6"  />
+    <arg name="wheelBaseLength"                 default="0.3"  />
+    <arg name="turningRadius"                   default="3.0"  />
     <arg name="maxSteerAngle"                   default="0.45" />
     <arg name="steeringDelay"                   default="1.2" />
     <!-- Not included in app window -->
     <arg name="minPursuiteDistance"             default="3.0"  />
-    <arg name="additionalBrakingDistance"       default="5.0"  />
-    <arg name="giveUpDistance"                  default="-4.0"  />
+    <arg name="additionalBrakingDistance"       default="3.0"  />
+    <arg name="giveUpDistance"                  default="-2.0"  />
     <arg name="mapSource"                       default="0" />        <!-- Autoware=0, Vector Map Folder=1, kml=2 -->
     <arg name="mapFileName"                     default="" />
     <arg name="minVelocity"                     default="0.1" />  
@@ -67,8 +58,8 @@
 
   <!-- op_trajectory_generator -->
   <include file="$(find op_local_planner)/launch/op_trajectory_generator.launch">
-    <arg name="samplingTipMargin"               default="4"  />       <!-- Tip Margin -->
-    <arg name="samplingOutMargin"               default="8" />        <!-- Roll In Margin -->
+    <arg name="samplingTipMargin"               default="0.4"  />       <!-- Tip Margin -->
+    <arg name="samplingOutMargin"               default="0.32" />        <!-- Roll In Margin -->
     <arg name="samplingSpeedFactor"             default="0.25" />    
     <arg name="enableHeadingSmoothing"          default="false" />
   </include>

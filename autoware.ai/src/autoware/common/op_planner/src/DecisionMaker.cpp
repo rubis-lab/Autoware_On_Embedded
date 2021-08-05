@@ -217,7 +217,10 @@ void DecisionMaker::InitBehaviorStates()
 
    double critical_long_front_distance =  m_CarInfo.wheel_base/2.0 + m_CarInfo.length/2.0 + m_params.verticalSafetyDistance;
 
-  if(ReachEndOfGlobalPath(pValues->minStoppingDistance + critical_long_front_distance, pValues->iCurrSafeLane))
+  // HJW modified
+  // ISSUE: Stop distnace should be calculated dynamically on real vehicle
+  //if(ReachEndOfGlobalPath(pValues->minStoppingDistance + critical_long_front_distance, pValues->iCurrSafeLane))
+  if(ReachEndOfGlobalPath(0.3, pValues->iCurrSafeLane))
     pValues->currentGoalID = -1;
   else
     pValues->currentGoalID = goalID;
