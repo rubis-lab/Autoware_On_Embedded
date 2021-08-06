@@ -30,12 +30,6 @@ voxel_grid_filter:
   task_relative_deadline: 100000000
 
 ndt_matching:
-  tf_x: 0.2
-  tf_y: 0.005
-  tf_z: 0.21
-  tf_roll: 0
-  tf_pitch: 0
-  tf_yaw: -0.436
   localizer: "velodyne"
 
   task_scheduling_flag: 0

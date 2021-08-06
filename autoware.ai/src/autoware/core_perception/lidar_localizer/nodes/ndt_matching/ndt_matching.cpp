@@ -221,7 +221,12 @@ static autoware_msgs::NDTStat ndt_stat_msg;
 
 static double predict_pose_error = 0.0;
 
-static double _tf_x, _tf_y, _tf_z, _tf_roll, _tf_pitch, _tf_yaw;
+static double _tf_x = 1.2;
+static double _tf_y = 0.0;
+static double _tf_z = 2.0;
+static double _tf_roll = 0.0;
+static double _tf_pitch = 0.0;
+static double _tf_yaw = 0.0;
 static Eigen::Matrix4f tf_btol;
 
 static std::string _localizer = "velodyne";
@@ -1559,47 +1564,33 @@ int main(int argc, char** argv)
   private_nh.getParam("imu_upside_down", _imu_upside_down);
   private_nh.getParam("imu_topic", _imu_topic);
   private_nh.param<double>("gnss_reinit_fitness", _gnss_reinit_fitness, 500.0);
-  
-  if (nh.getParam("/ndt_matching/localizer", _localizer) == false)
-  {
-    std::cout << "localizer is not set." << std::endl;
-    return 1;
-  }
 
-  if (nh.getParam("/ndt_matching/tf_x", _tf_x) == false)
-  {
-    std::cout << "tf_x is not set." << std::endl;
-    return 1;
-  }
+  nh.param<std::string>("/ndt_matching/localizer", _localizer, "velodyne");
 
-  if (nh.getParam("/ndt_matching/tf_y", _tf_y) == false)
+  try
   {
-    std::cout << "tf_y is not set." << std::endl;
-    return 1;
-  }
+    tf::TransformListener base_localizer_listener;
+    tf::StampedTransform  m_base_to_localizer;
+    base_localizer_listener.waitForTransform("/base_link", _localizer, ros::Time(0), ros::Duration(1.0));
+    base_localizer_listener.lookupTransform("/base_link", _localizer, ros::Time(0), m_base_to_localizer);
 
-  if (nh.getParam("/ndt_matching/tf_z", _tf_z) == false)
-  {
-    std::cout << "tf_z is not set." << std::endl;
-    return 1;
-  }
+    _tf_x = m_base_to_localizer.getOrigin().x();
+    _tf_y = m_base_to_localizer.getOrigin().y();
+    _tf_z = m_base_to_localizer.getOrigin().z();
 
-  if (nh.getParam("/ndt_matching/tf_roll", _tf_roll) == false)
-  {
-    std::cout << "tf_roll is not set." << std::endl;
-    return 1;
-  }
+    tf::Quaternion b_l_q(
+      m_base_to_localizer.getRotation().x(),
+      m_base_to_localizer.getRotation().y(),
+      m_base_to_localizer.getRotation().z(),
+      m_base_to_localizer.getRotation().w()
+    );
 
-  if (nh.getParam("/ndt_matching/tf_pitch", _tf_pitch) == false)
-  {
-    std::cout << "tf_pitch is not set." << std::endl;
-    return 1;
+    tf::Matrix3x3 b_l_m(b_l_q);
+    b_l_m.getRPY(_tf_roll, _tf_pitch, _tf_yaw);
   }
-
-  if (nh.getParam("/ndt_matching/tf_yaw", _tf_yaw) == false)
+  catch (tf::TransformException& ex)
   {
-    std::cout << "tf_yaw is not set." << std::endl;
-    return 1;
+    ROS_ERROR("%s", ex.what());
   }
 
   std::cout << "-----------------------------------------------------------------" << std::endl;
@@ -1653,7 +1644,6 @@ int main(int argc, char** argv)
   std::string gpu_execution_time_filename;
   std::string gpu_response_time_filename;
   std::string gpu_deadline_filename;
-
 
   private_nh.param<int>("/ndt_matching/task_scheduling_flag", task_scheduling_flag, 0);
   private_nh.param<int>("/ndt_matching/task_profiling_flag", task_profiling_flag, 0);
