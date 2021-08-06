@@ -7,7 +7,6 @@ find_package(autoware_build_flags REQUIRED)
 find_package(catkin REQUIRED COMPONENTS
   autoware_msgs
   geometry_msgs
-  lanelet2_extension
   pcl_ros
   roscpp
   std_msgs
@@ -76,14 +75,6 @@ add_executable(vector_map_loader nodes/vector_map_loader/vector_map_loader.cpp)
 target_link_libraries(vector_map_loader ${catkin_LIBRARIES} ${vector_map_LIBRARIES} get_file ${CURL_LIBRARIES})
 add_dependencies(vector_map_loader ${catkin_EXPORTED_TARGETS})
 
-add_executable(lanelet2_map_loader nodes/lanelet2_map_loader/lanelet2_map_loader.cpp)
-target_link_libraries(lanelet2_map_loader ${catkin_LIBRARIES} ${Boost_LIBRARIES})
-add_dependencies(lanelet2_map_loader ${catkin_EXPORTED_TARGETS})
-
-add_executable(lanelet2_map_visualization nodes/lanelet2_map_loader/lanelet2_map_visualization.cpp)
-target_link_libraries(lanelet2_map_visualization ${catkin_LIBRARIES})
-add_dependencies(lanelet2_map_visualization ${catkin_EXPORTED_TARGETS})
-
 add_executable(points_map_filter nodes/points_map_filter/points_map_filter_node.cpp nodes/points_map_filter/points_map_filter.cpp)
 target_link_libraries(points_map_filter ${catkin_LIBRARIES})
 add_dependencies(points_map_filter ${catkin_EXPORTED_TARGETS})
@@ -94,8 +85,6 @@ install(
     get_file
     points_map_loader
     vector_map_loader
-    lanelet2_map_loader
-    lanelet2_map_visualization
     points_map_filter
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
