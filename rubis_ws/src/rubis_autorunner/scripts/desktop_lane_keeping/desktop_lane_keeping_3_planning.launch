@@ -21,12 +21,12 @@
     <!-- CubeTown -->
     <arg name="use_static_goal"       value="true" />
     <arg name="goal_pose_x"           value="55.9" />
-    <arg name="goal_pose_y"           value="-32.0" />
+    <arg name="goal_pose_y"           value="-18.8" />
     <arg name="goal_pose_z"           value="0.0" />
     <arg name="goal_ori_x"            value="0.0" />
     <arg name="goal_ori_y"            value="0.0" />
-    <arg name="goal_ori_z"            value="0.75" />
-    <arg name="goal_ori_w"            value="0.66" />
+    <arg name="goal_ori_z"            value="0.70" />
+    <arg name="goal_ori_w"            value="0.70" />
   </include>
 
   <!-- op_common_params  -->

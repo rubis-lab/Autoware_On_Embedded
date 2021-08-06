@@ -437,6 +437,8 @@ void GlobalPlanner::MainLoop()
   double task_execution_time;
   double task_relative_deadline; 
   int multilap_flag;
+  double multilap_replanning_distance;
+  int planning_fail_cnt;
 
   private_nh.param<int>("/op_global_planner/task_scheduling_flag", task_scheduling_flag, 0);
   private_nh.param<int>("/op_global_planner/task_profiling_flag", task_profiling_flag, 0);
@@ -446,6 +448,7 @@ void GlobalPlanner::MainLoop()
   private_nh.param("/op_global_planner/task_execution_time", task_execution_time, (double)10);
   private_nh.param("/op_global_planner/task_relative_deadline", task_relative_deadline, (double)10);
   private_nh.param("/op_global_planner/multilap_flag", multilap_flag, 0);
+  private_nh.param("/op_global_planner/multilap_replanning_distance", multilap_replanning_distance, (double)50);
 
   if(task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
 
@@ -524,6 +527,10 @@ void GlobalPlanner::MainLoop()
     {
       if(m_GeneratedTotalPaths.size() == 0) // initialize two paths
       {
+        // Try 50 Times to planning
+        if(planning_fail_cnt == 0){
+          planning_fail_cnt = 50;
+        }
         std::vector<std::vector<PlannerHNS::WayPoint>> tmp_path_list;
         std::vector<std::vector<PlannerHNS::WayPoint>> tmp_path_list_2;
         PlannerHNS::WayPoint goalPoint = m_GoalsPos.at(m_iCurrentGoalIndex);
@@ -536,7 +543,6 @@ void GlobalPlanner::MainLoop()
           m_GeneratedTotalPaths.push_back(tmp_path_list);
 
           // Do multi-lab driving only current position and goal point is close
-          // TODO : Add parameter for enable multi-lab driving
           if(multilap_flag){
             if(hypot(m_CurrentPose.pos.x - goalPoint.pos.x, m_CurrentPose.pos.y - goalPoint.pos.y) < 30){
               int wp_size = tmp_path_list.at(0).size();
@@ -553,7 +559,10 @@ void GlobalPlanner::MainLoop()
           VisualizeAndSend(m_GeneratedTotalPaths.at(selectedGlobalPathIdx));
         }
         else{
-          m_GoalsPos.clear();
+          planning_fail_cnt--;
+          if(planning_fail_cnt == 0){
+            m_GoalsPos.clear();
+          }
         }
       }
       else if(m_GeneratedTotalPaths.size() > 1){
@@ -562,7 +571,7 @@ void GlobalPlanner::MainLoop()
         if(ret == true && info.iGlobalPath >= 0 &&  info.iGlobalPath < m_GeneratedTotalPaths.at(selectedGlobalPathIdx).size() && info.iFront > 0 && info.iFront < m_GeneratedTotalPaths.at(selectedGlobalPathIdx).at(info.iGlobalPath).size())
         {
           double remaining_distance = m_GeneratedTotalPaths.at(selectedGlobalPathIdx).at(info.iGlobalPath).at(m_GeneratedTotalPaths.at(selectedGlobalPathIdx).at(info.iGlobalPath).size()-1).cost - (m_GeneratedTotalPaths.at(selectedGlobalPathIdx).at(info.iGlobalPath).at(info.iFront).cost + info.to_front_distance);
-          if(remaining_distance <= 5)
+          if(remaining_distance <= multilap_replanning_distance)
           {
             selectedGlobalPathIdx = 1 - selectedGlobalPathIdx;
             VisualizeAndSend(m_GeneratedTotalPaths.at(selectedGlobalPathIdx));
