@@ -20,8 +20,6 @@
 
 #define SPIN_PROFILING
 
-int is_topic_ready = 0;
-
 namespace GlobalPlanningNS
 {
 
@@ -229,7 +227,8 @@ void GlobalPlanner::callbackGetVehicleStatus(const geometry_msgs::TwistStampedCo
     m_VehicleState.steer = atan(2.7 * msg->twist.angular.z/msg->twist.linear.x);
   UtilityHNS::UtilityH::GetTickCount(m_VehicleState.tStamp);
 
-  is_topic_ready = 1;
+  if(rubis::sched::is_task_ready_ == TASK_NOT_READY) rubis::sched::init_task();
+  rubis::sched::task_state_ = TASK_STATE_DONE;
 }
 
 void GlobalPlanner::callbackGetCANInfo(const autoware_can_msgs::CANInfoConstPtr &msg)
@@ -455,12 +454,16 @@ void GlobalPlanner::MainLoop()
   ros::Rate loop_rate(25);
   if(!task_scheduling_flag && !task_profiling_flag) loop_rate = ros::Rate(rate);
   
+
+
   while (ros::ok())
   {
-    if(task_profiling_flag && is_topic_ready) rubis::sched::start_task_profiling();
-    if(task_scheduling_flag && is_topic_ready){        
-      rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline);
-    }      
+    if(rubis::sched::is_task_ready_ == TASK_READY && rubis::sched::task_state_ == TASK_STATE_READY){
+      if(task_scheduling_flag) rubis::sched::start_task_profiling();
+      if(task_profiling_flag) rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline); 
+      rubis::sched::task_state_ = TASK_STATE_RUNNING;     
+    }
+
     ros::spinOnce();
     bool bMakeNewPlan = false;
 
@@ -568,8 +571,12 @@ void GlobalPlanner::MainLoop()
       }
       VisualizeDestinations(m_GoalsPos, m_iCurrentGoalIndex);
     }
-    if(task_scheduling_flag && is_topic_ready) rubis::sched::yield_task_scheduling();
-    if(task_profiling_flag && is_topic_ready) rubis::sched::stop_task_profiling();
+
+    if(rubis::sched::is_task_ready_ == TASK_READY && rubis::sched::task_state_ == TASK_STATE_DONE){
+      if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
+      if(task_profiling_flag) rubis::sched::stop_task_profiling();
+      rubis::sched::task_state_ = TASK_STATE_READY;
+    }
     loop_rate.sleep();
   }
 }

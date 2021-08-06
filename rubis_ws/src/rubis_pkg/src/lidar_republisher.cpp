@@ -13,7 +13,8 @@ void points_cb(const sensor_msgs::PointCloud2& msg){
 
     msg_with_intensity.header.stamp = ros::Time::now();
     pub.publish(msg_with_intensity);
-    if(!is_topic_ready) is_topic_ready = 1;
+    if(rubis::sched::is_task_ready_ == TASK_NOT_READY) rubis::sched::init_task();
+    rubis::sched::task_state_ = TASK_STATE_DONE;
 }
 
 int main(int argc, char** argv){
@@ -57,17 +58,30 @@ int main(int argc, char** argv){
         ros::spin();
     }
     else{
-        
-        ros::Rate r(rate);    
+        ros::Rate r(rate);
+        // Initialize task ( Wait until first necessary topic is published )
         while(ros::ok()){
-            if(task_profiling_flag  && is_topic_ready) rubis::sched::start_task_profiling();
-            if(task_scheduling_flag && is_topic_ready){        
-                rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline);
-            }
+            if(rubis::sched::is_task_ready_ == TASK_READY) break;
             ros::spinOnce();
-            if(task_scheduling_flag && is_topic_ready) rubis::sched::yield_task_scheduling();
-            if(task_profiling_flag && is_topic_ready) rubis::sched::stop_task_profiling();
+            r.sleep();      
+        }
 
+        // Executing task
+        while(ros::ok()){
+            if(rubis::sched::task_state_ == TASK_STATE_READY){
+                if(task_scheduling_flag) rubis::sched::start_task_profiling();
+                if(task_profiling_flag) rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline); 
+                rubis::sched::task_state_ = TASK_STATE_RUNNING;     
+            }
+
+            ros::spinOnce();
+
+            if(rubis::sched::task_state_ == TASK_STATE_DONE){
+                if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
+                if(task_profiling_flag) rubis::sched::stop_task_profiling();
+                rubis::sched::task_state_ = TASK_STATE_READY;
+            }
+        
             r.sleep();
         }
     }

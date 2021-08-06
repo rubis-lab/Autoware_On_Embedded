@@ -84,19 +84,26 @@ int main(int argc, char** argv)
     if(!task_scheduling_flag && !task_profiling_flag){
       ros::spin();
     }
-    else{    
+    else{
       ros::Rate r(rate);
+      // Executing task
       while(ros::ok()){
-        if(task_profiling_flag) rubis::sched::start_task_profiling();
-        if(task_scheduling_flag){        
-          rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline);
+        if(rubis::sched::task_state_ == TASK_STATE_READY){
+          if(task_scheduling_flag) rubis::sched::start_task_profiling();
+          if(task_profiling_flag) rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline); 
+          rubis::sched::task_state_ = TASK_STATE_RUNNING;     
         }
-        ros::spinOnce();
-        if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
-        if(task_profiling_flag) rubis::sched::stop_task_profiling();
 
+        ros::spinOnce();
+
+        if(rubis::sched::task_state_ == TASK_STATE_DONE){
+          if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
+          if(task_profiling_flag) rubis::sched::stop_task_profiling();
+          rubis::sched::task_state_ = TASK_STATE_READY;
+        }
+        
         r.sleep();
-      }  
+      }
     }
   }
   else {
@@ -119,19 +126,26 @@ int main(int argc, char** argv)
     if(!task_scheduling_flag && !task_profiling_flag){
       ros::spin();
     }
-    else{    
+    else{
       ros::Rate r(rate);
+      // Executing task
       while(ros::ok()){
-        if(task_profiling_flag) rubis::sched::start_task_profiling();
-        if(task_scheduling_flag){        
-          rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline);
+        if(rubis::sched::task_state_ == TASK_STATE_READY){
+          if(task_scheduling_flag) rubis::sched::start_task_profiling();
+          if(task_profiling_flag) rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline); 
+          rubis::sched::task_state_ = TASK_STATE_RUNNING;     
         }
-        ros::spinOnce();
-        if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
-        if(task_profiling_flag) rubis::sched::stop_task_profiling();
 
+        ros::spinOnce();
+
+        if(rubis::sched::task_state_ == TASK_STATE_DONE){
+          if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
+          if(task_profiling_flag) rubis::sched::stop_task_profiling();
+          rubis::sched::task_state_ = TASK_STATE_READY;
+        }
+        
         r.sleep();
-      }  
+      }
     }
   }
 

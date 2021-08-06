@@ -16,6 +16,7 @@
 
 
 #include <imm_ukf_pda/imm_ukf_pda.h>
+#include <rubis_sched/sched.hpp>
 
 ImmUkfPda::ImmUkfPda()
   : target_id_(0)
@@ -98,7 +99,8 @@ void ImmUkfPda::callback(const autoware_msgs::DetectedObjectArray& input)
     dumpResultText(detected_objects_output);
   }
 
-  if(!is_topic_ready) is_topic_ready = 1;
+  if(rubis::sched::is_task_ready_ == TASK_NOT_READY) rubis::sched::init_task();
+  rubis::sched::task_state_ = TASK_STATE_DONE;
 }
 
 void ImmUkfPda::checkVectormapSubscription()

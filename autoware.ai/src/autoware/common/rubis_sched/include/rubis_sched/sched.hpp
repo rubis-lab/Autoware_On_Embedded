@@ -46,10 +46,20 @@
 #define MS2NS(t) (t*1000000)
 #define MS2US(t) (t*1000)
 
-#define STOP -1
-#define NONE 0
-#define WAIT 1
-#define RUN 2
+#define SCHEDULING_STATE_STOP -1
+#define SCHEDULING_STATE_NONE 0
+#define SCHEDULING_STATE_WAIT 1
+#define SCHEDULING_STATE_RUN 2
+
+#define TASK_NOT_READY 0
+#define TASK_READY 1
+
+// Task state
+#define TASK_STATE_READY 0
+#define TASK_STATE_RUNNING 1
+#define TASK_STATE_DONE 2
+
+
 
 namespace rubis {
 namespace sched {
@@ -106,6 +116,8 @@ extern std::string gpu_deadline_filename_;
 // extern unsigned long long gpu_deadline_list_[1024];
 extern unsigned long long* gpu_deadline_list_;
 extern int max_gpu_id_;
+extern int task_state_;
+extern int is_task_ready_;
 
 // Task scheduling
 int sched_setattr(pid_t pid, const struct sched_attr *attr, unsigned int flags);
@@ -113,6 +125,7 @@ int sched_getattr(pid_t pid, struct sched_attr *attr, unsigned int size, unsigne
 bool set_sched_deadline(int _tid, __u64 _exec_time, __u64 _deadline, __u64 _period);
 void request_task_scheduling(double task_minimum_inter_release_time, double task_execution_time, double task_relative_deadline);
 void yield_task_scheduling();
+void init_task();
 
 // GPU scheduling
 void init_gpu_scheduling(std::string task_filename, std::string gpu_deadline_filename, int key_id);

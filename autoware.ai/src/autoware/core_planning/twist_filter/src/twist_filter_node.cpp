@@ -15,6 +15,7 @@
  */
 
 #include "twist_filter/twist_filter_node.h"
+#include <rubis_sched/sched.hpp>
 
 namespace twist_filter_node
 {
@@ -118,6 +119,9 @@ void TwistFilterNode::twistCmdCallback(const geometry_msgs::TwistStampedConstPtr
     out_msg.twist.angular.z = 0;
   }
   twist_pub_.publish(out_msg);
+
+  if(rubis::sched::is_task_ready_ == TASK_NOT_READY) rubis::sched::init_task();
+  rubis::sched::task_state_ = TASK_STATE_DONE;
 
   // Publish lateral accel and jerk after smoothing
   auto lacc_smoothed_result = twist_filter_ptr_->calcLaccWithAngularZ(twist_out);

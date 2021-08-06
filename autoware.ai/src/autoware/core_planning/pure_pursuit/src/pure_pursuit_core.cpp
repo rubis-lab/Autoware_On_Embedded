@@ -18,8 +18,6 @@
 #include <pure_pursuit/pure_pursuit_core.h>
 #include <rubis_sched/sched.hpp>
 
-int is_topic_ready = 0;
-
 namespace waypoint_follower
 {
 DynamicParams::DynamicParams(){
@@ -125,7 +123,6 @@ void PurePursuitNode::initForROS()
     nh_.advertise<visualization_msgs::Marker>("expanded_waypoints_mark", 0);
   // pub7_ = nh.advertise<std_msgs::Bool>("wf_stat", 0);
 
-  is_topic_ready = 1;
 }
 
 void PurePursuitNode::run()
@@ -158,18 +155,22 @@ void PurePursuitNode::run()
 
   while (ros::ok())
   {
-    if(task_profiling_flag && is_topic_ready) rubis::sched::start_task_profiling();
-    if(task_scheduling_flag && is_topic_ready){        
-      rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline);
-    }     
+    if(rubis::sched::is_task_ready_ == TASK_READY && rubis::sched::task_state_ == TASK_STATE_READY){
+      if(task_scheduling_flag) rubis::sched::start_task_profiling();
+      if(task_profiling_flag) rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline); 
+      rubis::sched::task_state_ = TASK_STATE_RUNNING;     
+    }
 
     ros::spinOnce();
     if (!is_pose_set_ || !is_waypoint_set_ || !is_velocity_set_)
     {
       // ROS_WARN("Necessary topics are not subscribed yet ... ");
       
-      if(task_scheduling_flag && is_topic_ready) rubis::sched::yield_task_scheduling();
-      if(task_profiling_flag && is_topic_ready) rubis::sched::stop_task_profiling();
+      if(rubis::sched::is_task_ready_ == TASK_READY && rubis::sched::task_state_ == TASK_STATE_DONE){
+        if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
+        if(task_profiling_flag) rubis::sched::stop_task_profiling();
+        rubis::sched::task_state_ = TASK_STATE_READY;
+      }
 
       loop_rate.sleep();
       continue;
@@ -211,8 +212,11 @@ void PurePursuitNode::run()
     is_velocity_set_ = false;
     is_waypoint_set_ = false;
 
-    if(task_scheduling_flag && is_topic_ready) rubis::sched::yield_task_scheduling();
-    if(task_profiling_flag && is_topic_ready) rubis::sched::stop_task_profiling();
+    if(rubis::sched::is_task_ready_ == TASK_READY && rubis::sched::task_state_ == TASK_STATE_DONE){
+      if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
+      if(task_profiling_flag) rubis::sched::stop_task_profiling();
+      rubis::sched::task_state_ = TASK_STATE_READY;
+    }
 
     loop_rate.sleep();
   }
@@ -346,7 +350,8 @@ void PurePursuitNode::callbackFromCurrentPose(
   pp_.setCurrentPose(msg);
   is_pose_set_ = true;
 
-  is_topic_ready = 1;
+  if(rubis::sched::is_task_ready_ == TASK_NOT_READY) rubis::sched::init_task();
+  rubis::sched::task_state_ = TASK_STATE_DONE;
 }
 
 void PurePursuitNode::callbackFromCurrentVelocity(

@@ -86,8 +86,6 @@
 
 static std::shared_ptr<autoware_health_checker::HealthChecker> health_checker_ptr_;
 
-int is_topic_ready = 0;
-
 struct pose
 {
   double x;
@@ -1497,10 +1495,12 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
     previous_estimated_vel_kmph.data = estimated_vel_kmph.data;
   }
 
-  if(is_topic_ready != 1){
-    is_topic_ready = 1;
-    rubis::sched::set_is_gpu_profiling_ready();
+  if(rubis::sched::is_task_ready_ == TASK_NOT_READY){
+    rubis::sched::init_task();
+    if(rubis::sched::gpu_profiling_flag_) rubis::sched::start_gpu_profiling();
   }
+  
+  rubis::sched::task_state_ = TASK_STATE_DONE;
 }
 
 void* thread_func(void* args)
@@ -1727,19 +1727,31 @@ int main(int argc, char** argv)
   }
   else{    
     ros::Rate r(rate);
+    // Initialize task ( Wait until first necessary topic is published )
     while(ros::ok()){
-      
-      if(task_profiling_flag && is_topic_ready) rubis::sched::start_task_profiling();
-      if(gpu_profiling_flag) rubis::sched::refresh_gpu_profiling();
-      if(task_scheduling_flag && is_topic_ready){        
-        rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline);
-      }
+      if(rubis::sched::is_task_ready_ == TASK_READY) break;
       ros::spinOnce();
-      if(task_scheduling_flag && is_topic_ready) rubis::sched::yield_task_scheduling();
-      if(task_profiling_flag && is_topic_ready) rubis::sched::stop_task_profiling();
+      r.sleep();      
+    }
 
+    // Executing task
+    while(ros::ok()){
+      if(rubis::sched::task_state_ == TASK_STATE_READY){
+        if(task_scheduling_flag) rubis::sched::start_task_profiling();
+        if(task_profiling_flag) rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline); 
+        rubis::sched::task_state_ = TASK_STATE_RUNNING;     
+      }
+
+      ros::spinOnce();
+
+      if(rubis::sched::task_state_ == TASK_STATE_DONE){
+        if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
+        if(task_profiling_flag) rubis::sched::stop_task_profiling();
+        rubis::sched::task_state_ = TASK_STATE_READY;
+      }
+      
       r.sleep();
-    }  
+    }
   }
 
   return 0;

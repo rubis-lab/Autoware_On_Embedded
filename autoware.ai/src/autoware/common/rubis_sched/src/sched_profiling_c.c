@@ -17,7 +17,7 @@ unsigned long long gpu_seg_execution_time_;
 unsigned long long cpu_seg_response_time_;
 int is_gpu_profiling_ready_ = 0;
 
-void set_is_gpu_profiling_ready(){
+void start_gpu_profiling(){
   is_gpu_profiling_ready_ = 1;
 }
 

@@ -33,7 +33,6 @@
 #include "gencolors.cpp"
 #endif
 
-int is_topic_ready = 0;
 
 namespace darknet
 {
@@ -278,11 +277,13 @@ void Yolo3DetectorNode::image_callback(const sensor_msgs::ImageConstPtr& in_imag
     publisher_objects_.publish(output_message);
 
     free(darknet_image_.data);
-
-    if(is_topic_ready != 1){
-        is_topic_ready = 1;
-        set_is_gpu_profiling_ready();
-    }    
+    
+    if(is_task_ready_ == TASK_NOT_READY){
+        init_task();
+        if(gpu_profiling_flag_) start_gpu_profiling();
+    }
+    
+    task_state_ = TASK_STATE_DONE;
 }
 
 void Yolo3DetectorNode::config_cb(const autoware_config_msgs::ConfigSSD::ConstPtr& param)
@@ -443,23 +444,35 @@ void Yolo3DetectorNode::Run()
     ROS_INFO_STREAM( __APP_NAME__ << "" );
 
     if(!task_scheduling_flag && !task_profiling_flag){
-       ros::spin();
+        ros::spin();
     }
-    else{       
-        ros::Rate r(rate);        
+    else{
+        ros::Rate r(rate);
+        // Initialize task ( Wait until first necessary topic is published )
         while(ros::ok()){
-
-            if(task_profiling_flag && is_topic_ready) start_task_profiling();
-            if(gpu_profiling_flag) refresh_gpu_profiling();
-            if(task_scheduling_flag && is_topic_ready){
-                request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline);
-            }
+            if(is_task_ready_) break;
             ros::spinOnce();
-            if(task_scheduling_flag && is_topic_ready) yield_task_scheduling();
-            if(task_profiling_flag && is_topic_ready) stop_task_profiling();
+            r.sleep();      
+        }
+
+        // Executing task
+        while(ros::ok()){
+            if(task_state_ == TASK_STATE_READY){
+                if(task_scheduling_flag) start_task_profiling();
+                if(task_profiling_flag) request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline); 
+                task_state_ = TASK_STATE_RUNNING;     
+            }
+
+            ros::spinOnce();
+
+            if(task_state_ == TASK_STATE_DONE){
+                if(task_scheduling_flag) yield_task_scheduling();
+                if(task_profiling_flag) stop_task_profiling();
+                task_state_ = TASK_STATE_READY;
+            }
             
             r.sleep();
-        }          
+        }
     }
     ROS_INFO("END Yolo");
 

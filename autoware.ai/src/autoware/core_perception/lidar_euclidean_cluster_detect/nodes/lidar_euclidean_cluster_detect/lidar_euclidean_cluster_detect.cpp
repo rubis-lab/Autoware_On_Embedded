@@ -142,8 +142,6 @@ static std::string _response_time_filename;
 static std::string _remain_time_filename;
 static std::string _deadline_file_name;
 
-int is_topic_ready = 0;
-
 /* For GPU Profiling */
 #ifdef GPU_CLUSTERING
 static GpuEuclideanCluster _gecl_cluster;  
@@ -281,10 +279,12 @@ void publishCloudClusters(const ros::Publisher *in_publisher, const autoware_msg
     publishDetectedObjects(in_clusters);
   }
 
-  if(is_topic_ready != 1){
-    is_topic_ready = 1;
-    rubis::sched::set_is_gpu_profiling_ready();
+  if(rubis::sched::is_task_ready_ == TASK_NOT_READY){
+    rubis::sched::init_task();
+    if(rubis::sched::gpu_profiling_flag_) rubis::sched::start_gpu_profiling();
   }
+  
+  rubis::sched::task_state_ = TASK_STATE_DONE;
   
 }
 
@@ -1134,25 +1134,36 @@ int main(int argc, char **argv)
   // Create a ROS subscriber for the input point cloud
   ros::Subscriber sub = h.subscribe(points_topic, 1, velodyne_callback);
 
-  // SPIN
   if(!task_scheduling_flag && !task_profiling_flag){
     ros::spin();
   }
-  else{    
+  else{
     ros::Rate r(rate);
+    // Initialize task ( Wait until first necessary topic is published )
     while(ros::ok()){
-      
-      if(task_profiling_flag && is_topic_ready) rubis::sched::start_task_profiling();
-      if(gpu_profiling_flag && is_topic_ready) rubis::sched::refresh_gpu_profiling();
-      if(task_scheduling_flag && is_topic_ready){        
-        rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline);
-      }
+      if(rubis::sched::is_task_ready_) break;
       ros::spinOnce();
-      if(task_scheduling_flag && is_topic_ready) rubis::sched::yield_task_scheduling();
-      if(task_profiling_flag && is_topic_ready) rubis::sched::stop_task_profiling();
+      r.sleep();      
+    }
 
+    // Executing task
+    while(ros::ok()){
+      if(rubis::sched::task_state_ == TASK_STATE_READY){
+        if(task_scheduling_flag) rubis::sched::start_task_profiling();
+        if(task_profiling_flag) rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline); 
+        rubis::sched::task_state_ = TASK_STATE_RUNNING;     
+      }
+
+      ros::spinOnce();
+
+      if(rubis::sched::task_state_ == TASK_STATE_DONE){
+        if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
+        if(task_profiling_flag) rubis::sched::stop_task_profiling();
+        rubis::sched::task_state_ = TASK_STATE_READY;
+      }
+      
       r.sleep();
-    }  
+    }
   }
 
   return 0;

@@ -19,8 +19,6 @@
 #include "op_ros_helpers/op_ROSHelpers.h"
 #include <rubis_sched/sched.hpp>
 
-int is_topic_ready = 0;
-
 namespace MotionPredictorNS
 {
 
@@ -241,7 +239,8 @@ void MotionPrediction::callbackGetVehicleStatus(const geometry_msgs::TwistStampe
   UtilityHNS::UtilityH::GetTickCount(m_VehicleStatus.tStamp);
   bVehicleStatus = true;
 
-  is_topic_ready = 1;
+  if(rubis::sched::is_task_ready_ == TASK_NOT_READY) rubis::sched::init_task();
+  rubis::sched::task_state_ = TASK_STATE_DONE;
 }
 
 void MotionPrediction::callbackGetCANInfo(const autoware_can_msgs::CANInfoConstPtr &msg)
@@ -563,9 +562,10 @@ void MotionPrediction::MainLoop()
 
   while (ros::ok())
   {
-    if(task_profiling_flag && is_topic_ready) rubis::sched::start_task_profiling();
-    if(task_scheduling_flag && is_topic_ready){        
-      rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline);
+    if(rubis::sched::is_task_ready_ == TASK_READY && rubis::sched::task_state_ == TASK_STATE_READY){
+      if(task_scheduling_flag) rubis::sched::start_task_profiling();
+      if(task_profiling_flag) rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline); 
+      rubis::sched::task_state_ = TASK_STATE_RUNNING;     
     }
 
     ros::spinOnce();
@@ -629,8 +629,11 @@ void MotionPrediction::MainLoop()
 //      pub_predicted_objects_trajectories.publish(m_PredictedResultsResults);
 //    }
 
-    if(task_scheduling_flag && is_topic_ready) rubis::sched::yield_task_scheduling();
-    if(task_profiling_flag && is_topic_ready) rubis::sched::stop_task_profiling();
+    if(rubis::sched::is_task_ready_ == TASK_READY && rubis::sched::task_state_ == TASK_STATE_DONE){
+      if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
+      if(task_profiling_flag) rubis::sched::stop_task_profiling();
+      rubis::sched::task_state_ = TASK_STATE_READY;
+    }
 
     loop_rate.sleep();
   }

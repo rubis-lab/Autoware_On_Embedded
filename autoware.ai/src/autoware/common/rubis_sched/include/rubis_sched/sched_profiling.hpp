@@ -39,7 +39,7 @@ namespace sched {
   void stop_profiling_gpu_seg_time(unsigned int id, std::string remark = " ");
   unsigned long long get_current_time_ns();
   void refresh_gpu_profiling();
-  void set_is_gpu_profiling_ready();
+  void start_gpu_profiling();
 
 }
 }

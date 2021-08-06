@@ -46,7 +46,7 @@ void stop_profiling_gpu_seg_time(unsigned int id);
 void stop_profiling_gpu_seg_time_with_remark(unsigned int id, const char* remark);
 unsigned long long get_current_time_ns();
 void refresh_gpu_profiling();
-void set_is_gpu_profiling_ready();
+void start_gpu_profiling();
 
 #ifdef __cplusplus
 }

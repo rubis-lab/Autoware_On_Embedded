@@ -9,7 +9,9 @@ char* task_filename_;
 char* gpu_deadline_filename_;
 // unsigned long long gpu_deadline_list_[1024];
 unsigned long long* gpu_deadline_list_;
-int max_gpu_id_ = 0;
+int max_gpu_id_ = TASK_NOT_READY;
+int task_state_ = TASK_STATE_READY;
+int is_task_ready_ = 0;
 
 // system call hook to call SCHED_DEADLINE
 int sched_setattr(pid_t pid, const struct sched_attr *attr, unsigned int flags){
@@ -116,7 +118,7 @@ void init_gpu_scheduling(char* task_filename, char* gpu_deadline_filename, int k
   shmid = shmget(key, sizeof(GPUSchedInfo), 0666|IPC_CREAT);
   gpu_sched_info_ = (GPUSchedInfo*)shmat(shmid, 0, 0);
   gpu_sched_info_->pid = getpid();
-  gpu_sched_info_->state = NONE;
+  gpu_sched_info_->state = SCHEDULING_STATE_NONE;
   gpu_sched_info_->scheduling_flag = 0;
   printf("Task [%d] is ready to work\n", getpid());
 
@@ -177,7 +179,7 @@ void get_deadline_list(){
 void termination(){
   printf("TERMINATION\n");
 	if(gpu_scheduling_flag_==1){
-		gpu_sched_info_->state = STOP;
+		gpu_sched_info_->state = SCHEDULING_STATE_STOP;
   	shmdt(gpu_sched_info_);
 	}
   
@@ -211,7 +213,7 @@ void request_gpu(unsigned int id){
     
     unsigned long long relative_deadline = gpu_deadline_list_[id];
     gpu_sched_info_->deadline = get_current_time_ns() + relative_deadline;
-    gpu_sched_info_->state = WAIT;
+    gpu_sched_info_->state = SCHEDULING_STATE_WAIT;
   }
   
   start_profiling_gpu_seg_response_time();
@@ -226,7 +228,7 @@ void request_gpu(unsigned int id){
   start_profiling_gpu_seg_execution_time();
 
   if(gpu_scheduling_flag_ == 1){
-    gpu_sched_info_->state = RUN;
+    gpu_sched_info_->state = SCHEDULING_STATE_RUN;
     gpu_sched_info_->deadline = -1;
   }
 }
@@ -234,7 +236,7 @@ void request_gpu(unsigned int id){
 void yield_gpu(unsigned int id){
   if(gpu_scheduling_flag_==1){
     gpu_sched_info_->scheduling_flag = 0;
-    gpu_sched_info_->state = NONE;
+    gpu_sched_info_->state = SCHEDULING_STATE_NONE;
   }
   stop_profiling_cpu_seg_response_time();
   stop_profiling_gpu_seg_time(id);
@@ -245,9 +247,13 @@ void yield_gpu(unsigned int id){
 void yield_gpu_with_remark(unsigned int id, const char* remark){
   if(gpu_scheduling_flag_==1){
     gpu_sched_info_->scheduling_flag = 0;
-    gpu_sched_info_->state = NONE;
+    gpu_sched_info_->state = SCHEDULING_STATE_NONE;
   }
   stop_profiling_cpu_seg_response_time();
   stop_profiling_gpu_seg_time_with_remark(id, remark);
   start_profiling_cpu_seg_response_time();
+}
+
+void init_task(){
+  is_task_ready_ = TASK_READY;
 }
