@@ -114,6 +114,8 @@ protected:
   ros::Publisher pub_Paths;
   ros::Publisher pub_PathsRviz;
   ros::Publisher pub_TrafficInfo;
+  ros::Publisher pub_PathsRvizMinicar;
+  ros::Publisher pub_MapRvizMinicar;
   //ros::Publisher pub_TrafficInfoRviz;
   //ros::Publisher pub_StartPointRviz;
   //ros::Publisher pub_GoalPointRviz;

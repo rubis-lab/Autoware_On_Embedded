@@ -20,6 +20,8 @@
 
 #define SPIN_PROFILING
 
+#define MINICAR_SCALE 0.3
+
 int is_topic_ready = 0;
 
 namespace GlobalPlanningNS
@@ -82,6 +84,8 @@ GlobalPlanner::GlobalPlanner()
   pub_PathsRviz = nh.advertise<visualization_msgs::MarkerArray>("global_waypoints_rviz", 1, true);
   pub_MapRviz  = nh.advertise<visualization_msgs::MarkerArray>("vector_map_center_lines_rviz", 1, true);
   pub_GoalsListRviz = nh.advertise<visualization_msgs::MarkerArray>("op_destinations_rviz", 1, true);
+  pub_PathsRvizMinicar = nh.advertise<visualization_msgs::MarkerArray>("global_waypoints_rviz_minicar", 1, true);
+  pub_MapRvizMinicar = nh.advertise<visualization_msgs::MarkerArray>("vector_map_center_lines_rviz_minicar", 1, true);
 
   if(m_params.bEnableRvizInput)
   {
@@ -292,6 +296,7 @@ void GlobalPlanner::VisualizeAndSend(const std::vector<std::vector<PlannerHNS::W
 {
   autoware_msgs::LaneArray lane_array;
   visualization_msgs::MarkerArray pathsToVisualize;
+  visualization_msgs::MarkerArray pathsToVisualizeMinicar;
 
   for(unsigned int i=0; i < generatedTotalPaths.size(); i++)
   {
@@ -308,6 +313,12 @@ void GlobalPlanner::VisualizeAndSend(const std::vector<std::vector<PlannerHNS::W
   PlannerHNS::ROSHelpers::createGlobalLaneArrayMarker(total_color, lane_array, pathsToVisualize);
   PlannerHNS::ROSHelpers::createGlobalLaneArrayOrientationMarker(lane_array, pathsToVisualize);
   PlannerHNS::ROSHelpers::createGlobalLaneArrayVelocityMarker(lane_array, pathsToVisualize);
+
+  PlannerHNS::ROSHelpers::createGlobalLaneArrayMarker(total_color, lane_array, pathsToVisualizeMinicar, MINICAR_SCALE);
+  PlannerHNS::ROSHelpers::createGlobalLaneArrayOrientationMarker(lane_array, pathsToVisualizeMinicar, MINICAR_SCALE);
+  PlannerHNS::ROSHelpers::createGlobalLaneArrayVelocityMarker(lane_array, pathsToVisualizeMinicar, MINICAR_SCALE);
+  
+  pub_PathsRvizMinicar.publish(pathsToVisualizeMinicar);
   pub_PathsRviz.publish(pathsToVisualize);
   if((m_bFirstStart && m_params.bEnableHMI) || !m_params.bEnableHMI)
     pub_Paths.publish(lane_array);
@@ -514,7 +525,11 @@ void GlobalPlanner::MainLoop()
       if(m_bKmlMap)
       {
         visualization_msgs::MarkerArray map_marker_array;
+        visualization_msgs::MarkerArray map_marker_array_minicar;
         PlannerHNS::ROSHelpers::ConvertFromRoadNetworkToAutowareVisualizeMapFormat(m_Map, map_marker_array);
+        PlannerHNS::ROSHelpers::ConvertFromRoadNetworkToAutowareVisualizeMapFormat(m_Map, map_marker_array_minicar, MINICAR_SCALE);
+
+        pub_MapRvizMinicar.publish(map_marker_array_minicar);
         pub_MapRviz.publish(map_marker_array);
       }
     }
