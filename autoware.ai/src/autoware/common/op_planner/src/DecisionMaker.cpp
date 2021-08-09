@@ -376,21 +376,21 @@ void DecisionMaker::InitBehaviorStates()
    return true;
  }
 
- void DecisionMaker::SetNewGlobalPath(const std::vector<std::vector<WayPoint> >& globalPath)
- {
-   if(m_pCurrentBehaviorState)
-   {
-     m_pCurrentBehaviorState->GetCalcParams()->bNewGlobalPath = true;
-     m_TotalOriginalPath = globalPath;
-   }
+void DecisionMaker::SetNewGlobalPath(const std::vector<std::vector<WayPoint> >& globalPath)
+{
+  if(m_pCurrentBehaviorState)
+  {
+    m_pCurrentBehaviorState->GetCalcParams()->bNewGlobalPath = true;
+    m_TotalOriginalPath = globalPath;
+  }
  }
 
- bool DecisionMaker::SelectSafeTrajectory()
- {
-   bool bNewTrajectory = false;
-   PlannerHNS::PreCalculatedConditions *preCalcPrams = m_pCurrentBehaviorState->GetCalcParams();
+bool DecisionMaker::SelectSafeTrajectory()
+{
+  bool bNewTrajectory = false;
+  PlannerHNS::PreCalculatedConditions *preCalcPrams = m_pCurrentBehaviorState->GetCalcParams();
 
-   if(!preCalcPrams || m_RollOuts.size() == 0) return bNewTrajectory;
+  if(!preCalcPrams || m_RollOuts.size() == 0) return bNewTrajectory;
 
   int currIndex = PlannerHNS::PlanningHelpers::GetClosestNextPointIndexFast(m_Path, state);
   int index_limit = 0;
