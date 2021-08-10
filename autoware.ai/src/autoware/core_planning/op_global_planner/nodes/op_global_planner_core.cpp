@@ -312,11 +312,11 @@ void GlobalPlanner::VisualizeAndSend(const std::vector<std::vector<PlannerHNS::W
   total_color.a = 0.9;
   PlannerHNS::ROSHelpers::createGlobalLaneArrayMarker(total_color, lane_array, pathsToVisualize);
   PlannerHNS::ROSHelpers::createGlobalLaneArrayOrientationMarker(lane_array, pathsToVisualize);
-  PlannerHNS::ROSHelpers::createGlobalLaneArrayVelocityMarker(lane_array, pathsToVisualize);
+  // PlannerHNS::ROSHelpers::createGlobalLaneArrayVelocityMarker(lane_array, pathsToVisualize);
 
   PlannerHNS::ROSHelpers::createGlobalLaneArrayMarker(total_color, lane_array, pathsToVisualizeMinicar, MINICAR_SCALE);
   PlannerHNS::ROSHelpers::createGlobalLaneArrayOrientationMarker(lane_array, pathsToVisualizeMinicar, MINICAR_SCALE);
-  PlannerHNS::ROSHelpers::createGlobalLaneArrayVelocityMarker(lane_array, pathsToVisualizeMinicar, MINICAR_SCALE);
+  // PlannerHNS::ROSHelpers::createGlobalLaneArrayVelocityMarker(lane_array, pathsToVisualizeMinicar, MINICAR_SCALE);
   
   pub_PathsRvizMinicar.publish(pathsToVisualizeMinicar);
   pub_PathsRviz.publish(pathsToVisualize);
