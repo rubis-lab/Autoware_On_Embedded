@@ -557,8 +557,8 @@ void MotionPrediction::MainLoop()
 
   if(task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
 
-  ros::Rate loop_rate(25);
-  if(!task_scheduling_flag && !task_profiling_flag) loop_rate = ros::Rate(rate);
+  ros::Rate loop_rate(rate);
+  if(!task_scheduling_flag && !task_profiling_flag) loop_rate = ros::Rate(25);
 
   while (ros::ok())
   {
