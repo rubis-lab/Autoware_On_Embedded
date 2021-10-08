@@ -467,8 +467,8 @@ void TrajectoryEval::MainLoop()
   while (ros::ok())
   {
     if(rubis::sched::is_task_ready_ == TASK_READY && rubis::sched::task_state_ == TASK_STATE_READY){
-      if(task_scheduling_flag) rubis::sched::start_task_profiling();
-      if(task_profiling_flag) rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline); 
+      if(task_profiling_flag) rubis::sched::start_task_profiling();
+      if(task_scheduling_flag) rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline); 
       rubis::sched::task_state_ = TASK_STATE_RUNNING;     
     }
 

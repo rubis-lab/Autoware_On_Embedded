@@ -63,72 +63,72 @@ GRegistration::~GRegistration()
 {
 	if (!is_copied_) {
 		if (x_ != NULL) {
-			//rubis::sched::request_gpu(101);
+			rubis::sched::request_gpu();
 			checkCudaErrors(cudaFree(x_));
-			//rubis::sched::yield_gpu(101,"free");
+			rubis::sched::yield_gpu("102_free");
 			x_ = NULL;
 		}
 
 		if (y_ != NULL) {
-			//rubis::sched::request_gpu(102);
+			rubis::sched::request_gpu();
 			checkCudaErrors(cudaFree(y_));
-			//rubis::sched::yield_gpu(102,"free");
+			rubis::sched::yield_gpu("103_free");
 
 			y_ = NULL;
 		}
 
 		if (z_ != NULL) {
-			//rubis::sched::request_gpu(103);
+			rubis::sched::request_gpu();
 			checkCudaErrors(cudaFree(z_));
-			//rubis::sched::yield_gpu(103,"free");
+			rubis::sched::yield_gpu("104_free");
 	
 			z_ = NULL;
 		}
 
 		if (trans_x_ != NULL) {
-			//rubis::sched::request_gpu(104);
+			rubis::sched::request_gpu();
 			checkCudaErrors(cudaFree(trans_x_));
-			//rubis::sched::yield_gpu(104,"free");
+			rubis::sched::yield_gpu("105_free");
 
 			trans_x_ = NULL;
 		}
 
 		if (trans_y_ != NULL) {
-			//rubis::sched::request_gpu(405);
+			rubis::sched::request_gpu();
 			checkCudaErrors(cudaFree(trans_y_));
-			//rubis::sched::yield_gpu(405,"free");
+			rubis::sched::yield_gpu("106_free");
 
 			trans_y_ = NULL;
 		}
 
 		if (trans_z_ != NULL) {
-			//rubis::sched::request_gpu(106);
+			rubis::sched::request_gpu();
 			checkCudaErrors(cudaFree(trans_z_));
-			//rubis::sched::yield_gpu(106,"free");
+			rubis::sched::yield_gpu("107_free");
 			
 			trans_z_ = NULL;
 		}
 
 		if (target_x_ != NULL) {
-			//rubis::sched::request_gpu(107);
+			rubis::sched::request_gpu();
 			checkCudaErrors(cudaFree(target_x_));
-			//rubis::sched::yield_gpu(107,"free");
+			rubis::sched::yield_gpu("108_free");
 			
 			target_x_ = NULL;
 		}
 
 		if (target_y_ != NULL) {
-			//rubis::sched::request_gpu(108);
+			rubis::sched::request_gpu();
 			checkCudaErrors(cudaFree(target_y_));
-			//rubis::sched::yield_gpu(108,"free");
+			rubis::sched::yield_gpu("109_free");
 
 			target_y_ = NULL;
 		}
 
 		if (target_z_ != NULL) {
-			//rubis::sched::request_gpu(109);
+			rubis::sched::request_gpu();
 			checkCudaErrors(cudaFree(target_z_));
-			//rubis::sched::yield_gpu(109,"free");
+			rubis::sched::yield_gpu("110_free");
 
 			target_z_ = NULL;
 		}
@@ -193,123 +193,123 @@ void GRegistration::setInputSource(pcl::PointCloud<pcl::PointXYZI>::Ptr input)
 
 		pcl::PointXYZI *tmp;
 
-		//rubis::sched::request_gpu(110);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaMalloc(&tmp, sizeof(pcl::PointXYZI) * points_number_));
-		//rubis::sched::yield_gpu(110,"cudaMalloc");
+		rubis::sched::yield_gpu("111_cudaMalloc");
 		
 		pcl::PointXYZI *host_tmp = input->points.data();
 
 		// Pin the host buffer for accelerating the memory copy
 #ifndef __aarch64__
-		//rubis::sched::request_gpu(111);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaHostRegister(host_tmp, sizeof(pcl::PointXYZI) * points_number_, cudaHostRegisterDefault));
-		//rubis::sched::yield_gpu(111,"htod");
+		rubis::sched::yield_gpu("112_htod");
 #endif
-		//rubis::sched::request_gpu(112);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaMemcpy(tmp, host_tmp, sizeof(pcl::PointXYZI) * points_number_, cudaMemcpyHostToDevice));
-		//rubis::sched::yield_gpu(112,"htod");
+		rubis::sched::yield_gpu("113_htod");
 		
 
 		if (x_ != NULL) {
-			//rubis::sched::request_gpu(113);
+			rubis::sched::request_gpu();
 			checkCudaErrors(cudaFree(x_));
-			//rubis::sched::yield_gpu(113,"free");
+			rubis::sched::yield_gpu("114_free");
 			x_ = NULL;
 		}
 
 		if (y_ != NULL) {
-			//rubis::sched::request_gpu(114);
+			rubis::sched::request_gpu();
 			checkCudaErrors(cudaFree(y_));
-			//rubis::sched::yield_gpu(114,"free");
+			rubis::sched::yield_gpu("115_free");
 			y_ = NULL;
 		}
 
 		if (z_ != NULL) {
-			//rubis::sched::request_gpu(115);
+			rubis::sched::request_gpu();
 			checkCudaErrors(cudaFree(z_));
-			//rubis::sched::yield_gpu(115,"free");
+			rubis::sched::yield_gpu("116_free");
 			z_ = NULL;
 		}
 
-		//rubis::sched::request_gpu(116);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaMalloc(&x_, sizeof(float) * points_number_));
-		//rubis::sched::yield_gpu(116,"cudaMalloc");
+		rubis::sched::yield_gpu("117_cudaMalloc");
 
-		//rubis::sched::request_gpu(117);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaMalloc(&y_, sizeof(float) * points_number_));
-		//rubis::sched::yield_gpu(117,"cudaMalloc");
+		rubis::sched::yield_gpu("118_cudaMalloc");
 
-		//rubis::sched::request_gpu(118);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaMalloc(&z_, sizeof(float) * points_number_));
-		//rubis::sched::yield_gpu(118,"cudaMalloc");
+		rubis::sched::yield_gpu("119_cudaMalloc");
 
 		int block_x = (points_number_ > BLOCK_SIZE_X) ? BLOCK_SIZE_X : points_number_;
 		int grid_x = (points_number_ - 1) / block_x + 1;
 
-		//rubis::sched::request_gpu(119);
+		rubis::sched::request_gpu();
 		convertInput<pcl::PointXYZI><<<grid_x, block_x>>>(tmp, x_, y_, z_, points_number_);
-		//rubis::sched::yield_gpu(119,"convertInput");
+		rubis::sched::yield_gpu("120_convertInput");
 
 		checkCudaErrors(cudaGetLastError());
 		checkCudaErrors(cudaDeviceSynchronize());
 
 
 		if (trans_x_ != NULL) {
-			//rubis::sched::request_gpu(120);
+			rubis::sched::request_gpu();
 			checkCudaErrors(cudaFree(trans_x_));
-			//rubis::sched::yield_gpu(120,"free");
+			rubis::sched::yield_gpu("121_free");
 			trans_x_ = NULL;
 		}
 
 		if (trans_y_ != NULL) {
-			//rubis::sched::request_gpu(121);
+			rubis::sched::request_gpu();
 			checkCudaErrors(cudaFree(trans_y_));
-			//rubis::sched::yield_gpu(121,"free");
+			rubis::sched::yield_gpu("122_free");
 			trans_y_ = NULL;
 		}
 
 		if (trans_z_ != NULL) {
-			//rubis::sched::request_gpu(122);
+			rubis::sched::request_gpu();
 			checkCudaErrors(cudaFree(trans_z_));
-			//rubis::sched::yield_gpu(122,"free");
+			rubis::sched::yield_gpu("123_free");
 			trans_z_ = NULL;
 		}
 
-		//rubis::sched::request_gpu(123);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaMalloc(&trans_x_, sizeof(float) * points_number_));
-		//rubis::sched::yield_gpu(123,"cudaMalloc");
+		rubis::sched::yield_gpu("124_cudaMalloc");
 
-		//rubis::sched::request_gpu(124);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaMalloc(&trans_y_, sizeof(float) * points_number_));
-		//rubis::sched::yield_gpu(124,"cudaMalloc");
+		rubis::sched::yield_gpu("125_cudaMalloc");
 
-		//rubis::sched::request_gpu(125);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaMalloc(&trans_z_, sizeof(float) * points_number_));
-		//rubis::sched::yield_gpu(125,"cudaMalloc");
+		rubis::sched::yield_gpu("126_cudaMalloc");
 
 		// Initially, also copy scanned points to transformed buffers
 		
-		//rubis::sched::request_gpu(126);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaMemcpy(trans_x_, x_, sizeof(float) * points_number_, cudaMemcpyDeviceToDevice));
-		//rubis::sched::yield_gpu(126,"dtod");
+		rubis::sched::yield_gpu("127_dtod");
 
-		//rubis::sched::request_gpu(127);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaMemcpy(trans_y_, y_, sizeof(float) * points_number_, cudaMemcpyDeviceToDevice));
-		//rubis::sched::yield_gpu(127,"dtod");
+		rubis::sched::yield_gpu("128_dtod");
 
-		//rubis::sched::request_gpu(128);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaMemcpy(trans_z_, z_, sizeof(float) * points_number_, cudaMemcpyDeviceToDevice));
-		//rubis::sched::yield_gpu(128,"dtod");
+		rubis::sched::yield_gpu("129_dtod");
 
-		//rubis::sched::request_gpu(129);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaFree(tmp));
-		//rubis::sched::yield_gpu(129,"free");
+		rubis::sched::yield_gpu("130_free");
 
 		// Unpin host buffer
 #ifndef __aarch64__
-		//rubis::sched::request_gpu(130);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaHostUnregister(host_tmp));
-		//rubis::sched::yield_gpu(130,"free");
+		rubis::sched::yield_gpu("131_free");
 #endif
 	}
 }
@@ -322,124 +322,124 @@ void GRegistration::setInputSource(pcl::PointCloud<pcl::PointXYZ>::Ptr input)
 
 		pcl::PointXYZ *tmp;
 
-		//rubis::sched::request_gpu(131);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaMalloc(&tmp, sizeof(pcl::PointXYZ) * points_number_));
-		//rubis::sched::yield_gpu(131,"cudaMalloc");
+		rubis::sched::yield_gpu("132_cudaMalloc");
 
 		pcl::PointXYZ *host_tmp = input->points.data();
 
 		// Pin the host buffer for accelerating the memory copy
 #ifndef __aarch64__
-		//rubis::sched::request_gpu(132);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaHostRegister(host_tmp, sizeof(pcl::PointXYZ) * points_number_, cudaHostRegisterDefault));
-		//rubis::sched::yield_gpu(132,"htod");
+		rubis::sched::yield_gpu("133_htod");
 #endif			
-		//rubis::sched::request_gpu(133);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaMemcpy(tmp, host_tmp, sizeof(pcl::PointXYZ) * points_number_, cudaMemcpyHostToDevice));
-		//rubis::sched::yield_gpu(133,"htod");
+		rubis::sched::yield_gpu("134_htod");
 
 		if (x_ != NULL) {			
-			//rubis::sched::request_gpu(134);
+			rubis::sched::request_gpu();
 			checkCudaErrors(cudaFree(x_));
-			//rubis::sched::yield_gpu(134,"free");
+			rubis::sched::yield_gpu("135_free");
 			
 			x_ = NULL;
 		}
 
 		if (y_ != NULL) {
-			//rubis::sched::request_gpu(135);
+			rubis::sched::request_gpu();
 			checkCudaErrors(cudaFree(y_));
-			//rubis::sched::yield_gpu(135,"free");
+			rubis::sched::yield_gpu("136_free");
 			
 			y_ = NULL;
 		}
 
 		if (z_ != NULL) {
-			//rubis::sched::request_gpu(136);
+			rubis::sched::request_gpu();
 			checkCudaErrors(cudaFree(z_));
-			//rubis::sched::yield_gpu(136,"free");
+			rubis::sched::yield_gpu("137_free");
 
 			z_ = NULL;
 		}
 
-		//rubis::sched::request_gpu(137);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaMalloc(&x_, sizeof(float) * points_number_));
-		//rubis::sched::yield_gpu(137,"cudaMalloc");
+		rubis::sched::yield_gpu("138_cudaMalloc");
 
-		//rubis::sched::request_gpu(138);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaMalloc(&y_, sizeof(float) * points_number_));
-		//rubis::sched::yield_gpu(138,"cudaMalloc");
+		rubis::sched::yield_gpu("139_cudaMalloc");
 
-		//rubis::sched::request_gpu(139);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaMalloc(&z_, sizeof(float) * points_number_));
-		//rubis::sched::yield_gpu(139,"cudaMalloc");
+		rubis::sched::yield_gpu("140_cudaMalloc");
 
 		int block_x = (points_number_ > BLOCK_SIZE_X) ? BLOCK_SIZE_X : points_number_;
 		int grid_x = (points_number_ - 1) / block_x + 1;
 
-		//rubis::sched::request_gpu(140);
+		rubis::sched::request_gpu();
 		convertInput<pcl::PointXYZ><<<grid_x, block_x>>>(tmp, x_, y_, z_, points_number_);
-		//rubis::sched::yield_gpu(140,"convertInput");
+		rubis::sched::yield_gpu("141_convertInput");
 
 		checkCudaErrors(cudaGetLastError());
 		checkCudaErrors(cudaDeviceSynchronize());		
 
 		if (trans_x_ != NULL) {
-			//rubis::sched::request_gpu(141);
+			rubis::sched::request_gpu();
 			checkCudaErrors(cudaFree(trans_x_));
-			//rubis::sched::yield_gpu(141,"free");
+			rubis::sched::yield_gpu("142_free");
 
 			trans_x_ = NULL;
 		}
 
 		if (trans_y_ != NULL) {
-			//rubis::sched::request_gpu(142);
+			rubis::sched::request_gpu();
 			checkCudaErrors(cudaFree(trans_y_));
-			//rubis::sched::yield_gpu(142,"free");
+			rubis::sched::yield_gpu("143_free");
 
 			trans_y_ = NULL;
 		}
 
 		if (trans_z_ != NULL) {
-			//rubis::sched::request_gpu(143);
+			rubis::sched::request_gpu();
 			checkCudaErrors(cudaFree(trans_z_));
-			//rubis::sched::yield_gpu(143,"free");
+			rubis::sched::yield_gpu("144_free");
 
 			trans_z_ = NULL;
 		}
 
-		//rubis::sched::request_gpu(144);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaMalloc(&trans_x_, sizeof(float) * points_number_));
-		//rubis::sched::yield_gpu(144,"cudaMalloc");
+		rubis::sched::yield_gpu("145_cudaMalloc");
 
-		//rubis::sched::request_gpu(145);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaMalloc(&trans_y_, sizeof(float) * points_number_));
-		//rubis::sched::yield_gpu(145,"cudaMalloc");
+		rubis::sched::yield_gpu("146_cudaMalloc");
 
-		//rubis::sched::request_gpu(146);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaMalloc(&trans_z_, sizeof(float) * points_number_));
-		//rubis::sched::yield_gpu(146,"cudaMalloc");
+		rubis::sched::yield_gpu("147_cudaMalloc");
 
-		//rubis::sched::request_gpu(147);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaMemcpy(trans_x_, x_, sizeof(float) * points_number_, cudaMemcpyDeviceToDevice));		
-		//rubis::sched::yield_gpu(147,"dtod");
+		rubis::sched::yield_gpu("148_dtod");
 		
-		//rubis::sched::request_gpu(148);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaMemcpy(trans_y_, y_, sizeof(float) * points_number_, cudaMemcpyDeviceToDevice));
-		//rubis::sched::yield_gpu(148,"dtod");
+		rubis::sched::yield_gpu("149_dtod");
 		
-		//rubis::sched::request_gpu(149);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaMemcpy(trans_z_, z_, sizeof(float) * points_number_, cudaMemcpyDeviceToDevice));
-		//rubis::sched::yield_gpu(149,"dtod");
+		rubis::sched::yield_gpu("150_dtod");
 		
-		//rubis::sched::request_gpu(150);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaFree(tmp));
-		//rubis::sched::yield_gpu(150,"free");
+		rubis::sched::yield_gpu("151_free");
 
 #ifndef __aarch64__
-		//rubis::sched::request_gpu(151);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaHostUnregister(host_tmp));
-		//rubis::sched::yield_gpu(151,"free");
+		rubis::sched::yield_gpu("152_free");
 #endif
 	}
 }
@@ -454,76 +454,76 @@ void GRegistration::setInputTarget(pcl::PointCloud<pcl::PointXYZI>::Ptr input)
 
 		pcl::PointXYZI *tmp;
 
-		//rubis::sched::request_gpu(152);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaMalloc(&tmp, sizeof(pcl::PointXYZI) * target_points_number_));
-		//rubis::sched::yield_gpu(152,"cudaMalloc");
+		rubis::sched::yield_gpu("153_cudaMalloc");
 
 		pcl::PointXYZI *host_tmp = input->points.data();
 
 #ifndef __aarch64__
-		//rubis::sched::request_gpu(153);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaHostRegister(host_tmp, sizeof(pcl::PointXYZI) * target_points_number_, cudaHostRegisterDefault));
-		//rubis::sched::yield_gpu(153,"htod");
+		rubis::sched::yield_gpu("154_htod");
 #endif
 
-		//rubis::sched::request_gpu(154);	
+		rubis::sched::request_gpu();	
 		checkCudaErrors(cudaMemcpy(tmp, host_tmp, sizeof(pcl::PointXYZI) * target_points_number_, cudaMemcpyHostToDevice));
-		//rubis::sched::yield_gpu(154,"htod");
+		rubis::sched::yield_gpu("155_htod");
 
 		if (target_x_ != NULL) {
-			//rubis::sched::request_gpu(155);
+			rubis::sched::request_gpu();
 			checkCudaErrors(cudaFree(target_x_));
-			//rubis::sched::yield_gpu(155,"free");
+			rubis::sched::yield_gpu("156_free");
 
 			target_x_ = NULL;
 		}
 
 		if (target_y_ != NULL) {
-			//rubis::sched::request_gpu(156);
+			rubis::sched::request_gpu();
 			checkCudaErrors(cudaFree(target_y_));
-			//rubis::sched::yield_gpu(156,"free");
+			rubis::sched::yield_gpu("157_free");
 
 			target_y_ = NULL;
 		}
 
 		if (target_z_ != NULL) {
-			//rubis::sched::request_gpu(157);
+			rubis::sched::request_gpu();
 			checkCudaErrors(cudaFree(target_z_));
-			//rubis::sched::yield_gpu(157,"free");
+			rubis::sched::yield_gpu("158_free");
 
 			target_z_ = NULL;
 		}
 
-		//rubis::sched::request_gpu(158);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaMalloc(&target_x_, sizeof(float) * target_points_number_));
-		//rubis::sched::yield_gpu(158,"cudaMalloc");
+		rubis::sched::yield_gpu("159_cudaMalloc");
 
-		//rubis::sched::request_gpu(159);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaMalloc(&target_y_, sizeof(float) * target_points_number_));
-		//rubis::sched::yield_gpu(159,"cudaMalloc");
+		rubis::sched::yield_gpu("160_cudaMalloc");
 
-		//rubis::sched::request_gpu(160);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaMalloc(&target_z_, sizeof(float) * target_points_number_));
-		//rubis::sched::yield_gpu(160,"cudaMalloc");
+		rubis::sched::yield_gpu("161_cudaMalloc");
 
 		int block_x = (target_points_number_ > BLOCK_SIZE_X) ? BLOCK_SIZE_X : target_points_number_;
 		int grid_x = (target_points_number_ - 1) / block_x + 1;
 
-		//rubis::sched::request_gpu(161);
+		rubis::sched::request_gpu();
 		convertInput<pcl::PointXYZI><<<grid_x, block_x>>>(tmp, target_x_, target_y_, target_z_, target_points_number_);
-		//rubis::sched::yield_gpu(161,"convertInput");
+		rubis::sched::yield_gpu("162_convertInput");
 
 		checkCudaErrors(cudaGetLastError());
 		checkCudaErrors(cudaDeviceSynchronize());
 
 #ifndef __aarch64__
-		//rubis::sched::request_gpu(162);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaHostUnregister(host_tmp));
-		//rubis::sched::yield_gpu(162,"free");
+		rubis::sched::yield_gpu("163_free");
 #endif
-		//rubis::sched::request_gpu(163);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaFree(tmp));
-		//rubis::sched::yield_gpu(163,"free");
+		rubis::sched::yield_gpu("164_free");
 	}
 }
 
@@ -534,74 +534,74 @@ void GRegistration::setInputTarget(pcl::PointCloud<pcl::PointXYZ>::Ptr input)
 
 		pcl::PointXYZ *tmp;
 
-		//rubis::sched::request_gpu(164);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaMalloc(&tmp, sizeof(pcl::PointXYZ) * target_points_number_));
-		//rubis::sched::yield_gpu(164,"cudaMalloc");
+		rubis::sched::yield_gpu("165_cudaMalloc");
 
 		pcl::PointXYZ *host_tmp = input->points.data();
 
 #ifndef __aarch64__
-		//rubis::sched::request_gpu(165);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaHostRegister(host_tmp, sizeof(pcl::PointXYZ) * target_points_number_, cudaHostRegisterDefault));
-		//rubis::sched::yield_gpu(165,"htod");
+		rubis::sched::yield_gpu("166_htod");
 #endif
-		//rubis::sched::request_gpu(166);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaMemcpy(tmp, host_tmp, sizeof(pcl::PointXYZ) * target_points_number_, cudaMemcpyHostToDevice));
-		//rubis::sched::yield_gpu(166,"htod");
+		rubis::sched::yield_gpu("167_htod");
 
 		if (target_x_ != NULL) {
-			//rubis::sched::request_gpu(167);
+			rubis::sched::request_gpu();
 			checkCudaErrors(cudaFree(target_x_));
-			//rubis::sched::yield_gpu(167,"free");
+			rubis::sched::yield_gpu("168_free");
 
 			target_x_ = NULL;
 		}
 
 		if (target_y_ != NULL) {
-			//rubis::sched::request_gpu(168);
+			rubis::sched::request_gpu();
 			checkCudaErrors(cudaFree(target_y_));
-			//rubis::sched::yield_gpu(168,"free");
+			rubis::sched::yield_gpu("169_free");
 
 			target_y_ = NULL;
 		}
 
 		if (target_z_ != NULL) {
-			//rubis::sched::request_gpu(169);
+			rubis::sched::request_gpu();
 			checkCudaErrors(cudaFree(target_z_));
-			//rubis::sched::yield_gpu(169,"free");
+			rubis::sched::yield_gpu("170_free");
 
 			target_z_ = NULL;
 		}
 
-		//rubis::sched::request_gpu(170);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaMalloc(&target_x_, sizeof(float) * target_points_number_));
-		//rubis::sched::yield_gpu(170,"cudaMalloc");
+		rubis::sched::yield_gpu("171_cudaMalloc");
 
-		//rubis::sched::request_gpu(171);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaMalloc(&target_y_, sizeof(float) * target_points_number_));
-		//rubis::sched::yield_gpu(171,"cudaMalloc");
+		rubis::sched::yield_gpu("172_cudaMalloc");
 
-		//rubis::sched::request_gpu(172);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaMalloc(&target_z_, sizeof(float) * target_points_number_));
-		//rubis::sched::yield_gpu(172,"cudaMalloc");
+		rubis::sched::yield_gpu("173_cudaMalloc");
 
 		int block_x = (target_points_number_ > BLOCK_SIZE_X) ? BLOCK_SIZE_X : target_points_number_;
 		int grid_x = (target_points_number_ - 1) / block_x + 1;
 
-		//rubis::sched::request_gpu(173);
+		rubis::sched::request_gpu();
 		convertInput<pcl::PointXYZ><<<grid_x, block_x>>>(tmp, target_x_, target_y_, target_z_, target_points_number_);	
-		//rubis::sched::yield_gpu(173,"convertInput");
+		rubis::sched::yield_gpu("174_convertInput");
 
 		checkCudaErrors(cudaGetLastError());
 		checkCudaErrors(cudaDeviceSynchronize());
 
-		//rubis::sched::request_gpu(174);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaFree(tmp));
-		//rubis::sched::yield_gpu(174,"free");
+		rubis::sched::yield_gpu("175_free");
 #ifndef __aarch64__
-		//rubis::sched::request_gpu(175);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaHostUnregister(host_tmp));
-		//rubis::sched::yield_gpu(175,"free");
+		rubis::sched::yield_gpu("176_free");
 #endif
 	}
 }

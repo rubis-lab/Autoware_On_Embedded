@@ -18,7 +18,6 @@ namespace sched {
   extern FILE* seg_execution_time_fp_;
   extern FILE* seg_response_time_fp_;
 
-  extern unsigned int cpu_seg_id_;
   extern int is_gpu_profiling_started_;
 
   extern struct timespec task_start_time_;
@@ -33,12 +32,13 @@ namespace sched {
   void stop_task_profiling();
   void init_gpu_profiling(std::string execution_time_filename, std::string response_time_filename);
   void start_profiling_cpu_seg_response_time();
-  void stop_profiling_cpu_seg_response_time();
+  void stop_profiling_cpu_seg_response_time(unsigned int cpu_seg_id, unsigned int iter);
   void start_profiling_gpu_seg_response_time();
   void start_profiling_gpu_seg_execution_time();
-  void stop_profiling_gpu_seg_time(unsigned int id, std::string remark = " ");
+  void stop_profiling_gpu_seg_time(unsigned int gpu_seg_id, unsigned int iter, std::string remark = " ");
   unsigned long long get_current_time_ns();
-  void refresh_gpu_profiling();
+  void start_job_profiling();
+  void finish_job_profiling(unsigned int cpu_seg_id);
   void start_gpu_profiling();
 
 }

@@ -50,12 +50,12 @@ void col2im_gpu(float *data_col,
     int width_col = (width + 2 * pad - ksize) / stride + 1;
     int num_kernels = channels * height * width;
     
-    //request_gpu(52);
+    request_gpu();
     col2im_gpu_kernel<<<(num_kernels+BLOCK-1)/BLOCK,
         BLOCK>>>(
                 num_kernels, data_col, height, width, ksize, pad,
                 stride, height_col,
                 width_col, data_im);
-    //yield_gpu_with_remark(52,"col2im_gpu_kernel");
+    yield_gpu_with_remark("col2im_gpu_kernel");
 }
 

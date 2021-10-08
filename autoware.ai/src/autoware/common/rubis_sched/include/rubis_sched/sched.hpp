@@ -59,6 +59,9 @@
 #define TASK_STATE_RUNNING 1
 #define TASK_STATE_DONE 2
 
+#define GPU_SEG_LOOP_START 0
+#define GPU_SEG_LOOP_MID 1
+#define GPU_SEG_LOOP_END 2
 
 
 namespace rubis {
@@ -115,9 +118,15 @@ extern std::string task_filename_;
 extern std::string gpu_deadline_filename_;
 // extern unsigned long long gpu_deadline_list_[1024];
 extern unsigned long long* gpu_deadline_list_;
-extern int max_gpu_id_;
+extern unsigned int max_gpu_id_;
+extern unsigned int gpu_seg_id_;
+extern unsigned int cpu_seg_id_;
 extern int task_state_;
 extern int is_task_ready_;
+extern int was_in_loop_;
+extern int loop_cnt_;
+extern int gpu_seg_cnt_in_loop_;
+
 
 // Task scheduling
 int sched_setattr(pid_t pid, const struct sched_attr *attr, unsigned int flags);
@@ -133,10 +142,20 @@ void get_deadline_list();
 void sig_handler(int signum);
 void termination();
 unsigned long long get_current_time_us();
-void request_gpu(unsigned int id);
-void yield_gpu(unsigned int id, std::string remark = " ");
 
+
+void start_job();
+void finish_job();
+
+void request_gpu();
+void request_gpu_in_loop(int flag);
+
+void yield_gpu(std::string remark = "");
+void yield_gpu_in_loop(int flag, std::string remark = "");
+void print_loop_info(std::string tag);
 } // namespace sched
 } // namespace rubis
 
 #endif
+
+

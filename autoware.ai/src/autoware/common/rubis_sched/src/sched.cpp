@@ -12,9 +12,15 @@ std::string task_filename_;
 std::string gpu_deadline_filename_;
 // unsigned long long gpu_deadline_list_[1024];
 unsigned long long* gpu_deadline_list_;
-int max_gpu_id_ = 0;
+unsigned int max_gpu_id_ = 0;
+unsigned int cpu_seg_id_ = 0;
+unsigned int gpu_seg_id_ = 0;
+
 int is_task_ready_ = TASK_NOT_READY;
 int task_state_ = TASK_STATE_READY;
+int was_in_loop_ = 0;
+int loop_cnt_ = 0;
+int gpu_seg_cnt_in_loop_ = 0;
 
 // system call hook to call SCHED_DEADLINE
 int sched_setattr(pid_t pid, const struct sched_attr *attr, unsigned int flags){
@@ -64,7 +70,6 @@ void yield_task_scheduling(){
 }
 
 void init_gpu_scheduling(std::string task_filename, std::string gpu_deadline_filename, int key_id){
-  printf("init_gpu_scheduling\n");
   gpu_scheduling_flag_ = 1;
   task_filename_ = task_filename;
   gpu_deadline_filename_ = gpu_deadline_filename;
@@ -124,7 +129,9 @@ void init_gpu_scheduling(std::string task_filename, std::string gpu_deadline_fil
   gpu_sched_info_->scheduling_flag = 0;
   printf("Task [%d] is ready to work\n", getpid());
 
-  
+  gpu_seg_id_ = 0;
+  cpu_seg_id_ = 0;
+
   return;
 }
 
@@ -154,7 +161,7 @@ void get_deadline_list(){
     if(!fgets(buf, 1024, fp)) break;
     strtok(buf, "\n");
     sscanf(buf, "%d, %*llu", &id);
-    if(id > max_gpu_id_) max_gpu_id_ = id;
+    if(gpu_seg_id_ > max_gpu_id_) max_gpu_id_ = id;
   }
 
   gpu_deadline_list_ = (unsigned long long *)malloc(sizeof(unsigned long long) * (max_gpu_id_+1));
@@ -198,15 +205,31 @@ void termination(){
   exit(0);
 }
 
-void request_gpu(unsigned int id){  
-  stop_profiling_cpu_seg_response_time();
+void start_job(){
+  gpu_seg_id_ = 0;
+  cpu_seg_id_ = 0;
+  start_job_profiling();
+}
+
+void finish_job(){
+  finish_job_profiling(cpu_seg_id_);
+}
+
+void request_gpu(){
+  if(was_in_loop_ == 1){
+    was_in_loop_ = 0;
+    loop_cnt_ = 0;
+    gpu_seg_cnt_in_loop_ = 0;
+  }
+
+  stop_profiling_cpu_seg_response_time(cpu_seg_id_, 1);
   if(gpu_scheduling_flag_==1){
-    if(id > max_gpu_id_){
+    if(gpu_seg_id_ > max_gpu_id_){
       printf("[ERROR] GPU segment id bigger than max segment id!\n");
       exit(1);
     }
     
-    unsigned long long relative_deadline = gpu_deadline_list_[id];
+    unsigned long long relative_deadline = gpu_deadline_list_[gpu_seg_id_];
     gpu_sched_info_->deadline = get_current_time_ns() + relative_deadline;
     gpu_sched_info_->state = SCHEDULING_STATE_WAIT;
   }
@@ -228,19 +251,94 @@ void request_gpu(unsigned int id){
   }
 }
 
-void yield_gpu(unsigned int id, std::string remark){
+void request_gpu_in_loop(int flag){
+  was_in_loop_ = 1;
+
+  if(flag == GPU_SEG_LOOP_START){
+      loop_cnt_++;
+    if(gpu_seg_cnt_in_loop_ == 0){
+      gpu_seg_cnt_in_loop_ = 1;
+    }
+    else{
+      gpu_seg_id_ = gpu_seg_id_ - gpu_seg_cnt_in_loop_;
+      cpu_seg_id_ = cpu_seg_id_ - gpu_seg_cnt_in_loop_;
+      gpu_seg_cnt_in_loop_ = 1;
+    }
+  }
+
+  if(flag != GPU_SEG_LOOP_START){
+    gpu_seg_cnt_in_loop_++;
+  }
+
+  stop_profiling_cpu_seg_response_time(cpu_seg_id_, loop_cnt_);
+  if(gpu_scheduling_flag_==1){
+    if(gpu_seg_id_ > max_gpu_id_){
+      printf("[ERROR] GPU segment id bigger than max segment id!\n");
+      exit(1);
+    }
+    
+    unsigned long long relative_deadline = gpu_deadline_list_[gpu_seg_id_];
+    gpu_sched_info_->deadline = get_current_time_ns() + relative_deadline;
+    gpu_sched_info_->state = SCHEDULING_STATE_WAIT;
+  }
+  
+  start_profiling_gpu_seg_response_time();
+
+  if(gpu_scheduling_flag_ == 1){
+    while(1){
+      kill(gpu_scheduler_pid_, SIGUSR1);
+      if(gpu_sched_info_->scheduling_flag == 1) break;
+    }
+  }
+
+  start_profiling_gpu_seg_execution_time();
+
+  if(gpu_scheduling_flag_ == 1){
+    gpu_sched_info_->state = SCHEDULING_STATE_RUN;
+    gpu_sched_info_->deadline = -1;
+  }
+}
+
+void yield_gpu(std::string remark){
   if(gpu_scheduling_flag_==1){
     gpu_sched_info_->scheduling_flag = 0;
     gpu_sched_info_->state = SCHEDULING_STATE_NONE;
   }
-  stop_profiling_cpu_seg_response_time();
-  stop_profiling_gpu_seg_time(id, remark);
+  stop_profiling_gpu_seg_time(gpu_seg_id_, 1, remark);
   start_profiling_cpu_seg_response_time();
+
+  gpu_seg_id_++;
+  cpu_seg_id_++;
+}
+
+void yield_gpu_in_loop(int flag, std::string remark){
+  if(gpu_scheduling_flag_==1){
+    gpu_sched_info_->scheduling_flag = 0;
+    gpu_sched_info_->state = SCHEDULING_STATE_NONE;
+  }
+  stop_profiling_gpu_seg_time(gpu_seg_id_, loop_cnt_, remark);
+  start_profiling_cpu_seg_response_time();
+
+  gpu_seg_id_++;
+  cpu_seg_id_++;
+
+  // if(flag == GPU_SEG_LOOP_END){
+  //   gpu_seg_id_ = gpu_seg_id_ - gpu_seg_cnt_in_loop_ + 1;
+  //   cpu_seg_id_ = cpu_seg_id_ - gpu_seg_cnt_in_loop_ + 1;
+  // }
 }
 
 void init_task(){
   is_task_ready_ = TASK_READY;
 }
 
+void print_loop_info(std::string tag){
+  std::cout<<"tag: "<<tag<<std::endl;
+  std::cout<<"cpu_seg_id: "<<cpu_seg_id_<<std::endl;
+  std::cout<<"gpu_seg_id: "<<gpu_seg_id_<<std::endl;
+  std::cout<<"loop cnt: "<<loop_cnt_<<std::endl;
+  std::cout<<"loop seg cnt: "<<gpu_seg_cnt_in_loop_<<std::endl<<std::endl;;
+}
+
 } // namespace sched
-} // namespace rubis
+} // namespace rubiss

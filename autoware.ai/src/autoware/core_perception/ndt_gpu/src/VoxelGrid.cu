@@ -110,16 +110,16 @@ GVoxelGrid::~GVoxelGrid() {
 
 		for (unsigned int i = 1; i < octree_centroids_.size(); i++) {
 			if (octree_centroids_[i] != NULL) {
-				//rubis::sched::request_gpu(184);
+				rubis::sched::request_gpu();
 				checkCudaErrors(cudaFree(octree_centroids_[i]));
-				//rubis::sched::yield_gpu(184,"free");
+				rubis::sched::yield_gpu("185_free");
 				
 				octree_centroids_[i] = NULL;
 			}
 			if (octree_points_per_node_[i] != NULL) {
-				//rubis::sched::request_gpu(185);
+				rubis::sched::request_gpu();
 				checkCudaErrors(cudaFree(octree_points_per_node_[i]));
-				//rubis::sched::yield_gpu(185,"free");
+				rubis::sched::yield_gpu("186_free");
 
 				octree_points_per_node_[i] = NULL;
 			}
@@ -130,49 +130,49 @@ GVoxelGrid::~GVoxelGrid() {
 		octree_grid_size_.clear();
 
 		if (starting_point_ids_ != NULL) {
-			//rubis::sched::request_gpu(186);
+			rubis::sched::request_gpu();
 			checkCudaErrors(cudaFree(starting_point_ids_));
-			//rubis::sched::yield_gpu(186,"free");
+			rubis::sched::yield_gpu("187_free");
 
 			starting_point_ids_ = NULL;
 		}
 
 		if (point_ids_ != NULL) {
-			//rubis::sched::request_gpu(187);
+			rubis::sched::request_gpu();
 			checkCudaErrors(cudaFree(point_ids_));
-			//rubis::sched::yield_gpu(187,"free");
+			rubis::sched::yield_gpu("188_free");
 
 			point_ids_ = NULL;
 		}
 
 		if (centroid_ != NULL) {
-			//rubis::sched::request_gpu(188);
+			rubis::sched::request_gpu();
 			checkCudaErrors(cudaFree(centroid_));
-			//rubis::sched::yield_gpu(188,"free");
+			rubis::sched::yield_gpu("189_free");
 			
 			centroid_ = NULL;
 		}
 
 		if (covariance_ != NULL) {
-			//rubis::sched::request_gpu(189);
+			rubis::sched::request_gpu();
 			checkCudaErrors(cudaFree(covariance_));
-			//rubis::sched::yield_gpu(189,"free");
+			rubis::sched::yield_gpu("190_free");
 
 			covariance_ = NULL;
 		}
 
 		if (inverse_covariance_ != NULL) {
-			//rubis::sched::request_gpu(190);
+			rubis::sched::request_gpu();
 			checkCudaErrors(cudaFree(inverse_covariance_));
-			//rubis::sched::yield_gpu(190,"free");
+			rubis::sched::yield_gpu("191_free");
 
 			inverse_covariance_ = NULL;
 		}
 
 		if (points_per_voxel_ != NULL) {
-			//rubis::sched::request_gpu(191);
+			rubis::sched::request_gpu();
 			checkCudaErrors(cudaFree(points_per_voxel_));
-			//rubis::sched::yield_gpu(191,"free");
+			rubis::sched::yield_gpu("192_free");
 
 			points_per_voxel_ = NULL;
 		}
@@ -183,60 +183,60 @@ GVoxelGrid::~GVoxelGrid() {
 void GVoxelGrid::initialize()
 {
 	if (centroid_ != NULL) {
-		//rubis::sched::request_gpu(192);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaFree(centroid_));
-		//rubis::sched::yield_gpu(192,"free");
+		rubis::sched::yield_gpu("193_free");
 
 		centroid_ = NULL;
 	}
 
 	if (covariance_ != NULL) {
-		//rubis::sched::request_gpu(193);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaFree(covariance_));
-		//rubis::sched::yield_gpu(193,"free");
+		rubis::sched::yield_gpu("194_free");
 
 		covariance_ = NULL;
 	}
 
 	if (inverse_covariance_ != NULL) {
-		//rubis::sched::request_gpu(194);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaFree(inverse_covariance_));
-		//rubis::sched::yield_gpu(194,"free");
+		rubis::sched::yield_gpu("195_free");
 
 		inverse_covariance_ = NULL;
 	}
 
 	if (points_per_voxel_ != NULL) {
-		//rubis::sched::request_gpu(195);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaFree(points_per_voxel_));
-		//rubis::sched::yield_gpu(195,"free");
+		rubis::sched::yield_gpu("196_free");
 
 		points_per_voxel_ = NULL;
 	}
 
-	//rubis::sched::request_gpu(196);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMalloc(&centroid_, sizeof(double) * 3 * voxel_num_));
-	//rubis::sched::yield_gpu(196,"cudaMalloc");
+	rubis::sched::yield_gpu("197_cudaMalloc");
 
-	//rubis::sched::request_gpu(197);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMalloc(&covariance_, sizeof(double) * 9 * voxel_num_));
-	//rubis::sched::yield_gpu(197,"cudaMalloc");
+	rubis::sched::yield_gpu("198_cudaMalloc");
 
-	//rubis::sched::request_gpu(198);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMalloc(&inverse_covariance_, sizeof(double) * 9 * voxel_num_));
-	//rubis::sched::yield_gpu(198,"cudaMalloc");
+	rubis::sched::yield_gpu("199_cudaMalloc");
 
-	//rubis::sched::request_gpu(199);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMalloc(&points_per_voxel_, sizeof(int) * voxel_num_));
-	//rubis::sched::yield_gpu(199,"cudaMalloc");
+	rubis::sched::yield_gpu("200_cudaMalloc");
 
-	//rubis::sched::request_gpu(200);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMemset(inverse_covariance_, 0, sizeof(double) * 9 * voxel_num_));
-	//rubis::sched::yield_gpu(200,"cudaMemset);
+	rubis::sched::yield_gpu("201_cudaMemset");
 
-	//rubis::sched::request_gpu(201);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMemset(points_per_voxel_, 0, sizeof(int) * voxel_num_));
-	//rubis::sched::yield_gpu(201,"cudaMemset);
+	rubis::sched::yield_gpu("202_cudaMemset");
 
 	checkCudaErrors(cudaDeviceSynchronize());
 }
@@ -707,49 +707,49 @@ void GVoxelGrid::computeCentroidAndCovariance()
 	int block_x = (voxel_num_ > BLOCK_SIZE_X) ? BLOCK_SIZE_X : voxel_num_;
 	int grid_x = (voxel_num_ - 1) / block_x + 1;
 
-	//rubis::sched::request_gpu(202);
+	rubis::sched::request_gpu();
 	initCentroidAndCovariance<<<grid_x, block_x>>>(x_, y_, z_, starting_point_ids_, point_ids_, centroid_, covariance_, voxel_num_);
-	//rubis::sched::yield_gpu(202,"initCentroidAndCovariance");
+	rubis::sched::yield_gpu("203_initCentroidAndCovariance");
 
 	checkCudaErrors(cudaGetLastError());
 	checkCudaErrors(cudaDeviceSynchronize());
 
 	double *pt_sum;
 
-	//rubis::sched::request_gpu(203);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMalloc(&pt_sum, sizeof(double) * voxel_num_ * 3));
-	//rubis::sched::yield_gpu(203,"cudaMalloc");
+	rubis::sched::yield_gpu("204_cudaMalloc");
 
-	//rubis::sched::request_gpu(204);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMemcpy(pt_sum, centroid_, sizeof(double) * voxel_num_ * 3, cudaMemcpyDeviceToDevice));
-	//rubis::sched::yield_gpu(204,"cudaMemcpy");
+	rubis::sched::yield_gpu("205_cudaMemcpy");
 
-	//rubis::sched::request_gpu(205);
+	rubis::sched::request_gpu();
 	updateVoxelCentroid<<<grid_x, block_x>>>(centroid_, points_per_voxel_, voxel_num_);
-	//rubis::sched::yield_gpu(205,"updateVoxelCentroid");
+	rubis::sched::yield_gpu("206_updateVoxelCentroid");
 
 	checkCudaErrors(cudaGetLastError());
 
-	//rubis::sched::request_gpu(206);
+	rubis::sched::request_gpu();
 	updateVoxelCovariance<<<grid_x, block_x>>>(centroid_, pt_sum, covariance_, points_per_voxel_, voxel_num_, min_points_per_voxel_);
-	//rubis::sched::yield_gpu(206,"updateVoxelCovariance");
+	rubis::sched::yield_gpu("207_updateVoxelCovariance");
 
 	checkCudaErrors(cudaGetLastError());
 	checkCudaErrors(cudaDeviceSynchronize());
 
-	//rubis::sched::request_gpu(207);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaFree(pt_sum));
-	//rubis::sched::yield_gpu(207,"free");
+	rubis::sched::yield_gpu("208_free");
 
 	double *eigenvalues_dev, *eigenvectors_dev;
 
-	//rubis::sched::request_gpu(208);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMalloc(&eigenvalues_dev, sizeof(double) * 3 * voxel_num_));
-	//rubis::sched::yield_gpu(208,"cudaMalloc");
+	rubis::sched::yield_gpu("209_cudaMalloc");
 
-	//rubis::sched::request_gpu(209);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMalloc(&eigenvectors_dev, sizeof(double) * 9 * voxel_num_));
-	//rubis::sched::yield_gpu(209,"cudaMalloc");
+	rubis::sched::yield_gpu("210_cudaMalloc");
 
 	// Solving eigenvalues and eigenvectors problem by the GPU.
 	SymmetricEigensolver3x3 sv(voxel_num_);
@@ -758,84 +758,96 @@ void GVoxelGrid::computeCentroidAndCovariance()
 	sv.setEigenvalues(eigenvalues_dev);
 	sv.setEigenvectors(eigenvectors_dev);
 
-	//rubis::sched::request_gpu(210);
+	rubis::sched::request_gpu();
 	normalize<<<grid_x, block_x>>>(sv, points_per_voxel_, voxel_num_, min_points_per_voxel_);
-	//rubis::sched::yield_gpu(210,"normalize");
+	rubis::sched::yield_gpu("211_normalize");
 
 	checkCudaErrors(cudaGetLastError());
 
-	//rubis::sched::request_gpu(211);
+	rubis::sched::request_gpu();
 	computeEigenvalues<<<grid_x, block_x>>>(sv, points_per_voxel_, voxel_num_, min_points_per_voxel_);
-	//rubis::sched::yield_gpu(211,"computeEigenvalues");
+	rubis::sched::yield_gpu("212_computeEigenvalues");
 
 	checkCudaErrors(cudaGetLastError());
 
-	//rubis::sched::request_gpu(211);
+	rubis::sched::request_gpu();
 	computeEvec00<<<grid_x, block_x>>>(sv, points_per_voxel_, voxel_num_, min_points_per_voxel_);
-	//rubis::sched::yield_gpu(211,"computeEvec00");
+	rubis::sched::yield_gpu("213_computeEvec00");
 
 	checkCudaErrors(cudaGetLastError());
 
-	//rubis::sched::request_gpu(212);
+	rubis::sched::request_gpu();
 	computeEvec01<<<grid_x, block_x>>>(sv, points_per_voxel_, voxel_num_, min_points_per_voxel_);
-	//rubis::sched::yield_gpu(212,"computeEvec01");
+	rubis::sched::yield_gpu("214_computeEvec01");
 
 	checkCudaErrors(cudaGetLastError());
 
-	//rubis::sched::request_gpu(213);
+	rubis::sched::request_gpu();
 	computeEvec10<<<grid_x, block_x>>>(sv, points_per_voxel_, voxel_num_, min_points_per_voxel_);
-	//rubis::sched::yield_gpu(213,"computeEvec10");
+	rubis::sched::yield_gpu("215_computeEvec10");
 
 	checkCudaErrors(cudaGetLastError());
 
-	//rubis::sched::request_gpu(214);
+	rubis::sched::request_gpu();
 	computeEvec11<<<grid_x, block_x>>>(sv, points_per_voxel_, voxel_num_, min_points_per_voxel_);
-	//rubis::sched::yield_gpu(214,"computeEvec11");
+	rubis::sched::yield_gpu("216_computeEvec11");
 
 	checkCudaErrors(cudaGetLastError());
 
-	//rubis::sched::request_gpu(215);
+	rubis::sched::request_gpu();
 	computeEvec2<<<grid_x, block_x>>>(sv, points_per_voxel_, voxel_num_, min_points_per_voxel_);
-	//rubis::sched::yield_gpu(215,"computeEvec2");
+	rubis::sched::yield_gpu("217_computeEvec2");
 
 	checkCudaErrors(cudaGetLastError());
 
-	//rubis::sched::request_gpu(216);
+	rubis::sched::request_gpu();
 	updateEval<<<grid_x, block_x>>>(sv, points_per_voxel_, voxel_num_, min_points_per_voxel_);
-	//rubis::sched::yield_gpu(216,"updateEval");
+	rubis::sched::yield_gpu("218_updateEval");
 
 	checkCudaErrors(cudaGetLastError());
 
-	//rubis::sched::request_gpu(217);
+	rubis::sched::request_gpu();
 	updateEval2<<<grid_x, block_x>>>(eigenvalues_dev, points_per_voxel_, voxel_num_, min_points_per_voxel_);
-	//rubis::sched::yield_gpu(217,"updateEval2");
+	rubis::sched::yield_gpu("219_updateEval2");
 
 	checkCudaErrors(cudaGetLastError());
 
-	//rubis::sched::request_gpu(218);
+	rubis::sched::request_gpu();
 	computeInverseEigenvectors<<<grid_x, block_x>>>(inverse_covariance_, points_per_voxel_, voxel_num_, eigenvectors_dev, min_points_per_voxel_);
-	//rubis::sched::yield_gpu(218,"computeInverseEigenvectors");
+	rubis::sched::yield_gpu("220_computeInverseEigenvectors");
 
 	checkCudaErrors(cudaGetLastError());
 
-	//rubis::sched::request_gpu(219);
+	rubis::sched::request_gpu();
 	updateCovarianceS0<<<grid_x, block_x>>>(points_per_voxel_, voxel_num_, eigenvalues_dev, eigenvectors_dev, min_points_per_voxel_);
-	//rubis::sched::yield_gpu(219,"updateCovarianceS0");
+	rubis::sched::yield_gpu("221_updateCovarianceS0");
 
 	checkCudaErrors(cudaGetLastError());
 
-	for (int i = 0; i < 3; i++) {
-		//rubis::sched::request_gpu(220);
-		updateCovarianceS1<<<grid_x, block_x>>>(covariance_, inverse_covariance_, points_per_voxel_, voxel_num_, eigenvectors_dev, min_points_per_voxel_, i);
-		//rubis::sched::yield_gpu(220,"updateCovarianceS1");
-		
-		checkCudaErrors(cudaGetLastError());
-	}
+	rubis::sched::request_gpu();
+	updateCovarianceS1<<<grid_x, block_x>>>(covariance_, inverse_covariance_, points_per_voxel_, voxel_num_, eigenvectors_dev, min_points_per_voxel_, 0);
+	rubis::sched::yield_gpu("222_updateCovarianceS1");
+	
+	checkCudaErrors(cudaGetLastError());
+
+	rubis::sched::request_gpu();
+	updateCovarianceS1<<<grid_x, block_x>>>(covariance_, inverse_covariance_, points_per_voxel_, voxel_num_, eigenvectors_dev, min_points_per_voxel_, 1);
+	rubis::sched::yield_gpu("223_updateCovarianceS1");
+	
+	checkCudaErrors(cudaGetLastError());
+
+	rubis::sched::request_gpu();
+	updateCovarianceS1<<<grid_x, block_x>>>(covariance_, inverse_covariance_, points_per_voxel_, voxel_num_, eigenvectors_dev, min_points_per_voxel_, 2);
+	rubis::sched::yield_gpu("224_updateCovarianceS1");
+	
+	checkCudaErrors(cudaGetLastError());
+	
+
 	checkCudaErrors(cudaDeviceSynchronize());
 
-	//rubis::sched::request_gpu(221);
+	rubis::sched::request_gpu();
 	computeInverseCovariance<<<grid_x, block_x>>>(covariance_, inverse_covariance_, points_per_voxel_, voxel_num_, min_points_per_voxel_);
-	//rubis::sched::yield_gpu(221,"computeInverseCovariance");
+	rubis::sched::yield_gpu("225_computeInverseCovariance");
 
 	checkCudaErrors(cudaGetLastError());
 
@@ -843,13 +855,13 @@ void GVoxelGrid::computeCentroidAndCovariance()
 
 	sv.memFree();
 
-	//rubis::sched::request_gpu(222);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaFree(eigenvalues_dev));
-	//rubis::sched::yield_gpu(222,"free");
+	rubis::sched::yield_gpu("226_free");
 
-	//rubis::sched::request_gpu(223);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaFree(eigenvectors_dev));
-	//rubis::sched::yield_gpu(223,"free");
+	rubis::sched::yield_gpu("227_free");
 }
 
 //Input are supposed to be in device memory
@@ -906,53 +918,53 @@ void GVoxelGrid::findBoundaries()
 {
 	float *max_x, *max_y, *max_z, *min_x, *min_y, *min_z;
 
-	//rubis::sched::request_gpu(224);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMalloc(&max_x, sizeof(float) * points_num_));
-	//rubis::sched::yield_gpu(224,"cudaMalloc");
+	rubis::sched::yield_gpu("228_cudaMalloc");
 
-	//rubis::sched::request_gpu(225);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMalloc(&max_y, sizeof(float) * points_num_));
-	//rubis::sched::yield_gpu(225,"cudaMalloc");
+	rubis::sched::yield_gpu("229_cudaMalloc");
 
-	//rubis::sched::request_gpu(226);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMalloc(&max_z, sizeof(float) * points_num_));
-	//rubis::sched::yield_gpu(226,"cudaMalloc");
+	rubis::sched::yield_gpu("230_cudaMalloc");
 	
-	//rubis::sched::request_gpu(227);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMalloc(&min_x, sizeof(float) * points_num_));
-	//rubis::sched::yield_gpu(227,"cudaMalloc");
+	rubis::sched::yield_gpu("231_cudaMalloc");
 
-	//rubis::sched::request_gpu(228);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMalloc(&min_y, sizeof(float) * points_num_));
-	//rubis::sched::yield_gpu(228,"cudaMalloc");
+	rubis::sched::yield_gpu("232_cudaMalloc");
 
-	//rubis::sched::request_gpu(229);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMalloc(&min_z, sizeof(float) * points_num_));
-	//rubis::sched::yield_gpu(229,"cudaMalloc");
+	rubis::sched::yield_gpu("233_cudaMalloc");
 
-	//rubis::sched::request_gpu(230);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMemcpy(max_x, x_, sizeof(float) * points_num_, cudaMemcpyDeviceToDevice));
-	//rubis::sched::yield_gpu(230,"dtod");
+	rubis::sched::yield_gpu("234_dtod");
 
-	//rubis::sched::request_gpu(231);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMemcpy(max_y, y_, sizeof(float) * points_num_, cudaMemcpyDeviceToDevice));
-	//rubis::sched::yield_gpu(231,"dtod");
+	rubis::sched::yield_gpu("235_dtod");
 
-	//rubis::sched::request_gpu(232);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMemcpy(max_z, z_, sizeof(float) * points_num_, cudaMemcpyDeviceToDevice));
-	//rubis::sched::yield_gpu(232,"dtod");
+	rubis::sched::yield_gpu("236_dtod");
 	
-	//rubis::sched::request_gpu(233);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMemcpy(min_x, x_, sizeof(float) * points_num_, cudaMemcpyDeviceToDevice));
-	//rubis::sched::yield_gpu(233,"dtod");
+	rubis::sched::yield_gpu("237_dtod");
 
-	//rubis::sched::request_gpu(234);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMemcpy(min_y, y_, sizeof(float) * points_num_, cudaMemcpyDeviceToDevice));
-	//rubis::sched::yield_gpu(234,"dtod");
+	rubis::sched::yield_gpu("238_dtod");
 
-	//rubis::sched::request_gpu(235);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMemcpy(min_z, z_, sizeof(float) * points_num_, cudaMemcpyDeviceToDevice));
-	//rubis::sched::yield_gpu(235,"dtod");
+	rubis::sched::yield_gpu("239_dtod");
 
 	int points_num = points_num_;
 
@@ -961,15 +973,15 @@ void GVoxelGrid::findBoundaries()
 		int block_x = (half_points_num > BLOCK_SIZE_X) ? BLOCK_SIZE_X : half_points_num;
 		int grid_x = (half_points_num - 1) / block_x + 1;
 
-		//rubis::sched::request_gpu(236);
+		rubis::sched::request_gpu();
 		findMax<<<grid_x, block_x>>>(max_x, max_y, max_z, points_num, half_points_num);
-		//rubis::sched::yield_gpu(236,"findMax");
+		rubis::sched::yield_gpu("240_findMax");
 
 		checkCudaErrors(cudaGetLastError());
 
-		//rubis::sched::request_gpu(237);
+		rubis::sched::request_gpu();
 		findMin<<<grid_x, block_x>>>(min_x, min_y, min_z, points_num, half_points_num);
-		//rubis::sched::yield_gpu(237,"findMin");
+		rubis::sched::yield_gpu("241_findMin");
 
 		checkCudaErrors(cudaGetLastError());
 
@@ -978,29 +990,29 @@ void GVoxelGrid::findBoundaries()
 
 	checkCudaErrors(cudaDeviceSynchronize());
 
-	//rubis::sched::request_gpu(238);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMemcpy(&max_x_, max_x, sizeof(float), cudaMemcpyDeviceToHost));
-	//rubis::sched::yield_gpu(238,"dtoh");
+	rubis::sched::yield_gpu("242_dtoh");
 
-	//rubis::sched::request_gpu(239);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMemcpy(&max_y_, max_y, sizeof(float), cudaMemcpyDeviceToHost));
-	//rubis::sched::yield_gpu(239,"dtoh");
+	rubis::sched::yield_gpu("243_dtoh");
 
-	//rubis::sched::request_gpu(240);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMemcpy(&max_z_, max_z, sizeof(float), cudaMemcpyDeviceToHost));
-	//rubis::sched::yield_gpu(240,"dtoh");
+	rubis::sched::yield_gpu("244_dtoh");
 
-	//rubis::sched::request_gpu(241);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMemcpy(&min_x_, min_x, sizeof(float), cudaMemcpyDeviceToHost));
-	//rubis::sched::yield_gpu(241,"dtoh");
+	rubis::sched::yield_gpu("245_dtoh");
 
-	//rubis::sched::request_gpu(242);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMemcpy(&min_y_, min_y, sizeof(float), cudaMemcpyDeviceToHost));
-	//rubis::sched::yield_gpu(242,"dtoh");
+	rubis::sched::yield_gpu("246_dtoh");
 
-	//rubis::sched::request_gpu(243);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMemcpy(&min_z_, min_z, sizeof(float), cudaMemcpyDeviceToHost));
-	//rubis::sched::yield_gpu(243,"dtoh");
+	rubis::sched::yield_gpu("247_dtoh");
 
 	max_b_x_ = static_cast<int> (floor(max_x_ / voxel_x_));
 	max_b_y_ = static_cast<int> (floor(max_y_ / voxel_y_));
@@ -1014,29 +1026,29 @@ void GVoxelGrid::findBoundaries()
 	vgrid_y_ = max_b_y_ - min_b_y_ + 1;
 	vgrid_z_ = max_b_z_ - min_b_z_ + 1;
 
-	//rubis::sched::request_gpu(244);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaFree(max_x));
-	//rubis::sched::yield_gpu(244,"free");
+	rubis::sched::yield_gpu("248_free");
 
-	//rubis::sched::request_gpu(245);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaFree(max_y));
-	//rubis::sched::yield_gpu(245,"free");
+	rubis::sched::yield_gpu("249_free");
 
-	//rubis::sched::request_gpu(246);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaFree(max_z));
-	//rubis::sched::yield_gpu(246,"free");
+	rubis::sched::yield_gpu("250_free");
 
-	//rubis::sched::request_gpu(247);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaFree(min_x));
-	//rubis::sched::yield_gpu(247,"free");
+	rubis::sched::yield_gpu("251_free");
 
-	//rubis::sched::request_gpu(248);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaFree(min_y));
-	//rubis::sched::yield_gpu(248,"free");
+	rubis::sched::yield_gpu("252_free");
 
-	//rubis::sched::request_gpu(249);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaFree(min_z));
-	//rubis::sched::yield_gpu(249,"free");
+	rubis::sched::yield_gpu("253_free");
 }
 
 /* Find indexes idx, idy and idz of candidate voxels */
@@ -1210,9 +1222,9 @@ void GVoxelGrid::ExclusiveScan(T *input, int ele_num, T *sum)
 {
 	thrust::device_ptr<T> dev_ptr(input);
 
-	//rubis::sched::request_gpu(250);
+	rubis::sched::request_gpu();
 	thrust::exclusive_scan(dev_ptr, dev_ptr + ele_num, dev_ptr);
-	//rubis::sched::yield_gpu(250,"exclusive_scan");
+	rubis::sched::yield_gpu("254_exclusive_scan");
 
 	checkCudaErrors(cudaDeviceSynchronize());
 
@@ -1224,9 +1236,9 @@ void GVoxelGrid::ExclusiveScan(T *input, int ele_num)
 {
 	thrust::device_ptr<T> dev_ptr(input);
 
-	//rubis::sched::request_gpu(251);
+	rubis::sched::request_gpu();
 	thrust::exclusive_scan(dev_ptr, dev_ptr + ele_num, dev_ptr);
-	//rubis::sched::yield_gpu(251,"exclusive_scan");
+	rubis::sched::yield_gpu("255_exclusive_scan");
 
 	checkCudaErrors(cudaDeviceSynchronize());
 }
@@ -1243,39 +1255,39 @@ void GVoxelGrid::radiusSearch(float *qx, float *qy, float *qz, int points_num, f
 	int *max_vid_x, *max_vid_y, *max_vid_z;
 	int *min_vid_x, *min_vid_y, *min_vid_z;
 
-	//rubis::sched::request_gpu(252);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMalloc(&max_vid_x, sizeof(int) * points_num));
-	//rubis::sched::yield_gpu(252,"cudaMalloc");
+	rubis::sched::yield_gpu("256_cudaMalloc");
 
-	//rubis::sched::request_gpu(253);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMalloc(&max_vid_y, sizeof(int) * points_num));
-	//rubis::sched::yield_gpu(253,"cudaMalloc");
+	rubis::sched::yield_gpu("257_cudaMalloc");
 
-	//rubis::sched::request_gpu(254);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMalloc(&max_vid_z, sizeof(int) * points_num));
-	//rubis::sched::yield_gpu(254,"cudaMalloc");
+	rubis::sched::yield_gpu("258_cudaMalloc");
 
-	//rubis::sched::request_gpu(255);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMalloc(&min_vid_x, sizeof(int) * points_num));
-	//rubis::sched::yield_gpu(255,"cudaMalloc");
+	rubis::sched::yield_gpu("259_cudaMalloc");
 
-	//rubis::sched::request_gpu(256);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMalloc(&min_vid_y, sizeof(int) * points_num));
-	//rubis::sched::yield_gpu(256,"cudaMalloc");
+	rubis::sched::yield_gpu("260_cudaMalloc");
 
-	//rubis::sched::request_gpu(257);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMalloc(&min_vid_z, sizeof(int) * points_num));
-	//rubis::sched::yield_gpu(257,"cudaMalloc");
+	rubis::sched::yield_gpu("261_cudaMalloc");
 
 	//Determine the number of candidate voxel per points
 	int *candidate_voxel_num_per_point;
 	int total_candidate_voxel_num;
 
-	//rubis::sched::request_gpu(258);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMalloc(&candidate_voxel_num_per_point, sizeof(int) * (points_num + 1)));
-	//rubis::sched::yield_gpu(258,"cudaMalloc");
+	rubis::sched::yield_gpu("262_cudaMalloc");
 
-	//rubis::sched::request_gpu(259);
+	rubis::sched::request_gpu();
 	findBoundariesOfCandidateVoxels<<<grid_x, block_x>>>(qx, qy, qz, radius, points_num,
 															voxel_x_, voxel_y_, voxel_z_,
 															max_b_x_, max_b_y_, max_b_z_,
@@ -1283,7 +1295,7 @@ void GVoxelGrid::radiusSearch(float *qx, float *qy, float *qz, int points_num, f
 															max_vid_x, max_vid_y, max_vid_z,
 															min_vid_x, min_vid_y, min_vid_z,
 															candidate_voxel_num_per_point);
-	//rubis::sched::yield_gpu(259,"findBoundariesOfCandidateVoxels");
+	rubis::sched::yield_gpu("263_findBoundariesOfCandidateVoxels");
 
 	checkCudaErrors(cudaGetLastError());
 	checkCudaErrors(cudaDeviceSynchronize());
@@ -1293,33 +1305,33 @@ void GVoxelGrid::radiusSearch(float *qx, float *qy, float *qz, int points_num, f
 	if (total_candidate_voxel_num <= 0) {
 		std::cout << "No candidate voxel was found. Exiting..." << std::endl;
 		
-		//rubis::sched::request_gpu(260);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaFree(max_vid_x));
-		//rubis::sched::yield_gpu(260,"free");
+		rubis::sched::yield_gpu("264_free");
 
-		//rubis::sched::request_gpu(261);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaFree(max_vid_y));
-		//rubis::sched::yield_gpu(261,"free");
+		rubis::sched::yield_gpu("265_free");
 
-		//rubis::sched::request_gpu(262);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaFree(max_vid_z));
-		//rubis::sched::yield_gpu(262,"free");
+		rubis::sched::yield_gpu("266_free");
 
-		//rubis::sched::request_gpu(263);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaFree(min_vid_x));
-		//rubis::sched::yield_gpu(263,"free");
+		rubis::sched::yield_gpu("267_free");
 
-		//rubis::sched::request_gpu(264);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaFree(min_vid_y));
-		//rubis::sched::yield_gpu(264,"free");
+		rubis::sched::yield_gpu("268_free");
 
-		//rubis::sched::request_gpu(265);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaFree(min_vid_z));
-		//rubis::sched::yield_gpu(265,"free");
+		rubis::sched::yield_gpu("269_free");
 
-		//rubis::sched::request_gpu(266);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaFree(candidate_voxel_num_per_point));
-		//rubis::sched::yield_gpu(266,"free");
+		rubis::sched::yield_gpu("270_free");
 
 		valid_points = NULL;
 		starting_voxel_id = NULL;
@@ -1335,16 +1347,16 @@ void GVoxelGrid::radiusSearch(float *qx, float *qy, float *qz, int points_num, f
 	//Determine the voxel id of candidate voxels
 	int *candidate_voxel_id;
 
-	//rubis::sched::request_gpu(267);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMalloc(&candidate_voxel_id, sizeof(int) * total_candidate_voxel_num));
-	//rubis::sched::yield_gpu(267,"cudaMalloc");
+	rubis::sched::yield_gpu("271_cudaMalloc");
 
-	//rubis::sched::request_gpu(268);
+	rubis::sched::request_gpu();
 	updateCandidateVoxelIds<<<grid_x, block_x>>>(points_num, vgrid_x_, vgrid_y_, vgrid_z_,
 													max_vid_x, max_vid_y, max_vid_z,
 													min_vid_x, min_vid_y, min_vid_z,
 													candidate_voxel_num_per_point, candidate_voxel_id);
-	//rubis::sched::yield_gpu(268,"updateCandidateVoxelIds");
+	rubis::sched::yield_gpu("272_updateCandidateVoxelIds");
 	
 	checkCudaErrors(cudaGetLastError());
 	checkCudaErrors(cudaDeviceSynchronize());
@@ -1352,50 +1364,50 @@ void GVoxelGrid::radiusSearch(float *qx, float *qy, float *qz, int points_num, f
 	//Go through the candidate voxel id list and find out which voxels are really inside the radius
 	int *valid_voxel_mark;
 
-	//rubis::sched::request_gpu(269);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMalloc(&valid_voxel_mark, sizeof(int) * total_candidate_voxel_num));
-	//rubis::sched::yield_gpu(269,"cudaMalloc");
+	rubis::sched::yield_gpu("273_cudaMalloc");
 
 	int *valid_voxel_count;
 
-	//rubis::sched::request_gpu(270);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMalloc(&valid_voxel_count, sizeof(int) * (points_num + 1)));
-	//rubis::sched::yield_gpu(270,"cudaMalloc");
+	rubis::sched::yield_gpu("274_cudaMalloc");
 
 	int *valid_points_mark;
 
-	//rubis::sched::request_gpu(271);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMalloc(&valid_points_mark, sizeof(int) * points_num));
-	//rubis::sched::yield_gpu(271,"cudaMalloc");
+	rubis::sched::yield_gpu("275_cudaMalloc");
 
 	block_x = (total_candidate_voxel_num > BLOCK_SIZE_X) ? BLOCK_SIZE_X : total_candidate_voxel_num;
 	grid_x = (total_candidate_voxel_num - 1) / block_x + 1;
 
 	///CHECK VALID VOXEL COUNT AGAIN
 	
-	//rubis::sched::request_gpu(272);
+	rubis::sched::request_gpu();
 	inspectCandidateVoxels<<<grid_x, block_x>>>(qx, qy, qz, radius, max_nn, points_num,
 													centroid_, points_per_voxel_, voxel_num_,
 													candidate_voxel_num_per_point, candidate_voxel_id,
 													valid_voxel_mark, valid_voxel_count, valid_points_mark);
-	//rubis::sched::yield_gpu(272,"inspectCandidateVoxels");
+	rubis::sched::yield_gpu("276_inspectCandidateVoxels");
 
 	checkCudaErrors(cudaGetLastError());
 	checkCudaErrors(cudaDeviceSynchronize());
 
 	//Collect valid points
 	int *valid_points_location;
-	//rubis::sched::request_gpu(273);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMalloc(&valid_points_location, sizeof(int) * (points_num + 1)));
-	//rubis::sched::yield_gpu(273,"cudaMalloc");
+	rubis::sched::yield_gpu("277_cudaMalloc");
 	
-	//rubis::sched::request_gpu(274);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMemset(valid_points_location, 0, sizeof(int) * (points_num + 1)));
-	//rubis::sched::yield_gpu(274,"cudaMemset");
+	rubis::sched::yield_gpu("278_cudaMemset");
 
-	//rubis::sched::request_gpu(275);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMemcpy(valid_points_location, valid_points_mark, sizeof(int) * points_num, cudaMemcpyDeviceToDevice));
-	//rubis::sched::yield_gpu(275,"dtod");
+	rubis::sched::yield_gpu("279_dtod");
 
 	//Writing location to the output buffer is determined by an exclusive scan
 	ExclusiveScan(valid_points_location, points_num + 1, valid_points_num);
@@ -1404,53 +1416,53 @@ void GVoxelGrid::radiusSearch(float *qx, float *qy, float *qz, int points_num, f
 		//std::cout << "No valid point was found. Exiting..." << std::endl;
 		std::cout << "No valid point was found. Exiting...: " << *valid_points_num << std::endl;
 
-		//rubis::sched::request_gpu(276);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaFree(max_vid_x));
-		//rubis::sched::yield_gpu(276,"free");
+		rubis::sched::yield_gpu("280_free");
 
-		//rubis::sched::request_gpu(277);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaFree(max_vid_y));
-		//rubis::sched::yield_gpu(277,"free");
+		rubis::sched::yield_gpu("281_free");
 
-		//rubis::sched::request_gpu(278);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaFree(max_vid_z));
-		//rubis::sched::yield_gpu(278,"free");
+		rubis::sched::yield_gpu("282_free");
 
-		//rubis::sched::request_gpu(279);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaFree(min_vid_x));
-		//rubis::sched::yield_gpu(279,"free");
+		rubis::sched::yield_gpu("283_free");
 
-		//rubis::sched::request_gpu(280);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaFree(min_vid_y));
-		//rubis::sched::yield_gpu(280,"free");
+		rubis::sched::yield_gpu("284_free");
 
-		//rubis::sched::request_gpu(281);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaFree(min_vid_z));
-		//rubis::sched::yield_gpu(281,"free");
+		rubis::sched::yield_gpu("285_free");
 
-		//rubis::sched::request_gpu(282);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaFree(candidate_voxel_num_per_point));
-		//rubis::sched::yield_gpu(282,"free");
+		rubis::sched::yield_gpu("286_free");
 		
-		//rubis::sched::request_gpu(283);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaFree(candidate_voxel_id));
-		//rubis::sched::yield_gpu(283,"free");
+		rubis::sched::yield_gpu("287_free");
 
-		//rubis::sched::request_gpu(284);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaFree(valid_voxel_mark));
-		//rubis::sched::yield_gpu(284,"free");
+		rubis::sched::yield_gpu("288_free");
 
-		//rubis::sched::request_gpu(285);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaFree(valid_voxel_count));
-		//rubis::sched::yield_gpu(285,"free");
+		rubis::sched::yield_gpu("289_free");
 		
-		//rubis::sched::request_gpu(286);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaFree(valid_points_mark));
-		//rubis::sched::yield_gpu(286,"free");
+		rubis::sched::yield_gpu("290_free");
 
-		//rubis::sched::request_gpu(287);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaFree(valid_points_location));
-		//rubis::sched::yield_gpu(287,"free");
+		rubis::sched::yield_gpu("291_free");
 
 		valid_points = NULL;
 		starting_voxel_id = NULL;
@@ -1462,24 +1474,24 @@ void GVoxelGrid::radiusSearch(float *qx, float *qy, float *qz, int points_num, f
 		return;
 	}
 
-	//rubis::sched::request_gpu(288);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMalloc(valid_points, sizeof(int) * (*valid_points_num)));
-	//rubis::sched::yield_gpu(288,"cudaMalloc");
+	rubis::sched::yield_gpu("292_cudaMalloc");
 
-	//rubis::sched::request_gpu(289);
+	rubis::sched::request_gpu();
 	collectValidPoints<<<grid_x, block_x>>>(valid_points_mark, *valid_points, valid_points_location, points_num);
-	//rubis::sched::yield_gpu(289,"collectValidPoints");
+	rubis::sched::yield_gpu("293_collectValidPoints");
 
 	checkCudaErrors(cudaGetLastError());
 	checkCudaErrors(cudaDeviceSynchronize());
 
-	//rubis::sched::request_gpu(290);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMalloc(starting_voxel_id, sizeof(int) * (*valid_points_num + 1)));
-	//rubis::sched::yield_gpu(290,"cudaMalloc");
+	rubis::sched::yield_gpu("294_cudaMalloc");
 
-	//rubis::sched::request_gpu(291);
+	rubis::sched::request_gpu();
 	collectValidVoxelCount<<<grid_x, block_x>>>(valid_voxel_count, *starting_voxel_id, valid_points_location, points_num);
-	//rubis::sched::yield_gpu(291,"collectValidVoxelCount");
+	rubis::sched::yield_gpu("295_collectValidVoxelCount");
 	
 	checkCudaErrors(cudaGetLastError());
 	checkCudaErrors(cudaDeviceSynchronize());
@@ -1490,90 +1502,90 @@ void GVoxelGrid::radiusSearch(float *qx, float *qy, float *qz, int points_num, f
 	//Collect valid voxels
 	int *valid_voxel_location;
 
-	//rubis::sched::request_gpu(292);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMalloc(&valid_voxel_location, sizeof(int) * (total_candidate_voxel_num + 1)));
-	//rubis::sched::yield_gpu(292,"cudaMalloc");
+	rubis::sched::yield_gpu("296_cudaMalloc");
 
-	//rubis::sched::request_gpu(293);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMemcpy(valid_voxel_location, valid_voxel_mark, sizeof(int) * total_candidate_voxel_num, cudaMemcpyDeviceToDevice));
-	//rubis::sched::yield_gpu(293,"dtod");
+	rubis::sched::yield_gpu("297_dtod");
 
 	ExclusiveScan(valid_voxel_location, total_candidate_voxel_num + 1, valid_voxel_num);
 
 	if (*valid_voxel_num <= 0) {
-		//rubis::sched::request_gpu(294);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaFree(max_vid_x));
-		//rubis::sched::yield_gpu(294,"free");
+		rubis::sched::yield_gpu("298_free");
 
 		max_vid_x = NULL;
-		//rubis::sched::request_gpu(295);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaFree(max_vid_y));
-		//rubis::sched::yield_gpu(295,"free");
+		rubis::sched::yield_gpu("299_free");
 
 		max_vid_y = NULL;
-		//rubis::sched::request_gpu(296);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaFree(max_vid_z));
-		//rubis::sched::yield_gpu(296,"free");
+		rubis::sched::yield_gpu("300_free");
 
 		max_vid_z = NULL;
 
-		//rubis::sched::request_gpu(297);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaFree(min_vid_x));
-		//rubis::sched::yield_gpu(297,"free");
+		rubis::sched::yield_gpu("301_free");
 
 		min_vid_x = NULL;
 
-		//rubis::sched::request_gpu(298);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaFree(min_vid_y));
-		//rubis::sched::yield_gpu(298,"free");
+		rubis::sched::yield_gpu("302_free");
 
 		min_vid_y = NULL;
 		
-		//rubis::sched::request_gpu(299);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaFree(min_vid_z));
-		//rubis::sched::yield_gpu(299,"free");
+		rubis::sched::yield_gpu("303_free");
 
 		min_vid_z = NULL;
 
-		//rubis::sched::request_gpu(300);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaFree(candidate_voxel_num_per_point));
-		//rubis::sched::yield_gpu(300,"free");
+		rubis::sched::yield_gpu("304_free");
 
 		candidate_voxel_num_per_point = NULL;
 
-		//rubis::sched::request_gpu(301);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaFree(candidate_voxel_id));
-		//rubis::sched::yield_gpu(301,"free");
+		rubis::sched::yield_gpu("305_free");
 
 		candidate_voxel_id = NULL;
 
-		//rubis::sched::request_gpu(302);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaFree(valid_voxel_mark));
-		//rubis::sched::yield_gpu(302,"free");
+		rubis::sched::yield_gpu("306_free");
 
 		valid_voxel_mark = NULL;
 
-		//rubis::sched::request_gpu(303);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaFree(valid_voxel_count));
-		//rubis::sched::yield_gpu(303,"free");
+		rubis::sched::yield_gpu("307_free");
 
 		valid_voxel_count = NULL;
 
-		//rubis::sched::request_gpu(304);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaFree(valid_points_mark));
-		//rubis::sched::yield_gpu(304,"free");
+		rubis::sched::yield_gpu("308_free");
 
 		valid_points_mark = NULL;
 
-		//rubis::sched::request_gpu(305);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaFree(valid_points_location));
-		//rubis::sched::yield_gpu(305,"free");
+		rubis::sched::yield_gpu("309_free");
 
 		valid_points_location = NULL;
 
-		//rubis::sched::request_gpu(306);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaFree(valid_voxel_location));
-		//rubis::sched::yield_gpu(306,"free");
+		rubis::sched::yield_gpu("310_free");
 
 		valid_voxel_location = NULL;
 
@@ -1585,71 +1597,71 @@ void GVoxelGrid::radiusSearch(float *qx, float *qy, float *qz, int points_num, f
 		*valid_points_num = 0;
 	}
 
-	//rubis::sched::request_gpu(307);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMalloc(valid_voxel_id, sizeof(int) * (*valid_voxel_num)));
-	//rubis::sched::yield_gpu(307,"cudaMalloc");
+	rubis::sched::yield_gpu("311_cudaMalloc");
 
 	block_x = (total_candidate_voxel_num > BLOCK_SIZE_X) ? BLOCK_SIZE_X : total_candidate_voxel_num;
 	grid_x = (total_candidate_voxel_num - 1) / block_x + 1;
 
-	//rubis::sched::request_gpu(308);
+	rubis::sched::request_gpu();
 	collectValidVoxels<<<grid_x, block_x>>>(valid_voxel_mark, candidate_voxel_id, *valid_voxel_id, valid_voxel_location, total_candidate_voxel_num);
-	//rubis::sched::yield_gpu(308,"collectValidVoxels");
+	rubis::sched::yield_gpu("312_collectValidVoxels");
 
 	checkCudaErrors(cudaGetLastError());
 	checkCudaErrors(cudaDeviceSynchronize());
 
-	//rubis::sched::request_gpu(309);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaFree(max_vid_x));
-	//rubis::sched::yield_gpu(309,"free");
+	rubis::sched::yield_gpu("313_free");
 
-	//rubis::sched::request_gpu(310);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaFree(max_vid_y));
-	//rubis::sched::yield_gpu(310,"free");
+	rubis::sched::yield_gpu("314_free");
 
-	//rubis::sched::request_gpu(311);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaFree(max_vid_z));
-	//rubis::sched::yield_gpu(311,"free");
+	rubis::sched::yield_gpu("315_free");
 
-	//rubis::sched::request_gpu(312);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaFree(min_vid_x));
-	//rubis::sched::yield_gpu(312,"free");
+	rubis::sched::yield_gpu("316_free");
 
-	//rubis::sched::request_gpu(313);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaFree(min_vid_y));
-	//rubis::sched::yield_gpu(313,"free");
+	rubis::sched::yield_gpu("317_free");
 
-	//rubis::sched::request_gpu(314);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaFree(min_vid_z));
-	//rubis::sched::yield_gpu(314,"free");
+	rubis::sched::yield_gpu("318_free");
 
-	//rubis::sched::request_gpu(315);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaFree(candidate_voxel_num_per_point));
-	//rubis::sched::yield_gpu(315,"free");
+	rubis::sched::yield_gpu("319_free");
 
-	//rubis::sched::request_gpu(316);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaFree(candidate_voxel_id));
-	//rubis::sched::yield_gpu(316,"free");
+	rubis::sched::yield_gpu("320_free");
 
-	//rubis::sched::request_gpu(317);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaFree(valid_voxel_mark));
-	//rubis::sched::yield_gpu(317,"free");
+	rubis::sched::yield_gpu("321_free");
 
-	//rubis::sched::request_gpu(318);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaFree(valid_points_mark));
-	//rubis::sched::yield_gpu(318,"free");
+	rubis::sched::yield_gpu("322_free");
 
-	//rubis::sched::request_gpu(319);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaFree(valid_voxel_count));
-	//rubis::sched::yield_gpu(319,"free");
+	rubis::sched::yield_gpu("323_free");
 
-	//rubis::sched::request_gpu(320);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaFree(valid_points_location));
-	//rubis::sched::yield_gpu(320,"free");
+	rubis::sched::yield_gpu("324_free");
 
-	//rubis::sched::request_gpu(321);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaFree(valid_voxel_location));
-	//rubis::sched::yield_gpu(321,"free");
+	rubis::sched::yield_gpu("325_free");
 }
 
 /* Build parent nodes from child nodes of the octree */
@@ -1752,17 +1764,17 @@ void GVoxelGrid::scatterPointsToVoxelGrid()
 {
 	if (starting_point_ids_ != NULL) {
 
-		//rubis::sched::request_gpu(322);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaFree(starting_point_ids_));
-		//rubis::sched::yield_gpu(322,"free");
+		rubis::sched::yield_gpu("326_free");
 
 		starting_point_ids_ = NULL;
 	}
 
 	if (point_ids_ != NULL) {
-		//rubis::sched::request_gpu(323);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaFree(point_ids_));
-		//rubis::sched::yield_gpu(323,"free");
+		rubis::sched::yield_gpu("327_free");
 
 		point_ids_ = NULL;
 	}
@@ -1770,69 +1782,69 @@ void GVoxelGrid::scatterPointsToVoxelGrid()
 	int block_x = (points_num_ > BLOCK_SIZE_X) ? BLOCK_SIZE_X : points_num_;
 	int grid_x = (points_num_ - 1) / block_x + 1;
 
-	//rubis::sched::request_gpu(324);
+	rubis::sched::request_gpu();
 	insertPointsToGrid<<<grid_x, block_x>>>(x_, y_, z_, points_num_, points_per_voxel_, voxel_num_,
 												vgrid_x_, vgrid_y_, vgrid_z_,
 												voxel_x_, voxel_y_, voxel_z_,
 												min_b_x_, min_b_y_, min_b_z_);
-	//rubis::sched::yield_gpu(324,"insertPointsToGrid");
+	rubis::sched::yield_gpu("328_insertPointsToGrid");
 	checkCudaErrors(cudaGetLastError());
 	checkCudaErrors(cudaDeviceSynchronize());
 
-	//rubis::sched::request_gpu(325);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMalloc(&starting_point_ids_, sizeof(int) * (voxel_num_ + 1)));
-	//rubis::sched::yield_gpu(325,"cudaMalloc");
+	rubis::sched::yield_gpu("329_cudaMalloc");
 
 	int *writing_location;
 
-	//rubis::sched::request_gpu(326);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMalloc(&writing_location, sizeof(int) * voxel_num_));
-	//rubis::sched::yield_gpu(326,"cudaMalloc");
+	rubis::sched::yield_gpu("330_cudaMalloc");
 
-	//rubis::sched::request_gpu(327);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMemcpy(starting_point_ids_, points_per_voxel_, sizeof(int) * voxel_num_, cudaMemcpyDeviceToDevice));
-	//rubis::sched::yield_gpu(327,"dtod");
+	rubis::sched::yield_gpu("331_dtod");
 
 	ExclusiveScan(starting_point_ids_, voxel_num_ + 1);
 
-	//rubis::sched::request_gpu(328);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMemcpy(writing_location, starting_point_ids_, sizeof(int) * voxel_num_, cudaMemcpyDeviceToDevice));
-	//rubis::sched::yield_gpu(328,"dtod");
+	rubis::sched::yield_gpu("332_dtod");
 
-	//rubis::sched::request_gpu(329);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMalloc(&point_ids_, sizeof(int) * points_num_));
-	//rubis::sched::yield_gpu(329,"cudaMalloc");
+	rubis::sched::yield_gpu("333_cudaMalloc");
 
-	//rubis::sched::request_gpu(330);
+	rubis::sched::request_gpu();
 	scatterPointsToVoxels<<<grid_x, block_x>>>(x_, y_, z_, points_num_, voxel_num_,
 												voxel_x_, voxel_y_, voxel_z_,
 												min_b_x_, min_b_y_, min_b_z_,
 												vgrid_x_, vgrid_y_, vgrid_z_,
 												writing_location, point_ids_);
-	//rubis::sched::yield_gpu(330,"scatterPointsToVoxels");
+	rubis::sched::yield_gpu("334_scatterPointsToVoxels");
 	
 	checkCudaErrors(cudaGetLastError());
 	checkCudaErrors(cudaDeviceSynchronize());
 
-	//rubis::sched::request_gpu(331);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaFree(writing_location));
-	//rubis::sched::yield_gpu(331,"free");
+	rubis::sched::yield_gpu("335_free");
 }
 
 void GVoxelGrid::buildOctree()
 {
 	for (unsigned int i = 1; i < octree_centroids_.size(); i++) {
 		if (octree_centroids_[i] != NULL) {
-			//rubis::sched::request_gpu(332);
+			rubis::sched::request_gpu();
 			checkCudaErrors(cudaFree(octree_centroids_[i]));
-			//rubis::sched::yield_gpu(332,"free");
+			rubis::sched::yield_gpu("336_free");
 
 			octree_centroids_[i] = NULL;
 		}
 		if (octree_points_per_node_[i] != NULL) {
-			//rubis::sched::request_gpu(333);
+			rubis::sched::request_gpu();
 			checkCudaErrors(cudaFree(octree_points_per_node_[i]));
-			//rubis::sched::yield_gpu(333,"free");
+			rubis::sched::yield_gpu("337_free");
 
 			octree_points_per_node_[i] = NULL;
 		}
@@ -1873,13 +1885,13 @@ void GVoxelGrid::buildOctree()
 		double *parent_centroids;
 		int *points_per_parent;
 
-		//rubis::sched::request_gpu(334);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaMalloc(&parent_centroids, sizeof(double) * 3 * node_number));
-		//rubis::sched::yield_gpu(334,"cudaMalloc");
+		rubis::sched::yield_gpu("338_cudaMalloc");
 
-		//rubis::sched::request_gpu(335);
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaMalloc(&points_per_parent, sizeof(int) * node_number));
-		//rubis::sched::yield_gpu(335,"cudaMalloc");
+		rubis::sched::yield_gpu("339_cudaMalloc");
 
 		double *child_centroids = octree_centroids_[i];
 		int *points_per_child = octree_points_per_node_[i];
@@ -1895,12 +1907,12 @@ void GVoxelGrid::buildOctree()
 		dim3 block(block_x, block_y, block_z);
 		dim3 grid(grid_x, grid_y, grid_z);
 
-		//rubis::sched::request_gpu(336);
+		rubis::sched::request_gpu();
 		buildParent<<<grid, block>>>(child_centroids, points_per_child,
 										child_grid_x, child_grid_y, child_grid_z, child_grid_x * child_grid_y * child_grid_z,
 										parent_centroids, points_per_parent,
 										parent_grid_x, parent_grid_y, parent_grid_z);
-		//rubis::sched::yield_gpu(336,"buildParent");
+		rubis::sched::yield_gpu("340_buildParent");
 		
 		checkCudaErrors(cudaGetLastError());
 		octree_centroids_.push_back(parent_centroids);
@@ -2031,29 +2043,29 @@ void GVoxelGrid::nearestNeighborSearch(float *trans_x, float *trans_y, float *tr
 
 	int *vid_x, *vid_y, *vid_z;
 
-	//rubis::sched::request_gpu(337);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMalloc(&vid_x, sizeof(int) * point_num));
-	//rubis::sched::yield_gpu(337,"cudaMalloc");
+	rubis::sched::yield_gpu("338_cudaMalloc");
 
-	//rubis::sched::request_gpu(338);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMalloc(&vid_y, sizeof(int) * point_num));
-	//rubis::sched::yield_gpu(338,"cudaMalloc");
+	rubis::sched::yield_gpu("339_cudaMalloc");
 
-	//rubis::sched::request_gpu(339);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMalloc(&vid_z, sizeof(int) * point_num));
-	//rubis::sched::yield_gpu(339,"cudaMalloc");
+	rubis::sched::yield_gpu("340_cudaMalloc");
 
-	//rubis::sched::request_gpu(340);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMemset(vid_x, 0, sizeof(int) * point_num));
-	//rubis::sched::yield_gpu(340,"cudaMemset");
+	rubis::sched::yield_gpu("341_cudaMemset");
 
-	//rubis::sched::request_gpu(341);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMemset(vid_y, 0, sizeof(int) * point_num));
-	//rubis::sched::yield_gpu(341,"cudaMemset");
+	rubis::sched::yield_gpu("342_cudaMemset");
 
-	//rubis::sched::request_gpu(342);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaMemset(vid_z, 0, sizeof(int) * point_num));
-	//rubis::sched::yield_gpu(342,"cudaMemset");
+	rubis::sched::yield_gpu("343_cudaMemset");
 	
 	checkCudaErrors(cudaDeviceSynchronize());
 
@@ -2069,46 +2081,46 @@ void GVoxelGrid::nearestNeighborSearch(float *trans_x, float *trans_y, float *tr
 		int vgrid_z = octree_grid_size_[i].size_z;
 		int node_num = vgrid_x * vgrid_y * vgrid_z;
 
-		//rubis::sched::request_gpu(343);
+		rubis::sched::request_gpu();
 		nearestOctreeNodeSearch<<<grid_x, block_x>>>(trans_x, trans_y, trans_z,
 														vid_x, vid_y, vid_z,
 														point_num,
 														centroids, points_per_node,
 														vgrid_x, vgrid_y, vgrid_z, node_num);
-		//rubis::sched::yield_gpu(343,"nearestOctreeNodeSearch");
+		rubis::sched::yield_gpu("344_nearestOctreeNodeSearch");
 
 		checkCudaErrors(cudaGetLastError());
 	}
 
-	//rubis::sched::request_gpu(344);
+	rubis::sched::request_gpu();
 	nearestPointSearch<<<grid_x, block_x>>>(trans_x, trans_y, trans_z, point_num,
 												x_, y_, z_, points_num_,
 												vid_x, vid_y, vid_z,
 												vgrid_x_, vgrid_y_, vgrid_z_, voxel_num_,
 												starting_point_ids_, point_ids_,
 												min_distance);
-	//rubis::sched::yield_gpu(344,"nearestPointSearch");
+	rubis::sched::yield_gpu("345_nearestPointSearch");
 	
 	checkCudaErrors(cudaGetLastError());
 
-	//rubis::sched::request_gpu(345);
+	rubis::sched::request_gpu();
 	verifyDistances<<<grid_x, block_x>>>(valid_distance, min_distance, max_range, point_num);
-	//rubis::sched::yield_gpu(345,"verifyDistances");
+	rubis::sched::yield_gpu("346_verifyDistances");
 
 	checkCudaErrors(cudaGetLastError());
 	checkCudaErrors(cudaDeviceSynchronize());
 
-	//rubis::sched::request_gpu(346);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaFree(vid_x));
-	//rubis::sched::yield_gpu(346,"free");
+	rubis::sched::yield_gpu("347_free");
 
-	//rubis::sched::request_gpu(347);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaFree(vid_y));
-	//rubis::sched::yield_gpu(347,"free");
+	rubis::sched::yield_gpu("348_free");
 
-	//rubis::sched::request_gpu(348);
+	rubis::sched::request_gpu();
 	checkCudaErrors(cudaFree(vid_z));
-	//rubis::sched::yield_gpu(348,"free");
+	rubis::sched::yield_gpu("349_free");
 }
 
 }

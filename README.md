@@ -76,13 +76,13 @@ in below three files (`sudo` required)
 ### Autoware Build
 ```
 # If you have CUDA
-AUTOWARE_COMPILE_WITH_CUDA=1 colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release
+AUTOWARE_COMPILE_WITH_CUDA=1 colcon build --cmake-args --parallel-workers 6 -DCMAKE_BUILD_TYPE=Release
 
 # Build only some package
 AUTOWARE_COMPILE_WITH_CUDA=1 colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release --packages-select $(pakcage name)
 
 # Build without some package
-AUTOWARE_COMPILE_WITH_CUDA=1 colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release --packages-skip $(pakcage name)
+AUTOWARE_COMPILE_WITH_CUDA=1 colcon build --cmake-args --parallel-workers 6 -DCMAKE_BUILD_TYPE=Release --packages-skip $(pakcage name)
 
 # If you don't have CUDA
 colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release
