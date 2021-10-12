@@ -24,9 +24,9 @@ extern int is_gpu_profiling_started_;
 
 extern struct timespec task_start_time_;
 extern struct timespec task_end_time_;
-extern unsigned long long gpu_seg_response_time_;
-extern unsigned long long gpu_seg_execution_time_;
-extern unsigned long long cpu_seg_response_time_;
+extern unsigned long gpu_seg_response_time_;
+extern unsigned long gpu_seg_execution_time_;
+extern unsigned long cpu_seg_response_time_;
 extern int is_gpu_profiling_ready_;
 
 #ifdef __cplusplus
@@ -43,7 +43,7 @@ void start_profiling_gpu_seg_response_time();
 void start_profiling_gpu_seg_execution_time();
 void stop_profiling_gpu_seg_time(unsigned int gpu_seg_id, unsigned int iter);
 void stop_profiling_gpu_seg_time_with_remark(unsigned int gpu_seg_id, unsigned int iter, const char* remark);
-unsigned long long get_current_time_ns();
+unsigned long get_current_time_ns();
 void start_job_profiling();
 void finish_job_profiling(unsigned int cpu_seg_id);
 void start_gpu_profiling();

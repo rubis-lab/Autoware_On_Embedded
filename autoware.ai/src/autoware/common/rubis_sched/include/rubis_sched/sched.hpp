@@ -104,7 +104,7 @@ struct sched_attr {
 // GPU 
 typedef struct  gpuSchedInfo{
     int pid;
-    unsigned long long deadline;
+    unsigned long deadline;
     int state; // NONE = 0, WAIT = 1, RUN = 2
     int scheduling_flag;
 } GPUSchedInfo;
@@ -116,8 +116,8 @@ extern GPUSchedInfo* gpu_sched_info_;
 extern int gpu_scheduler_pid_;
 extern std::string task_filename_;
 extern std::string gpu_deadline_filename_;
-// extern unsigned long long gpu_deadline_list_[1024];
-extern unsigned long long* gpu_deadline_list_;
+// extern unsigned long gpu_deadline_list_[1024];
+extern unsigned long* gpu_deadline_list_;
 extern unsigned int max_gpu_id_;
 extern unsigned int gpu_seg_id_;
 extern unsigned int cpu_seg_id_;
@@ -141,7 +141,7 @@ void init_gpu_scheduling(std::string task_filename, std::string gpu_deadline_fil
 void get_deadline_list();
 void sig_handler(int signum);
 void termination();
-unsigned long long get_current_time_us();
+unsigned long get_current_time_us();
 
 
 void start_job();
@@ -153,6 +153,8 @@ void request_gpu_in_loop(int flag);
 void yield_gpu(std::string remark = "");
 void yield_gpu_in_loop(int flag, std::string remark = "");
 void print_loop_info(std::string tag);
+void print_gpu_deadline_list();
+
 } // namespace sched
 } // namespace rubis
 

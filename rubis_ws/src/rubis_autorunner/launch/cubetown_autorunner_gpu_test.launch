@@ -1,0 +1,4 @@
+<launch>
+    <rosparam command="load" file="$(env USER_HOME)/rubis_ws/src/rubis_autorunner/cfg/cubetown_autorunner/cubetown_autorunner.yaml" />
+    <node pkg="rubis_autorunner" type="cubetown_autorunner_gpu_test" name="cubetown_autorunner_gpu_test" output="screen" />
+</launch>

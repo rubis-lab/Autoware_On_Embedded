@@ -1,0 +1,5 @@
+<launch>
+  <include file="$(find points_downsampler)/launch/points_downsample.launch" />
+
+
+</launch>

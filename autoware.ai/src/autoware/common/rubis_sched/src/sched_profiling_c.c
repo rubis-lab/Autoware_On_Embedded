@@ -11,9 +11,9 @@ int is_gpu_profiling_started_;
 
 struct timespec task_start_time_;
 struct timespec task_end_time_;
-unsigned long long gpu_seg_response_time_;
-unsigned long long gpu_seg_execution_time_;
-unsigned long long cpu_seg_response_time_;
+unsigned long gpu_seg_response_time_;
+unsigned long gpu_seg_execution_time_;
+unsigned long cpu_seg_response_time_;
 int is_gpu_profiling_ready_ = 0;
 
 void start_gpu_profiling(){
@@ -103,7 +103,7 @@ void start_profiling_gpu_seg_execution_time(){
 
 void stop_profiling_gpu_seg_time(unsigned int gpu_seg_id, unsigned int iter){
   if(gpu_profiling_flag_){
-    unsigned long long current_time = get_current_time_ns();
+    unsigned long current_time = get_current_time_ns();
     gpu_seg_response_time_ = current_time - gpu_seg_response_time_;
     gpu_seg_execution_time_ = current_time - gpu_seg_execution_time_;
     
@@ -114,7 +114,7 @@ void stop_profiling_gpu_seg_time(unsigned int gpu_seg_id, unsigned int iter){
 
 void stop_profiling_gpu_seg_time_with_remark(unsigned int gpu_seg_id, unsigned int iter, const char* remark){
   if(gpu_profiling_flag_){
-    unsigned long long current_time = get_current_time_ns();
+    unsigned long current_time = get_current_time_ns();
     gpu_seg_response_time_ = current_time - gpu_seg_response_time_;
     gpu_seg_execution_time_ = current_time - gpu_seg_execution_time_;
     
@@ -123,9 +123,9 @@ void stop_profiling_gpu_seg_time_with_remark(unsigned int gpu_seg_id, unsigned i
   }
 }
 
-unsigned long long get_current_time_ns(){
+unsigned long get_current_time_ns(){
   struct timespec ts;
-  unsigned long long current_time;
+  unsigned long current_time;
   clock_gettime(CLOCK_REALTIME, &ts);
   current_time = ts.tv_sec%10000 * 1000000000 + ts.tv_nsec;
   return current_time;

@@ -81,6 +81,8 @@ int main(int argc, char** argv)
     PublishMemFn pub_mem_fn = &image_transport::Publisher::publish;
     sub = it.subscribe(in_topic, 1, boost::bind(pub_mem_fn, &pub, _1), ros::VoidPtr(), in_transport);
 
+    rubis::sched::task_state_ = TASK_STATE_READY;
+
     if(!task_scheduling_flag && !task_profiling_flag){
       ros::spin();
     }
@@ -95,6 +97,7 @@ int main(int argc, char** argv)
         }
 
         ros::spinOnce();
+        rubis::sched::task_state_ = TASK_STATE_DONE;
 
         if(rubis::sched::task_state_ == TASK_STATE_DONE){
           if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
@@ -126,9 +129,9 @@ int main(int argc, char** argv)
     if(!task_scheduling_flag && !task_profiling_flag){
       ros::spin();
     }
-    else{
+    else{      
       ros::Rate r(rate);
-      // Executing task
+      // Executing task      
       while(ros::ok()){
         if(rubis::sched::task_state_ == TASK_STATE_READY){
           if(task_profiling_flag) rubis::sched::start_task_profiling();
@@ -137,6 +140,7 @@ int main(int argc, char** argv)
         }
 
         ros::spinOnce();
+        rubis::sched::task_state_ = TASK_STATE_DONE;
 
         if(rubis::sched::task_state_ == TASK_STATE_DONE){
           if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
