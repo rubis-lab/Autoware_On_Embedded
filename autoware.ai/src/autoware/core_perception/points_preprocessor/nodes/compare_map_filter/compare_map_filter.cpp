@@ -44,6 +44,8 @@
 
 #include <autoware_config_msgs/ConfigCompareMapFilter.h>
 
+#include <autoware_msgs/NDTStat.h>
+
 #include "rubis_sched/sched.hpp"
 
 static int ready_;
@@ -62,7 +64,7 @@ private:
   ros::Subscriber config_sub_;
   ros::Subscriber sensor_points_sub_;
   ros::Subscriber map_sub_;
-  ros::Subscriber ndt_pose_sub_;
+  ros::Subscriber ndt_stat_sub_;
   ros::Publisher match_points_pub_;
   ros::Publisher unmatch_points_pub_;
 
@@ -82,7 +84,7 @@ private:
   void searchMatchingCloud(const pcl::PointCloud<pcl::PointXYZI>::Ptr in_cloud_ptr,
                            pcl::PointCloud<pcl::PointXYZI>::Ptr match_cloud_ptr,
                            pcl::PointCloud<pcl::PointXYZI>::Ptr unmatch_cloud_ptr);  
-  void ndtPoseCallback(const geometry_msgs::PoseStamped msg);
+  void ndtStatCallback(const autoware_msgs::NDTStat& msg);
 };
 
 CompareMapFilter::CompareMapFilter()
@@ -100,7 +102,7 @@ CompareMapFilter::CompareMapFilter()
 
   map_flag = 0;
 
-  ndt_pose_sub_ = nh_.subscribe("/ndt_pose", 1, &CompareMapFilter::ndtPoseCallback, this);
+  ndt_stat_sub_ = nh_.subscribe("/ndt_stat", 1, &CompareMapFilter::ndtStatCallback, this);
   match_points_pub_ = nh_.advertise<sensor_msgs::PointCloud2>("/points_ground", 1);
   unmatch_points_pub_ = nh_.advertise<sensor_msgs::PointCloud2>("/points_no_ground", 1);
 
@@ -111,7 +113,7 @@ void CompareMapFilter::ready(){
   config_sub_ = nh_.subscribe("/config/compare_map_filter", 1, &CompareMapFilter::configCallback, this);
   sensor_points_sub_ = nh_.subscribe("/points_raw", 1, &CompareMapFilter::sensorPointsCallback, this);
   map_sub_ = nh_.subscribe("/points_map", 1, &CompareMapFilter::pointsMapCallback, this);
-  ndt_pose_sub_.shutdown();
+  ndt_stat_sub_.shutdown();
 }
 
 void CompareMapFilter::configCallback(const autoware_config_msgs::ConfigCompareMapFilter::ConstPtr& config_msg_ptr)
@@ -132,8 +134,9 @@ void CompareMapFilter::pointsMapCallback(const sensor_msgs::PointCloud2::ConstPt
   ROS_INFO("[Compare_map_filter] Points_Map_callback\n");
 }
 
-void CompareMapFilter::ndtPoseCallback(const geometry_msgs::PoseStamped msg){
-  ready_ = 1;
+void CompareMapFilter::ndtStatCallback(const autoware_msgs::NDTStat& msg){
+  std::cout<<"################## "<<msg.score<<std::endl;
+  if(msg.score < 0.5 && msg.score > 0.0) ready_ = 1;
 }
 
 void CompareMapFilter::sensorPointsCallback(const sensor_msgs::PointCloud2::ConstPtr& sensorTF_cloud_msg_ptr)

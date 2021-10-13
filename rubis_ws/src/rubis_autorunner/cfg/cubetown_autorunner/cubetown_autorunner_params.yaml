@@ -35,7 +35,7 @@ ndt_matching:
   task_minimum_inter_release_time: 100_000_000
   task_execution_time: 80_000_000
   task_relative_deadline: 80_000_000
-  gpu_scheduling_flag: 1
+  gpu_scheduling_flag: 0
   gpu_profiling_flag: 1
   gpu_execution_time_filename: "~/Documents/gpu_profiling/test_ndt_matching_execution_time.csv"
   gpu_response_time_filename: "~/Documents/gpu_profiling/test_ndt_matching_response_time.csv"

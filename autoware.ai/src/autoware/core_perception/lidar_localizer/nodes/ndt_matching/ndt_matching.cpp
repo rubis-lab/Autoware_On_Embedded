@@ -911,7 +911,6 @@ static void imu_callback(const sensor_msgs::Imu::Ptr& input)
 
 static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
 { 
-  std::cout<<"points callback"<<std::endl;
   // Check inital matching is success or not
   if(_is_init_match_finished == false && previous_score < USING_GPS_THRESHOLD && previous_score != 0.0)
     _is_init_match_finished = true;
@@ -1064,12 +1063,10 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
       iteration = anh_gpu_ndt_ptr->getFinalNumIteration();
 
       getFitnessScore_start = std::chrono::system_clock::now();
-      // fitness_score = anh_gpu_ndt_ptr->getFitnessScore();
-      fitness_score = 0;
+      fitness_score = anh_gpu_ndt_ptr->getFitnessScore();
       getFitnessScore_end = std::chrono::system_clock::now();
 
       trans_probability = anh_gpu_ndt_ptr->getTransformationProbability();      
-      std::cout<<"CUDA works"<<std::endl;
     }
 #endif
 #ifdef USE_PCL_OPENMP
@@ -1718,27 +1715,33 @@ int main(int argc, char** argv)
   // Subscribers
   ros::Subscriber param_sub = nh.subscribe("config/ndt", 1, param_callback); // origin: 10
   ros::Subscriber gnss_sub = nh.subscribe("gnss_pose", 1, gnss_callback); // origin: 10
-  //  ros::Subscriber map_sub = nh.subscribe("points_map", 1, map_callback);
+  ros::Subscriber map_sub = nh.subscribe("points_map", 1, map_callback);
   ros::Subscriber initialpose_sub = nh.subscribe("initialpose", 1, initialpose_callback); // origin: 10
-  ros::Subscriber points_sub = nh.subscribe("filtered_points", 1, points_callback); // origin: _queue_size
+  // ros::Subscriber points_sub = nh.subscribe("filtered_points", 1, points_callback); // origin: _queue_size
   // ros::Subscriber odom_sub = nh.subscribe("/vehicle/odom", _queue_size * 10, odom_callback);
   // ros::Subscriber imu_sub = nh.subscribe(_imu_topic.c_str(), _queue_size * 10, imu_callback);
 
-  pthread_t thread;
-  pthread_create(&thread, NULL, thread_func, NULL);
+  // pthread_t thread;
+  // pthread_create(&thread, NULL, thread_func, NULL);
 
   // SPIN  
   if(!task_scheduling_flag && !task_profiling_flag){
+    ros::Subscriber points_sub = nh.subscribe("filtered_points", 1, points_callback); // origin: _queue_size
     ros::spin();
   }
-  else{    
+  else{ 
     ros::Rate r(rate);
+
     // Initialize task ( Wait until first necessary topic is published )
     while(ros::ok()){
-      if(rubis::sched::is_task_ready_ == TASK_READY) break;
+      if(map_loaded == 1) break;
       ros::spinOnce();
       r.sleep();      
     }
+    
+    map_sub.shutdown();
+
+    ros::Subscriber points_sub = nh.subscribe("filtered_points", 1, points_callback); // origin: _queue_size
 
     // Executing task
     while(ros::ok()){

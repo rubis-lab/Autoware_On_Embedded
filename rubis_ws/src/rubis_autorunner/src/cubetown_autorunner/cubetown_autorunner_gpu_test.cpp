@@ -32,7 +32,7 @@ void CubetownAutorunner::register_subscribers(){
  }
 
  void CubetownAutorunner::ndt_stat_cb(const autoware_msgs::NDTStat& msg){
-  
+
  }
 
 void CubetownAutorunner::detection_cb(const autoware_msgs::DetectedObjectArray& msg){

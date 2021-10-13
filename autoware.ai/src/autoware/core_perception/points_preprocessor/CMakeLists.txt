@@ -8,6 +8,7 @@ endif()
 find_package(autoware_build_flags REQUIRED)
 
 find_package(catkin REQUIRED COMPONENTS
+  autoware_msgs
   autoware_config_msgs
   autoware_health_checker
   cv_bridge

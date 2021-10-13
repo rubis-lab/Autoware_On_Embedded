@@ -1924,13 +1924,9 @@ void GVoxelGrid::buildOctree()
 		octree_grid_size_.push_back(grid_size);
 
 		i++;
-		printf("sleep\n");
-		sleep(1);
 	}
 	
-	printf("!!!START SYNC\n");
 	checkCudaErrors(cudaDeviceSynchronize());
-	printf("!!!END SYNC\n");
 }
 
 /* Search for the nearest octree node */
