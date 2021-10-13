@@ -468,10 +468,11 @@ static void map_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
 
     // Setting point cloud to be aligned to.
     if (_method_type == MethodType::PCL_GENERIC)
-    {
+    { 
       pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ> new_ndt;
       pcl::PointCloud<pcl::PointXYZ>::Ptr output_cloud(new pcl::PointCloud<pcl::PointXYZ>);
       new_ndt.setResolution(ndt_res);
+      
       new_ndt.setInputTarget(map_ptr);
       new_ndt.setMaximumIterations(max_iter);
       new_ndt.setStepSize(step_size);
@@ -508,6 +509,7 @@ static void map_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
     {
       std::shared_ptr<gpu::GNormalDistributionsTransform> new_anh_gpu_ndt_ptr =
           std::make_shared<gpu::GNormalDistributionsTransform>();
+
       new_anh_gpu_ndt_ptr->setResolution(ndt_res);
       new_anh_gpu_ndt_ptr->setInputTarget(map_ptr);
       new_anh_gpu_ndt_ptr->setMaximumIterations(max_iter);
@@ -515,6 +517,7 @@ static void map_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
       new_anh_gpu_ndt_ptr->setTransformationEpsilon(trans_eps);
 
       pcl::PointCloud<pcl::PointXYZ>::Ptr dummy_scan_ptr(new pcl::PointCloud<pcl::PointXYZ>());
+
       pcl::PointXYZ dummy_point;
       dummy_scan_ptr->push_back(dummy_point);
       new_anh_gpu_ndt_ptr->setInputSource(dummy_scan_ptr);
@@ -908,11 +911,13 @@ static void imu_callback(const sensor_msgs::Imu::Ptr& input)
 
 static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
 { 
+  std::cout<<"points callback"<<std::endl;
   // Check inital matching is success or not
   if(_is_init_match_finished == false && previous_score < USING_GPS_THRESHOLD && previous_score != 0.0)
     _is_init_match_finished = true;
 
   health_checker_ptr_->CHECK_RATE("topic_rate_filtered_points_slow", 8, 5, 1, "topic filtered_points subscribe rate slow.");
+
   if (map_loaded == 1 && init_pos_set == 1)
   {
 
@@ -1064,6 +1069,7 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
       getFitnessScore_end = std::chrono::system_clock::now();
 
       trans_probability = anh_gpu_ndt_ptr->getTransformationProbability();      
+      std::cout<<"CUDA works"<<std::endl;
     }
 #endif
 #ifdef USE_PCL_OPENMP
@@ -1721,7 +1727,7 @@ int main(int argc, char** argv)
   pthread_t thread;
   pthread_create(&thread, NULL, thread_func, NULL);
 
-  // SPIN
+  // SPIN  
   if(!task_scheduling_flag && !task_profiling_flag){
     ros::spin();
   }

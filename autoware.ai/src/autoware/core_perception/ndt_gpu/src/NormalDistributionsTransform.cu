@@ -131,6 +131,7 @@ void GNormalDistributionsTransform::setInputTarget(pcl::PointCloud<pcl::PointXYZ
 		voxel_grid_.setLeafSize(resolution_, resolution_, resolution_);
 		voxel_grid_.setInput(target_x_, target_y_, target_z_, target_points_number_);
 	}
+	printf("complete set Input Target\n");
 }
 
 void GNormalDistributionsTransform::setInputTarget(pcl::PointCloud<pcl::PointXYZ>::Ptr input)
@@ -143,6 +144,7 @@ void GNormalDistributionsTransform::setInputTarget(pcl::PointCloud<pcl::PointXYZ
 		voxel_grid_.setLeafSize(resolution_, resolution_, resolution_);
 		voxel_grid_.setInput(target_x_, target_y_, target_z_, target_points_number_);
 	}
+	printf("complete set Input Target\n");
 }
 
 void GNormalDistributionsTransform::computeTransformation(const Eigen::Matrix<float, 4, 4> &guess)

@@ -131,6 +131,7 @@ int set_sched_deadline(int _tid, __u64 _exec_time, __u64 _deadline, __u64 _perio
 void request_task_scheduling(double task_minimum_inter_release_time, double task_execution_time, double task_relative_deadline);
 void yield_task_scheduling();
 void init_task();
+void disable_task();
 
 // GPU scheduling
 void init_gpu_scheduling(char* task_filename, char* gpu_deadline_filename, int key_id);

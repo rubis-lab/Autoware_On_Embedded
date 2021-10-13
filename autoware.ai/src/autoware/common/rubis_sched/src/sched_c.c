@@ -1,5 +1,7 @@
 #include "rubis_sched/sched_c.h"
 
+// #define DEBUG
+
 int key_id_;
 int is_scheduled_;
 int gpu_scheduling_flag_;
@@ -18,7 +20,6 @@ int is_task_ready_ = 0;
 int was_in_loop_ = 0;
 int loop_cnt_ = 0;
 int gpu_seg_cnt_in_loop_ = 0;
-
 
 // system call hook to call SCHED_DEADLINE
 int sched_setattr(pid_t pid, const struct sched_attr *attr, unsigned int flags){
@@ -227,6 +228,7 @@ void finish_job(){
 }
 
 void request_gpu(){  
+  if(is_task_ready_ != TASK_READY) return;
   if(was_in_loop_ == 1){
     was_in_loop_ = 0;
     loop_cnt_ = 0;
@@ -239,6 +241,7 @@ void request_gpu(){
 
     if(gpu_seg_id_ > max_gpu_id_){
       printf("[ERROR] GPU segment id bigger than max segment id!\n");
+      printf("gpu seg id: %d / max seg id: %d\n", gpu_seg_id_, max_gpu_id_);
       relative_deadline = 1000; // 1us
     }
 
@@ -247,6 +250,10 @@ void request_gpu(){
   }
   
   start_profiling_gpu_seg_response_time();
+
+  #ifdef DEBUG
+    printf("request_gpu: %d\n", gpu_seg_id_);
+  #endif
 
   if(gpu_scheduling_flag_ == 1){
     while(1){
@@ -264,6 +271,7 @@ void request_gpu(){
 }
 
 void request_gpu_in_loop(int flag){
+  if(is_task_ready_ != TASK_READY) return;
   was_in_loop_ = 1;
 
   if(flag == GPU_SEG_LOOP_START){
@@ -297,6 +305,10 @@ void request_gpu_in_loop(int flag){
   
   start_profiling_gpu_seg_response_time();
 
+  #ifdef DEBUG
+    printf("request_gpu: %d\n", gpu_seg_id_);
+  #endif
+
   if(gpu_scheduling_flag_ == 1){
     while(1){
       kill(gpu_scheduler_pid_, SIGUSR1);
@@ -317,6 +329,11 @@ void yield_gpu(){
     gpu_sched_info_->scheduling_flag = 0;
     gpu_sched_info_->state = SCHEDULING_STATE_NONE;
   }
+
+  #ifdef DEBUG
+    printf("yield_gpu: %d\n", gpu_seg_id_);
+  #endif
+
   stop_profiling_gpu_seg_time(gpu_seg_id_, 1);
   start_profiling_cpu_seg_response_time(1);
 
@@ -329,6 +346,11 @@ void yield_gpu_with_remark(const char* remark){
     gpu_sched_info_->scheduling_flag = 0;
     gpu_sched_info_->state = SCHEDULING_STATE_NONE;
   }
+
+  #ifdef DEBUG
+    printf("yield_gpu: %d\n", gpu_seg_id_);
+  #endif
+
   stop_profiling_gpu_seg_time_with_remark(gpu_seg_id_, 1, remark);
   start_profiling_cpu_seg_response_time();
 
@@ -341,6 +363,11 @@ void yield_gpu_in_loop(int flag){
     gpu_sched_info_->scheduling_flag = 0;
     gpu_sched_info_->state = SCHEDULING_STATE_NONE;
   }
+
+  #ifdef DEBUG
+    printf("yield_gpu: %d\n", gpu_seg_id_);
+  #endif
+
   stop_profiling_gpu_seg_time(gpu_seg_id_, loop_cnt_);
   start_profiling_cpu_seg_response_time();
 
@@ -355,6 +382,11 @@ void yield_gpu_with_remark_in_loop(int flag, const char* remark){
     gpu_sched_info_->scheduling_flag = 0;
     gpu_sched_info_->state = SCHEDULING_STATE_NONE;
   }
+
+  #ifdef DEBUG
+    printf("yield_gpu: %d\n", gpu_seg_id_);
+  #endif
+
   stop_profiling_gpu_seg_time_with_remark(gpu_seg_id_, loop_cnt_, remark);
   start_profiling_cpu_seg_response_time();
 
@@ -366,6 +398,10 @@ void yield_gpu_with_remark_in_loop(int flag, const char* remark){
 
 void init_task(){
   is_task_ready_ = TASK_READY;
+}
+
+void disable_task(){
+  is_task_ready_ = TASK_NOT_READY;
 }
 
 void print_loop_info(const char* tag){

@@ -1913,7 +1913,6 @@ void GVoxelGrid::buildOctree()
 										parent_centroids, points_per_parent,
 										parent_grid_x, parent_grid_y, parent_grid_z);
 		rubis::sched::yield_gpu("340_buildParent");
-		
 		checkCudaErrors(cudaGetLastError());
 		octree_centroids_.push_back(parent_centroids);
 		octree_points_per_node_.push_back(points_per_parent);
@@ -1925,9 +1924,13 @@ void GVoxelGrid::buildOctree()
 		octree_grid_size_.push_back(grid_size);
 
 		i++;
+		printf("sleep\n");
+		sleep(1);
 	}
-
+	
+	printf("!!!START SYNC\n");
 	checkCudaErrors(cudaDeviceSynchronize());
+	printf("!!!END SYNC\n");
 }
 
 /* Search for the nearest octree node */

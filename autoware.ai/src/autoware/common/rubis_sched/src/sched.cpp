@@ -1,5 +1,7 @@
 #include "rubis_sched/sched.hpp"
 
+// #define DEBUG 
+
 namespace rubis{
 namespace sched{
 
@@ -221,6 +223,7 @@ void finish_job(){
 }
 
 void request_gpu(){
+  if(is_task_ready_ != TASK_READY) return;
   if(was_in_loop_ == 1){
     was_in_loop_ = 0;
     loop_cnt_ = 0;
@@ -233,14 +236,20 @@ void request_gpu(){
 
     if(gpu_seg_id_ > max_gpu_id_){
       printf("[ERROR] GPU segment id bigger than max segment id!\n");
+      printf("gpu seg id: %d / max seg id: %d\n", gpu_seg_id_);
       relative_deadline = 1000; // 1us
     }
 
     gpu_sched_info_->deadline = get_current_time_ns() + relative_deadline;
     gpu_sched_info_->state = SCHEDULING_STATE_WAIT;
   }
-  
+
   start_profiling_gpu_seg_response_time();
+
+  #ifdef DEBUG
+    printf("request_gpu: %d\n", gpu_seg_id_);
+  #endif
+  
 
   if(gpu_scheduling_flag_ == 1){
     while(1){
@@ -258,6 +267,7 @@ void request_gpu(){
 }
 
 void request_gpu_in_loop(int flag){
+  if(is_task_ready_ != TASK_READY) return;
   was_in_loop_ = 1;
 
   if(flag == GPU_SEG_LOOP_START){
@@ -291,6 +301,10 @@ void request_gpu_in_loop(int flag){
   
   start_profiling_gpu_seg_response_time();
 
+  #ifdef DEBUG
+    printf("request_gpu: %d\n", gpu_seg_id_);
+  #endif
+
   if(gpu_scheduling_flag_ == 1){
     while(1){
       kill(gpu_scheduler_pid_, SIGUSR1);
@@ -311,9 +325,13 @@ void yield_gpu(std::string remark){
     gpu_sched_info_->scheduling_flag = 0;
     gpu_sched_info_->state = SCHEDULING_STATE_NONE;
   }
+
+  #ifdef DEBUG
+    printf("yield_gpu: %d, %s\n", gpu_seg_id_, remark.c_str());
+  #endif
+
   stop_profiling_gpu_seg_time(gpu_seg_id_, 1, remark);
   start_profiling_cpu_seg_response_time();
-
   gpu_seg_id_++;
   cpu_seg_id_++;
 }
@@ -323,6 +341,11 @@ void yield_gpu_in_loop(int flag, std::string remark){
     gpu_sched_info_->scheduling_flag = 0;
     gpu_sched_info_->state = SCHEDULING_STATE_NONE;
   }
+
+  #ifdef DEBUG
+    printf("yield_gpu: %d\n", gpu_seg_id_);
+  #endif
+
   stop_profiling_gpu_seg_time(gpu_seg_id_, loop_cnt_, remark);
   start_profiling_cpu_seg_response_time();
 
@@ -337,6 +360,10 @@ void yield_gpu_in_loop(int flag, std::string remark){
 
 void init_task(){
   is_task_ready_ = TASK_READY;
+}
+
+void disable_task(){
+  is_task_ready_ = TASK_NOT_READY;
 }
 
 void print_loop_info(std::string tag){

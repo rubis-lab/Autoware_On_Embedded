@@ -127,7 +127,6 @@ extern int was_in_loop_;
 extern int loop_cnt_;
 extern int gpu_seg_cnt_in_loop_;
 
-
 // Task scheduling
 int sched_setattr(pid_t pid, const struct sched_attr *attr, unsigned int flags);
 int sched_getattr(pid_t pid, struct sched_attr *attr, unsigned int size, unsigned int flags);
@@ -135,6 +134,7 @@ bool set_sched_deadline(int _tid, __u64 _exec_time, __u64 _deadline, __u64 _peri
 void request_task_scheduling(double task_minimum_inter_release_time, double task_execution_time, double task_relative_deadline);
 void yield_task_scheduling();
 void init_task();
+void disable_task();
 
 // GPU scheduling
 void init_gpu_scheduling(std::string task_filename, std::string gpu_deadline_filename, int key_id);
