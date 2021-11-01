@@ -69,16 +69,29 @@ MotionPrediction::MotionPrediction()
     object_msg_list_.push_back(msg);
   }
   
-  sub_current_pose   = nh.subscribe("/current_pose", 1,  &MotionPrediction::callbackGetCurrentPose,     this); //origin 10
+  sub_current_pose   = nh.subscribe("/current_pose", 10,  &MotionPrediction::callbackGetCurrentPose,     this);
 
   int bVelSource = 1;
   _nh.getParam("/op_motion_predictor/velocitySource", bVelSource);
   if(bVelSource == 0)
-    sub_robot_odom = nh.subscribe("/odom", 1, &MotionPrediction::callbackGetRobotOdom, this); //origin 10
+    sub_robot_odom = nh.subscribe("/odom", 10, &MotionPrediction::callbackGetRobotOdom, this);
   else if(bVelSource == 1)
-    sub_current_velocity = nh.subscribe("/current_velocity", 1, &MotionPrediction::callbackGetVehicleStatus, this); //origin 10
+    sub_current_velocity = nh.subscribe("/current_velocity", 10, &MotionPrediction::callbackGetVehicleStatus, this);
   else if(bVelSource == 2)
-    sub_can_info = nh.subscribe("/can_info", 1, &MotionPrediction::callbackGetCANInfo, this); //origin 10
+    sub_can_info = nh.subscribe("/can_info", 10, &MotionPrediction::callbackGetCANInfo, this);
+  
+
+  /*  RT Scheduling setup  */
+  // sub_current_pose   = nh.subscribe("/current_pose", 1,  &MotionPrediction::callbackGetCurrentPose,     this); //origin 10
+
+  // int bVelSource = 1;
+  // _nh.getParam("/op_motion_predictor/velocitySource", bVelSource);
+  // if(bVelSource == 0)
+  //   sub_robot_odom = nh.subscribe("/odom", 1, &MotionPrediction::callbackGetRobotOdom, this); //origin 10
+  // else if(bVelSource == 1)
+  //   sub_current_velocity = nh.subscribe("/current_velocity", 1, &MotionPrediction::callbackGetVehicleStatus, this); //origin 10
+  // else if(bVelSource == 2)
+  //   sub_can_info = nh.subscribe("/can_info", 1, &MotionPrediction::callbackGetCANInfo, this); //origin 10
 
   UtilityHNS::UtilityH::GetTickCount(m_VisualizationTimer);
   PlannerHNS::ROSHelpers::InitPredMarkers(100, m_PredictedTrajectoriesDummy);
@@ -630,8 +643,8 @@ void MotionPrediction::MainLoop()
 //    }
 
     if(rubis::sched::is_task_ready_ == TASK_READY && rubis::sched::task_state_ == TASK_STATE_DONE){
-      if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
       if(task_profiling_flag) rubis::sched::stop_task_profiling();
+      if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
       rubis::sched::task_state_ = TASK_STATE_READY;
     }
 
