@@ -61,16 +61,28 @@ BehaviorGen::BehaviorGen()
   pub_turnMarker = nh.advertise<visualization_msgs::MarkerArray>("turn_marker", 1);
   pub_currentState = nh.advertise<std_msgs::Int32>("current_state", 1);
 
-  sub_current_pose = nh.subscribe("/current_pose", 1,  &BehaviorGen::callbackGetCurrentPose, this); //origin 10
+  sub_current_pose = nh.subscribe("/current_pose", 10,  &BehaviorGen::callbackGetCurrentPose, this); 
 
   int bVelSource = 1;
   _nh.getParam("/op_trajectory_evaluator/velocitySource", bVelSource);
   if(bVelSource == 0)
-    sub_robot_odom = nh.subscribe("/odom", 1, &BehaviorGen::callbackGetRobotOdom, this); //origin 10
+    sub_robot_odom = nh.subscribe("/odom", 10, &BehaviorGen::callbackGetRobotOdom, this);
   else if(bVelSource == 1)
-    sub_current_velocity = nh.subscribe("/current_velocity", 1, &BehaviorGen::callbackGetVehicleStatus, this); //origin 10
+    sub_current_velocity = nh.subscribe("/current_velocity", 10, &BehaviorGen::callbackGetVehicleStatus, this);
   else if(bVelSource == 2)
-    sub_can_info = nh.subscribe("/can_info", 1, &BehaviorGen::callbackGetCANInfo, this); //origin 10
+    sub_can_info = nh.subscribe("/can_info", 10, &BehaviorGen::callbackGetCANInfo, this);
+  
+  /*  RT Scheduling setup  */
+  // sub_current_pose = nh.subscribe("/current_pose", 1,  &BehaviorGen::callbackGetCurrentPose, this); //origin 10
+
+  // int bVelSource = 1;
+  // _nh.getParam("/op_trajectory_evaluator/velocitySource", bVelSource);
+  // if(bVelSource == 0)
+  //   sub_robot_odom = nh.subscribe("/odom", 1, &BehaviorGen::callbackGetRobotOdom, this); //origin 10
+  // else if(bVelSource == 1)
+  //   sub_current_velocity = nh.subscribe("/current_velocity", 1, &BehaviorGen::callbackGetVehicleStatus, this); //origin 10
+  // else if(bVelSource == 2)
+  //   sub_can_info = nh.subscribe("/can_info", 1, &BehaviorGen::callbackGetCANInfo, this); //origin 10
 
   sub_GlobalPlannerPaths = nh.subscribe("/lane_waypoints_array", 1, &BehaviorGen::callbackGetGlobalPlannerPath, this);
   sub_LocalPlannerPaths = nh.subscribe("/local_weighted_trajectories", 1, &BehaviorGen::callbackGetLocalPlannerPath, this);
@@ -768,8 +780,8 @@ void BehaviorGen::MainLoop()
       sub_GlobalPlannerPaths = nh.subscribe("/lane_waypoints_array",   1,    &BehaviorGen::callbackGetGlobalPlannerPath,   this);
 
     if(rubis::sched::is_task_ready_ == TASK_READY && rubis::sched::task_state_ == TASK_STATE_DONE){
-      if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
       if(task_profiling_flag) rubis::sched::stop_task_profiling();
+      if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
       rubis::sched::task_state_ = TASK_STATE_READY;
     }
 

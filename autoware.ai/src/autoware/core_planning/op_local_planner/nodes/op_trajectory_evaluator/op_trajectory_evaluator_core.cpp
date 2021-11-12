@@ -49,17 +49,30 @@ TrajectoryEval::TrajectoryEval()
   pub_IntersectionCondition = nh.advertise<autoware_msgs::IntersectionCondition>("intersection_condition", 1);
   pub_SprintSwitch = nh.advertise<std_msgs::Bool>("sprint_switch", 1);
 
-  sub_current_pose = nh.subscribe("/current_pose", 1, &TrajectoryEval::callbackGetCurrentPose, this); //origin 10
-  sub_current_state = nh.subscribe("/current_state", 1, &TrajectoryEval::callbackGetCurrentState, this); //origin 10
+  sub_current_pose = nh.subscribe("/current_pose", 10, &TrajectoryEval::callbackGetCurrentPose, this);
+  sub_current_state = nh.subscribe("/current_state", 10, &TrajectoryEval::callbackGetCurrentState, this);
 
   int bVelSource = 1;
   _nh.getParam("/op_trajectory_evaluator/velocitySource", bVelSource);
   if(bVelSource == 0)
-    sub_robot_odom = nh.subscribe("/odom", 1, &TrajectoryEval::callbackGetRobotOdom, this); //origin 10
+    sub_robot_odom = nh.subscribe("/odom", 10, &TrajectoryEval::callbackGetRobotOdom, this);
   else if(bVelSource == 1)
-    sub_current_velocity = nh.subscribe("/current_velocity", 1, &TrajectoryEval::callbackGetVehicleStatus, this); //origin 10
+    sub_current_velocity = nh.subscribe("/current_velocity", 10, &TrajectoryEval::callbackGetVehicleStatus, this);
   else if(bVelSource == 2)
-    sub_can_info = nh.subscribe("/can_info", 1, &TrajectoryEval::callbackGetCANInfo, this); //origin 10
+    sub_can_info = nh.subscribe("/can_info", 10, &TrajectoryEval::callbackGetCANInfo, this);
+
+  /*  RT Scheduling setup  */
+  // sub_current_pose = nh.subscribe("/current_pose", 1, &TrajectoryEval::callbackGetCurrentPose, this); //origin 10
+  // sub_current_state = nh.subscribe("/current_state", 1, &TrajectoryEval::callbackGetCurrentState, this); //origin 10
+
+  // int bVelSource = 1;
+  // _nh.getParam("/op_trajectory_evaluator/velocitySource", bVelSource);
+  // if(bVelSource == 0)
+  //   sub_robot_odom = nh.subscribe("/odom", 1, &TrajectoryEval::callbackGetRobotOdom, this); //origin 10
+  // else if(bVelSource == 1)
+  //   sub_current_velocity = nh.subscribe("/current_velocity", 1, &TrajectoryEval::callbackGetVehicleStatus, this); //origin 10
+  // else if(bVelSource == 2)
+  //   sub_can_info = nh.subscribe("/can_info", 1, &TrajectoryEval::callbackGetCANInfo, this); //origin 10
 
   sub_GlobalPlannerPaths = nh.subscribe("/lane_waypoints_array", 1, &TrajectoryEval::callbackGetGlobalPlannerPath, this);
   sub_LocalPlannerPaths = nh.subscribe("/local_trajectories", 1, &TrajectoryEval::callbackGetLocalPlannerPath, this);
@@ -566,8 +579,8 @@ void TrajectoryEval::MainLoop()
       sub_GlobalPlannerPaths = nh.subscribe("/lane_waypoints_array",   1,    &TrajectoryEval::callbackGetGlobalPlannerPath,   this);
 
     if(rubis::sched::is_task_ready_ == TASK_READY && rubis::sched::task_state_ == TASK_STATE_DONE){
-      if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
       if(task_profiling_flag) rubis::sched::stop_task_profiling();
+      if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
       rubis::sched::task_state_ = TASK_STATE_READY;
     }
     loop_rate.sleep();

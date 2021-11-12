@@ -24,8 +24,14 @@ TwistFilterNode::TwistFilterNode() : nh_(), private_nh_("~"), health_checker_(nh
   // Subscribe
   twist_sub_ = nh_.subscribe("twist_raw", 1, &TwistFilterNode::twistCmdCallback, this);
   ctrl_sub_ = nh_.subscribe("ctrl_raw", 1, &TwistFilterNode::ctrlCmdCallback, this);
-  config_sub_ = nh_.subscribe("config/twist_filter", 1, &TwistFilterNode::configCallback, this); //origin 10
+  config_sub_ = nh_.subscribe("config/twist_filter", 10, &TwistFilterNode::configCallback, this);
   emergency_stop_sub_ = nh_.subscribe("emergency_stop", 1 ,&TwistFilterNode::emergencyStopCallback, this);
+
+  /*  RT Scheduling setup  */
+  // twist_sub_ = nh_.subscribe("twist_raw", 1, &TwistFilterNode::twistCmdCallback, this);
+  // ctrl_sub_ = nh_.subscribe("ctrl_raw", 1, &TwistFilterNode::ctrlCmdCallback, this);
+  // config_sub_ = nh_.subscribe("config/twist_filter", 1, &TwistFilterNode::configCallback, this); //origin 10
+  // emergency_stop_sub_ = nh_.subscribe("emergency_stop", 1 ,&TwistFilterNode::emergencyStopCallback, this);
 
   // Publish
   twist_pub_ = nh_.advertise<geometry_msgs::TwistStamped>("twist_cmd", 5);

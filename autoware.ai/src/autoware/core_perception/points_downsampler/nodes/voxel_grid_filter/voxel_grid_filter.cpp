@@ -177,8 +177,12 @@ int main(int argc, char** argv)
   points_downsampler_info_pub = nh.advertise<points_downsampler::PointsDownsamplerInfo>("/points_downsampler_info", 1000);
 
   // Subscribers
-  ros::Subscriber config_sub = nh.subscribe("config/voxel_grid_filter", 1, config_callback); // origin 10
-  ros::Subscriber scan_sub = nh.subscribe(POINTS_TOPIC, 1, scan_callback); // origin 10
+  ros::Subscriber config_sub = nh.subscribe("config/voxel_grid_filter", 10, config_callback);
+  ros::Subscriber scan_sub = nh.subscribe(POINTS_TOPIC, 10, scan_callback);
+
+  /*  RT Scheduling setup  */
+  // ros::Subscriber config_sub = nh.subscribe("config/voxel_grid_filter", 1, config_callback); // origin 10
+  // ros::Subscriber scan_sub = nh.subscribe(POINTS_TOPIC, 1, scan_callback); // origin 10
 
   if(!task_scheduling_flag && !task_profiling_flag){
     ros::spin();
@@ -203,8 +207,8 @@ int main(int argc, char** argv)
       ros::spinOnce();
 
       if(rubis::sched::task_state_ == TASK_STATE_DONE){
-        if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
         if(task_profiling_flag) rubis::sched::stop_task_profiling();
+        if(task_scheduling_flag) rubis::sched::yield_task_scheduling();        
         rubis::sched::task_state_ = TASK_STATE_READY;
       }
       
