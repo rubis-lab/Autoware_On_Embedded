@@ -42,19 +42,27 @@ ndt_matching:
   gpu_deadline_filename: "~/Documents/gpu_deadline/ndt_matching_gpu_deadline.csv"
 
 # Detection
-compare_map_filter:
-  distance_threshold: 0.4
-  min_clipping_height: -1.7
-  max_clipping_height: 0.5
+# compare_map_filter:
+#   distance_threshold: 0.4
+#   min_clipping_height: -1.7
+#   max_clipping_height: 0.5
 
+#   task_scheduling_flag: 0
+#   task_profiling_flag: 1
+#   task_response_time_filename: "~/Documents/profiling/response_time/compare_map_filter.csv"
+#   rate: 10
+#   task_minimum_inter_release_time: 200_000_000
+#   task_execution_time: 50_000_000
+#   task_relative_deadline: 80_000_000
+
+ray_ground_filter:
   task_scheduling_flag: 0
   task_profiling_flag: 1
-  task_response_time_filename: "~/Documents/profiling/response_time/compare_map_filter.csv"
+  task_response_time_filename: "~/Documents/profiling/response_time/ray_ground_filter.csv"
   rate: 10
   task_minimum_inter_release_time: 200_000_000
-  task_execution_time: 50_000_000
-  task_relative_deadline: 80_000_000
-
+  task_execution_time: 100_000_000
+  task_relative_deadline: 200_000_000
 
 lidar_euclidean_cluster_detect:
   task_scheduling_flag: 0
@@ -64,7 +72,7 @@ lidar_euclidean_cluster_detect:
   task_minimum_inter_release_time: 200_000_000
   task_execution_time: 50_000_000
   task_relative_deadline: 200_000_000
-  gpu_scheduling_flag: 1
+  gpu_scheduling_flag: 0
   gpu_profiling_flag: 1
   gpu_execution_time_filename: "~/Documents/gpu_profiling/test_clustering_execution_time.csv"
   gpu_response_time_filename: "~/Documents/gpu_profiling/test_clustering_response_time.csv"
@@ -78,7 +86,7 @@ vision_darknet_detect:
   task_minimum_inter_release_time: 100_000_000
   task_execution_time: 75_000_000
   task_relative_deadline: 80_000_000
-  gpu_scheduling_flag: 1
+  gpu_scheduling_flag: 0
   gpu_profiling_flag: 1
   gpu_execution_time_filename: "~/Documents/gpu_profiling/test_yolo_execution_time.csv"
   gpu_response_time_filename: "~/Documents/gpu_profiling/test_yolo_response_time.csv"
