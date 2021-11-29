@@ -11,12 +11,12 @@ char* task_filename_;
 char* gpu_deadline_filename_;
 // unsigned long gpu_deadline_list_[1024];
 unsigned long* gpu_deadline_list_;
-unsigned int max_gpu_id_ = TASK_NOT_READY;
+unsigned int max_gpu_id_ = 0;
 unsigned int cpu_seg_id_ = 0;
 unsigned int gpu_seg_id_ = 0;
 
+int is_task_ready_ = TASK_NOT_READY;
 int task_state_ = TASK_STATE_READY;
-int is_task_ready_ = 0;
 int was_in_loop_ = 0;
 int loop_cnt_ = 0;
 int gpu_seg_cnt_in_loop_ = 0;
@@ -240,7 +240,7 @@ void request_gpu(){
     unsigned long relative_deadline = gpu_deadline_list_[gpu_seg_id_];
 
     if(gpu_seg_id_ > max_gpu_id_){
-      printf("[ERROR] GPU segment id bigger than max segment id!\n");
+      printf("[ERROR] %s - GPU segment id bigger than max segment id!\n", task_filename_);
       printf("gpu seg id: %d / max seg id: %d\n", gpu_seg_id_, max_gpu_id_);
       relative_deadline = 1000; // 1us
     }
@@ -295,7 +295,7 @@ void request_gpu_in_loop(int flag){
     unsigned long relative_deadline = gpu_deadline_list_[gpu_seg_id_];
 
     if(gpu_seg_id_ > max_gpu_id_){
-      printf("[ERROR] GPU segment id bigger than max segment id!\n");
+      printf("[ERROR] %s - GPU segment id bigger than max segment id!\n", task_filename_);
       relative_deadline = 1000; // 1us
     }
 

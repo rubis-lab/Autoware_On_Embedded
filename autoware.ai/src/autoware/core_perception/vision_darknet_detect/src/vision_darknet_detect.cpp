@@ -468,8 +468,8 @@ void Yolo3DetectorNode::Run()
 
             if(task_state_ == TASK_STATE_DONE){
                 if(gpu_profiling_flag || gpu_scheduling_flag) finish_job();
+                if(task_profiling_flag) stop_task_profiling();
                 if(task_scheduling_flag) yield_task_scheduling();
-                if(task_profiling_flag) stop_task_profiling();                
                 task_state_ = TASK_STATE_READY;
             }
             
