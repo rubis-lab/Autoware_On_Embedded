@@ -619,6 +619,8 @@ void BehaviorGen::MainLoop()
 
   m_BehaviorGenerator.m_turnThreshold = m_turnThreshold;
 
+m_sprintSwitch = false;
+
   private_nh.param<int>("/op_behavior_selector/task_scheduling_flag", task_scheduling_flag, 0);
   private_nh.param<int>("/op_behavior_selector/task_profiling_flag", task_profiling_flag, 0);
   private_nh.param<std::string>("/op_behavior_selector/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/op_behavior_selector.csv");
@@ -634,6 +636,8 @@ void BehaviorGen::MainLoop()
   if(!task_scheduling_flag && !task_profiling_flag) loop_rate = ros::Rate(25);
 
   struct timespec start_time, end_time;
+
+  m_sprintSwitch = false;
 
   while (ros::ok())
   {

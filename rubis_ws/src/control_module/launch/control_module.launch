@@ -8,7 +8,7 @@
     steering_angle_to_servo_offset: 0.5304
     wheelbase: .25
     vesc_to_odom/publish_tf: false
-    vesc_driver/port: /dev/vesc
+    vesc_driver/port: /dev/ttyACM0
     keyboard: false
   </rosparam>
 

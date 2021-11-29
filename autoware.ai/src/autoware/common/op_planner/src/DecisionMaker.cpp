@@ -217,7 +217,10 @@ void DecisionMaker::InitBehaviorStates()
 
    double critical_long_front_distance =  m_CarInfo.wheel_base/2.0 + m_CarInfo.length/2.0 + m_params.verticalSafetyDistance;
 
-  if(ReachEndOfGlobalPath(pValues->minStoppingDistance + critical_long_front_distance, pValues->iCurrSafeLane))
+  // HJW modified
+  // ISSUE: Stop distnace should be calculated dynamically on real vehicle
+  //if(ReachEndOfGlobalPath(pValues->minStoppingDistance + critical_long_front_distance, pValues->iCurrSafeLane))
+  if(ReachEndOfGlobalPath(0.3, pValues->iCurrSafeLane))
     pValues->currentGoalID = -1;
   else
     pValues->currentGoalID = goalID;
@@ -373,21 +376,21 @@ void DecisionMaker::InitBehaviorStates()
    return true;
  }
 
- void DecisionMaker::SetNewGlobalPath(const std::vector<std::vector<WayPoint> >& globalPath)
- {
-   if(m_pCurrentBehaviorState)
-   {
-     m_pCurrentBehaviorState->GetCalcParams()->bNewGlobalPath = true;
-     m_TotalOriginalPath = globalPath;
-   }
+void DecisionMaker::SetNewGlobalPath(const std::vector<std::vector<WayPoint> >& globalPath)
+{
+  if(m_pCurrentBehaviorState)
+  {
+    m_pCurrentBehaviorState->GetCalcParams()->bNewGlobalPath = true;
+    m_TotalOriginalPath = globalPath;
+  }
  }
 
- bool DecisionMaker::SelectSafeTrajectory()
- {
-   bool bNewTrajectory = false;
-   PlannerHNS::PreCalculatedConditions *preCalcPrams = m_pCurrentBehaviorState->GetCalcParams();
+bool DecisionMaker::SelectSafeTrajectory()
+{
+  bool bNewTrajectory = false;
+  PlannerHNS::PreCalculatedConditions *preCalcPrams = m_pCurrentBehaviorState->GetCalcParams();
 
-   if(!preCalcPrams || m_RollOuts.size() == 0) return bNewTrajectory;
+  if(!preCalcPrams || m_RollOuts.size() == 0) return bNewTrajectory;
 
   int currIndex = PlannerHNS::PlanningHelpers::GetClosestNextPointIndexFast(m_Path, state);
   int index_limit = 0;
@@ -637,7 +640,7 @@ void DecisionMaker::InitBehaviorStates()
       (*it).v = desiredVelocity;
     }
 
-    //std::cout << "Target Velocity: " << desiredVelocity << ", Change Slowdown: " << bSlowBecauseChange  << std::endl;
+    std::cout << "Target Velocity: " << target_velocity << ", desired : " << desiredVelocity << ", Change Slowdown: " << bSlowBecauseChange  << std::endl;
 
     return desiredVelocity;
   }

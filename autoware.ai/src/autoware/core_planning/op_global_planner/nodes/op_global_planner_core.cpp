@@ -80,6 +80,8 @@ GlobalPlanner::GlobalPlanner()
   pub_PathsRviz = nh.advertise<visualization_msgs::MarkerArray>("global_waypoints_rviz", 1, true);
   pub_MapRviz  = nh.advertise<visualization_msgs::MarkerArray>("vector_map_center_lines_rviz", 1, true);
   pub_GoalsListRviz = nh.advertise<visualization_msgs::MarkerArray>("op_destinations_rviz", 1, true);
+  pub_PathsRvizMinicar = nh.advertise<visualization_msgs::MarkerArray>("global_waypoints_rviz_minicar", 1, true);
+  pub_MapRvizMinicar = nh.advertise<visualization_msgs::MarkerArray>("vector_map_center_lines_rviz_minicar", 1, true);
 
   if(m_params.bEnableRvizInput)
   {
@@ -300,6 +302,7 @@ void GlobalPlanner::VisualizeAndSend(const std::vector<std::vector<PlannerHNS::W
 {
   autoware_msgs::LaneArray lane_array;
   visualization_msgs::MarkerArray pathsToVisualize;
+  visualization_msgs::MarkerArray pathsToVisualizeMinicar;
 
   for(unsigned int i=0; i < generatedTotalPaths.size(); i++)
   {
@@ -315,7 +318,13 @@ void GlobalPlanner::VisualizeAndSend(const std::vector<std::vector<PlannerHNS::W
   total_color.a = 0.9;
   PlannerHNS::ROSHelpers::createGlobalLaneArrayMarker(total_color, lane_array, pathsToVisualize);
   PlannerHNS::ROSHelpers::createGlobalLaneArrayOrientationMarker(lane_array, pathsToVisualize);
-  PlannerHNS::ROSHelpers::createGlobalLaneArrayVelocityMarker(lane_array, pathsToVisualize);
+  // PlannerHNS::ROSHelpers::createGlobalLaneArrayVelocityMarker(lane_array, pathsToVisualize);
+
+  PlannerHNS::ROSHelpers::createGlobalLaneArrayMarker(total_color, lane_array, pathsToVisualizeMinicar, MINICAR_SCALE);
+  PlannerHNS::ROSHelpers::createGlobalLaneArrayOrientationMarker(lane_array, pathsToVisualizeMinicar, MINICAR_SCALE);
+  // PlannerHNS::ROSHelpers::createGlobalLaneArrayVelocityMarker(lane_array, pathsToVisualizeMinicar, MINICAR_SCALE);
+  
+  pub_PathsRvizMinicar.publish(pathsToVisualizeMinicar);
   pub_PathsRviz.publish(pathsToVisualize);
   if((m_bFirstStart && m_params.bEnableHMI) || !m_params.bEnableHMI)
     pub_Paths.publish(lane_array);
@@ -445,6 +454,8 @@ void GlobalPlanner::MainLoop()
   double task_execution_time;
   double task_relative_deadline; 
   int multilap_flag;
+  double multilap_replanning_distance;
+  int planning_fail_cnt;
 
   private_nh.param<int>("/op_global_planner/task_scheduling_flag", task_scheduling_flag, 0);
   private_nh.param<int>("/op_global_planner/task_profiling_flag", task_profiling_flag, 0);
@@ -454,6 +465,7 @@ void GlobalPlanner::MainLoop()
   private_nh.param("/op_global_planner/task_execution_time", task_execution_time, (double)10);
   private_nh.param("/op_global_planner/task_relative_deadline", task_relative_deadline, (double)10);
   private_nh.param("/op_global_planner/multilap_flag", multilap_flag, 0);
+  private_nh.param("/op_global_planner/multilap_replanning_distance", multilap_replanning_distance, (double)50);
 
   if(task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
 
@@ -523,7 +535,11 @@ void GlobalPlanner::MainLoop()
       if(m_bKmlMap)
       {
         visualization_msgs::MarkerArray map_marker_array;
+        visualization_msgs::MarkerArray map_marker_array_minicar;
         PlannerHNS::ROSHelpers::ConvertFromRoadNetworkToAutowareVisualizeMapFormat(m_Map, map_marker_array);
+        PlannerHNS::ROSHelpers::ConvertFromRoadNetworkToAutowareVisualizeMapFormat(m_Map, map_marker_array_minicar, MINICAR_SCALE);
+
+        pub_MapRvizMinicar.publish(map_marker_array_minicar);
         pub_MapRviz.publish(map_marker_array);
       }
     }
@@ -536,6 +552,10 @@ void GlobalPlanner::MainLoop()
     {
       if(m_GeneratedTotalPaths.size() == 0) // initialize two paths
       {
+        // Try 50 Times to planning
+        if(planning_fail_cnt == 0){
+          planning_fail_cnt = 50;
+        }
         std::vector<std::vector<PlannerHNS::WayPoint>> tmp_path_list;
         std::vector<std::vector<PlannerHNS::WayPoint>> tmp_path_list_2;
         PlannerHNS::WayPoint goalPoint = m_GoalsPos.at(m_iCurrentGoalIndex);
@@ -548,7 +568,6 @@ void GlobalPlanner::MainLoop()
           m_GeneratedTotalPaths.push_back(tmp_path_list);
 
           // Do multi-lab driving only current position and goal point is close
-          // TODO : Add parameter for enable multi-lab driving
           if(multilap_flag){
             if(hypot(m_CurrentPose.pos.x - goalPoint.pos.x, m_CurrentPose.pos.y - goalPoint.pos.y) < 30){
               int wp_size = tmp_path_list.at(0).size();
@@ -564,6 +583,12 @@ void GlobalPlanner::MainLoop()
           selectedGlobalPathIdx = 0;
           VisualizeAndSend(m_GeneratedTotalPaths.at(selectedGlobalPathIdx));
         }
+        else{
+          planning_fail_cnt--;
+          if(planning_fail_cnt == 0){
+            m_GoalsPos.clear();
+          }
+        }
       }
       else if(m_GeneratedTotalPaths.size() > 1){
         PlannerHNS::RelativeInfo info;
@@ -571,7 +596,7 @@ void GlobalPlanner::MainLoop()
         if(ret == true && info.iGlobalPath >= 0 &&  info.iGlobalPath < m_GeneratedTotalPaths.at(selectedGlobalPathIdx).size() && info.iFront > 0 && info.iFront < m_GeneratedTotalPaths.at(selectedGlobalPathIdx).at(info.iGlobalPath).size())
         {
           double remaining_distance = m_GeneratedTotalPaths.at(selectedGlobalPathIdx).at(info.iGlobalPath).at(m_GeneratedTotalPaths.at(selectedGlobalPathIdx).at(info.iGlobalPath).size()-1).cost - (m_GeneratedTotalPaths.at(selectedGlobalPathIdx).at(info.iGlobalPath).at(info.iFront).cost + info.to_front_distance);
-          if(remaining_distance <= 50)
+          if(remaining_distance <= multilap_replanning_distance)
           {
             selectedGlobalPathIdx = 1 - selectedGlobalPathIdx;
             VisualizeAndSend(m_GeneratedTotalPaths.at(selectedGlobalPathIdx));

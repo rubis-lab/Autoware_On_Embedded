@@ -1,10 +1,10 @@
 <launch>
-  <arg name="init_x" value="0.0" />
-  <arg name="init_y" value="0.0" />
-  <arg name="init_z" value="0.0" />
-  <arg name="init_roll" value="0.0" />
-  <arg name="init_pitch" value="0.0" />
-  <arg name="init_yaw" value="-0.0" />
+  <arg name="init_x" value="1.31" />
+  <arg name="init_y" value="0.18" />
+  <arg name="init_z" value="1.60" />
+  <arg name="init_roll" value="0.005" />
+  <arg name="init_pitch" value="-0.054" />
+  <arg name="init_yaw" value="0.431" />
 
   <!-- vel/pose connect -->
   <arg name="topic_pose_stamped" default="/ndt_pose" />
@@ -20,7 +20,7 @@
 
   <!-- ndt_matching --><!-- pcl_generic=0, pcl_anh=1, pcl_anh_gpu=2, pcl_openmp=3 -->
   <include file="$(find lidar_localizer)/launch/ndt_matching.launch">
-    <arg name="method_type" value="3" /> 
+    <arg name="method_type" value="1" /> 
     <arg name="get_height" value="true" /> 
   </include>
 
@@ -36,11 +36,11 @@
     pitch: $(arg init_pitch),
     yaw: $(arg init_yaw),
     use_predict_pose: 1,
-    error_threshold: 0.01,
-    resolution: 2.0,
+    error_threshold: 1,
+    resolution: 3,
     step_size: 0.1,
-    trans_epsilon: 0.05,
-    max_iterations: 10}
+    trans_epsilon: 0.01,
+    max_iterations: 20}
   '"/>
 
   <!-- vel_pose_mux -->
@@ -48,5 +48,8 @@
     <arg name="topic_pose_stamped" value="$(arg topic_pose_stamped)" />
     <arg name="topic_twist_stamped" value="$(arg topic_twist_stamped)" />
   </include>
+
+  <node pkg="rostopic" type="rostopic" name="config_voxel" args="pub /config/voxel_grid_filter autoware_config_msgs/ConfigVoxelGridFilter '{voxel_leaf_size: 2.0, measurement_range: 50.0}'"/>
+
 
 </launch>
