@@ -461,7 +461,7 @@ void ROSHelpers::ConvertFromPlannerHToAutowarePathFormat(const std::vector<Plann
   }
 }
 
-void ROSHelpers::ConvertFromRoadNetworkToAutowareVisualizeMapFormat(const PlannerHNS::RoadNetwork& map,  visualization_msgs::MarkerArray& markerArray)
+void ROSHelpers::ConvertFromRoadNetworkToAutowareVisualizeMapFormat(const PlannerHNS::RoadNetwork& map,  visualization_msgs::MarkerArray& markerArray, double scale)
 {
   visualization_msgs::Marker lane_waypoint_marker;
   lane_waypoint_marker.header.frame_id = "map";
@@ -469,7 +469,7 @@ void ROSHelpers::ConvertFromRoadNetworkToAutowareVisualizeMapFormat(const Planne
   lane_waypoint_marker.ns = "road_network_vector_map";
   lane_waypoint_marker.type = visualization_msgs::Marker::LINE_STRIP;
   lane_waypoint_marker.action = visualization_msgs::Marker::ADD;
-  lane_waypoint_marker.scale.x = 0.25;
+  lane_waypoint_marker.scale.x = 0.25 * scale;
   std_msgs::ColorRGBA roll_color, total_color, curr_color;
   roll_color.r = 1;
   roll_color.g = 1;
@@ -1399,7 +1399,7 @@ void ROSHelpers::ConvertFromAutowareLaneToLocalLane(const autoware_msgs::Lane& t
 }
 
 void ROSHelpers::createGlobalLaneArrayMarker(std_msgs::ColorRGBA color,
-    const autoware_msgs::LaneArray &lane_waypoints_array, visualization_msgs::MarkerArray& markerArray)
+    const autoware_msgs::LaneArray &lane_waypoints_array, visualization_msgs::MarkerArray& markerArray, double scale)
 {
   visualization_msgs::Marker lane_waypoint_marker;
   lane_waypoint_marker.header.frame_id = "map";
@@ -1407,8 +1407,8 @@ void ROSHelpers::createGlobalLaneArrayMarker(std_msgs::ColorRGBA color,
   lane_waypoint_marker.ns = "global_lane_array_marker";
   lane_waypoint_marker.type = visualization_msgs::Marker::LINE_STRIP;
   lane_waypoint_marker.action = visualization_msgs::Marker::ADD;
-  lane_waypoint_marker.scale.x = 0.75;
-  lane_waypoint_marker.scale.y = 0.75;
+  lane_waypoint_marker.scale.x = 0.75*scale;
+  lane_waypoint_marker.scale.y = 0.75*scale;
   lane_waypoint_marker.color = color;
   lane_waypoint_marker.frame_locked = false;
 
@@ -1431,7 +1431,7 @@ void ROSHelpers::createGlobalLaneArrayMarker(std_msgs::ColorRGBA color,
 }
 
 void ROSHelpers::createGlobalLaneArrayVelocityMarker(const autoware_msgs::LaneArray &lane_waypoints_array
-    , visualization_msgs::MarkerArray& markerArray)
+    , visualization_msgs::MarkerArray& markerArray, double scale)
 {
   visualization_msgs::MarkerArray tmp_marker_array;
   // display by markers the velocity of each waypoint.
@@ -1479,7 +1479,7 @@ void ROSHelpers::createGlobalLaneArrayVelocityMarker(const autoware_msgs::LaneAr
 }
 
 void ROSHelpers::createGlobalLaneArrayOrientationMarker(const autoware_msgs::LaneArray &lane_waypoints_array
-    , visualization_msgs::MarkerArray& markerArray)
+    , visualization_msgs::MarkerArray& markerArray, double scale)
 {
   visualization_msgs::MarkerArray tmp_marker_array;
   visualization_msgs::Marker lane_waypoint_marker;
@@ -1487,9 +1487,9 @@ void ROSHelpers::createGlobalLaneArrayOrientationMarker(const autoware_msgs::Lan
   lane_waypoint_marker.header.stamp = ros::Time();
   lane_waypoint_marker.type = visualization_msgs::Marker::ARROW;
   lane_waypoint_marker.action = visualization_msgs::Marker::ADD;
-  lane_waypoint_marker.scale.x = 0.6;
-  lane_waypoint_marker.scale.y = 0.2;
-  lane_waypoint_marker.scale.z = 0.1;
+  lane_waypoint_marker.scale.x = 0.6 * scale;
+  lane_waypoint_marker.scale.y = 0.2 * scale;
+  lane_waypoint_marker.scale.z = 0.1 * scale;
   lane_waypoint_marker.color.r = 1.0;
   lane_waypoint_marker.color.a = 1.0;
   //lane_waypoint_marker.frame_locked = false;

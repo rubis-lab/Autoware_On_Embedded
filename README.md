@@ -102,7 +102,7 @@ source ~/autoware.ai/install/setup.bash
 ## How to build package in rubis_ws
 * Install some dependency
 ```
-sudo apt-get ros-melodic-ackermann-msgs ros-melodic-serial -y
+sudo apt-get install ros-melodic-ackermann-msgs ros-melodic-serial -y
 ```
 
 
@@ -134,7 +134,7 @@ cd ${WORKSPACE_DIR}/rubis_ws
 catkin_make
 ```
 
-## How to launch LGSVL scrips
+## How to launch LGSVL scripts
 * Setup environments
 ```
 cd ${WORKSPACE_DIR}/autoware.ai/autoware_files/lgsvl_file/scripts

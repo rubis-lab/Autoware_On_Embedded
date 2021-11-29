@@ -52,7 +52,7 @@
     <arg name="mapSource"                       default="0" />        <!-- Autoware=0, Vector Map Folder=1, kml=2 -->
     <arg name="mapFileName"                     default="" />
     <arg name="minVelocity"                     default="0.1" />  
-    <arg name="speedProfileFactor"              default="1.2"  />
+    <arg name="speedProfileFactor"              default="1.2"  />     <!-- Minimum waypoint velocity -->   
     <arg name="smoothingDataWeight"             default="0.45"  />
     <arg name="smoothingSmoothWeight"           default="0.4"  />  
   </include>

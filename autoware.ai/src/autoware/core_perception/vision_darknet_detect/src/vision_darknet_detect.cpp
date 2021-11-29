@@ -402,10 +402,9 @@ void Yolo3DetectorNode::Run()
     if (private_node_handle.getParam("names_file", names_file))
     {
         ROS_INFO("Names File: %s", names_file.c_str());
-        use_coco_names_ = false;        
-        std::string _names_file = convert_to_absolute_path(names_file);
+        use_coco_names_ = false;
 
-        custom_names_ = read_custom_names_file(_names_file);
+        custom_names_ = read_custom_names_file(names_file);
     }
     else
     {

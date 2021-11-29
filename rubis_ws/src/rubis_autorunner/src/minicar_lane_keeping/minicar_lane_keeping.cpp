@@ -15,12 +15,12 @@ void MinicarLaneKeeping::register_subscribers(){
     sub_v_.resize(TOTAL_STEP_NUM);          // Resizing the subscriber vectors. Its size must be same with number of steps
 
     // Set the check function(subscriber)
-    sub_v_[STEP(1)] = nh_.subscribe("/points_no_ground_center", 1, &MinicarLaneKeeping::points_no_ground_cb, this);   
+    sub_v_[STEP(1)] = nh_.subscribe("/points_raw", 1, &MinicarLaneKeeping::points_raw_cb, this);   
     sub_v_[STEP(2)] = nh_.subscribe("/ndt_stat", 1, &MinicarLaneKeeping::ndt_stat_cb, this);   
     sub_v_[STEP(3)] = nh_.subscribe("/behavior_state", 1, &MinicarLaneKeeping::behavior_state_cb, this);   
 }
 
- void MinicarLaneKeeping::points_no_ground_cb(const sensor_msgs::PointCloud2& msg){
+ void MinicarLaneKeeping::points_raw_cb(const sensor_msgs::PointCloud2& msg){
     if(!msg.fields.empty() && !ros_autorunner_.step_info_list_[STEP(2)].is_prepared){
         ROS_WARN("[STEP 1] Map and Sensors are prepared");
     	sleep(SLEEP_PERIOD);
@@ -29,7 +29,7 @@ void MinicarLaneKeeping::register_subscribers(){
  }
 
  void MinicarLaneKeeping::ndt_stat_cb(const autoware_msgs::NDTStat& msg){
-    if(msg.score < 0.3 && !ros_autorunner_.step_info_list_[STEP(3)].is_prepared){
+    if(msg.score < 1.0 && !ros_autorunner_.step_info_list_[STEP(3)].is_prepared){
         ROS_WARN("[STEP 2] Localization is success");
     	sleep(SLEEP_PERIOD);
         ros_autorunner_.step_info_list_[STEP(3)].is_prepared = true;

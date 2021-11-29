@@ -15,7 +15,7 @@ private:
 private:
     virtual void register_subscribers();
 private:
-    void points_no_ground_cb(const sensor_msgs::PointCloud2& msg);
+    void points_raw_cb(const sensor_msgs::PointCloud2& msg);
     void ndt_stat_cb(const autoware_msgs::NDTStat& msg);
     void behavior_state_cb(const visualization_msgs::MarkerArray& msg);
 
