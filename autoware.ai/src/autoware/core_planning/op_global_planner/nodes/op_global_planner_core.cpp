@@ -20,11 +20,8 @@
 
 #define SPIN_PROFILING
 
-<<<<<<< HEAD
 #define MINICAR_SCALE 0.3
 
-=======
->>>>>>> 42e4b62286b09503af06f27452151fb7ae1ff833
 namespace GlobalPlanningNS
 {
 
