@@ -98,14 +98,24 @@ void PurePursuitNode::initForROS()
 
 
   // setup subscriber
-  sub1_ = nh_.subscribe("final_waypoints", 1,
-    &PurePursuitNode::callbackFromWayPoints, this); // origin 10
-  sub2_ = nh_.subscribe("current_pose", 1,
-    &PurePursuitNode::callbackFromCurrentPose, this); // origin 10
-  sub3_ = nh_.subscribe("config/waypoint_follower", 1,
-    &PurePursuitNode::callbackFromConfig, this); // origin 10
-  sub4_ = nh_.subscribe("current_velocity", 1,
-    &PurePursuitNode::callbackFromCurrentVelocity, this); // origin 10
+  sub1_ = nh_.subscribe("final_waypoints", 10,
+    &PurePursuitNode::callbackFromWayPoints, this);
+  sub2_ = nh_.subscribe("current_pose", 10,
+    &PurePursuitNode::callbackFromCurrentPose, this);
+  sub3_ = nh_.subscribe("config/waypoint_follower", 10,
+    &PurePursuitNode::callbackFromConfig, this);
+  sub4_ = nh_.subscribe("current_velocity", 10,
+    &PurePursuitNode::callbackFromCurrentVelocity, this);
+  
+  /*  RT Scheduling setup  */
+  // sub1_ = nh_.subscribe("final_waypoints", 1,
+  //   &PurePursuitNode::callbackFromWayPoints, this); // origin 10
+  // sub2_ = nh_.subscribe("current_pose", 1,
+  //   &PurePursuitNode::callbackFromCurrentPose, this); // origin 10
+  // sub3_ = nh_.subscribe("config/waypoint_follower", 1,
+  //   &PurePursuitNode::callbackFromConfig, this); // origin 10
+  // sub4_ = nh_.subscribe("current_velocity", 1,
+  //   &PurePursuitNode::callbackFromCurrentVelocity, this); // origin 10
 
   // setup publisher
   pub1_ = nh_.advertise<geometry_msgs::TwistStamped>("twist_raw", 10);
@@ -167,8 +177,8 @@ void PurePursuitNode::run()
       // ROS_WARN("Necessary topics are not subscribed yet ... ");
       
       if(rubis::sched::is_task_ready_ == TASK_READY && rubis::sched::task_state_ == TASK_STATE_DONE){
-        if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
         if(task_profiling_flag) rubis::sched::stop_task_profiling();
+        if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
         rubis::sched::task_state_ = TASK_STATE_READY;
       }
 
@@ -213,8 +223,8 @@ void PurePursuitNode::run()
     is_waypoint_set_ = false;
 
     if(rubis::sched::is_task_ready_ == TASK_READY && rubis::sched::task_state_ == TASK_STATE_DONE){
-      if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
       if(task_profiling_flag) rubis::sched::stop_task_profiling();
+      if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
       rubis::sched::task_state_ = TASK_STATE_READY;
     }
 

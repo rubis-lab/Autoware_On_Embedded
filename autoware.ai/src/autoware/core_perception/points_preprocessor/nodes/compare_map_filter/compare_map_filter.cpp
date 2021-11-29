@@ -110,9 +110,15 @@ CompareMapFilter::CompareMapFilter()
 }
 
 void CompareMapFilter::ready(){
-  config_sub_ = nh_.subscribe("/config/compare_map_filter", 1, &CompareMapFilter::configCallback, this);
+  config_sub_ = nh_.subscribe("/config/compare_map_filter", 10, &CompareMapFilter::configCallback, this);
   sensor_points_sub_ = nh_.subscribe("/points_raw", 1, &CompareMapFilter::sensorPointsCallback, this);
-  map_sub_ = nh_.subscribe("/points_map", 1, &CompareMapFilter::pointsMapCallback, this);
+  map_sub_ = nh_.subscribe("/points_map", 10, &CompareMapFilter::pointsMapCallback, this);
+
+  /*  RT Scheduling setup  */
+  // config_sub_ = nh_.subscribe("/config/compare_map_filter", 1, &CompareMapFilter::configCallback, this); // origin 10
+  // sensor_points_sub_ = nh_.subscribe("/points_raw", 1, &CompareMapFilter::sensorPointsCallback, this);
+  // map_sub_ = nh_.subscribe("/points_map", 1, &CompareMapFilter::pointsMapCallback, this); // origin 10
+  
   ndt_stat_sub_.shutdown();
 }
 
@@ -304,8 +310,8 @@ int main(int argc, char** argv)
       ros::spinOnce();
 
       if(rubis::sched::task_state_ == TASK_STATE_DONE){
-        if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
         if(task_profiling_flag) rubis::sched::stop_task_profiling();
+        if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
         rubis::sched::task_state_ = TASK_STATE_READY;
       }
       

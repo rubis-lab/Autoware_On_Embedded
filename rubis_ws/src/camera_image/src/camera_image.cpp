@@ -113,8 +113,8 @@ void CameraImage::sendImage(){
         // int ckey = cv::waitKey(1);
         // if(ckey == 27)break;
 
-        if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
         if(task_profiling_flag) rubis::sched::stop_task_profiling();
+        if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
         loop_rate.sleep();
     }
 }

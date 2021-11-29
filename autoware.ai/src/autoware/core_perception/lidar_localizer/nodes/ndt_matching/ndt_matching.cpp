@@ -1703,20 +1703,31 @@ int main(int argc, char** argv)
   ndt_reliability_pub = nh.advertise<std_msgs::Float32>("/ndt_reliability", 10);
 
   // Subscribers
-  ros::Subscriber param_sub = nh.subscribe("config/ndt", 1, param_callback); // origin: 10
-  ros::Subscriber gnss_sub = nh.subscribe("gnss_pose", 1, gnss_callback); // origin: 10
+  ros::Subscriber param_sub = nh.subscribe("config/ndt", 10, param_callback);
+  ros::Subscriber gnss_sub = nh.subscribe("gnss_pose", 10, gnss_callback); 
   ros::Subscriber map_sub = nh.subscribe("points_map", 1, map_callback);
-  ros::Subscriber initialpose_sub = nh.subscribe("initialpose", 1, initialpose_callback); // origin: 10
+  ros::Subscriber initialpose_sub = nh.subscribe("initialpose", 10, initialpose_callback); 
   // ros::Subscriber points_sub = nh.subscribe("filtered_points", 1, points_callback); // origin: _queue_size
   // ros::Subscriber odom_sub = nh.subscribe("/vehicle/odom", _queue_size * 10, odom_callback);
   // ros::Subscriber imu_sub = nh.subscribe(_imu_topic.c_str(), _queue_size * 10, imu_callback);
+
+  /*  RT Scheduling setup  */
+  // ros::Subscriber param_sub = nh.subscribe("config/ndt", 1, param_callback); // origin: 10
+  // ros::Subscriber gnss_sub = nh.subscribe("gnss_pose", 1, gnss_callback); // origin: 10
+  // ros::Subscriber map_sub = nh.subscribe("points_map", 1, map_callback);
+  // ros::Subscriber initialpose_sub = nh.subscribe("initialpose", 1, initialpose_callback); // origin: 10
+  
 
   // pthread_t thread;
   // pthread_create(&thread, NULL, thread_func, NULL);
 
   // SPIN  
   if(!task_scheduling_flag && !task_profiling_flag){
-    ros::Subscriber points_sub = nh.subscribe("filtered_points", 1, points_callback); // origin: _queue_size
+    ros::Subscriber points_sub = nh.subscribe("filtered_points", _queue_size, points_callback); // _queue_size = 1000
+
+    /*  RT Scheduling setup  */
+    // ros::Subscriber points_sub = nh.subscribe("filtered_points", 1, points_callback); // origin: _queue_size
+
     ros::spin();
   }
   else{ 
@@ -1731,7 +1742,10 @@ int main(int argc, char** argv)
     
     map_sub.shutdown();
 
-    ros::Subscriber points_sub = nh.subscribe("filtered_points", 1, points_callback); // origin: _queue_size
+    ros::Subscriber points_sub = nh.subscribe("filtered_points", _queue_size, points_callback);
+
+    /*  RT Scheduling setup  */
+    // ros::Subscriber points_sub = nh.subscribe("filtered_points", 1, points_callback); // origin: _queue_size
 
     // Executing task
     while(ros::ok()){
@@ -1746,8 +1760,8 @@ int main(int argc, char** argv)
 
       if(rubis::sched::task_state_ == TASK_STATE_DONE){      
         if(gpu_profiling_flag || gpu_scheduling_flag) rubis::sched::finish_job();
-        if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
         if(task_profiling_flag) rubis::sched::stop_task_profiling();
+        if(task_scheduling_flag) rubis::sched::yield_task_scheduling();        
         rubis::sched::task_state_ = TASK_STATE_READY;
       }
       

@@ -39,9 +39,9 @@
 
 #include <rubis_sched/sched.hpp>
 
-#define SPIN_PROFILING
+#include <rubis_sched/sched.hpp>
 
-int is_topic_ready = 0;
+#define SPIN_PROFILING
 
 void RayGroundFilter::update_config_params(const autoware_config_msgs::ConfigRayGroundFilter::ConstPtr& param)
 {
@@ -377,7 +377,8 @@ void RayGroundFilter::CloudCallback(const sensor_msgs::PointCloud2ConstPtr& in_s
   publish_cloud(ground_points_pub_, ground_cloud_ptr, in_sensor_cloud->header);
   publish_cloud(groundless_points_pub_, no_ground_cloud_ptr, in_sensor_cloud->header);
 
-  is_topic_ready = 1;
+  if(rubis::sched::is_task_ready_ == TASK_NOT_READY) rubis::sched::init_task();
+  rubis::sched::task_state_ = TASK_STATE_DONE;
 }
 
 RayGroundFilter::RayGroundFilter() : node_handle_("~"), tf_listener_(tf_buffer_)
@@ -398,7 +399,7 @@ void RayGroundFilter::Run()
   int rate;
   double task_minimum_inter_release_time;
   double task_execution_time;
-  double task_relative_deadline; 
+  double task_relative_deadline;
 
   // Model   |   Horizontal   |   Vertical   | FOV(Vertical)    degrees / rads
   // ----------------------------------------------------------
@@ -475,16 +476,27 @@ void RayGroundFilter::Run()
   else{
     ros::Rate r(rate);    
     while(ros::ok()){
-      if(task_profiling_flag  && is_topic_ready) rubis::sched::start_task_profiling();
-      if(task_scheduling_flag && is_topic_ready){        
-        rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline);
-      }
+      if(rubis::sched::is_task_ready_) break;
       ros::spinOnce();
-      if(task_scheduling_flag && is_topic_ready) rubis::sched::yield_task_scheduling();
-      if(task_profiling_flag && is_topic_ready) rubis::sched::stop_task_profiling();
+      r.sleep();      
+    }
 
+    // Executing task
+    while(ros::ok()){
+      if(rubis::sched::task_state_ == TASK_STATE_READY){
+        if(task_profiling_flag) rubis::sched::start_task_profiling();
+        if(task_scheduling_flag) rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline); 
+        rubis::sched::task_state_ = TASK_STATE_RUNNING;     
+      }
+
+      ros::spinOnce();
+
+      if(rubis::sched::task_state_ == TASK_STATE_DONE){
+        if(task_profiling_flag) rubis::sched::stop_task_profiling();
+        if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
+        rubis::sched::task_state_ = TASK_STATE_READY;
+      }
       
-
       r.sleep();
     }
   }
