@@ -47,11 +47,11 @@ inline void send_control_signal(){
     // TODO: Send control signal to interface
     #ifdef DEBUG
     autoware_msgs::VehicleCmd msg;
-    msg.ctrl_cmd.linear_velocity = current_velocity_;
+    msg.ctrl_cmd.linear_velocity = current_velocity_; // TODO: (for simulation) chnage to goal velocity
     msg.ctrl_cmd.linear_acceleration = output_;
     msg.ctrl_cmd.steering_angle = debug_steering_angle_;
-    msg.twist_cmd = debug_twist_;
-    msg.twist_cmd.twist.linear.x += output_ * dt_;
+    msg.twist_cmd = debug_twist_; // twist_cmd
+    msg.twist_cmd.twist.linear.x += output_ * dt_; // TODO: (for simulation) real current velocity + caclculated acccleration * dt -> 
     debug_pub_vehicle_cmd_.publish(msg);
     #endif
 }
@@ -62,8 +62,8 @@ void ctrl_callback(const autoware_msgs::ControlCommandStampedConstPtr& msg){
     // TODO: Get process_variable from the Vehicle
     #ifdef DEBUG
     static float _prev_velocity = 0.0;
-    current_velocity_ = msg->cmd.linear_velocity; // TODO: Change to IonicautoRealSPEED
-    process_variable_ = (current_velocity_ - _prev_velocity)/100;    // TODO: Change to IonicautoControlAx
+    current_velocity_ = msg->cmd.linear_velocity; // TODO: (simulation) odom's velocity // (for vehical) Change to IonicautoRealSPEED
+    process_variable_ = (current_velocity_ - _prev_velocity)/100;    // TODO: (for vehical) Change to IonicautoControlAx or calculated acceleration
                                                                     // When subscription rate is 10hz
     _prev_velocity = current_velocity_;
     debug_steering_angle_ = msg->cmd.steering_angle;
