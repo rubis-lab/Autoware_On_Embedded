@@ -58,11 +58,11 @@ rosdep install -y --from-paths src --ignore-src --rosdistro $ROS_DISTRO -r
 ```
 
 ### Resolving OpenCV version issue
-You should change some code to use OpenCV 4.x
+This package uses OpenCv 3.x. If you want to use OpenCV 4.x, follow below lines.
 
-```
+<!-- ```
 sudo apt-get install libopencv3.2 -y
-```
+``` --->
 
 Change `set(_include_dirs "include;/usr/include;/usr/include/opencv")`
 
