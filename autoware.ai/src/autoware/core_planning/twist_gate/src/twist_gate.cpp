@@ -34,6 +34,7 @@
 #include <chrono>
 #include <string>
 #include <autoware_system_msgs/DiagnosticStatus.h>
+#include <rubis_sched/sched.hpp>
 
 using AwDiagStatus = autoware_system_msgs::DiagnosticStatus;
 
@@ -207,6 +208,9 @@ void TwistGate::autoCmdTwistCmdCallback(const geometry_msgs::TwistStamped::Const
 
     checkState();
   }
+
+  if(rubis::sched::is_task_ready_ == TASK_NOT_READY) rubis::sched::init_task();
+  rubis::sched::task_state_ = TASK_STATE_DONE;
 }
 
 void TwistGate::modeCmdCallback(const tablet_socket_msgs::mode_cmd::ConstPtr& input_msg)
@@ -339,6 +343,7 @@ void TwistGate::timerCallback(const ros::TimerEvent& e)
     resetVehicleCmdMsg();
 
   vehicle_cmd_pub_.publish(twist_gate_msg_);
+
 }
 
 void TwistGate::configCallback(const autoware_config_msgs::ConfigTwistFilter& msg)

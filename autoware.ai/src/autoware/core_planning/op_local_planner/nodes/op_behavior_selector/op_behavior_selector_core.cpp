@@ -19,8 +19,6 @@
 #include "op_planner/MappingHelpers.h"
 #include <rubis_sched/sched.hpp>
 
-int is_topic_ready = 0;
-
 namespace BehaviorGeneratorNS
 {
 
@@ -63,16 +61,28 @@ BehaviorGen::BehaviorGen()
   pub_turnMarker = nh.advertise<visualization_msgs::MarkerArray>("turn_marker", 1);
   pub_currentState = nh.advertise<std_msgs::Int32>("current_state", 1);
 
-  sub_current_pose = nh.subscribe("/current_pose", 1,  &BehaviorGen::callbackGetCurrentPose, this); //origin 10
+  sub_current_pose = nh.subscribe("/current_pose", 10,  &BehaviorGen::callbackGetCurrentPose, this); 
 
   int bVelSource = 1;
   _nh.getParam("/op_trajectory_evaluator/velocitySource", bVelSource);
   if(bVelSource == 0)
-    sub_robot_odom = nh.subscribe("/odom", 1, &BehaviorGen::callbackGetRobotOdom, this); //origin 10
+    sub_robot_odom = nh.subscribe("/odom", 10, &BehaviorGen::callbackGetRobotOdom, this);
   else if(bVelSource == 1)
-    sub_current_velocity = nh.subscribe("/current_velocity", 1, &BehaviorGen::callbackGetVehicleStatus, this); //origin 10
+    sub_current_velocity = nh.subscribe("/current_velocity", 10, &BehaviorGen::callbackGetVehicleStatus, this);
   else if(bVelSource == 2)
-    sub_can_info = nh.subscribe("/can_info", 1, &BehaviorGen::callbackGetCANInfo, this); //origin 10
+    sub_can_info = nh.subscribe("/can_info", 10, &BehaviorGen::callbackGetCANInfo, this);
+  
+  /*  RT Scheduling setup  */
+  // sub_current_pose = nh.subscribe("/current_pose", 1,  &BehaviorGen::callbackGetCurrentPose, this); //origin 10
+
+  // int bVelSource = 1;
+  // _nh.getParam("/op_trajectory_evaluator/velocitySource", bVelSource);
+  // if(bVelSource == 0)
+  //   sub_robot_odom = nh.subscribe("/odom", 1, &BehaviorGen::callbackGetRobotOdom, this); //origin 10
+  // else if(bVelSource == 1)
+  //   sub_current_velocity = nh.subscribe("/current_velocity", 1, &BehaviorGen::callbackGetVehicleStatus, this); //origin 10
+  // else if(bVelSource == 2)
+  //   sub_can_info = nh.subscribe("/can_info", 1, &BehaviorGen::callbackGetCANInfo, this); //origin 10
 
   sub_GlobalPlannerPaths = nh.subscribe("/lane_waypoints_array", 1, &BehaviorGen::callbackGetGlobalPlannerPath, this);
   sub_LocalPlannerPaths = nh.subscribe("/local_weighted_trajectories", 1, &BehaviorGen::callbackGetLocalPlannerPath, this);
@@ -248,7 +258,8 @@ void BehaviorGen::callbackGetVehicleStatus(const geometry_msgs::TwistStampedCons
   UtilityHNS::UtilityH::GetTickCount(m_VehicleStatus.tStamp);
   bVehicleStatus = true;
 
-  is_topic_ready = 1;
+  if(rubis::sched::is_task_ready_ == TASK_NOT_READY) rubis::sched::init_task();
+  rubis::sched::task_state_ = TASK_STATE_DONE;
 }
 
 void BehaviorGen::callbackGetCANInfo(const autoware_can_msgs::CANInfoConstPtr &msg)
@@ -621,8 +632,8 @@ m_sprintSwitch = false;
   /* For Task scheduling */
   if(task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
 
-  ros::Rate loop_rate(100);
-  if(!task_scheduling_flag && !task_profiling_flag) loop_rate = ros::Rate(rate);
+  ros::Rate loop_rate(rate);  
+  if(!task_scheduling_flag && !task_profiling_flag) loop_rate = ros::Rate(25);
 
   struct timespec start_time, end_time;
 
@@ -630,10 +641,11 @@ m_sprintSwitch = false;
 
   while (ros::ok())
   {
-    if(task_profiling_flag && is_topic_ready) rubis::sched::start_task_profiling();
-      if(task_scheduling_flag && is_topic_ready){        
-        rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline);
-      }    
+    if(rubis::sched::is_task_ready_ == TASK_READY && rubis::sched::task_state_ == TASK_STATE_READY){
+      if(task_profiling_flag) rubis::sched::start_task_profiling();
+      if(task_scheduling_flag) rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline); 
+      rubis::sched::task_state_ = TASK_STATE_RUNNING;     
+    }
 
     ros::spinOnce();
 
@@ -771,8 +783,11 @@ m_sprintSwitch = false;
     else
       sub_GlobalPlannerPaths = nh.subscribe("/lane_waypoints_array",   1,    &BehaviorGen::callbackGetGlobalPlannerPath,   this);
 
-    if(task_scheduling_flag && is_topic_ready) rubis::sched::yield_task_scheduling();
-    if(task_profiling_flag && is_topic_ready) rubis::sched::stop_task_profiling();
+    if(rubis::sched::is_task_ready_ == TASK_READY && rubis::sched::task_state_ == TASK_STATE_DONE){
+      if(task_profiling_flag) rubis::sched::stop_task_profiling();
+      if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
+      rubis::sched::task_state_ = TASK_STATE_READY;
+    }
 
     loop_rate.sleep();
   }

@@ -1,5 +1,7 @@
 #include "rubis_sched/sched_c.h"
 
+// #define DEBUG
+
 int key_id_;
 int is_scheduled_;
 int gpu_scheduling_flag_;
@@ -7,9 +9,17 @@ GPUSchedInfo* gpu_sched_info_;
 int gpu_scheduler_pid_;
 char* task_filename_;
 char* gpu_deadline_filename_;
-// unsigned long long gpu_deadline_list_[1024];
-unsigned long long* gpu_deadline_list_;
-int max_gpu_id_ = 0;
+// unsigned long gpu_deadline_list_[1024];
+unsigned long* gpu_deadline_list_;
+unsigned int max_gpu_id_ = 0;
+unsigned int cpu_seg_id_ = 0;
+unsigned int gpu_seg_id_ = 0;
+
+int is_task_ready_ = TASK_NOT_READY;
+int task_state_ = TASK_STATE_READY;
+int was_in_loop_ = 0;
+int loop_cnt_ = 0;
+int gpu_seg_cnt_in_loop_ = 0;
 
 // system call hook to call SCHED_DEADLINE
 int sched_setattr(pid_t pid, const struct sched_attr *attr, unsigned int flags){
@@ -56,7 +66,6 @@ void yield_task_scheduling(){
 }
 
 void init_gpu_scheduling(char* task_filename, char* gpu_deadline_filename, int key_id){
-  printf("init_gpu_scheduling\n");
   gpu_scheduling_flag_ = 1;
 
   task_filename_ = (char *)malloc(strlen(task_filename) * sizeof(char));
@@ -116,10 +125,12 @@ void init_gpu_scheduling(char* task_filename, char* gpu_deadline_filename, int k
   shmid = shmget(key, sizeof(GPUSchedInfo), 0666|IPC_CREAT);
   gpu_sched_info_ = (GPUSchedInfo*)shmat(shmid, 0, 0);
   gpu_sched_info_->pid = getpid();
-  gpu_sched_info_->state = NONE;
+  gpu_sched_info_->state = SCHEDULING_STATE_NONE;
   gpu_sched_info_->scheduling_flag = 0;
   printf("Task [%d] is ready to work\n", getpid());
 
+  gpu_seg_id_ = 0;
+  cpu_seg_id_ = 0;
   
   return;
 }
@@ -148,28 +159,33 @@ void get_deadline_list(){
 	  fprintf(stderr, "Cannot find file %s\n", gpu_deadline_filename);
 	  exit(1);
   }
-  char buf[1024];
-  
-  while(1){
-    int id;
-    if(!fgets(buf, 1024, fp)) break;
-    strtok(buf, "\n");
-    sscanf(buf, "%d, %*llu", &id);
-    if(id > max_gpu_id_) max_gpu_id_ = id;
+
+  char* buf;
+  int cnt = 0;
+  size_t len = 0;
+  ssize_t n;
+
+  getline(&buf, &len, fp); // skip first line
+  while( (n = getline(&buf, &len, fp)) != -1 ){
+    cnt++;
   }
-
-  gpu_deadline_list_ = (unsigned long long *)malloc(sizeof(unsigned long long) * (max_gpu_id_+1));
-  printf("file read is finished\n");
-
+  max_gpu_id_ = cnt;
+  gpu_deadline_list_ = (unsigned long *)malloc(sizeof(unsigned long) * max_gpu_id_);
   rewind(fp);
-  while(1){    
-    int id;
-    long long int deadline;
-    if(!fgets(buf, 1024, fp)) break;
-    sscanf(buf, "%d, %llu", &id, &deadline);
-    gpu_deadline_list_[id] = deadline;
+
+  int idx = 0;
+  
+  getline(&buf, &len, fp); // skip first line
+  while((n = getline(&buf, &len, fp)) != -1){
+    unsigned long deadline;
+    sscanf(buf, "gpu_%*d,%llu", &deadline);
+    gpu_deadline_list_[idx++] = deadline;
   }
-  fclose(fp);
+
+  free(buf); // free allocated memory at getline
+  fclose(fp);  
+
+  // print_gpu_deadline_list();
 
   return;  
 }
@@ -177,7 +193,7 @@ void get_deadline_list(){
 void termination(){
   printf("TERMINATION\n");
 	if(gpu_scheduling_flag_==1){
-		gpu_sched_info_->state = STOP;
+		gpu_sched_info_->state = SCHEDULING_STATE_STOP;
   	shmdt(gpu_sched_info_);
 	}
   
@@ -201,20 +217,43 @@ void termination(){
   exit(0);
 }
 
-void request_gpu(unsigned int id){  
-  stop_profiling_cpu_seg_response_time();
+void start_job(){
+  gpu_seg_id_ = 0;
+  cpu_seg_id_ = 0;
+  start_job_profiling();
+}
+
+void finish_job(){
+  finish_job_profiling(cpu_seg_id_);
+}
+
+void request_gpu(){  
+  if(is_task_ready_ != TASK_READY) return;
+  if(was_in_loop_ == 1){
+    was_in_loop_ = 0;
+    loop_cnt_ = 0;
+    gpu_seg_cnt_in_loop_ = 0;
+  }
+
+  stop_profiling_cpu_seg_response_time(cpu_seg_id_, 1);
   if(gpu_scheduling_flag_==1){
-    if(id > max_gpu_id_){
-      printf("[ERROR] GPU segment id bigger than max segment id!\n");
-      exit(1);
+    unsigned long relative_deadline = gpu_deadline_list_[gpu_seg_id_];
+
+    if(gpu_seg_id_ > max_gpu_id_){
+      printf("[ERROR] %s - GPU segment id bigger than max segment id!\n", task_filename_);
+      printf("gpu seg id: %d / max seg id: %d\n", gpu_seg_id_, max_gpu_id_);
+      relative_deadline = 1000; // 1us
     }
-    
-    unsigned long long relative_deadline = gpu_deadline_list_[id];
+
     gpu_sched_info_->deadline = get_current_time_ns() + relative_deadline;
-    gpu_sched_info_->state = WAIT;
+    gpu_sched_info_->state = SCHEDULING_STATE_WAIT;
   }
   
   start_profiling_gpu_seg_response_time();
+
+  #ifdef DEBUG
+    printf("request_gpu: %d\n", gpu_seg_id_);
+  #endif
 
   if(gpu_scheduling_flag_ == 1){
     while(1){
@@ -226,28 +265,158 @@ void request_gpu(unsigned int id){
   start_profiling_gpu_seg_execution_time();
 
   if(gpu_scheduling_flag_ == 1){
-    gpu_sched_info_->state = RUN;
+    gpu_sched_info_->state = SCHEDULING_STATE_RUN;
     gpu_sched_info_->deadline = -1;
   }
 }
 
-void yield_gpu(unsigned int id){
-  if(gpu_scheduling_flag_==1){
-    gpu_sched_info_->scheduling_flag = 0;
-    gpu_sched_info_->state = NONE;
+void request_gpu_in_loop(int flag){
+  if(is_task_ready_ != TASK_READY) return;
+  was_in_loop_ = 1;
+
+  if(flag == GPU_SEG_LOOP_START){
+      loop_cnt_++;
+    if(gpu_seg_cnt_in_loop_ == 0){
+      gpu_seg_cnt_in_loop_ = 1;
+    }
+    else{
+      gpu_seg_id_ = gpu_seg_id_ - gpu_seg_cnt_in_loop_;
+      cpu_seg_id_ = cpu_seg_id_ - gpu_seg_cnt_in_loop_;
+      gpu_seg_cnt_in_loop_ = 1;
+    }
   }
-  stop_profiling_cpu_seg_response_time();
-  stop_profiling_gpu_seg_time(id);
-  start_profiling_cpu_seg_response_time();
+
+  if(flag != GPU_SEG_LOOP_START){
+    gpu_seg_cnt_in_loop_++;
+  }
+
+  stop_profiling_cpu_seg_response_time(cpu_seg_id_, loop_cnt_);
+  if(gpu_scheduling_flag_==1){    
+    unsigned long relative_deadline = gpu_deadline_list_[gpu_seg_id_];
+
+    if(gpu_seg_id_ > max_gpu_id_){
+      printf("[ERROR] %s - GPU segment id bigger than max segment id!\n", task_filename_);
+      relative_deadline = 1000; // 1us
+    }
+
+    gpu_sched_info_->deadline = get_current_time_ns() + relative_deadline;
+    gpu_sched_info_->state = SCHEDULING_STATE_WAIT;
+  }
+  
+  start_profiling_gpu_seg_response_time();
+
+  #ifdef DEBUG
+    printf("request_gpu: %d\n", gpu_seg_id_);
+  #endif
+
+  if(gpu_scheduling_flag_ == 1){
+    while(1){
+      kill(gpu_scheduler_pid_, SIGUSR1);
+      if(gpu_sched_info_->scheduling_flag == 1) break;
+    }
+  }
+
+  start_profiling_gpu_seg_execution_time();
+
+  if(gpu_scheduling_flag_ == 1){
+    gpu_sched_info_->state = SCHEDULING_STATE_RUN;
+    gpu_sched_info_->deadline = -1;
+  }
 }
 
-
-void yield_gpu_with_remark(unsigned int id, const char* remark){
+void yield_gpu(){
   if(gpu_scheduling_flag_==1){
     gpu_sched_info_->scheduling_flag = 0;
-    gpu_sched_info_->state = NONE;
+    gpu_sched_info_->state = SCHEDULING_STATE_NONE;
   }
-  stop_profiling_cpu_seg_response_time();
-  stop_profiling_gpu_seg_time_with_remark(id, remark);
+
+  #ifdef DEBUG
+    printf("yield_gpu: %d\n", gpu_seg_id_);
+  #endif
+
+  stop_profiling_gpu_seg_time(gpu_seg_id_, 1);
+  start_profiling_cpu_seg_response_time(1);
+
+  gpu_seg_id_++;
+  cpu_seg_id_++;
+}
+
+void yield_gpu_with_remark(const char* remark){
+  if(gpu_scheduling_flag_==1){
+    gpu_sched_info_->scheduling_flag = 0;
+    gpu_sched_info_->state = SCHEDULING_STATE_NONE;
+  }
+
+  #ifdef DEBUG
+    printf("yield_gpu: %d\n", gpu_seg_id_);
+  #endif
+
+  stop_profiling_gpu_seg_time_with_remark(gpu_seg_id_, 1, remark);
   start_profiling_cpu_seg_response_time();
+
+  gpu_seg_id_++;
+  cpu_seg_id_++;
+}
+
+void yield_gpu_in_loop(int flag){
+  if(gpu_scheduling_flag_==1){
+    gpu_sched_info_->scheduling_flag = 0;
+    gpu_sched_info_->state = SCHEDULING_STATE_NONE;
+  }
+
+  #ifdef DEBUG
+    printf("yield_gpu: %d\n", gpu_seg_id_);
+  #endif
+
+  stop_profiling_gpu_seg_time(gpu_seg_id_, loop_cnt_);
+  start_profiling_cpu_seg_response_time();
+
+  if(flag == GPU_SEG_LOOP_END){
+    gpu_seg_id_ -= gpu_seg_cnt_in_loop_;
+    cpu_seg_id_ -= gpu_seg_cnt_in_loop_;
+  }
+}
+
+void yield_gpu_with_remark_in_loop(int flag, const char* remark){
+  if(gpu_scheduling_flag_==1){
+    gpu_sched_info_->scheduling_flag = 0;
+    gpu_sched_info_->state = SCHEDULING_STATE_NONE;
+  }
+
+  #ifdef DEBUG
+    printf("yield_gpu: %d\n", gpu_seg_id_);
+  #endif
+
+  stop_profiling_gpu_seg_time_with_remark(gpu_seg_id_, loop_cnt_, remark);
+  start_profiling_cpu_seg_response_time();
+
+  // if(flag == GPU_SEG_LOOP_END){
+  //   gpu_seg_id_ = gpu_seg_id_ - gpu_seg_cnt_in_loop_ + 1;
+  //   cpu_seg_id_ = cpu_seg_id_ - gpu_seg_cnt_in_loop_ + 1;
+  // }
+}
+
+void init_task(){
+  is_task_ready_ = TASK_READY;
+}
+
+void disable_task(){
+  is_task_ready_ = TASK_NOT_READY;
+}
+
+void print_loop_info(const char* tag){
+  printf("tag: %s\n",tag);
+  printf("cpu_seg_id: %d\n",cpu_seg_id_);
+  printf("gpu_seg_id: %d\n",gpu_seg_id_);
+  printf("loop cnt: %d\n",loop_cnt_);
+  printf("loop seg cnt: %d\n",gpu_seg_cnt_in_loop_);
+}
+
+void print_gpu_deadline_list(){
+  printf("====================================\n[GPU deadline list]\n");
+  printf("gpu_id\tdeadline\n");
+  for(int i = 0; i < max_gpu_id_; i++){
+    printf("%d\t%lu\n",i,gpu_deadline_list_[i]);
+  }
+  printf("====================================\n");
 }

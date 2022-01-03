@@ -15,6 +15,7 @@
  */
 
 #include "twist_filter/twist_filter_node.h"
+#include <rubis_sched/sched.hpp>
 
 namespace twist_filter_node
 {
@@ -23,8 +24,14 @@ TwistFilterNode::TwistFilterNode() : nh_(), private_nh_("~"), health_checker_(nh
   // Subscribe
   twist_sub_ = nh_.subscribe("twist_raw", 1, &TwistFilterNode::twistCmdCallback, this);
   ctrl_sub_ = nh_.subscribe("ctrl_raw", 1, &TwistFilterNode::ctrlCmdCallback, this);
-  config_sub_ = nh_.subscribe("config/twist_filter", 1, &TwistFilterNode::configCallback, this); //origin 10
+  config_sub_ = nh_.subscribe("config/twist_filter", 10, &TwistFilterNode::configCallback, this);
   emergency_stop_sub_ = nh_.subscribe("emergency_stop", 1 ,&TwistFilterNode::emergencyStopCallback, this);
+
+  /*  RT Scheduling setup  */
+  // twist_sub_ = nh_.subscribe("twist_raw", 1, &TwistFilterNode::twistCmdCallback, this);
+  // ctrl_sub_ = nh_.subscribe("ctrl_raw", 1, &TwistFilterNode::ctrlCmdCallback, this);
+  // config_sub_ = nh_.subscribe("config/twist_filter", 1, &TwistFilterNode::configCallback, this); //origin 10
+  // emergency_stop_sub_ = nh_.subscribe("emergency_stop", 1 ,&TwistFilterNode::emergencyStopCallback, this);
 
   // Publish
   twist_pub_ = nh_.advertise<geometry_msgs::TwistStamped>("twist_cmd", 5);
@@ -118,6 +125,9 @@ void TwistFilterNode::twistCmdCallback(const geometry_msgs::TwistStampedConstPtr
     out_msg.twist.angular.z = 0;
   }
   twist_pub_.publish(out_msg);
+
+  if(rubis::sched::is_task_ready_ == TASK_NOT_READY) rubis::sched::init_task();
+  rubis::sched::task_state_ = TASK_STATE_DONE;
 
   // Publish lateral accel and jerk after smoothing
   auto lacc_smoothed_result = twist_filter_ptr_->calcLaccWithAngularZ(twist_out);

@@ -15,13 +15,13 @@ void CubetownAutorunner::register_subscribers(){
     sub_v_.resize(TOTAL_STEP_NUM);          // Resizing the subscriber vectors. Its size must be same with number of steps
 
     // Set the check function(subscriber)
-    sub_v_[STEP(1)] = nh_.subscribe("/points_no_ground_center", 1, &CubetownAutorunner::points_no_ground_cb, this);   
+    sub_v_[STEP(1)] = nh_.subscribe("/points_raw", 1, &CubetownAutorunner::points_raw_cb, this);   
     sub_v_[STEP(2)] = nh_.subscribe("/ndt_stat", 1, &CubetownAutorunner::ndt_stat_cb, this);   
     sub_v_[STEP(3)] = nh_.subscribe("/detection/object_tracker/objects_center", 1, &CubetownAutorunner::detection_cb, this);   
     sub_v_[STEP(4)] = nh_.subscribe("/behavior_state", 1, &CubetownAutorunner::behavior_state_cb, this);   
 }
 
- void CubetownAutorunner::points_no_ground_cb(const sensor_msgs::PointCloud2& msg){
+ void CubetownAutorunner::points_raw_cb(const sensor_msgs::PointCloud2& msg){
     if(!msg.fields.empty() && !ros_autorunner_.step_info_list_[STEP(2)].is_prepared){
         ROS_WARN("[STEP 1] Map and Sensors are prepared");
     	sleep(SLEEP_PERIOD);

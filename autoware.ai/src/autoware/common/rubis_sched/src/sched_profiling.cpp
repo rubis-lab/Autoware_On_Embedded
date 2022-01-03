@@ -9,17 +9,16 @@ namespace sched{
   FILE* seg_execution_time_fp_;
   FILE* seg_response_time_fp_;
 
-  unsigned int cpu_seg_id_;
   int is_gpu_profiling_started_;
 
   struct timespec task_start_time_;
   struct timespec task_end_time_;
-  unsigned long long gpu_seg_response_time_;
-  unsigned long long gpu_seg_execution_time_;
-  unsigned long long cpu_seg_response_time_;
+  unsigned long gpu_seg_response_time_;
+  unsigned long gpu_seg_execution_time_;
+  unsigned long cpu_seg_response_time_;
   int is_gpu_profiling_ready_ = 0;
 
-  void set_is_gpu_profiling_ready(){
+  void start_gpu_profiling(){
     is_gpu_profiling_ready_ = 1;
   }
 
@@ -63,12 +62,11 @@ namespace sched{
     gpu_profiling_flag_ = 1;
     seg_execution_time_fp_ = fopen(execution_time_filename.c_str(), "w+");
     chmod(execution_time_filename.c_str(), strtol("0777", 0, 8));
-    fprintf(seg_execution_time_fp_, "ID, TIME, REMARK\n");
+    fprintf(seg_execution_time_fp_, "ID,TIME,ITERATION, REMARK\n");
 
     seg_response_time_fp_ = fopen(response_time_filename.c_str(), "w+");
     chmod(response_time_filename.c_str(), strtol("0777", 0, 8));
-    fprintf(seg_response_time_fp_, "ID, TIME, REMARK\n");
-    cpu_seg_id_ = 0;
+    fprintf(seg_response_time_fp_, "ID,TIME,ITERATION, REMARK\n");
   }
 
   void start_profiling_cpu_seg_response_time(){
@@ -76,11 +74,10 @@ namespace sched{
       cpu_seg_response_time_ = get_current_time_ns();
   }
 
-  void stop_profiling_cpu_seg_response_time(){
+  void stop_profiling_cpu_seg_response_time(unsigned int cpu_seg_id, unsigned int iter){
     if(gpu_profiling_flag_){
       cpu_seg_response_time_ = get_current_time_ns() - cpu_seg_response_time_;
-      fprintf(seg_response_time_fp_, "cpu_%u, %llu,  \n", cpu_seg_id_, cpu_seg_response_time_);
-      cpu_seg_id_++;
+      fprintf(seg_response_time_fp_, "cpu_%u,%llu,%u\n", cpu_seg_id, cpu_seg_response_time_, iter);
     }    
   }
 
@@ -92,39 +89,48 @@ namespace sched{
     if(gpu_profiling_flag_) gpu_seg_execution_time_ = get_current_time_ns();
   }
 
-  void stop_profiling_gpu_seg_time(unsigned int id, std::string remark){
+  void stop_profiling_gpu_seg_time(unsigned int gpu_seg_id, unsigned int iter, std::string remark){
     if(gpu_profiling_flag_){
-      unsigned long long current_time = get_current_time_ns();
+      unsigned long current_time = get_current_time_ns();
       gpu_seg_response_time_ = current_time - gpu_seg_response_time_;
       gpu_seg_execution_time_ = current_time - gpu_seg_execution_time_;
       
-      fprintf(seg_response_time_fp_, "gpu_%u, %llu, %s\n", id, gpu_seg_response_time_, remark.c_str());
-      fprintf(seg_execution_time_fp_, "gpu_%u, %llu, %s\n", id, gpu_seg_execution_time_, remark.c_str());
+      fprintf(seg_response_time_fp_, "gpu_%u,%llu,%u,%s\n", gpu_seg_id, gpu_seg_response_time_, iter, remark.c_str());
+      fprintf(seg_execution_time_fp_, "gpu_%u,%llu,%u,%s\n", gpu_seg_id, gpu_seg_execution_time_, iter, remark.c_str());
     }
   }
 
-  unsigned long long get_current_time_ns(){
+  unsigned long get_current_time_ns(){
     struct timespec ts;
-    unsigned long long current_time;
+    unsigned long current_time;
     clock_gettime(CLOCK_REALTIME, &ts);
     current_time = ts.tv_sec%10000 * 1000000000 + ts.tv_nsec;
     return current_time;
   }
 
-  void refresh_gpu_profiling(){
-    printf("refresh gpu profiling\n");
+  void start_job_profiling(){
+    if(!gpu_profiling_flag_) return;
+    
     if(is_gpu_profiling_started_ == 0) is_gpu_profiling_started_ = 1;
     else if( (is_gpu_profiling_started_ == 1) && (is_gpu_profiling_ready_ == 1) ){
-      stop_profiling_cpu_seg_response_time();
+      start_profiling_cpu_seg_response_time();
+    }    
+  }
+
+  void finish_job_profiling(unsigned int cpu_seg_id){
+    if(!gpu_profiling_flag_) return;
+    
+    if(is_gpu_profiling_started_ == 0) is_gpu_profiling_started_ = 1;
+    else if( (is_gpu_profiling_started_ == 1) && (is_gpu_profiling_ready_ == 1) ){
+      stop_profiling_cpu_seg_response_time(cpu_seg_id, 1);
       fprintf(seg_response_time_fp_, "-1, -1, -1\n");
       fprintf(seg_execution_time_fp_, "-1, -1, -1\n");
       
       fflush(seg_response_time_fp_);
       fflush(seg_execution_time_fp_);
-      cpu_seg_id_ = 0;
-      start_profiling_cpu_seg_response_time();
-    }
+    }    
   }
+
 
 }// end namespace
 }

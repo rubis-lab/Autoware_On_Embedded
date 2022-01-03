@@ -19,8 +19,6 @@
 #include "op_ros_helpers/op_ROSHelpers.h"
 #include <rubis_sched/sched.hpp>
 
-int is_topic_ready = 0;
-
 namespace MotionPredictorNS
 {
 
@@ -71,16 +69,29 @@ MotionPrediction::MotionPrediction()
     object_msg_list_.push_back(msg);
   }
   
-  sub_current_pose   = nh.subscribe("/current_pose", 1,  &MotionPrediction::callbackGetCurrentPose,     this); //origin 10
+  sub_current_pose   = nh.subscribe("/current_pose", 10,  &MotionPrediction::callbackGetCurrentPose,     this);
 
   int bVelSource = 1;
   _nh.getParam("/op_motion_predictor/velocitySource", bVelSource);
   if(bVelSource == 0)
-    sub_robot_odom = nh.subscribe("/odom", 1, &MotionPrediction::callbackGetRobotOdom, this); //origin 10
+    sub_robot_odom = nh.subscribe("/odom", 10, &MotionPrediction::callbackGetRobotOdom, this);
   else if(bVelSource == 1)
-    sub_current_velocity = nh.subscribe("/current_velocity", 1, &MotionPrediction::callbackGetVehicleStatus, this); //origin 10
+    sub_current_velocity = nh.subscribe("/current_velocity", 10, &MotionPrediction::callbackGetVehicleStatus, this);
   else if(bVelSource == 2)
-    sub_can_info = nh.subscribe("/can_info", 1, &MotionPrediction::callbackGetCANInfo, this); //origin 10
+    sub_can_info = nh.subscribe("/can_info", 10, &MotionPrediction::callbackGetCANInfo, this);
+  
+
+  /*  RT Scheduling setup  */
+  // sub_current_pose   = nh.subscribe("/current_pose", 1,  &MotionPrediction::callbackGetCurrentPose,     this); //origin 10
+
+  // int bVelSource = 1;
+  // _nh.getParam("/op_motion_predictor/velocitySource", bVelSource);
+  // if(bVelSource == 0)
+  //   sub_robot_odom = nh.subscribe("/odom", 1, &MotionPrediction::callbackGetRobotOdom, this); //origin 10
+  // else if(bVelSource == 1)
+  //   sub_current_velocity = nh.subscribe("/current_velocity", 1, &MotionPrediction::callbackGetVehicleStatus, this); //origin 10
+  // else if(bVelSource == 2)
+  //   sub_can_info = nh.subscribe("/can_info", 1, &MotionPrediction::callbackGetCANInfo, this); //origin 10
 
   UtilityHNS::UtilityH::GetTickCount(m_VisualizationTimer);
   PlannerHNS::ROSHelpers::InitPredMarkers(100, m_PredictedTrajectoriesDummy);
@@ -241,7 +252,8 @@ void MotionPrediction::callbackGetVehicleStatus(const geometry_msgs::TwistStampe
   UtilityHNS::UtilityH::GetTickCount(m_VehicleStatus.tStamp);
   bVehicleStatus = true;
 
-  is_topic_ready = 1;
+  if(rubis::sched::is_task_ready_ == TASK_NOT_READY) rubis::sched::init_task();
+  rubis::sched::task_state_ = TASK_STATE_DONE;
 }
 
 void MotionPrediction::callbackGetCANInfo(const autoware_can_msgs::CANInfoConstPtr &msg)
@@ -558,14 +570,15 @@ void MotionPrediction::MainLoop()
 
   if(task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
 
-  ros::Rate loop_rate(25);
-  if(!task_scheduling_flag && !task_profiling_flag) loop_rate = ros::Rate(rate);
+  ros::Rate loop_rate(rate);
+  if(!task_scheduling_flag && !task_profiling_flag) loop_rate = ros::Rate(25);
 
   while (ros::ok())
   {
-    if(task_profiling_flag && is_topic_ready) rubis::sched::start_task_profiling();
-    if(task_scheduling_flag && is_topic_ready){        
-      rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline);
+    if(rubis::sched::is_task_ready_ == TASK_READY && rubis::sched::task_state_ == TASK_STATE_READY){
+      if(task_profiling_flag) rubis::sched::start_task_profiling();
+      if(task_scheduling_flag) rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline); 
+      rubis::sched::task_state_ = TASK_STATE_RUNNING;     
     }
 
     ros::spinOnce();
@@ -629,8 +642,11 @@ void MotionPrediction::MainLoop()
 //      pub_predicted_objects_trajectories.publish(m_PredictedResultsResults);
 //    }
 
-    if(task_scheduling_flag && is_topic_ready) rubis::sched::yield_task_scheduling();
-    if(task_profiling_flag && is_topic_ready) rubis::sched::stop_task_profiling();
+    if(rubis::sched::is_task_ready_ == TASK_READY && rubis::sched::task_state_ == TASK_STATE_DONE){
+      if(task_profiling_flag) rubis::sched::stop_task_profiling();
+      if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
+      rubis::sched::task_state_ = TASK_STATE_READY;
+    }
 
     loop_rate.sleep();
   }
