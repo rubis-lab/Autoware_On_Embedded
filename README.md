@@ -54,7 +54,7 @@ sudo cp /usr/local/share/eigen3/cmake/* /usr/lib/cmake/eigen3
 ```
 cd {$WORKSPACE_DIR}/autoware.ai
 rosdep update
-rosdep install -y --from-paths src --ignore-src --rosdistro $ROS_DISTRO
+rosdep install -y --from-paths src --ignore-src --rosdistro $ROS_DISTRO -r
 ```
 
 ### Resolving OpenCV version issue
