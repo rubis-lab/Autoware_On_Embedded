@@ -6,7 +6,7 @@ Autoware system for embedded boards
 - Ubuntu 18.04
 - ROS Melodic
 - CUDA 10.x
-- OpenCV 4.x
+- OpenCV 3.x
 
 ## How to install ROS melodic
 ```
