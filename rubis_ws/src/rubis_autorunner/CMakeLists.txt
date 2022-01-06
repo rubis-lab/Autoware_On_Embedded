@@ -60,6 +60,12 @@ add_executable(cubetown_autorunner_gpu
   src/cubetown_autorunner/cubetown_autorunner_gpu.cpp
 )
 
+add_executable(tutorial_autorunner
+  include/tutorial_autorunner/tutorial_autorunner.h
+  src/tutorial_autorunner/tutorial_autorunner_node.cpp
+  src/tutorial_autorunner/tutorial_autorunner.cpp
+)
+
 add_dependencies(lgsvl_triple_lidar_autorunner ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(lgsvl_triple_lidar_autorunner
   ${catkin_LIBRARIES}
@@ -86,6 +92,12 @@ target_link_libraries(cubetown_autorunner
 
 add_dependencies(cubetown_autorunner_gpu ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(cubetown_autorunner_gpu
+  ${catkin_LIBRARIES}
+  ros_autorunner_lib
+)
+
+add_dependencies(tutorial_autorunner ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(tutorial_autorunner
   ${catkin_LIBRARIES}
   ros_autorunner_lib
 )
