@@ -1,0 +1,12 @@
+std_msgs/Header             header
+float64                     GPS_INS_Time
+float64                     GPS_IMU_Time
+std_msgs/UInt32             GPS_mSOW
+geometry_msgs/Vector3       LLH
+geometry_msgs/Vector3       YPR
+geometry_msgs/Quaternion    OriQuat
+geometry_msgs/Vector3       Vel_ENU
+std_msgs/Int8               Solution_Status
+geometry_msgs/Vector3       Pos_STD
+float32                     Heading_STD
+uint16                      USW
