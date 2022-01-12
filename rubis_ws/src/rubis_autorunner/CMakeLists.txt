@@ -66,6 +66,12 @@ add_executable(tutorial_autorunner
   src/tutorial_autorunner/tutorial_autorunner.cpp
 )
 
+add_executable(rubis_testbed_autorunner
+  include/rubis_testbed_autorunner/rubis_testbed_autorunner.h
+  src/rubis_testbed_autorunner/rubis_testbed_autorunner_node.cpp
+  src/rubis_testbed_autorunner/rubis_testbed_autorunner.cpp
+)
+
 add_dependencies(lgsvl_triple_lidar_autorunner ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(lgsvl_triple_lidar_autorunner
   ${catkin_LIBRARIES}
@@ -98,6 +104,12 @@ target_link_libraries(cubetown_autorunner_gpu
 
 add_dependencies(tutorial_autorunner ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(tutorial_autorunner
+  ${catkin_LIBRARIES}
+  ros_autorunner_lib
+)
+
+add_dependencies(rubis_testbed_autorunner ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(rubis_testbed_autorunner
   ${catkin_LIBRARIES}
   ros_autorunner_lib
 )

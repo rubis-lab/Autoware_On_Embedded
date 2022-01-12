@@ -1,0 +1,4 @@
+<launch>
+    <rosparam command="load" file="$(env USER_HOME)/rubis_ws/src/rubis_autorunner/cfg/rubis_testbed_autorunner/rubis_testbed_autorunner.yaml" />
+    <node pkg="rubis_autorunner" type="rubis_testbed_autorunner" name="rubis_testbed_autorunner" output="screen" />
+</launch>
