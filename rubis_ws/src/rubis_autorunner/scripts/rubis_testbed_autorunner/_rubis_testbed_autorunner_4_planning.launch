@@ -11,13 +11,13 @@
     <arg name="mapFileName"           value="" /> <!-- incase of kml map source -->
     <!-- Borregas Avenue -->
     <arg name="use_static_goal"       value="true" />
-    <arg name="goal_pose_x"           value="57.0422019958" />
-    <arg name="goal_pose_y"           value="-5.43001270294" />
+    <arg name="goal_pose_x"           value="-11.4754333496" />
+    <arg name="goal_pose_y"           value="577.3985595" />
     <arg name="goal_pose_z"           value="0.0" />
     <arg name="goal_ori_x"            value="0.0" />
     <arg name="goal_ori_y"            value="0.0" />
-    <arg name="goal_ori_z"            value="0.719615198264" />
-    <arg name="goal_ori_w"            value="0.694373074383" />
+    <arg name="goal_ori_z"            value="0.99960008408" />
+    <arg name="goal_ori_w"            value="-0.0282784707519" />
   </include>
 
   <!-- op_common_params  -->

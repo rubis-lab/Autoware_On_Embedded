@@ -7,8 +7,8 @@ terminate_script_path: "~/rubis_ws/src/rubis_autorunner/scripts/rubis_testbed_au
 #     [3] state that check constraint topic or not ( "true" or "false" )
 #     [4] target type( RUN or LAUNCH )
 
-step_1: ["rubis_autorunner", "_rubis_testbed__autorunner_1_sensing.launch", "true", "false", "LAUNCH"]
-step_2: ["rubis_autorunner", "_rubis_testbed__autorunner_2_localization.launch", "true", "true", "LAUNCH"]
-step_3: ["rubis_autorunner", "_rubis_testbed__autorunner_3_detection.launch", "true", "true", "LAUNCH"]
-step_4: ["rubis_autorunner", "_rubis_testbed__autorunner_4_planning.launch", "true", "true", "LAUNCH"]
-step_5: ["rubis_autorunner", "_rubis_testbed__autorunner_5_control.launch", "false", "true", "LAUNCH"]
+step_1: ["rubis_autorunner", "_rubis_testbed_autorunner_1_sensing.launch", "true", "false", "LAUNCH"]
+step_2: ["rubis_autorunner", "_rubis_testbed_autorunner_2_localization.launch", "true", "true", "LAUNCH"]
+step_3: ["rubis_autorunner", "_rubis_testbed_autorunner_3_detection.launch", "true", "true", "LAUNCH"]
+step_4: ["rubis_autorunner", "_rubis_testbed_autorunner_4_planning.launch", "true", "true", "LAUNCH"]
+step_5: ["rubis_autorunner", "_rubis_testbed_autorunner_5_control.launch", "false", "true", "LAUNCH"]
