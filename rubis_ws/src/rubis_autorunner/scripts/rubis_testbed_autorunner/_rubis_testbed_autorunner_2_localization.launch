@@ -1,8 +1,8 @@
 <launch>
   <!-- cubetown -->
-  <arg name="init_x" value="29.675" />
-  <arg name="init_y" value="-0.129" />
-  <arg name="init_z" value="1.96" />
+  <arg name="init_x" value="0.19" />
+  <arg name="init_y" value="0.05" />
+  <arg name="init_z" value="2.30" />
   <arg name="init_roll" value="0.0" />
   <arg name="init_pitch" value="0.0" />
   <arg name="init_yaw" value="0.0" />
@@ -35,7 +35,7 @@
     error_threshold: 1,
     resolution: 3.0,
     step_size: 0.5,
-    trans_epsilon: 0.05,
+    trans_epsilon: 0.01,
     max_iterations: 10}
   '"/>
 
