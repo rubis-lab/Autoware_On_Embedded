@@ -141,6 +141,7 @@ void TrajectoryEval::UpdatePlanningParams(ros::NodeHandle& _nh)
   _nh.param("/op_trajectory_evaluator/PedestrianRightThreshold", m_PedestrianRightThreshold, 7.0);
   _nh.param("/op_trajectory_evaluator/PedestrianLeftThreshold", m_PedestrianLeftThreshold, 2.0);
   _nh.param("/op_trajectory_evaluator/PedestrianImageDetectionRange", m_PedestrianImageDetectionRange, 0.7);
+  _nh.param("/op_trajectory_evaluator/PedstrianStopImgHeightThreshold", m_pedestrian_stop_img_height_threshold, 120);
   _nh.param("/op_trajectory_evaluator/ImageWidth", m_ImageWidth, 1920);
   _nh.param("/op_trajectory_evaluator/ImageHeight", m_ImageHeight, 1080);
   _nh.param("/op_trajectory_evaluator/VehicleImageDetectionRange", m_VehicleImageDetectionRange, 0.3);
@@ -273,14 +274,17 @@ void TrajectoryEval::callbackGetPredictedObjects(const autoware_msgs::DetectedOb
 
   PlannerHNS::DetectedObject obj;
   for(unsigned int i = 0 ; i <msg->objects.size(); i++)
-  {
+  {    
     // if(msg->objects.at(i).pose.position.y < -20 || msg->objects.at(i).pose.position.y > 20)
+    //   continue;    
+      
+    // if(msg->objects.at(i).pose.position.z > 1 || msg->objects.at(i).pose.position.z < -1.5)
     //   continue;
-    if(msg->objects.at(i).pose.position.z > 1 || msg->objects.at(i).pose.position.z < -1.5)
-      continue;
 
     autoware_msgs::DetectedObject msg_obj = msg->objects.at(i);     
 
+    // #### Decison making for objects
+    
     if(msg_obj.id > 0) // If fusion object is detected
     {
       // calculate distance to person first
@@ -355,28 +359,46 @@ void TrajectoryEval::callbackGetPredictedObjects(const autoware_msgs::DetectedOb
 
       m_PredictedObjects.push_back(obj);
     }
+    /*
     else{ // If object is only detected at vision
       int image_obj_center_x = msg_obj.x+msg_obj.width/2;
       int image_obj_center_y = msg_obj.y+msg_obj.height/2;
-      
-      if (msg_obj.label == "person"){// If person is detected only in image
-        if(image_obj_center_x >= image_person_detection_range_left && image_obj_center_x <= image_person_detection_range_right){ 
-          double temp_x_distance = 1000;
-          if(msg_obj.height>=195) temp_x_distance = 10.0;
-          else if(msg_obj.height>=125) temp_x_distance = 15.0;
-          else if(msg_obj.height>=105) temp_x_distance = 20.0;                
-          if(abs(temp_x_distance) < abs(distance_to_pedestrian)) distance_to_pedestrian = temp_x_distance;
-        }
-      }                    
-      else if(msg_obj.label == "car" || msg_obj.label == "truck" || msg_obj.label == "bus"){            
+      // if (msg_obj.label == "person"){// If person is detected only in image
+      //   // TO ERASE
+      //   std::cout<<"object height:" << msg_obj.height << " / threshold:" << m_pedestrian_stop_img_height_threshold << std::endl;
+      //   if(image_obj_center_x >= image_person_detection_range_left && image_obj_center_x <= image_person_detection_range_right){ 
+      //     double temp_x_distance = 1000;
+      //     if(msg_obj.height >= m_pedestrian_stop_img_height_threshold) temp_x_distance = 10;
+      //     if(abs(temp_x_distance) < abs(distance_to_pedestrian)) distance_to_pedestrian = temp_x_distance;
+      //   }
+      // }                    
+      // else 
+      if(msg_obj.label == "car" || msg_obj.label == "truck" || msg_obj.label == "bus"){            
         if((msg_obj.width > m_VehicleImageWidthThreshold) 
               && (image_obj_center_x > image_vehicle_detection_range_left) 
               && (image_obj_center_x < image_vehicle_detection_range_right)
-        ){          
+        )
+        {          
           vehicle_cnt+=1;        
         }
       }
     }
+    */
+
+    int image_obj_center_x = msg_obj.x+msg_obj.width/2;
+    int image_obj_center_y = msg_obj.y+msg_obj.height/2;
+    if (msg_obj.label == "person"){// If person is detected only in image
+      
+      // TO ERASE
+      // ROS_WARN("object height:%d // thr: %d\n", msg_obj.height, m_pedestrian_stop_img_height_threshold);
+
+      if(image_obj_center_x >= image_person_detection_range_left && image_obj_center_x <= image_person_detection_range_right){ 
+        double temp_x_distance = 1000;
+        if(msg_obj.height >= m_pedestrian_stop_img_height_threshold) temp_x_distance = 10;
+        if(abs(temp_x_distance) < abs(distance_to_pedestrian)) distance_to_pedestrian = temp_x_distance;
+      }
+    }
+    
   }
 
   // Publish Sprint Switch
@@ -458,7 +480,7 @@ void TrajectoryEval::MainLoop()
   private_nh.param<int>("/op_trajectory_evaluator/rate", rate, 10);
   private_nh.param("/op_trajectory_evaluator/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
   private_nh.param("/op_trajectory_evaluator/task_execution_time", task_execution_time, (double)10);
-  private_nh.param("/op_trajectory_evaluator/task_relative_deadline", task_relative_deadline, (double)10);
+  private_nh.param("/op_trajectory_evaluator/task_relative_deadline", task_relative_deadline, (double)10);  
 
   if(task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
 

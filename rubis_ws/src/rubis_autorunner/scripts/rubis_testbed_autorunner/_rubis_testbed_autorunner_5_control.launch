@@ -5,8 +5,8 @@
   <!-- pure_pursuit  -->
   <include file="$(find pure_pursuit)/launch/pure_pursuit.launch">    
     <!-- Core Parameter -->
-    <arg name="lookahead_ratio"               value="1.0"/>
-    <arg name="minimum_lookahead_distance"    value="7.0"/>
+    <arg name="lookahead_ratio"               value="1.5"/>
+    <arg name="minimum_lookahead_distance"    value="10.0"/>
     
     <arg name="const_velocity"                value="5.0"/>     
     <arg name="const_lookahead_distance"      value="4.0"/>
