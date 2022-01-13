@@ -9,21 +9,21 @@ void calculate_tf_with_gps_ndt_cb(const inertiallabs_msgs::gps_data::ConstPtr& m
 
     ToEulerAngles(msg_ndt_pose->pose.orientation, ndt_yaw, ndt_pitch, ndt_roll);
 
-    if(count % 100 == 1 && count <= 301){
-        gps_pos(0, count / 100) = cur_pose.pose.position.x; gps_pos(1, count / 100) = cur_pose.pose.position.y;
-        gps_pos(2, count / 100) = cur_pose.pose.position.z; gps_pos(3, count / 100) = 1.0;
+    if(cb_count % 100 == 1 && cb_count <= 301){
+        gps_pos(0, cb_count / 100) = cur_pose.pose.position.x; gps_pos(1, cb_count / 100) = cur_pose.pose.position.y;
+        gps_pos(2, cb_count / 100) = cur_pose.pose.position.z; gps_pos(3, cb_count / 100) = 1.0;
 
-        ndt_pos(0, count / 100) = msg_ndt_pose->pose.position.x; ndt_pos(1, count / 100) = msg_ndt_pose->pose.position.y;
-        ndt_pos(2, count / 100) = msg_ndt_pose->pose.position.z; ndt_pos(3, count / 100) = 1.0;
+        ndt_pos(0, cb_count / 100) = msg_ndt_pose->pose.position.x; ndt_pos(1, cb_count / 100) = msg_ndt_pose->pose.position.y;
+        ndt_pos(2, cb_count / 100) = msg_ndt_pose->pose.position.z; ndt_pos(3, cb_count / 100) = 1.0;
 
-        gps_qt(0, count / 100) = msg_ins->YPR.x / 180 * M_PI; gps_qt(1, count / 100) = msg_ins->YPR.y / 180 * M_PI;
-        gps_qt(2, count / 100) = msg_ins->YPR.z / 180 * M_PI; gps_qt(3, count / 100) = 1.0;
+        gps_qt(0, cb_count / 100) = msg_ins->YPR.x / 180 * M_PI; gps_qt(1, cb_count / 100) = msg_ins->YPR.y / 180 * M_PI;
+        gps_qt(2, cb_count / 100) = msg_ins->YPR.z / 180 * M_PI; gps_qt(3, cb_count / 100) = 1.0;
 
-        ndt_qt(0, count / 100) = ndt_yaw;  ndt_qt(1, count / 100) = ndt_pitch;
-        ndt_qt(2, count / 100) = ndt_roll; ndt_qt(3, count / 100) = 1.0;
+        ndt_qt(0, cb_count / 100) = ndt_yaw;  ndt_qt(1, cb_count / 100) = ndt_pitch;
+        ndt_qt(2, cb_count / 100) = ndt_roll; ndt_qt(3, cb_count / 100) = 1.0;
     }
 
-    if(count == 301){
+    if(cb_count == 301){
         pos_tf = ndt_pos * gps_pos.inverse();
         ori_tf = ndt_qt * gps_qt.inverse();
 
@@ -44,7 +44,7 @@ void calculate_tf_with_gps_ndt_cb(const inertiallabs_msgs::gps_data::ConstPtr& m
         ros::shutdown();
     }
     
-    count++;
+    cb_count++;
 }
 
 void pub_gnss_pose_cb(const inertiallabs_msgs::gps_data::ConstPtr& msg_gps, const inertiallabs_msgs::ins_data::ConstPtr& msg_ins){
@@ -191,82 +191,22 @@ int main(int argc, char *argv[]){
     else{
         sync_2.registerCallback(boost::bind(&pub_gnss_pose_cb, _1, _2));
 
-        double tf_tmp;
+        vector<double> tf_tmp;
 
         /*================= pos_tf matrix =================*/
-        ros::param::get("/gnss_converter/pos_tf_0_0", tf_tmp);
-        pos_tf(0, 0) = tf_tmp;
-        ros::param::get("/gnss_converter/pos_tf_0_1", tf_tmp);
-        pos_tf(0, 1) = tf_tmp;
-        ros::param::get("/gnss_converter/pos_tf_0_2", tf_tmp);
-        pos_tf(0, 2) = tf_tmp;
-        ros::param::get("/gnss_converter/pos_tf_0_3", tf_tmp);
-        pos_tf(0, 3) = tf_tmp;
-
-        ros::param::get("/gnss_converter/pos_tf_1_0", tf_tmp);
-        pos_tf(1, 0) = tf_tmp;
-        ros::param::get("/gnss_converter/pos_tf_1_1", tf_tmp);
-        pos_tf(1, 1) = tf_tmp;
-        ros::param::get("/gnss_converter/pos_tf_1_2", tf_tmp);
-        pos_tf(1, 2) = tf_tmp;
-        ros::param::get("/gnss_converter/pos_tf_1_3", tf_tmp);
-        pos_tf(1, 3) = tf_tmp;
-
-        ros::param::get("/gnss_converter/pos_tf_2_0", tf_tmp);
-        pos_tf(2, 0) = tf_tmp;
-        ros::param::get("/gnss_converter/pos_tf_2_1", tf_tmp);
-        pos_tf(2, 1) = tf_tmp;
-        ros::param::get("/gnss_converter/pos_tf_2_2", tf_tmp);
-        pos_tf(2, 2) = tf_tmp;
-        ros::param::get("/gnss_converter/pos_tf_2_3", tf_tmp);
-        pos_tf(2, 3) = tf_tmp;
-
-        ros::param::get("/gnss_converter/pos_tf_3_0", tf_tmp);
-        pos_tf(3, 0) = tf_tmp;
-        ros::param::get("/gnss_converter/pos_tf_3_1", tf_tmp);
-        pos_tf(3, 1) = tf_tmp;
-        ros::param::get("/gnss_converter/pos_tf_3_2", tf_tmp);
-        pos_tf(3, 2) = tf_tmp;
-        ros::param::get("/gnss_converter/pos_tf_3_3", tf_tmp);
-        pos_tf(3, 3) = tf_tmp;
+        ros::param::get("/gnss_converter/pos_tf", tf_tmp);
+        pos_tf(0, 0) = tf_tmp[0]; pos_tf(0, 1) = tf_tmp[1]; pos_tf(0, 2) = tf_tmp[2]; pos_tf(0, 3) = tf_tmp[3];
+        pos_tf(1, 0) = tf_tmp[4]; pos_tf(1, 1) = tf_tmp[5]; pos_tf(1, 2) = tf_tmp[6]; pos_tf(1, 3) = tf_tmp[7];
+        pos_tf(2, 0) = tf_tmp[8]; pos_tf(2, 1) = tf_tmp[9]; pos_tf(2, 2) = tf_tmp[10]; pos_tf(2, 3) = tf_tmp[11];
+        pos_tf(3, 0) = tf_tmp[12]; pos_tf(3, 1) = tf_tmp[13]; pos_tf(3, 2) = tf_tmp[14]; pos_tf(3, 3) = tf_tmp[15];
         /*=================================================*/
 
         /*================= ori_tf matrix =================*/
-        ros::param::get("/gnss_converter/ori_tf_0_0", tf_tmp);
-        ori_tf(0, 0) = tf_tmp;
-        ros::param::get("/gnss_converter/ori_tf_0_1", tf_tmp);
-        ori_tf(0, 1) = tf_tmp;
-        ros::param::get("/gnss_converter/ori_tf_0_2", tf_tmp);
-        ori_tf(0, 2) = tf_tmp;
-        ros::param::get("/gnss_converter/ori_tf_0_3", tf_tmp);
-        ori_tf(0, 3) = tf_tmp;
-
-        ros::param::get("/gnss_converter/ori_tf_1_0", tf_tmp);
-        ori_tf(1, 0) = tf_tmp;
-        ros::param::get("/gnss_converter/ori_tf_1_1", tf_tmp);
-        ori_tf(1, 1) = tf_tmp;
-        ros::param::get("/gnss_converter/ori_tf_1_2", tf_tmp);
-        ori_tf(1, 2) = tf_tmp;
-        ros::param::get("/gnss_converter/ori_tf_1_3", tf_tmp);
-        ori_tf(1, 3) = tf_tmp;
-
-        ros::param::get("/gnss_converter/ori_tf_2_0", tf_tmp);
-        ori_tf(2, 0) = tf_tmp;
-        ros::param::get("/gnss_converter/ori_tf_2_1", tf_tmp);
-        ori_tf(2, 1) = tf_tmp;
-        ros::param::get("/gnss_converter/ori_tf_2_2", tf_tmp);
-        ori_tf(2, 2) = tf_tmp;
-        ros::param::get("/gnss_converter/ori_tf_2_3", tf_tmp);
-        ori_tf(2, 3) = tf_tmp;
-
-        ros::param::get("/gnss_converter/ori_tf_3_0", tf_tmp);
-        ori_tf(3, 0) = tf_tmp;
-        ros::param::get("/gnss_converter/ori_tf_3_1", tf_tmp);
-        ori_tf(3, 1) = tf_tmp;
-        ros::param::get("/gnss_converter/ori_tf_3_2", tf_tmp);
-        ori_tf(3, 2) = tf_tmp;
-        ros::param::get("/gnss_converter/ori_tf_3_3", tf_tmp);
-        ori_tf(3, 3) = tf_tmp;
+        ros::param::get("/gnss_converter/ori_tf", tf_tmp);
+        ori_tf(0, 0) = tf_tmp[0]; ori_tf(0, 1) = tf_tmp[1]; ori_tf(0, 2) = tf_tmp[2]; ori_tf(0, 3) = tf_tmp[3];
+        ori_tf(1, 0) = tf_tmp[4]; ori_tf(1, 1) = tf_tmp[5]; ori_tf(1, 2) = tf_tmp[6]; ori_tf(1, 3) = tf_tmp[7];
+        ori_tf(2, 0) = tf_tmp[8]; ori_tf(2, 1) = tf_tmp[9]; ori_tf(2, 2) = tf_tmp[10]; ori_tf(2, 3) = tf_tmp[11];
+        ori_tf(3, 0) = tf_tmp[12]; ori_tf(3, 1) = tf_tmp[13]; ori_tf(3, 2) = tf_tmp[14]; ori_tf(3, 3) = tf_tmp[15];
         /*================================================*/
     }
 

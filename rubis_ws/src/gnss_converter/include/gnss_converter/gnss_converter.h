@@ -1,6 +1,7 @@
 #include <iostream>
 #include <angles/angles.h>
 #include <cmath>
+#include <vector>
 
 #include <ros/ros.h>
 #include <inertiallabs_msgs/gps_data.h>
@@ -18,6 +19,7 @@
 #include <message_filters/sync_policies/approximate_time.h>
 #include <message_filters/sync_policies/exact_time.h>
 
+using namespace std;
 using namespace message_filters;
 using namespace Eigen;
 
@@ -40,21 +42,21 @@ typedef sync_policies::ExactTime<inertiallabs_msgs::gps_data, inertiallabs_msgs:
 #define UTM_E6		(UTM_E4*UTM_E2)		// e^6
 #define UTM_EP2		(UTM_E2/(1-UTM_E2))	// e'^2
 
-double pos_x, pos_y, pos_z;
-double quat_x, quat_y, quat_z, quat_w;
+static double pos_x, pos_y, pos_z;
+static double quat_x, quat_y, quat_z, quat_w;
 
-double yaw_diff;
-int count;
+static double yaw_diff;
+static int cb_count;
 
-Matrix<double, 4, 4> pos_tf;
-Matrix<double, 4, 4> gps_pos;
-Matrix<double, 4, 4> ndt_pos;
+static Matrix<double, 4, 4> pos_tf;
+static Matrix<double, 4, 4> gps_pos;
+static Matrix<double, 4, 4> ndt_pos;
 
-Matrix<double, 4, 4> ori_tf;
-Matrix<double, 4, 4> gps_qt;
-Matrix<double, 4, 4> ndt_qt;
+static Matrix<double, 4, 4> ori_tf;
+static Matrix<double, 4, 4> gps_qt;
+static Matrix<double, 4, 4> ndt_qt;
 
-ros::Publisher gnss_pose_pub;
+static ros::Publisher gnss_pose_pub;
 
 void calculate_tf_with_gps_ndt_cb(const inertiallabs_msgs::gps_data::ConstPtr& msg_gps, const inertiallabs_msgs::ins_data::ConstPtr& msg_ins,
                                      const geometry_msgs::PoseStamped::ConstPtr& msg_ndt_pose);

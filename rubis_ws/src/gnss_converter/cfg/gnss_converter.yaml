@@ -6,43 +6,7 @@
 # map : 220111_138ground
 
 # ========= position tf matrix =========
-/gnss_converter/pos_tf_0_0 : -0.292395
-/gnss_converter/pos_tf_0_1 : -1.125976
-/gnss_converter/pos_tf_0_2 : -5.257557
-/gnss_converter/pos_tf_0_3 : 13690.052429
-
-/gnss_converter/pos_tf_1_0 : 1.616471
-/gnss_converter/pos_tf_1_1 : 0.198493
-/gnss_converter/pos_tf_1_2 : 13.630088
-/gnss_converter/pos_tf_1_3 : -10364.443012
-
-/gnss_converter/pos_tf_2_0 : -0.267041
-/gnss_converter/pos_tf_2_1 : -0.073857
-/gnss_converter/pos_tf_2_2 : -5.543469
-/gnss_converter/pos_tf_2_3 : 227.041684
-
-/gnss_converter/pos_tf_3_0 : 0.0
-/gnss_converter/pos_tf_3_1 : 0.0
-/gnss_converter/pos_tf_3_2 : 0.0
-/gnss_converter/pos_tf_3_3 : 1.0
+/gnss_converter/pos_tf : [-0.292395, -1.125976, -5.257557, 13690.052429, 1.616471, 0.198493, 13.630088, -10364.443012, -0.267041, -0.073857, -5.543469, 227.041684, 0.0, 0.0, 0.0, 1.0] 
 
 # ========= orientation tf matrix =========
-/gnss_converter/ori_tf_0_0 : 0.276667     
-/gnss_converter/ori_tf_0_1 : 15.435781
-/gnss_converter/ori_tf_0_2 : -17.992405
-/gnss_converter/ori_tf_0_3 : -0.632826
-
-/gnss_converter/ori_tf_1_0 : -0.004556        
-/gnss_converter/ori_tf_1_1 : -2.592555
-/gnss_converter/ori_tf_1_2 : 6.993107
-/gnss_converter/ori_tf_1_3 : 0.099857
-
-/gnss_converter/ori_tf_2_0 : -0.010594
-/gnss_converter/ori_tf_2_1 : 0.505370      
-/gnss_converter/ori_tf_2_2 : 3.094219
-/gnss_converter/ori_tf_2_3 : 0.039236
-
-/gnss_converter/ori_tf_3_0 : 0.0
-/gnss_converter/ori_tf_3_1 : 0.0
-/gnss_converter/ori_tf_3_2 : 0.0
-/gnss_converter/ori_tf_3_3 : 1.0
+/gnss_converter/ori_tf : [0.276667, 15.435781, -17.992405, -0.632826, -0.004556, -2.592555, 6.993107, 0.099857, -0.010594, 0.505370, 3.094219, 0.039236, 0.0, 0.0, 0.0, 1.0]
