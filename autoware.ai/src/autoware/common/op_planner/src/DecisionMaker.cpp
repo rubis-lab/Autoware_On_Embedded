@@ -247,8 +247,9 @@ void DecisionMaker::InitBehaviorStates()
 
   distanceToClosestStopLine = PlanningHelpers::CalculateStopLineDistance_RUBIS(m_TotalPath.at(pValues->iCurrSafeLane), state, m_Map.stopLines, stopLineID, stopLineLength, trafficLightID) - critical_long_front_distance;
 
-  // std::cout << "StopLineID : " << stopLineID << ", TrafficLightID : " << trafficLightID << ", Distance: " << distanceToClosestStopLine << ", MinStopDistance: " << pValues->minStoppingDistance << std::endl;
-  // std::cout << "detected Lights # : " << detectedLights.size() << std::endl;
+  //std::cout << "StopLineID : " << stopLineID << ", TrafficLightID : " << trafficLightID << ", Distance: " << distanceToClosestStopLine << ", MinStopDistance: " << pValues->minStoppingDistance << std::endl;
+  //std::cout << "stoplinedetectionDistance : " << m_params.stopLineDetectionDistance << std::endl;
+  //std::cout << "detected Lights # : " << detectedLights.size() << std::endl;
 
   if(m_pCurrentBehaviorState->m_pParams->enableTrafficLightBehavior){
 

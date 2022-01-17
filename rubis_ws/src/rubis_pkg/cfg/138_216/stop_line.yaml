@@ -1,0 +1,15 @@
+stop_line_list:
+  -
+    id : 1
+    tl_id : 1
+    pose :
+      x : 1.233
+      y : -0.082
+      z : 1.9584
+  -
+    id : 2
+    tl_id : 2
+    pose :
+      x : 0.0971
+      y : 4.2496
+      z : 1.3027
