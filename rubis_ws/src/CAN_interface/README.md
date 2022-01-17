@@ -21,21 +21,6 @@ sudo apt install ros-$ROS_DISTRO-kvaser-interface
 
 ### **Now you are ready to build the RUBIS CAN interface package**
 
-
-* Initialize ROS workspace
-```
-cd ${WORKSPACE_DIR}/src
-catkin_init_workspace
-```
-
-* Clone package & move the src
-```
-git clone https://github.com/rubis-lab/CAN-Interface.git
-cd CAN-Interface
-mv -r can_data_msgs can_translate ${WORKSPACE_DIR}/src
-cd ${WORKSPACE_DIR}/src
-```
-
 * Build packages
 ```
 cd ${WORKSPACE_DIR}
