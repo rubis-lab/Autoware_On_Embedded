@@ -67,7 +67,7 @@ op_global_planner:
   task_execution_time: 100000000
   task_relative_deadline: 100000000
   multilap_flag: 1
-  multilap_replanning_distance : 5
+  multilap_replanning_distance : 3.5
 
 op_common_params:
   rollOutDensity: 0

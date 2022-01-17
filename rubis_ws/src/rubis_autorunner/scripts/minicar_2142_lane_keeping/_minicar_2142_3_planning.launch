@@ -11,13 +11,13 @@
     <arg name="mapFileName"           value="" /> <!-- incase of kml map source -->
     <!-- 138-216 -->
     <arg name="use_static_goal"       value="true" />
-    <arg name="goal_pose_x"           value="3.46" />
-    <arg name="goal_pose_y"           value="-2.37" />
-    <arg name="goal_pose_z"           value="2.09" />
-    <arg name="goal_ori_x"            value="0.03" />
-    <arg name="goal_ori_y"            value="-0.024" />
-    <arg name="goal_ori_z"            value="-0.983" />
-    <arg name="goal_ori_w"            value="0.177" />
+    <arg name="goal_pose_x"           value="1.25" />
+    <arg name="goal_pose_y"           value="-1.88" />
+    <arg name="goal_pose_z"           value="1.70" />
+    <arg name="goal_ori_x"            value="-0.003" />
+    <arg name="goal_ori_y"            value="-0.018" />
+    <arg name="goal_ori_z"            value="0.824" />
+    <arg name="goal_ori_w"            value="0.566" />
   </include>
 
   <!-- op_common_params  -->
@@ -46,7 +46,7 @@
     <arg name="steeringDelay"                   default="1.2" />
     <!-- Not included in app window -->
     <arg name="minPursuiteDistance"             default="3.0"  />
-    <arg name="additionalBrakingDistance"       default="0"  /> <!-- original 3.0 -->
+    <arg name="additionalBrakingDistance"       default="-4.0"  /> <!-- original 3.0 -->
     <arg name="giveUpDistance"                  default="-2.0"  />
     <arg name="mapSource"                       default="0" />        <!-- Autoware=0, Vector Map Folder=1, kml=2 -->
     <arg name="mapFileName"                     default="" />
