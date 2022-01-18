@@ -41,7 +41,7 @@ This package generates two messages and translates CAN data from the ECU Gateway
 
 This topic is subscribed by the node. It expects to have other nodes subscribe to it to receive data which are *sent by the CAN device*. -->
 
-### car_ctrl_input [can_data_msgs::Car_ctrl_input]
+### car_ctrl_input [can_data_msgs::Car_ctrl_input] // Board -> Vehicle
 
 This topic is subscribed to by the node. This topic contains a vehicle control data.
 ```
@@ -58,7 +58,7 @@ This topic is subscribed to by the node. This topic contains a vehicle control d
 
 This topic is published to by the node. It expects to have data published to it which are intended to be *received by the CAN device*. -->
 
-### car_ctrl_output [can_data_msgs::Car_ctrl_output]
+### car_ctrl_output [can_data_msgs::Car_ctrl_output] // Vehicle -> Board
 
 This topic is publish the translated data from the CAN.
 ```

@@ -32,7 +32,8 @@ inline double mps2kmph(double mps)
   return (mps * 3.6);
 }
 
-inline void calculate_linear_acceleration(){
+inline void calculate_linear_acceleration(){ // Linear Control
+    // TODO: Parameter tuning
     float err = set_point_ - process_variable_;
     output_ = kp_ * err + ki_* err * dt_ + kd_ * err / dt_;
     if(output_ > max_acc_) output_ = max_acc_;
@@ -45,6 +46,7 @@ inline void send_control_signal(){
     calculate_linear_acceleration();
 
     // TODO: Send control signal to interface
+
     #ifdef DEBUG
     autoware_msgs::VehicleCmd msg;
     msg.ctrl_cmd.linear_velocity = current_velocity_; // TODO: (for simulation) chnage to goal velocity
@@ -60,11 +62,12 @@ void ctrl_callback(const autoware_msgs::ControlCommandStampedConstPtr& msg){
     set_point_ = msg->cmd.linear_acceleration;
 
     // TODO: Get process_variable from the Vehicle
+
     #ifdef DEBUG
     static float _prev_velocity = 0.0;
-    current_velocity_ = msg->cmd.linear_velocity; // TODO: (simulation) odom's velocity // (for vehical) Change to IonicautoRealSPEED
-    process_variable_ = (current_velocity_ - _prev_velocity)/100;    // TODO: (for vehical) Change to IonicautoControlAx or calculated acceleration
-                                                                    // When subscription rate is 10hz
+    current_velocity_ = msg->cmd.linear_velocity; // TODO: cmd.linear_velocity is determined by /current_velocity topic. Set value as (simulation) odom's velocity // (for vehical) Change to IonicautoRealSPEED
+    process_variable_ = (current_velocity_ - _prev_velocity)/100;   // TODO: (for vehicle) Change to (1) IonicautoControlAx or (2) calculated acceleration if subscription rate is 10hz
+                                                                    
     _prev_velocity = current_velocity_;
     debug_steering_angle_ = msg->cmd.steering_angle;
     #endif
