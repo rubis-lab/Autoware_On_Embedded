@@ -38,6 +38,8 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   autoware_msgs
   geometry_msgs
+  can_data_msgs
+  std_msgs
 )
 ##   * add "message_runtime" and every package in MSG_DEP_SET to
 ##     catkin_package(CATKIN_DEPENDS ...)
