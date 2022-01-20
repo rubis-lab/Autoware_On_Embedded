@@ -115,6 +115,7 @@ void debug_twist_cmd_callback(const geometry_msgs::TwistStampedConstPtr& msg){
 
 #ifndef DEBUG
 void ctrl_output_callback(const can_data_msgs::Car_ctrl_output::ConstPtr& msg){
+    header_ = msg->header;
     static float _prev_velocity = 0.0;
     current_velocity_ = msg->real_speed;
     process_variable_ = (current_velocity_ - _prev_velocity)/100;
