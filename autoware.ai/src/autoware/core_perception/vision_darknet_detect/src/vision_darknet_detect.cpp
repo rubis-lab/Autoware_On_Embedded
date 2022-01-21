@@ -189,12 +189,8 @@ void Yolo3DetectorNode::convert_rect_to_image_obj(std::vector< RectClassScore<fl
             }
             obj.valid = true;
 
-            obj.pose.orientation.x = 1;
-            obj.pose.orientation.y = 0;
-            obj.pose.orientation.z = 0;
-            obj.pose.orientation.w = 0;
-            
-            out_message.objects.push_back(obj);            
+            out_message.objects.push_back(obj);
+
         }
     }
 }
@@ -353,9 +349,6 @@ void Yolo3DetectorNode::Run()
     private_node_handle.param<std::string>("/vision_darknet_detect/gpu_execution_time_filename", gpu_execution_time_filename_str, "~/Documents/gpu_profiling/test_yolo_execution_time.csv");
     private_node_handle.param<std::string>("/vision_darknet_detect/gpu_response_time_filename", gpu_response_time_filename_str, "~/Documents/gpu_profiling/test_yolo_response_time.csv");
     private_node_handle.param<std::string>("/vision_darknet_detect/gpu_deadline_filename", gpu_deadline_filename_str, "~/Documents/gpu_deadline/yolo_gpu_deadline.csv");
-
-    
-
     
     char* task_response_time_filename = strdup(task_response_time_filename_str.c_str());
     char* gpu_execution_time_filename = strdup(gpu_execution_time_filename_str.c_str());

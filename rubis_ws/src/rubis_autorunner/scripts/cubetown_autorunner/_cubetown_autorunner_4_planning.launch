@@ -99,7 +99,7 @@
   <!-- op_behavior_selector -->
   <include file="$(find op_local_planner)/launch/op_behavior_selector_parameter.launch">
     <arg name="evidence_tust_number"            default="25"/>
-    <arg name="trafficLightFile"                default="crossing_test/crossing_traffic_light.yaml" />
-    <arg name="stopLineFile"                    default="crossing_test/crossing_stop_line.yaml" />
+    <arg name="trafficLightFile"                default="fake_traffic_light.yaml" />
+    <arg name="stopLineFile"                    default="fake_stop_line.yaml" />
   </include>
 </launch>

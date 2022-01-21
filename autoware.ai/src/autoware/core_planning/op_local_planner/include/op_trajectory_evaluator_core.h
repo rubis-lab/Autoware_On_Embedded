@@ -75,7 +75,6 @@ protected:
   bool bPredictedObjects;
   // Added by PHY
   double m_SprintDecisionTime;
-  int m_pedestrian_stop_img_height_threshold;
 
   struct timespec m_PlanningTimer;
   std::vector<std::string>    m_LogData;

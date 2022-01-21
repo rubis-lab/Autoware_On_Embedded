@@ -4,7 +4,7 @@
   <arg name="method_type" default="0" /> <!-- pcl_generic=0, pcl_anh=1, pcl_anh_gpu=2, pcl_openmp=3 -->
   <arg name="use_gnss" default="1" />
   <arg name="use_odom" default="false" />
-  <arg name="use_imu" default="false" />
+  <arg name="use_imu" default="true" />
   <arg name="imu_upside_down" default="false" />
   <arg name="imu_topic" default="/imu_raw" />
   <arg name="queue_size" default="1" />

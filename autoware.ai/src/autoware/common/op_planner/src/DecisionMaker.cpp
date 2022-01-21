@@ -640,7 +640,7 @@ bool DecisionMaker::SelectSafeTrajectory()
       (*it).v = desiredVelocity;
     }
 
-    // std::cout << "Target Velocity: " << target_velocity << ", desired : " << desiredVelocity << ", Change Slowdown: " << bSlowBecauseChange  << std::endl;
+    std::cout << "Target Velocity: " << target_velocity << ", desired : " << desiredVelocity << ", Change Slowdown: " << bSlowBecauseChange  << std::endl;
 
     return desiredVelocity;
   }

@@ -10,7 +10,7 @@
   <!-- vel/pose connect -->
   <arg name="topic_pose_stamped" default="/ndt_pose" />
   <arg name="topic_twist_stamped" default="/estimate_twist" /> 
-  <!-- <arg name="topic_twist_stamped" default="/odom_twist" /> -->
+  <!--<arg name="topic_twist_stamped" default="/odom_twist" />-->
 
   <!-- points downsampler -->
   <include file="$(find points_downsampler)/launch/points_downsample.launch" />

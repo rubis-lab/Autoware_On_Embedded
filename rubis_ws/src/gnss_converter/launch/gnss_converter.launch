@@ -1,4 +1,0 @@
-<launch>
-    <rosparam file="$(find gnss_converter)/cfg/gnss_converter.yaml" />
-    <node pkg="gnss_converter" type="gnss_converter" name="gnss_converter" clear_params="true" output="screen" />
-</launch>

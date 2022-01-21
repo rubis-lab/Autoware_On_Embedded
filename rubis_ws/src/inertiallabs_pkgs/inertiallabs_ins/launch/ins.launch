@@ -1,6 +1,0 @@
-<launch>
-  <node pkg="inertiallabs_ins" type="il_ins" name="INS" output="screen">
-   <param name="ins_url" type="string" value="serial:/dev/ttyUSB0:460800" />
-   <param name="ins_output_format" type="int" value="82"/>
-  </node>
-</launch>
