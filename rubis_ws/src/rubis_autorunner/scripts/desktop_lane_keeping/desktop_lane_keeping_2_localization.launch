@@ -7,12 +7,12 @@
   <arg name="init_pitch" value="0.0" />
   <arg name="init_yaw" value="-1.8" /> -->
   <!-- cubetown -->
-  <arg name="init_x" value="57.1" />
-  <arg name="init_y" value="1.38" />
-  <arg name="init_z" value="0.48" />
+  <arg name="init_x" value="0" />
+  <arg name="init_y" value="0" />
+  <arg name="init_z" value="0" />
   <arg name="init_roll" value="0.0" />
   <arg name="init_pitch" value="0.0" />
-  <arg name="init_yaw" value="1.57" />
+  <arg name="init_yaw" value="0" />
 
   <!-- vel/pose connect -->
   <arg name="topic_pose_stamped" default="/ndt_pose" />

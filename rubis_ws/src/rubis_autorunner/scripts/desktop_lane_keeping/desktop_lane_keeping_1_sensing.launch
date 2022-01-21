@@ -19,7 +19,7 @@
   <!-- Point Map Loader -->
 	<include file="$(find map_file)/launch/points_map_loader.launch">
     <arg name="scene_num" value="noupdate" />
-    <arg name="path_pcd" value="$(env USER_HOME)/autoware.ai/autoware_files/points_map/CubeTown.pcd"/>
+    <arg name="path_pcd" value="$(env USER_HOME)/autoware.ai/autoware_files/points_map/220113_rubis_testbed.pcd"/>
   </include>
 
   <!-- Re-publishing simulator/camera_node/image/compressed topic to /image_raw as expected by Autoware -->
