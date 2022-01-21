@@ -29,6 +29,7 @@ int main(int argc, char* argv[]){
     // Add Traffic Signal Info from yaml file
     XmlRpc::XmlRpcValue traffic_light_list;
     nh.getParam("/fake_traffic_signal_generator/traffic_light_list", traffic_light_list);
+    ROS_INFO("getting traffic light");
 
     // Add Traffic Signal Info from yaml file
     XmlRpc::XmlRpcValue stop_line_list;

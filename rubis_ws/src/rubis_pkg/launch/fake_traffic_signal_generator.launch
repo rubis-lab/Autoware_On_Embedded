@@ -2,8 +2,8 @@
     <arg name="traffic_signal_rate" default="0.3" />
 
     <node pkg="rubis_pkg" type="fake_traffic_signal_generator" name="fake_traffic_signal_generator" output="screen">
-        <rosparam command="load" file="$(find rubis_pkg)/cfg/testbed_stop_line.yaml"/>
-        <rosparam command="load" file="$(find rubis_pkg)/cfg/testbed_traffic_light.yaml"/>
+        <rosparam command="load" file="$(find rubis_pkg)/cfg/fake_stop_line.yaml"/>
+        <rosparam command="load" file="$(find rubis_pkg)/cfg/fake_traffic_light.yaml"/>
         <param name="traffic_signal_rate" value="$(arg traffic_signal_rate)"/>
         <rosparam param="traffic_signal_sequence">[1, 2]</rosparam>
     </node>

@@ -2,12 +2,10 @@ traffic_light_list:
   -
     id : 1
     pose :
-      x : -17.9
-      y : 19.3
+      x : 2.0
+      y : 57.0
       z : 0.0
-  -
-    id : 2
-    pose :
-      x : -29.0
-      y : -24.0
-      z : 0.0
+    routine :
+      red : 9999.0
+      green : 1.0
+      yellow : 1.0

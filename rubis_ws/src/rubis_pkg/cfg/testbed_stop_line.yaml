@@ -3,9 +3,9 @@ stop_line_list:
     id : 1
     tl_id : 1
     pose :
-      x : 42.4
-      y : 0.0
-      z : 0.0
+      x : 241.34 
+      y : -1741.44
+      z : -0.288
   -
     id : 2
     tl_id : 2
