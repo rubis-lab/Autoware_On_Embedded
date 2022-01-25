@@ -25,7 +25,7 @@
   
   <arg name="enableSwerving"       default="true"  />
   <arg name="enableFollowing"       default="true" />  
-  <arg name="enableTrafficLightBehavior" default="false" />
+  <arg name="enableTrafficLightBehavior" default="true" />
   <arg name="enableStopSignBehavior"   default="false" />  
   <arg name="enableLaneChange"       default="false" />  
   
