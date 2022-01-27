@@ -1,0 +1,59 @@
+exp:
+  iteration: 2
+
+origin:
+  offset:
+    x: 0
+    y: 0
+    z: 0
+    r: 0
+
+simulator:
+  address: localhost
+  port: 8181
+  scene: RubisTestbedStatic
+  timeout: 0 # (sec), 0 = infinite 
+
+# Host
+lgsvl_bridge:
+  address: 127.0.0.1
+  port: 9090
+
+# Remote
+# lgsvl_bridge:
+#   address: 192.168.10.23
+#   port: 9000
+
+ego:
+  asset-id: 5fdee53f-a89b-4e9d-aae0-8d0ac544a920 #dmshin
+  # asset-id: de4080d0-f96f-4462-bb32-ef88cfcb2ed5 # bkpark
+  # asset-id: 7bdbdb89-b2e7-423c-b2d3-f3e7cc3a9102 #hypark
+
+scenarios: # 1 = on, 0 = off
+  scenario0:
+    name: stand_vehicle
+    flag: 0
+
+  scenario1:
+    name: fast_pedestrian
+    flag: 0
+
+  scenario2:
+    name: narrow_path
+    flag: 0
+  
+  scenario3:
+    name: construction_section
+    flag: 0
+  
+  scenario4:
+    name: move_pedestrian
+    flag: 0
+  
+  scenario5:
+    name: congestion_section
+    flag: 0
+  
+  scenario6:
+    name: cut_in
+    flag: 0
