@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <time.h>
+#include <rubis_sched/common_c.h>
 
 #define RUBIS_SCHED_BUFFER_SIZE 1024
 
@@ -35,7 +36,7 @@ extern "C"{
 
 void init_task_profiling(char* _task_response_time_filename);
 void start_task_profiling();
-void stop_task_profiling();
+void stop_task_profiling(int state);
 void init_gpu_profiling(char* _execution_time_filename, char* _response_time_filename);
 void start_profiling_cpu_seg_response_time();
 void stop_profiling_cpu_seg_response_time(unsigned int cpu_seg_id, unsigned int iter);

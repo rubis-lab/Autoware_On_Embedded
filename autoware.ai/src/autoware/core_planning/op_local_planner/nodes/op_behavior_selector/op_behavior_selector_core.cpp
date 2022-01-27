@@ -259,7 +259,6 @@ void BehaviorGen::callbackGetVehicleStatus(const geometry_msgs::TwistStampedCons
   bVehicleStatus = true;
 
   if(rubis::sched::is_task_ready_ == TASK_NOT_READY) rubis::sched::init_task();
-  rubis::sched::task_state_ = TASK_STATE_DONE;
 }
 
 void BehaviorGen::callbackGetCANInfo(const autoware_can_msgs::CANInfoConstPtr &msg)
@@ -528,6 +527,7 @@ void BehaviorGen::SendLocalPlanningTopics()
   pub_ClosestIndex.publish(closest_waypoint);
   pub_LocalBasePath.publish(m_CurrentTrajectoryToSend);
   pub_LocalPath.publish(m_CurrentTrajectoryToSend);
+  rubis::sched::task_state_ = TASK_STATE_DONE;
 }
 
 void BehaviorGen::LogLocalPlanningInfo(double dt)
@@ -641,8 +641,9 @@ m_sprintSwitch = false;
 
   while (ros::ok())
   {
+    if(task_profiling_flag) rubis::sched::start_task_profiling();
+
     if(rubis::sched::is_task_ready_ == TASK_READY && rubis::sched::task_state_ == TASK_STATE_READY){
-      if(task_profiling_flag) rubis::sched::start_task_profiling();
       if(task_scheduling_flag) rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline); 
       rubis::sched::task_state_ = TASK_STATE_RUNNING;     
     }
@@ -783,8 +784,9 @@ m_sprintSwitch = false;
     else
       sub_GlobalPlannerPaths = nh.subscribe("/lane_waypoints_array",   1,    &BehaviorGen::callbackGetGlobalPlannerPath,   this);
 
+    if(task_profiling_flag) rubis::sched::stop_task_profiling(rubis::sched::task_state_);
+
     if(rubis::sched::is_task_ready_ == TASK_READY && rubis::sched::task_state_ == TASK_STATE_DONE){
-      if(task_profiling_flag) rubis::sched::stop_task_profiling();
       if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
       rubis::sched::task_state_ = TASK_STATE_READY;
     }

@@ -165,8 +165,9 @@ void PurePursuitNode::run()
 
   while (ros::ok())
   {
+    if(task_profiling_flag) rubis::sched::start_task_profiling();
+
     if(rubis::sched::is_task_ready_ == TASK_READY && rubis::sched::task_state_ == TASK_STATE_READY){
-      if(task_profiling_flag) rubis::sched::start_task_profiling();
       if(task_scheduling_flag) rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline); 
       rubis::sched::task_state_ = TASK_STATE_RUNNING;     
     }
@@ -176,8 +177,9 @@ void PurePursuitNode::run()
     {
       // ROS_WARN("Necessary topics are not subscribed yet ... ");
       
+      if(task_profiling_flag) rubis::sched::stop_task_profiling(rubis::sched::task_state_);
+
       if(rubis::sched::is_task_ready_ == TASK_READY && rubis::sched::task_state_ == TASK_STATE_DONE){
-        if(task_profiling_flag) rubis::sched::stop_task_profiling();
         if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
         rubis::sched::task_state_ = TASK_STATE_READY;
       }
@@ -222,8 +224,9 @@ void PurePursuitNode::run()
     is_velocity_set_ = false;
     is_waypoint_set_ = false;
 
+    if(task_profiling_flag) rubis::sched::stop_task_profiling(rubis::sched::task_state_);
+
     if(rubis::sched::is_task_ready_ == TASK_READY && rubis::sched::task_state_ == TASK_STATE_DONE){
-      if(task_profiling_flag) rubis::sched::stop_task_profiling();
       if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
       rubis::sched::task_state_ = TASK_STATE_READY;
     }
@@ -240,6 +243,9 @@ void PurePursuitNode::publishTwistStamped(
   ts.twist.linear.x = can_get_curvature ? computeCommandVelocity() : 0;
   ts.twist.angular.z = can_get_curvature ? kappa * ts.twist.linear.x : 0;
   pub1_.publish(ts);
+
+  if(rubis::sched::is_task_ready_ == TASK_NOT_READY) rubis::sched::init_task();
+  rubis::sched::task_state_ = TASK_STATE_DONE;
 }
 
 void PurePursuitNode::publishControlCommandStamped(
@@ -359,9 +365,6 @@ void PurePursuitNode::callbackFromCurrentPose(
 {
   pp_.setCurrentPose(msg);
   is_pose_set_ = true;
-
-  if(rubis::sched::is_task_ready_ == TASK_NOT_READY) rubis::sched::init_task();
-  rubis::sched::task_state_ = TASK_STATE_DONE;
 }
 
 void PurePursuitNode::callbackFromCurrentVelocity(

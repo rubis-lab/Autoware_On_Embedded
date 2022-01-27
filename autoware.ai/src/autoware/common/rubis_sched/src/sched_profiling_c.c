@@ -2,6 +2,7 @@
 
 int task_profiling_flag_;
 int gpu_profiling_flag_;
+int iter_;
 
 FILE* task_response_time_fp_;
 FILE* seg_execution_time_fp_;
@@ -35,16 +36,19 @@ void init_task_profiling(char* _task_response_time_filename){
   task_profiling_flag_ = 1;
   task_response_time_fp_ = fopen(task_response_time_filename, "w+");
   chmod(task_response_time_filename, strtol("0777", 0, 8));
+  fprintf(task_response_time_fp_, "iter,PID,start,end,activation\n");
 }
 
 void start_task_profiling(){
   if(task_profiling_flag_) clock_gettime(CLOCK_MONOTONIC, &task_start_time_);
 }
 
-void stop_task_profiling(){
+void stop_task_profiling(int state){
   if(task_profiling_flag_){
+    int activation = 0;
+    if(state == TASK_STATE_DONE) activation = 1;
     clock_gettime(CLOCK_MONOTONIC, &task_end_time_);
-    fprintf(task_response_time_fp_, "%lld.%.9ld,%lld.%.9ld,%d\n",(long long)task_start_time_.tv_sec, task_start_time_.tv_nsec, (long long)task_end_time_.tv_sec, task_end_time_.tv_nsec, getpid());
+    fprintf(task_response_time_fp_, "%d,%d,%lld.%.9ld,%lld.%.9ld,%d\n",iter_++, getpid(), (long long)task_start_time_.tv_sec, task_start_time_.tv_nsec, (long long)task_end_time_.tv_sec, task_end_time_.tv_nsec, activation);
     fflush(task_response_time_fp_);
   }
 }
