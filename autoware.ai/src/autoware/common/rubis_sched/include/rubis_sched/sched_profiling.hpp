@@ -8,6 +8,7 @@
 #include <string.h>
 #include <iostream>
 #include <cstdlib>
+#include <rubis_sched/common.hpp>
 
 namespace rubis {
 namespace sched {
@@ -29,7 +30,7 @@ namespace sched {
 
   void init_task_profiling(std::string task_reponse_time_filename);
   void start_task_profiling();
-  void stop_task_profiling();
+  void stop_task_profiling(int state);
   void init_gpu_profiling(std::string execution_time_filename, std::string response_time_filename);
   void start_profiling_cpu_seg_response_time();
   void stop_profiling_cpu_seg_response_time(unsigned int cpu_seg_id, unsigned int iter);

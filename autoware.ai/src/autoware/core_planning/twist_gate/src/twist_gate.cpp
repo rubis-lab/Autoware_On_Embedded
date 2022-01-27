@@ -343,7 +343,7 @@ void TwistGate::timerCallback(const ros::TimerEvent& e)
     resetVehicleCmdMsg();
 
   vehicle_cmd_pub_.publish(twist_gate_msg_);
-
+  rubis::sched::task_state_ = TASK_STATE_DONE;
 }
 
 void TwistGate::configCallback(const autoware_config_msgs::ConfigTwistFilter& msg)
