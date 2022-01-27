@@ -47,7 +47,7 @@
   <arg name="velocitySource"      default="2" /> <!-- read velocities from (0- Odometry, 1- autoware current_velocities, 2- car_info) "" -->    
 
   <!-- HJW Added -->
-  <arg name="stopLineMargin"       default="0.5" />
+  <arg name="stopLineMargin"       default="0.3" />
   <arg name="stopLineDetectionDistance"       default="7.0" />
 
   <node pkg="op_local_planner" type="op_common_params" name="op_common_params" output="screen">

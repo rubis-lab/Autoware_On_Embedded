@@ -281,12 +281,15 @@ void DecisionMaker::InitBehaviorStates()
             remain_time = detectedLights.at(i).routine.at(2);
           }
         }
+	else if(detectedLights.at(i).id != 1){
+	    remain_time = detectedLights.at(i).remainTime;
+	}
         else{
           remain_time -= 0.01; // spin period;
           if(remain_time < 0) remain_time = 0.0;
         }
 
-        if(distanceToClosestStopLine < m_params.stopLineDetectionDistance && distanceToClosestStopLine > 0){
+        if(distanceToClosestStopLine < m_params.stopLineDetectionDistance){
           bool bGreenTrafficLight = !(detectedLights.at(i).lightState == RED_LIGHT);
           double reachableDistance = m_params.maxSpeed * detectedLights.at(i).remainTime / 2;
           bShouldForward = (bGreenTrafficLight && reachableDistance > distanceToClosestStopLine) ||
@@ -521,7 +524,7 @@ bool DecisionMaker::SelectSafeTrajectory()
   }
   else if(beh.state == TRAFFIC_LIGHT_STOP_STATE || beh.state == TRAFFIC_LIGHT_WAIT_STATE)
   {
-    double desiredAcceleration = m_params.maxSpeed * m_params.maxSpeed / 2 / std::max(beh.stopDistance - m_params.stopLineMargin, 0.1);
+    double desiredAcceleration = 0.7 / std::max(beh.stopDistance - m_params.stopLineMargin, 0.1);
     double desiredVelocity = m_params.maxSpeed - desiredAcceleration * 0.1; // 0.1 stands for delta t.
     
     double e = max_velocity - CurrStatus.speed;
@@ -529,7 +532,7 @@ bool DecisionMaker::SelectSafeTrajectory()
     m_pidVelocity.getPID(e);
     m_pidIntersectionVelocity.getPID(e);
 
-    if(desiredVelocity < 0.5)
+    if(desiredVelocity < 0.2)
       desiredVelocity = 0;
 
     for(unsigned int i = 0; i < m_Path.size(); i++)
