@@ -21,6 +21,7 @@
   - To change the image size, use track bar to select a value and press enter.
   - If you want to choose a point, press the number and click the point in the image. (RBUTTONDOWN)
   - If you want to end, press the ESC button.
+  - **WARNING** 
 * After the previous process, the transformation matrix calculation result is displayed on the screen.
 * The calculation result is transferred to gnss_converter/cfg/gnss_converter.yaml.
 ```yaml
