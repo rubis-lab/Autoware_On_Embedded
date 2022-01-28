@@ -151,7 +151,7 @@ void points_select()
     orig_img.copyTo(display_img);
 
     cv::namedWindow("Display Image");
-    cv::createTrackbar("Scale", "Display Image", 0, 100, scale_image, NULL);
+    cv::createTrackbar("Scale", "Display Image", &scale_factor_, 100, scale_image, NULL);
 
     cv::setMouseCallback("Display Image", mouse_cb, NULL);
 
@@ -161,20 +161,16 @@ void points_select()
     std::cout << "To change the image size, use track bar to select a value and press enter." << std::endl;
     std::cout << "********************************************" << std::endl;
 
-    int keycode, prev_scale;
+    int keycode;
     while (true)
     {
-        if (prev_scale != scale_factor_)
+        display_img = cv::Mat(orig_img.rows * scale_factor_, orig_img.cols * scale_factor_, CV_8UC3, cv::Scalar(255, 255, 255));
+        for (int i = 0; i < gps_backup_.size(); i++)
         {
-            display_img = cv::Mat(orig_img.rows * scale_factor_, orig_img.cols * scale_factor_, CV_8UC3, cv::Scalar(255, 255, 255));
-            for (int i = 0; i < gps_backup_.size(); i++)
-            {
-                cv::circle(display_img,
-                           cv::Point(scale_factor_ * (gps_backup_[i].ndt_pose.x - ndt_pose_x_min_), scale_factor_ * (gps_backup_[i].ndt_pose.y - ndt_pose_y_min_)),
-                           1, cv::Scalar(255, 255, 0), 1, cv::LINE_AA);
-            }
+            cv::circle(display_img,
+                       cv::Point(scale_factor_ * (gps_backup_[i].ndt_pose.x - ndt_pose_x_min_), scale_factor_ * (gps_backup_[i].ndt_pose.y - ndt_pose_y_min_)),
+                       1, cv::Scalar(255, 255, 0), 1, cv::LINE_AA);
         }
-        prev_scale = scale_factor_;
 
         cv::imshow("Display Image", display_img);
         keycode = cv::waitKey();
@@ -263,8 +259,6 @@ int main(int argc, char *argv[])
     Synchronizer<SyncPolicy_2> sync_2(SyncPolicy_2(10), gps_sub, ins_sub);
 
     ros::param::get("/gnss_converter/calculate_tf", calculate_tf);
-    ros::param::get("/gnss_converter/use_ndt_stat", use_ndt_stat_);
-    ros::param::get("/gnss_converter/ndt_score_th", ndt_score_th_);
 
     if (calculate_tf)
     {

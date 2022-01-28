@@ -1,13 +1,8 @@
 # true : calculate tf matrix
 # false : publish /gnss_pose topic
-/gnss_converter/calculate_tf : false
+/gnss_converter/calculate_tf : true
 
-# true : consider ndt_stat score value when choosing the points
-# false : don't use ndt_stat score value
-/gnss_converter/use_ndt_stat : false
-/gnss_converter/ndt_socre_th : 1.0
 /gnss_converter/bag_file_path : /home/sunhokim/Documents/RUBIS/data/220111_pose_gnss_138ground.bag
-
 
 # map : 220111_138ground
 

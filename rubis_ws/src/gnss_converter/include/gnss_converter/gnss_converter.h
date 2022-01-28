@@ -56,13 +56,10 @@ static ros::Publisher gnss_pose_pub_;
 static vector<gps_stat> gps_backup_;
 static int ndt_pose_x_max_ = -9999999, ndt_pose_y_max_ = -9999999;
 static int ndt_pose_x_min_ = 9999999, ndt_pose_y_min_ = 9999999;
-static int scale_factor_ = 1;
+static int scale_factor_ = 10;
 
 static int points_idx_;
 static gps_stat selected_points_[4];
-
-static bool use_ndt_stat_;
-static double ndt_score_th_;
 
 void gps_ndt_data_cb(const inertiallabs_msgs::gps_data::ConstPtr &msg_gps, const inertiallabs_msgs::ins_data::ConstPtr &msg_ins,
                      const geometry_msgs::PoseStamped::ConstPtr &msg_ndt_pose);
