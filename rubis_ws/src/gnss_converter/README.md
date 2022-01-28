@@ -21,7 +21,7 @@
   - To change the image size, use track bar to select a value and press enter.
   - If you want to choose a point, press the number and click the point in the image. (RBUTTONDOWN)
   - If you want to end, press the ESC button.
-  - **WARNING** 
+  - **WARNING** : When performing angle transformation, linear transformation was assumed. However, since the angle has a value between -180 degrees and +180 degrees, if there is a discontinuous interval between the four points, the matrix is not properly calculated. Therefore, when selecting four points, it is necessary to make sure that there is no section where the change in angle is discontinuous. (If the first value of the ori_tf matrix is close to -1.0, the calculation was performed well.)
 * After the previous process, the transformation matrix calculation result is displayed on the screen.
 * The calculation result is transferred to gnss_converter/cfg/gnss_converter.yaml.
 ```yaml
