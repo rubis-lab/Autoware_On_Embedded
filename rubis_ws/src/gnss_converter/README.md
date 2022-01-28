@@ -33,6 +33,9 @@
 * Move to Case 2
 ### Case 2 : If you've already done Case 1
 * Set /gnss_converter/calculate_tf of gnss_converter/cfg/gnsss_converter.yaml to false.
+```yaml
+/gnss_converter/calculate_tf : false
+```
 * Execute gnss_converter launch file.
 ```console
 ~$ roslaunch gnss_converter gnss_converter.launch
