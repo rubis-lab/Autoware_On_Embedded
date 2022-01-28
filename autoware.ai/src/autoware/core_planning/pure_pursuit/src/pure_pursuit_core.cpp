@@ -177,7 +177,7 @@ void PurePursuitNode::run()
     {
       // ROS_WARN("Necessary topics are not subscribed yet ... ");
       
-      if(task_profiling_flag) rubis::sched::stop_task_profiling(rubis::sched::task_state_);
+      if(task_profiling_flag) rubis::sched::stop_task_profiling(1, rubis::sched::task_state_);
 
       if(rubis::sched::is_task_ready_ == TASK_READY && rubis::sched::task_state_ == TASK_STATE_DONE){
         if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
@@ -224,7 +224,7 @@ void PurePursuitNode::run()
     is_velocity_set_ = false;
     is_waypoint_set_ = false;
 
-    if(task_profiling_flag) rubis::sched::stop_task_profiling(rubis::sched::task_state_);
+    if(task_profiling_flag) rubis::sched::stop_task_profiling(1, rubis::sched::task_state_);
 
     if(rubis::sched::is_task_ready_ == TASK_READY && rubis::sched::task_state_ == TASK_STATE_DONE){
       if(task_scheduling_flag) rubis::sched::yield_task_scheduling();

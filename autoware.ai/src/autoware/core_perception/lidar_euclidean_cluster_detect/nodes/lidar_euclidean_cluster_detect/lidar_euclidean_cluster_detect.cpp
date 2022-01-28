@@ -1156,7 +1156,7 @@ int main(int argc, char **argv)
 
       ros::spinOnce();
 
-      if(task_profiling_flag) rubis::sched::stop_task_profiling(rubis::sched::task_state_);
+      if(task_profiling_flag) rubis::sched::stop_task_profiling(0, rubis::sched::task_state_);
       if(rubis::sched::task_state_ == TASK_STATE_DONE){
         if(gpu_profiling_flag || gpu_scheduling_flag) rubis::sched::finish_job();        
         if(task_scheduling_flag) rubis::sched::yield_task_scheduling();

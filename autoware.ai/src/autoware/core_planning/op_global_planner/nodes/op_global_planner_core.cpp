@@ -610,7 +610,7 @@ void GlobalPlanner::MainLoop()
 
     rubis::sched::task_state_ = TASK_STATE_DONE;
 
-    if(task_profiling_flag) rubis::sched::stop_task_profiling(rubis::sched::task_state_);
+    if(task_profiling_flag) rubis::sched::stop_task_profiling(0, rubis::sched::task_state_);
 
     if(rubis::sched::is_task_ready_ == TASK_READY && rubis::sched::task_state_ == TASK_STATE_DONE){
       if(task_scheduling_flag) rubis::sched::yield_task_scheduling();

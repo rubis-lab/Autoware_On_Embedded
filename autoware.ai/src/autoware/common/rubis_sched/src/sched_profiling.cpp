@@ -33,19 +33,19 @@ namespace sched{
     task_profiling_flag_ = 1;
     task_response_time_fp_ = fopen(task_reponse_time_filename.c_str(), "w+");
     chmod(task_reponse_time_filename.c_str(), strtol("0777", 0, 8));
-    fprintf(task_response_time_fp_, "iter,PID,start,end,activation\n");
+    fprintf(task_response_time_fp_, "iter,PID,start,end,instance,activation\n");
   }
 
   void start_task_profiling(){
     if(task_profiling_flag_) clock_gettime(CLOCK_MONOTONIC, &task_start_time_);
   }
 
-  void stop_task_profiling(int state){
+  void stop_task_profiling(unsigned long instance, int state){
     if(task_profiling_flag_){
       int activation = 0;
       if(state == TASK_STATE_DONE) activation = 1;
       clock_gettime(CLOCK_MONOTONIC, &task_end_time_);
-      fprintf(task_response_time_fp_, "%d,%d,%lld.%.9ld,%lld.%.9ld,%d\n",iter_++, getpid(), (long long)task_start_time_.tv_sec, task_start_time_.tv_nsec, (long long)task_end_time_.tv_sec, task_end_time_.tv_nsec, activation);
+      fprintf(task_response_time_fp_, "%d,%d,%lld.%.9ld,%lld.%.9ld,%lu,%d\n",iter_++, getpid(), (long long)task_start_time_.tv_sec, task_start_time_.tv_nsec, (long long)task_end_time_.tv_sec, task_end_time_.tv_nsec, instance, activation);
       fflush(task_response_time_fp_);
     }
   }

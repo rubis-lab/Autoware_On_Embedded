@@ -472,7 +472,7 @@ void Yolo3DetectorNode::Run()
 
             ros::spinOnce();
 
-            if(task_profiling_flag) stop_task_profiling(task_state_);
+            if(task_profiling_flag) stop_task_profiling(0, task_state_);
 
             if(task_state_ == TASK_STATE_DONE){
                 if(gpu_profiling_flag || gpu_scheduling_flag) finish_job();
