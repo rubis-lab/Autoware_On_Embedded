@@ -2,7 +2,7 @@
 #include "opencv2/opencv.hpp"
 #include "image_transport/image_transport.h"
 #include "cv_bridge/cv_bridge.h"
-#include "rubis_sched/sched.hpp"
+#include "rubis_lib/sched.hpp"
 
 // argv[0] : camera_id, argv[1] : frequency
 

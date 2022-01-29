@@ -6,7 +6,7 @@
 #include <cuda.h>
 #include <cuda_runtime.h>
 
-#include <rubis_sched/sched.hpp>
+#include <rubis_lib/sched.hpp>
 
 class GpuEuclideanCluster
 {

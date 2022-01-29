@@ -21,7 +21,7 @@
  */
 
 #include "range_vision_fusion/range_vision_fusion.h"
-#include <rubis_sched/sched.hpp>
+#include <rubis_lib/sched.hpp>
 #define SPIN_PROFILING
 
 int is_topic_ready = 0;

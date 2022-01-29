@@ -17,7 +17,7 @@
 #include "op_trajectory_evaluator_core.h"
 #include "op_ros_helpers/op_ROSHelpers.h"
 #include "op_planner/MappingHelpers.h"
-#include <rubis_sched/sched.hpp>
+#include <rubis_lib/sched.hpp>
 
 namespace TrajectoryEvaluatorNS
 {

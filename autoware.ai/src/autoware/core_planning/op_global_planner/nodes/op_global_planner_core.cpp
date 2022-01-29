@@ -16,7 +16,7 @@
 
 #include "op_global_planner_core.h"
 #include "op_ros_helpers/op_ROSHelpers.h"
-#include <rubis_sched/sched.hpp>
+#include <rubis_lib/sched.hpp>
 
 #define SPIN_PROFILING
 

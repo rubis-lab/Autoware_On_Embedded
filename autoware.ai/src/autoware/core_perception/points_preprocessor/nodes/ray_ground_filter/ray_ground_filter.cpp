@@ -37,9 +37,9 @@
 
 #include "points_preprocessor/ray_ground_filter/ray_ground_filter.h"
 
-#include <rubis_sched/sched.hpp>
+#include <rubis_lib/sched.hpp>
 
-#include <rubis_sched/sched.hpp>
+#include <rubis_lib/sched.hpp>
 
 #define SPIN_PROFILING
 

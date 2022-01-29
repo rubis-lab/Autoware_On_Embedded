@@ -15,7 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   sensor_msgs
   velodyne_pointcloud
-  rubis_sched
+  rubis_lib
 )
 
 add_message_files(
@@ -34,7 +34,7 @@ catkin_package(
   pcl_conversions
   pcl_ros
   sensor_msgs
-  rubis_sched
+  rubis_lib
 )
 
 include_directories(

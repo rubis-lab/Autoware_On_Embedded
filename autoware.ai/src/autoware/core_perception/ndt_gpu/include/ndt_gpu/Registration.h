@@ -12,7 +12,7 @@
 #include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
 #include <stdio.h>
-#include <rubis_sched/sched.hpp>
+#include <rubis_lib/sched.hpp>
 
 #define HTOD 0
 #define DTOH 1

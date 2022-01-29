@@ -72,7 +72,7 @@
 //headers in Autoware Health Checker
 #include <autoware_health_checker/health_checker/health_checker.h>
 
-#include <rubis_sched/sched.hpp>
+#include <rubis_lib/sched.hpp>
 
 #define SPIN_PROFILING
 

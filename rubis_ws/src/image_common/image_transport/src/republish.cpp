@@ -35,7 +35,7 @@
 #include "image_transport/image_transport.h"
 #include "image_transport/publisher_plugin.h"
 #include <pluginlib/class_loader.h>
-#include "rubis_sched/sched.hpp"
+#include "rubis_lib/sched.hpp"
 
 int main(int argc, char** argv)
 {

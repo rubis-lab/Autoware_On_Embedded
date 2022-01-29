@@ -34,7 +34,7 @@
 #include <cstdio>
 #include "topic_tools/shape_shifter.h"
 #include "topic_tools/parse.h"
-#include "rubis_sched/sched.hpp"
+#include "rubis_lib/sched.hpp"
 
 using std::string;
 using std::vector;

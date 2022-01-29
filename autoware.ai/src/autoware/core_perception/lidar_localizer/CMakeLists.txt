@@ -51,7 +51,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   tf
   velodyne_pointcloud
-  rubis_sched
+  rubis_lib
 )
 
 catkin_package(

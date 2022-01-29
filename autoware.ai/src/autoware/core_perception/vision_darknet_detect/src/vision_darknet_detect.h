@@ -55,7 +55,7 @@ extern "C"
 #include "utils.h"
 #include "image.h"
 #include "../darknet/src/cuda.h"
-#include "rubis_sched/sched_c.h"
+#include "rubis_lib/sched_c.h"
 #define __cplusplus
 }
 

@@ -15,5 +15,5 @@
   <depend>nav_msgs</depend>
   <depend>roscpp</depend>
   <depend>std_msgs</depend>
-  <depend>rubis_sched</depend>
+  <depend>rubis_lib</depend>
 </package>

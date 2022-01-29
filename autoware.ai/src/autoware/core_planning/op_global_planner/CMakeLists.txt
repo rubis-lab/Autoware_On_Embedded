@@ -23,7 +23,7 @@ find_package(
     std_msgs
     tf
     vector_map_msgs
-    rubis_sched
+    rubis_lib
 )
 
 catkin_package(

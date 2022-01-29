@@ -29,7 +29,7 @@
 
 #include "points_downsampler.h"
 
-#include <rubis_sched/sched.hpp>
+#include <rubis_lib/sched.hpp>
 
 #define SPIN_PROFILING
 

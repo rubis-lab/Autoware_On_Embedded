@@ -1,7 +1,7 @@
 #include <ros/ros.h>
 #include <ros/time.h>
 #include <sensor_msgs/PointCloud2.h>
-#include "rubis_sched/sched.hpp"
+#include "rubis_lib/sched.hpp"
 
 static ros::Subscriber sub;
 static ros::Publisher pub;

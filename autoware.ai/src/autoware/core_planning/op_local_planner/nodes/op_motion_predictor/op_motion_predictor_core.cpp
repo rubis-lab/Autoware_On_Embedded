@@ -17,7 +17,7 @@
 #include "op_motion_predictor_core.h"
 #include "op_planner/MappingHelpers.h"
 #include "op_ros_helpers/op_ROSHelpers.h"
-#include <rubis_sched/sched.hpp>
+#include <rubis_lib/sched.hpp>
 
 namespace MotionPredictorNS
 {

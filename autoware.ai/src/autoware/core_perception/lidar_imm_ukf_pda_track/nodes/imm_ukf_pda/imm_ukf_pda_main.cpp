@@ -15,7 +15,7 @@
  */
 
 #include <imm_ukf_pda/imm_ukf_pda.h>
-#include <rubis_sched/sched.hpp>
+#include <rubis_lib/sched.hpp>
 #define SPIN_PROFILING
 
 int main(int argc, char** argv)

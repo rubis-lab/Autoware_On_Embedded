@@ -34,7 +34,7 @@
 #include <chrono>
 #include <string>
 #include <autoware_system_msgs/DiagnosticStatus.h>
-#include <rubis_sched/sched.hpp>
+#include <rubis_lib/sched.hpp>
 
 using AwDiagStatus = autoware_system_msgs::DiagnosticStatus;
 

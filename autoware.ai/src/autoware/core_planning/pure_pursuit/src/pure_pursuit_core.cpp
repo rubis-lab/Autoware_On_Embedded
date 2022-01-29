@@ -16,7 +16,7 @@
 
 #include <vector>
 #include <pure_pursuit/pure_pursuit_core.h>
-#include <rubis_sched/sched.hpp>
+#include <rubis_lib/sched.hpp>
 
 namespace waypoint_follower
 {

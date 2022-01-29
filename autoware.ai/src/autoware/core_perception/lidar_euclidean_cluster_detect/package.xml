@@ -21,5 +21,5 @@
   <depend>std_msgs</depend>
   <depend>tf</depend>
   <depend>vector_map_server</depend>
-  <depend>rubis_sched</depend>
+  <depend>rubis_lib</depend>
 </package>

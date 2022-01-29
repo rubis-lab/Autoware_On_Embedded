@@ -15,7 +15,7 @@
  */
 
 #include "twist_filter/twist_filter_node.h"
-#include <rubis_sched/sched.hpp>
+#include <rubis_lib/sched.hpp>
 
 int main(int argc, char** argv)
 {

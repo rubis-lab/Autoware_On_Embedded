@@ -16,7 +16,7 @@ find_package(
     roscpp
     roslint
     std_msgs
-    rubis_sched
+    rubis_lib
 )
 
 catkin_package(

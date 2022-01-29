@@ -15,7 +15,7 @@
  #include <thrust/copy.h>
  #include <thrust/scan.h>
  #include <thrust/fill.h>
- #include "rubis_sched/sched.hpp"
+ #include "rubis_lib/sched.hpp"
  
  #include <time.h>
  #include <sys/time.h>
