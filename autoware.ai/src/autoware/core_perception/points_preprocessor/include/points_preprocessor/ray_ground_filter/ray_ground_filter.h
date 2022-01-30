@@ -45,6 +45,8 @@
 
 #include "gencolors.cpp"
 
+#include <rubis_msgs/PointCloud2.h>
+
 
 class RayGroundFilter
 {
@@ -77,6 +79,8 @@ private:
 
   std::vector<cv::Scalar> colors_;
   const size_t color_num_ = 60;  // different number of color to generate
+
+  int instance_mode_ = 0;
 
   struct PointXYZIRTColor
   {
@@ -166,7 +170,9 @@ private:
   void RemovePointsUpTo(const pcl::PointCloud<pcl::PointXYZI>::Ptr in_cloud_ptr, double in_min_distance,
                         pcl::PointCloud<pcl::PointXYZI>::Ptr out_filtered_cloud_ptr);
 
+  inline void PublishFilteredClouds(const sensor_msgs::PointCloud2ConstPtr& in_sensor_cloud);
   void CloudCallback(const sensor_msgs::PointCloud2ConstPtr& in_sensor_cloud);
+  void RubisCloudCallback(const rubis_msgs::PointCloud2ConstPtr in_sensor_cloud);
 
   friend class RayGroundFilter_clipCloud_Test;
 

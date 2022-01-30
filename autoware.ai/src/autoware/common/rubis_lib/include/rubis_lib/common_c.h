@@ -6,3 +6,5 @@
 #define GPU_SEG_LOOP_START 0
 #define GPU_SEG_LOOP_MID 1
 #define GPU_SEG_LOOP_END 2
+
+#define RUBIS_NO_INSTANCE 0

@@ -30,7 +30,6 @@ add_library(rubis_lib SHARED
   src/sched_profiling_c.c
   src/sched.cpp
   src/sched_profiling.cpp
-  src/conversion.cpp
 )
 
 target_link_libraries(rubis_lib

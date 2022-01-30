@@ -24,6 +24,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf2_ros
   velodyne_pointcloud
   rubis_lib
+  rubis_msgs
 )
 
 catkin_package()

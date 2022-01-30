@@ -32,4 +32,5 @@
   <depend>velodyne_pointcloud</depend>
   <depend>yaml-cpp</depend>
   <depend>rubis_lib</depend>
+  <depend>rubis_msgs</depend>
 </package>

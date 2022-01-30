@@ -19,6 +19,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   gnss
   rubis_lib
+  rubis_msgs
 )
 
 catkin_package(

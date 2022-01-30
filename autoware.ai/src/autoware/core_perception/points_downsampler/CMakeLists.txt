@@ -16,6 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   velodyne_pointcloud
   rubis_lib
+  rubis_msgs
 )
 
 add_message_files(
