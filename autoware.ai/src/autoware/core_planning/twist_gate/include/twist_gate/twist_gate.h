@@ -77,7 +77,7 @@ private:
   void timerCallback(const ros::TimerEvent& e);
   void configCallback(const autoware_config_msgs::ConfigTwistFilter& msg);
 
-  inline void updateTwistGateMsg(const geometry_msgs::TwistStamped::ConstPtr& input_msg, unsigned long instance);
+  inline void updateTwistGateMsg(const geometry_msgs::TwistStamped::ConstPtr& input_msg);
 
   void resetVehicleCmdMsg();
 
@@ -120,8 +120,6 @@ private:
   bool use_decision_maker_ = false;
 
   bool emergency_handling_active_ = false;
-
-  int instance_mode_;
 };
 
 #endif  // TWIST_GATE_TWIST_GATE_H

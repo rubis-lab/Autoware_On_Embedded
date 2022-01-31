@@ -74,7 +74,7 @@ void PurePursuitNode::initForROS()
   nh_.param("vehicle_info/wheel_base", wheel_base_, 2.7);
 
   private_nh_.param("/pure_pursuit/dynamic_params_flag", dynamic_param_flag_, false);
-  private_nh_.param("/pure_pursuit/instance_mode", instance_mode_, 0);
+  private_nh_.param("/pure_pursuit/instance_mode", rubis::instance_mode_, 0);
   
   if(dynamic_param_flag_){
     XmlRpc::XmlRpcValue xml_list;
@@ -102,7 +102,7 @@ void PurePursuitNode::initForROS()
   sub1_ = nh_.subscribe("final_waypoints", 10,
     &PurePursuitNode::callbackFromWayPoints, this);
 
-  if(instance_mode_) rubis_pose_sub_ = nh_.subscribe("rubis_current_pose", 10, &PurePursuitNode::callbackFromRubisCurrentPose, this);
+  if(rubis::instance_mode_) rubis_pose_sub_ = nh_.subscribe("rubis_current_pose", 10, &PurePursuitNode::callbackFromRubisCurrentPose, this);
   else pose_sub_ = nh_.subscribe("current_pose", 10, &PurePursuitNode::callbackFromCurrentPose, this);
 
   sub3_ = nh_.subscribe("config/waypoint_follower", 10,
@@ -112,7 +112,7 @@ void PurePursuitNode::initForROS()
 
   // setup publisher
   twist_pub_ = nh_.advertise<geometry_msgs::TwistStamped>("twist_raw", 10);
-  if(instance_mode_) rubis_twist_pub_ = nh_.advertise<rubis_msgs::TwistStamped>("rubis_twist_raw", 10);
+  if(rubis::instance_mode_) rubis_twist_pub_ = nh_.advertise<rubis_msgs::TwistStamped>("rubis_twist_raw", 10);
 
   pub2_ = nh_.advertise<autoware_msgs::ControlCommandStamped>("ctrl_raw", 10);
   pub11_ = nh_.advertise<visualization_msgs::Marker>("next_waypoint_mark", 0);
@@ -172,7 +172,7 @@ void PurePursuitNode::run()
     {
       // ROS_WARN("Necessary topics are not subscribed yet ... ");
       
-      if(task_profiling_flag) rubis::sched::stop_task_profiling(1, rubis::sched::task_state_);
+      if(task_profiling_flag) rubis::sched::stop_task_profiling(rubis::instance_, rubis::sched::task_state_);
 
       if(rubis::sched::is_task_ready_ == TASK_READY && rubis::sched::task_state_ == TASK_STATE_DONE){
         if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
@@ -219,7 +219,7 @@ void PurePursuitNode::run()
     is_velocity_set_ = false;
     is_waypoint_set_ = false;
 
-    if(task_profiling_flag) rubis::sched::stop_task_profiling(1, rubis::sched::task_state_);
+    if(task_profiling_flag) rubis::sched::stop_task_profiling(rubis::instance_, rubis::sched::task_state_);
 
     if(rubis::sched::is_task_ready_ == TASK_READY && rubis::sched::task_state_ == TASK_STATE_DONE){
       if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
@@ -239,9 +239,9 @@ void PurePursuitNode::publishTwistStamped(
   ts.twist.angular.z = can_get_curvature ? kappa * ts.twist.linear.x : 0;
   twist_pub_.publish(ts);
 
-  if(instance_mode_){
+  if(rubis::instance_mode_ && rubis::instance_mode_ != RUBIS_NO_INSTANCE){
     rubis_msgs::TwistStamped rubis_ts;
-    rubis_ts.instance = instance_;
+    rubis_ts.instance = rubis::instance_;
     rubis_ts.msg = ts;
     rubis_twist_pub_.publish(rubis_ts);
   }
@@ -375,7 +375,7 @@ void PurePursuitNode::callbackFromCurrentPose(const geometry_msgs::PoseStampedCo
 void PurePursuitNode::callbackFromRubisCurrentPose(const rubis_msgs::PoseStampedConstPtr& _msg)
 {
   geometry_msgs::PoseStampedConstPtr msg = boost::make_shared<const geometry_msgs::PoseStamped>(_msg->msg);
-  instance_ = _msg->instance;
+  rubis::instance_ = _msg->instance;
   updateCurrentPose(msg);
 }
 

@@ -111,12 +111,10 @@ private:
   double lookahead_distance_ratio_;
   // the next waypoint must be outside of this threshold.
   double minimum_lookahead_distance_;
-  unsigned long instance_;
 
   // Added by PHY
   bool dynamic_param_flag_;
   std::vector<DynamicParams> dynamic_params;
-  int instance_mode_ = 0;
 
   // callbacks
   void callbackFromConfig(

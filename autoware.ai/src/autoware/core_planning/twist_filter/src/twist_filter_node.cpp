@@ -29,7 +29,7 @@ TwistFilterNode::TwistFilterNode() : nh_(), private_nh_("~"), health_checker_(nh
   nh_.param("twist_filter/lowpass_gain_angular_z", twist_filter_config.lowpass_gain_angular_z, 0.0);
   nh_.param("twist_filter/lowpass_gain_steering_angle", twist_filter_config.lowpass_gain_steering_angle, 0.0);
   nh_.param("twist_filter/max_stop_count", max_stop_count_, 30);
-  nh_.param("twist_filter/instance_mode", instance_mode_, 0);
+  nh_.param("twist_filter/instance_mode", rubis::instance_mode_, 0);
   twist_filter_ptr_ = std::make_shared<twist_filter::TwistFilter>(twist_filter_config);
   emergency_stop_ = false;
   current_stop_count_ = 0;
@@ -38,7 +38,7 @@ TwistFilterNode::TwistFilterNode() : nh_(), private_nh_("~"), health_checker_(nh
   health_checker_.ENABLE();
 
   // Subscribe
-  if(instance_mode_) rubis_twist_sub_ = nh_.subscribe("rubis_twist_raw", 1, &TwistFilterNode::rubisTwistCmdCallback, this);
+  if(rubis::instance_mode_) rubis_twist_sub_ = nh_.subscribe("rubis_twist_raw", 1, &TwistFilterNode::rubisTwistCmdCallback, this);
   else twist_sub_ = nh_.subscribe("twist_raw", 1, &TwistFilterNode::twistCmdCallback, this);
   ctrl_sub_ = nh_.subscribe("ctrl_raw", 1, &TwistFilterNode::ctrlCmdCallback, this);
   config_sub_ = nh_.subscribe("config/twist_filter", 10, &TwistFilterNode::configCallback, this);
@@ -52,7 +52,7 @@ TwistFilterNode::TwistFilterNode() : nh_(), private_nh_("~"), health_checker_(nh
 
   // Publish
   twist_pub_ = nh_.advertise<geometry_msgs::TwistStamped>("twist_cmd", 5);
-  if(instance_mode_) rubis_twist_pub_ = nh_.advertise<rubis_msgs::TwistStamped>("rubis_twist_cmd", 5);
+  if(rubis::instance_mode_) rubis_twist_pub_ = nh_.advertise<rubis_msgs::TwistStamped>("rubis_twist_cmd", 5);
   ctrl_pub_ = nh_.advertise<autoware_msgs::ControlCommandStamped>("ctrl_cmd", 5);
   twist_lacc_limit_debug_pub_ = private_nh_.advertise<std_msgs::Float32>("limitation_debug/twist/lateral_accel", 5);
   twist_ljerk_limit_debug_pub_ = private_nh_.advertise<std_msgs::Float32>("limitation_debug/twist/lateral_jerk", 5);
@@ -76,7 +76,7 @@ void TwistFilterNode::configCallback(const autoware_config_msgs::ConfigTwistFilt
   twist_filter_ptr_->setConfiguration(twist_filter_config);
 }
 
-inline void TwistFilterNode::publishTwist(const geometry_msgs::TwistStampedConstPtr& msg, unsigned long instance){
+inline void TwistFilterNode::publishTwist(const geometry_msgs::TwistStampedConstPtr& msg){
   const twist_filter::Twist twist = { msg->twist.linear.x, msg->twist.angular.z };
   ros::Time current_time = ros::Time::now();
 
@@ -127,9 +127,9 @@ inline void TwistFilterNode::publishTwist(const geometry_msgs::TwistStampedConst
     out_msg.twist.angular.z = 0;
   }
   twist_pub_.publish(out_msg);
-  if(instance_mode_ && instance != RUBIS_NO_INSTANCE){
+  if(rubis::instance_mode_ && rubis::instance_ != RUBIS_NO_INSTANCE){
     rubis_msgs::TwistStamped rubis_out_msg;
-    rubis_out_msg.instance = instance;
+    rubis_out_msg.instance = rubis::instance_;
     rubis_out_msg.msg = out_msg;
     rubis_twist_pub_.publish(rubis_out_msg);
   }
@@ -160,13 +160,16 @@ inline void TwistFilterNode::publishTwist(const geometry_msgs::TwistStampedConst
 
 void TwistFilterNode::rubisTwistCmdCallback(const rubis_msgs::TwistStampedConstPtr& _msg){
   geometry_msgs::TwistStampedConstPtr msg = boost::make_shared<const geometry_msgs::TwistStamped>(_msg-> msg);
-  publishTwist(msg, _msg->instance);
+  rubis::instance_ = _msg->instance;
+  std::cout<<"callback instacne: "<<rubis::instance_<<std::endl;
+  publishTwist(msg);
 }
 
 
 void TwistFilterNode::twistCmdCallback(const geometry_msgs::TwistStampedConstPtr& msg)
 {
-  publishTwist(msg, RUBIS_NO_INSTANCE);
+  rubis::instance_ = RUBIS_NO_INSTANCE;
+  publishTwist(msg);
 }
 
 void TwistFilterNode::ctrlCmdCallback(const autoware_msgs::ControlCommandStampedConstPtr& msg)

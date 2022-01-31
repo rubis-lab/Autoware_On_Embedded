@@ -1,4 +1,7 @@
-#include "rubis_lib/sched_profiling_c.h"
+#include "rubis_lib/sched_profiling_c.h"ß
+
+int instance_mode_;
+unsigned long instance_;
 
 int task_profiling_flag_;
 int gpu_profiling_flag_;

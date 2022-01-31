@@ -262,8 +262,6 @@ pthread_mutex_t mutex;
 
 static bool _is_init_match_finished = false;
 
-static int instance_mode_ = 0;
-
 static pose convertPoseIntoRelativeCoordinate(const pose &target_pose, const pose &reference_pose)
 {
     tf::Quaternion target_q;
@@ -922,7 +920,7 @@ static void imu_callback(const sensor_msgs::Imu::Ptr& input)
   previous_imu_yaw = imu_yaw;
 }
 
-static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input, unsigned long instance)
+static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
 { 
   // Check inital matching is success or not
   if(_is_init_match_finished == false && previous_score < USING_GPS_THRESHOLD && previous_score != 0.0)
@@ -1368,8 +1366,8 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input,
     ndt_pose_pub.publish(ndt_pose_msg);
     rubis::sched::task_state_ = TASK_STATE_DONE;
 
-    if(instance_mode_ && instance != RUBIS_NO_INSTANCE){
-      rubis_ndt_pose_msg.instance = instance;
+    if(rubis::instance_mode_ && rubis::instance_ != RUBIS_NO_INSTANCE){
+      rubis_ndt_pose_msg.instance = rubis::instance_;
       rubis_ndt_pose_msg.msg = ndt_pose_msg;
       rubis_ndt_pose_pub.publish(rubis_ndt_pose_msg);
     }
@@ -1526,12 +1524,14 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input,
 }
 
 static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input){
-  ndt_matching(input, RUBIS_NO_INSTANCE);
+  rubis::instance_ = RUBIS_NO_INSTANCE;
+  ndt_matching(input);
 }
 
 static void rubis_points_callback(const rubis_msgs::PointCloud2::ConstPtr& _input){
   sensor_msgs::PointCloud2::ConstPtr input = boost::make_shared<const sensor_msgs::PointCloud2>(_input->msg);
-  ndt_matching(input, _input->instance);
+  rubis::instance_ = _input->instance;
+  ndt_matching(input);
 }
 
 void* thread_func(void* args)
@@ -1684,7 +1684,7 @@ int main(int argc, char** argv)
   private_nh.param<std::string>(node_name+"/gpu_execution_time_filename", gpu_execution_time_filename, "~/Documents/gpu_profiling/test_ndt_matching_execution_time.csv");
   private_nh.param<std::string>(node_name+"/gpu_response_time_filename", gpu_response_time_filename, "~/Documents/gpu_profiling/test_ndt_matching_response_time.csv");
   private_nh.param<std::string>(node_name+"/gpu_deadline_filename", gpu_deadline_filename, "~/Documents/gpu_deadline/ndt_matching_gpu_deadline.csv");
-  private_nh.param<int>(node_name+"/instance_mode", instance_mode_, 0);
+  private_nh.param<int>(node_name+"/instance_mode", rubis::instance_mode_, 0);
   
   if(task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
   if(gpu_profiling_flag) rubis::sched::init_gpu_profiling(gpu_execution_time_filename, gpu_response_time_filename);
@@ -1718,7 +1718,7 @@ int main(int argc, char** argv)
   predict_pose_imu_odom_pub = nh.advertise<geometry_msgs::PoseStamped>("/predict_pose_imu_odom", 10);
 
   ndt_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/ndt_pose", 10);
-  if(instance_mode_) rubis_ndt_pose_pub = nh.advertise<rubis_msgs::PoseStamped>("/rubis_ndt_pose",10);
+  if(rubis::instance_mode_) rubis_ndt_pose_pub = nh.advertise<rubis_msgs::PoseStamped>("/rubis_ndt_pose",10);
   
   // current_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/current_pose", 10);
   localizer_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/localizer_pose", 10);
@@ -1737,7 +1737,7 @@ int main(int argc, char** argv)
   ros::Subscriber initialpose_sub = nh.subscribe("initialpose", 10, initialpose_callback); 
 
   ros::Subscriber points_sub;
-  if(instance_mode_) points_sub = nh.subscribe("rubis_filtered_points", _queue_size, rubis_points_callback); // _queue_size = 1000
+  if(rubis::instance_mode_) points_sub = nh.subscribe("rubis_filtered_points", _queue_size, rubis_points_callback); // _queue_size = 1000
   else points_sub = nh.subscribe("filtered_points", _queue_size, points_callback); // _queue_size = 1000
   
   // ros::Subscriber odom_sub = nh.subscribe("/vehicle/odom", _queue_size * 10, odom_callback);
@@ -1773,7 +1773,7 @@ int main(int argc, char** argv)
 
       ros::spinOnce();
 
-      if(task_profiling_flag) rubis::sched::stop_task_profiling(1, rubis::sched::task_state_);
+      if(task_profiling_flag) rubis::sched::stop_task_profiling(rubis::instance_, rubis::sched::task_state_);
       
       if(rubis::sched::task_state_ == TASK_STATE_DONE){      
         if(gpu_profiling_flag || gpu_scheduling_flag) rubis::sched::finish_job();        

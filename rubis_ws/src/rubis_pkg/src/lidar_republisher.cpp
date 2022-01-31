@@ -6,8 +6,6 @@
 
 static ros::Subscriber sub;
 static ros::Publisher pub, pub_rubis;
-static unsigned long instance_ = 0;
-static int instance_mode_ = 0;
 int is_topic_ready = 1;
 
 void points_cb(const sensor_msgs::PointCloud2ConstPtr& msg){
@@ -18,11 +16,11 @@ void points_cb(const sensor_msgs::PointCloud2ConstPtr& msg){
 
     pub.publish(msg_with_intensity);
 
-    if(instance_mode_){
+    if(rubis::instance_mode_){
         rubis_msgs::PointCloud2 rubis_msg_with_intensity;
-        rubis_msg_with_intensity.instance = instance_;
+        rubis_msg_with_intensity.instance = rubis::instance_;
         rubis_msg_with_intensity.msg = msg_with_intensity;
-        instance_ = instance_+1;
+        rubis::instance_ = rubis::instance_+1;
         pub_rubis.publish(rubis_msg_with_intensity);
     }
 
@@ -42,13 +40,13 @@ int main(int argc, char** argv){
     std::string output_topic_name = node_name + "/output_topic";
     std::string rubis_output_topic;
 
-    nh.param<int>(node_name+"/instance_mode", instance_mode_, 0);
+    nh.param<int>(node_name+"/instance_mode", rubis::instance_mode_, 0);
     nh.param<std::string>(input_topic_name, input_topic, "/points_raw_origin");
     nh.param<std::string>(output_topic_name, output_topic, "/points_raw");
 
     sub = nh.subscribe(input_topic, 1, points_cb);      
     pub = nh.advertise<sensor_msgs::PointCloud2>(output_topic, 1);
-    if(instance_mode_){
+    if(rubis::instance_mode_){
         rubis_output_topic = "/rubis_"+output_topic.substr(1);
         pub_rubis = nh.advertise<rubis_msgs::PointCloud2>(rubis_output_topic, 1);
     }
@@ -96,7 +94,7 @@ int main(int argc, char** argv){
 
             ros::spinOnce();
 
-            if(task_profiling_flag) rubis::sched::stop_task_profiling(1, rubis::sched::task_state_);
+            if(task_profiling_flag) rubis::sched::stop_task_profiling(rubis::instance_, rubis::sched::task_state_);
 
             if(rubis::sched::task_state_ == TASK_STATE_DONE){
                 if(task_scheduling_flag) rubis::sched::yield_task_scheduling();

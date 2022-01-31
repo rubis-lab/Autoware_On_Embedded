@@ -55,12 +55,11 @@ private:
   bool emergency_stop_;
   int max_stop_count_;
   int current_stop_count_;
-  int instance_mode_ = 0;
 
   void configCallback(const autoware_config_msgs::ConfigTwistFilterConstPtr& config);
   void twistCmdCallback(const geometry_msgs::TwistStampedConstPtr& msg);
   void rubisTwistCmdCallback(const rubis_msgs::TwistStampedConstPtr& _msg);
-  inline void publishTwist(const geometry_msgs::TwistStampedConstPtr& msg, unsigned long instance);
+  inline void publishTwist(const geometry_msgs::TwistStampedConstPtr& msg);
   void ctrlCmdCallback(const autoware_msgs::ControlCommandStampedConstPtr& msg);
   void checkTwist(const twist_filter::Twist twist, const twist_filter::Twist twist_prev, const double& dt);
   void checkCtrl(const twist_filter::Ctrl ctrl, const twist_filter::Ctrl ctrl_prev, const double& dt);

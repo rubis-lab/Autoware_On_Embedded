@@ -12,6 +12,9 @@
 #include <rubis_lib/common.hpp>
 
 namespace rubis {
+  extern int instance_mode_;
+  extern unsigned long instance_;
+
 namespace sched {
   extern int task_profiling_flag_;
   extern int gpu_profiling_flag_;

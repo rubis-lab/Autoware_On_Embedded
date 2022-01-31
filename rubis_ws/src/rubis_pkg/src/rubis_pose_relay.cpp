@@ -3,15 +3,14 @@
 #include <rubis_msgs/PoseStamped.h>
 #include <rubis_lib/sched.hpp>
 
-static int instance_mode_ = 0;
 std::string input_topic_, rubis_input_topic_;
 ros::Subscriber rubis_sub_, sub_;
 ros::Publisher rubis_pub_, pub_;
 
-inline void relay(const geometry_msgs::PoseStampedConstPtr& msg, unsigned long instance){
-    if(instance_mode_ && instance != RUBIS_NO_INSTANCE){
+inline void relay(const geometry_msgs::PoseStampedConstPtr& msg){
+    if(rubis::instance_mode_ && rubis::instance_ != RUBIS_NO_INSTANCE){
         rubis_msgs::PoseStamped rubis_msg;
-        rubis_msg.instance = instance;
+        rubis_msg.instance = rubis::instance_;
         rubis_msg.msg = *msg;
         rubis_pub_.publish(rubis_msg);
     }
@@ -22,12 +21,14 @@ inline void relay(const geometry_msgs::PoseStampedConstPtr& msg, unsigned long i
 }
 
 void cb(const geometry_msgs::PoseStampedConstPtr& msg){
-    relay(msg, RUBIS_NO_INSTANCE);
+    rubis::instance_ = RUBIS_NO_INSTANCE;
+    relay(msg);
 }
 
 void rubis_cb(const rubis_msgs::PoseStampedConstPtr& _msg){
     geometry_msgs::PoseStampedConstPtr msg = boost::make_shared<const geometry_msgs::PoseStamped>(_msg->msg);
-    relay(msg, _msg->instance);
+    rubis::instance_ = _msg->instance;
+    relay(msg);
 }
 
 int main(int argc, char* argv[]){
@@ -51,13 +52,13 @@ int main(int argc, char* argv[]){
     nh.param("/pose_relay/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
     nh.param("/pose_relay/task_execution_time", task_execution_time, (double)10);
     nh.param("/pose_relay/task_relative_deadline", task_relative_deadline, (double)10);
-    nh.param<int>("/pose_relay/instance_mode", instance_mode_, 0);
+    nh.param<int>("/pose_relay/instance_mode", rubis::instance_mode_, 0);
 
     input_topic_ = std::string(argv[1]);
 
     std::cout<<"!!! input topic  "<<input_topic_<<std::endl;
 
-    if(instance_mode_){
+    if(rubis::instance_mode_){
         rubis_input_topic_ = "/rubis_"+input_topic_.substr(1);
         rubis_sub_ = nh.subscribe(rubis_input_topic_, 10, rubis_cb);
         rubis_pub_ = nh.advertise<rubis_msgs::PoseStamped>("/rubis_current_pose", 10);
@@ -94,7 +95,7 @@ int main(int argc, char* argv[]){
 
             ros::spinOnce();
 
-            if(task_profiling_flag) rubis::sched::stop_task_profiling(1, rubis::sched::task_state_);
+            if(task_profiling_flag) rubis::sched::stop_task_profiling(rubis::instance_, rubis::sched::task_state_);
 
             if(rubis::sched::task_state_ == TASK_STATE_DONE){
                 if(task_scheduling_flag) rubis::sched::yield_task_scheduling();

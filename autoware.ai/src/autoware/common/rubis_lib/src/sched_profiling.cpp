@@ -1,6 +1,8 @@
 #include "rubis_lib/sched_profiling.hpp"
 
 namespace rubis{
+  int instance_mode_;
+  unsigned long instance_;
 namespace sched{
   int task_profiling_flag_;
   int gpu_profiling_flag_;

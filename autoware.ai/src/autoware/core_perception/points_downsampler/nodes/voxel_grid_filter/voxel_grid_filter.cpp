@@ -54,15 +54,14 @@ static std::string filename;
 static std::string POINTS_TOPIC;
 static double measurement_range = MAX_MEASUREMENT_RANGE;
 
-static int instance_mode_ = 0;
-
 static void config_callback(const autoware_config_msgs::ConfigVoxelGridFilter::ConstPtr& input)
 {
   voxel_leaf_size = input->voxel_leaf_size;
   measurement_range = input->measurement_range;
 }
 
-inline static void publish_filtered_cloud(const sensor_msgs::PointCloud2::ConstPtr& input, unsigned long instance){
+inline static void publish_filtered_cloud(const sensor_msgs::PointCloud2::ConstPtr& input)
+{
   pcl::PointCloud<pcl::PointXYZI> scan;
   pcl::fromROSMsg(*input, scan);
 
@@ -97,10 +96,10 @@ inline static void publish_filtered_cloud(const sensor_msgs::PointCloud2::ConstP
   filtered_msg.header = input->header;
   filtered_points_pub.publish(filtered_msg);
 
-  if(instance_mode_ && instance != RUBIS_NO_INSTANCE){
+  if(rubis::instance_mode_ && rubis::instance_ != RUBIS_NO_INSTANCE){
     rubis_msgs::PointCloud2 rubis_filtered_msg;
     rubis_filtered_msg.msg = filtered_msg;
-    rubis_filtered_msg.instance = instance;
+    rubis_filtered_msg.instance = rubis::instance_;
     rubis_filtered_points_pub.publish(rubis_filtered_msg);
   }
 
@@ -144,13 +143,15 @@ inline static void publish_filtered_cloud(const sensor_msgs::PointCloud2::ConstP
 
 static void scan_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
 {
-  publish_filtered_cloud(input, RUBIS_NO_INSTANCE);
+  rubis::instance_ = RUBIS_NO_INSTANCE;
+  publish_filtered_cloud(input);
 }
 
 static void rubis_scan_callback(const rubis_msgs::PointCloud2::ConstPtr& _input)
 {
   sensor_msgs::PointCloud2::ConstPtr input = boost::make_shared<const sensor_msgs::PointCloud2>(_input->msg);
-  publish_filtered_cloud(input, _input->instance);
+  rubis::instance_ = _input->instance;
+  publish_filtered_cloud(input);
 }
 
 int main(int argc, char** argv)
@@ -189,7 +190,7 @@ int main(int argc, char** argv)
   private_nh.param(node_name+"/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
   private_nh.param(node_name+"/task_execution_time", task_execution_time, (double)10);
   private_nh.param(node_name+"/task_relative_deadline", task_relative_deadline, (double)10);
-  private_nh.param<int>(node_name+"/instance_mode", instance_mode_, 0);
+  private_nh.param<int>(node_name+"/instance_mode", rubis::instance_mode_, 0);
 
   /* For Task scheduling */
   if(task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
@@ -197,7 +198,7 @@ int main(int argc, char** argv)
 
   // Publishers
   filtered_points_pub = nh.advertise<sensor_msgs::PointCloud2>("/filtered_points", 10);
-  if(instance_mode_)
+  if(rubis::instance_mode_)
     rubis_filtered_points_pub = nh.advertise<rubis_msgs::PointCloud2>("/rubis_filtered_points", 10);
   points_downsampler_info_pub = nh.advertise<points_downsampler::PointsDownsamplerInfo>("/points_downsampler_info", 1000);
 
@@ -206,7 +207,7 @@ int main(int argc, char** argv)
   // ros::Subscriber scan_sub = nh.subscribe(POINTS_TOPIC, 10, scan_callback);
   ros::Subscriber scan_sub;
   
-  if(instance_mode_) scan_sub = nh.subscribe("/rubis_"+POINTS_TOPIC, 10, rubis_scan_callback);
+  if(rubis::instance_mode_) scan_sub = nh.subscribe("/rubis_"+POINTS_TOPIC, 10, rubis_scan_callback);
   else scan_sub = nh.subscribe(POINTS_TOPIC, 10, scan_callback);
 
   /*  RT Scheduling setup  */
@@ -235,7 +236,7 @@ int main(int argc, char** argv)
 
       ros::spinOnce();
 
-      if(task_profiling_flag) rubis::sched::stop_task_profiling(1, rubis::sched::task_state_);
+      if(task_profiling_flag) rubis::sched::stop_task_profiling(rubis::instance_, rubis::sched::task_state_);
       if(rubis::sched::task_state_ == TASK_STATE_DONE){        
         if(task_scheduling_flag) rubis::sched::yield_task_scheduling();        
         rubis::sched::task_state_ = TASK_STATE_READY;

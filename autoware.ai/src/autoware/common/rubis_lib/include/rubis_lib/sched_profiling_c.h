@@ -14,6 +14,9 @@
 
 #define rubis_lib_BUFFER_SIZE 1024
 
+extern int instance_mode_;
+extern unsigned long instance_;
+
 extern int task_profiling_flag_;
 extern int gpu_profiling_flag_;
 
