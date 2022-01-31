@@ -74,6 +74,7 @@ void PurePursuitNode::initForROS()
   nh_.param("vehicle_info/wheel_base", wheel_base_, 2.7);
 
   private_nh_.param("/pure_pursuit/dynamic_params_flag", dynamic_param_flag_, false);
+  private_nh_.param("/pure_pursuit/instance_mode", instance_mode_, 0);
   
   if(dynamic_param_flag_){
     XmlRpc::XmlRpcValue xml_list;
@@ -100,25 +101,19 @@ void PurePursuitNode::initForROS()
   // setup subscriber
   sub1_ = nh_.subscribe("final_waypoints", 10,
     &PurePursuitNode::callbackFromWayPoints, this);
-  sub2_ = nh_.subscribe("current_pose", 10,
-    &PurePursuitNode::callbackFromCurrentPose, this);
+
+  if(instance_mode_) rubis_pose_sub_ = nh_.subscribe("rubis_current_pose", 10, &PurePursuitNode::callbackFromRubisCurrentPose, this);
+  else pose_sub_ = nh_.subscribe("current_pose", 10, &PurePursuitNode::callbackFromCurrentPose, this);
+
   sub3_ = nh_.subscribe("config/waypoint_follower", 10,
     &PurePursuitNode::callbackFromConfig, this);
-  sub4_ = nh_.subscribe("current_velocity", 10,
-    &PurePursuitNode::callbackFromCurrentVelocity, this);
   
-  /*  RT Scheduling setup  */
-  // sub1_ = nh_.subscribe("final_waypoints", 1,
-  //   &PurePursuitNode::callbackFromWayPoints, this); // origin 10
-  // sub2_ = nh_.subscribe("current_pose", 1,
-  //   &PurePursuitNode::callbackFromCurrentPose, this); // origin 10
-  // sub3_ = nh_.subscribe("config/waypoint_follower", 1,
-  //   &PurePursuitNode::callbackFromConfig, this); // origin 10
-  // sub4_ = nh_.subscribe("current_velocity", 1,
-  //   &PurePursuitNode::callbackFromCurrentVelocity, this); // origin 10
+  velocity_sub_ = nh_.subscribe("current_velocity", 10, &PurePursuitNode::callbackFromCurrentVelocity, this);
 
   // setup publisher
-  pub1_ = nh_.advertise<geometry_msgs::TwistStamped>("twist_raw", 10);
+  twist_pub_ = nh_.advertise<geometry_msgs::TwistStamped>("twist_raw", 10);
+  if(instance_mode_) rubis_twist_pub_ = nh_.advertise<rubis_msgs::TwistStamped>("rubis_twist_raw", 10);
+
   pub2_ = nh_.advertise<autoware_msgs::ControlCommandStamped>("ctrl_raw", 10);
   pub11_ = nh_.advertise<visualization_msgs::Marker>("next_waypoint_mark", 0);
   pub12_ = nh_.advertise<visualization_msgs::Marker>("next_target_mark", 0);
@@ -242,7 +237,14 @@ void PurePursuitNode::publishTwistStamped(
   ts.header.stamp = ros::Time::now();
   ts.twist.linear.x = can_get_curvature ? computeCommandVelocity() : 0;
   ts.twist.angular.z = can_get_curvature ? kappa * ts.twist.linear.x : 0;
-  pub1_.publish(ts);
+  twist_pub_.publish(ts);
+
+  if(instance_mode_){
+    rubis_msgs::TwistStamped rubis_ts;
+    rubis_ts.instance = instance_;
+    rubis_ts.msg = ts;
+    rubis_twist_pub_.publish(rubis_ts);
+  }
 
   if(rubis::sched::is_task_ready_ == TASK_NOT_READY) rubis::sched::init_task();
   rubis::sched::task_state_ = TASK_STATE_DONE;
@@ -360,15 +362,24 @@ void PurePursuitNode::publishDeviationCurrentPosition(
   pub17_.publish(msg);
 }
 
-void PurePursuitNode::callbackFromCurrentPose(
-  const geometry_msgs::PoseStampedConstPtr& msg)
-{
+inline void PurePursuitNode::updateCurrentPose(const geometry_msgs::PoseStampedConstPtr& msg){
   pp_.setCurrentPose(msg);
   is_pose_set_ = true;
 }
 
-void PurePursuitNode::callbackFromCurrentVelocity(
-  const geometry_msgs::TwistStampedConstPtr& msg)
+void PurePursuitNode::callbackFromCurrentPose(const geometry_msgs::PoseStampedConstPtr& msg)
+{
+  updateCurrentPose(msg);
+}
+
+void PurePursuitNode::callbackFromRubisCurrentPose(const rubis_msgs::PoseStampedConstPtr& _msg)
+{
+  geometry_msgs::PoseStampedConstPtr msg = boost::make_shared<const geometry_msgs::PoseStamped>(_msg->msg);
+  instance_ = _msg->instance;
+  updateCurrentPose(msg);
+}
+
+void PurePursuitNode::callbackFromCurrentVelocity(const geometry_msgs::TwistStampedConstPtr& msg)
 {
   current_linear_velocity_ = msg->twist.linear.x;
   pp_.setCurrentVelocity(current_linear_velocity_);

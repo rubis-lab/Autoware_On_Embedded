@@ -1,0 +1,2 @@
+uint64 instance
+autoware_msgs/VehicleCmd msg

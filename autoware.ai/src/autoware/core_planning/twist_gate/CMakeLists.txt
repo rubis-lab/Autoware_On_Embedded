@@ -18,6 +18,7 @@ find_package(
     std_msgs
     tablet_socket_msgs
     rubis_lib
+    rubis_msgs
 )
 
 catkin_package(

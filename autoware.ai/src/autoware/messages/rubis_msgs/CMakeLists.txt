@@ -7,6 +7,7 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
   sensor_msgs
   std_msgs
+  autoware_msgs
 )
 
 add_message_files(
@@ -15,10 +16,12 @@ add_message_files(
     PointCloud2.msg
     PoseStamped.msg
     TwistStamped.msg
+    VehicleCmd.msg
 )
 
 generate_messages(
   DEPENDENCIES
+    autoware_msgs
     geometry_msgs
     jsk_recognition_msgs
     sensor_msgs
@@ -27,6 +30,7 @@ generate_messages(
 
 catkin_package(
   CATKIN_DEPENDS
+    autoware_msgs
     geometry_msgs
     jsk_recognition_msgs
     message_runtime

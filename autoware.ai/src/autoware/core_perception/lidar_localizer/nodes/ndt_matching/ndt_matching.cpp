@@ -73,6 +73,8 @@
 #include <autoware_health_checker/health_checker/health_checker.h>
 
 #include <rubis_lib/sched.hpp>
+#include <rubis_msgs/PointCloud2.h>
+#include <rubis_msgs/PoseStamped.h>
 
 #define SPIN_PROFILING
 
@@ -156,6 +158,9 @@ static geometry_msgs::PoseStamped predict_pose_imu_odom_msg;
 
 static ros::Publisher ndt_pose_pub;
 static geometry_msgs::PoseStamped ndt_pose_msg;
+
+static ros::Publisher rubis_ndt_pose_pub;
+static rubis_msgs::PoseStamped rubis_ndt_pose_msg;
 
 // current_pose is published by vel_pose_mux
 /*
@@ -256,6 +261,9 @@ static unsigned int points_map_num = 0;
 pthread_mutex_t mutex;
 
 static bool _is_init_match_finished = false;
+
+static int instance_mode_ = 0;
+
 static pose convertPoseIntoRelativeCoordinate(const pose &target_pose, const pose &reference_pose)
 {
     tf::Quaternion target_q;
@@ -914,7 +922,7 @@ static void imu_callback(const sensor_msgs::Imu::Ptr& input)
   previous_imu_yaw = imu_yaw;
 }
 
-static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
+static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input, unsigned long instance)
 { 
   // Check inital matching is success or not
   if(_is_init_match_finished == false && previous_score < USING_GPS_THRESHOLD && previous_score != 0.0)
@@ -1358,6 +1366,14 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
     predict_pose_pub.publish(predict_pose_msg);
     health_checker_ptr_->CHECK_RATE("topic_rate_ndt_pose_slow", 8, 5, 1, "topic ndt_pose publish rate slow.");
     ndt_pose_pub.publish(ndt_pose_msg);
+    rubis::sched::task_state_ = TASK_STATE_DONE;
+
+    if(instance_mode_ && instance != RUBIS_NO_INSTANCE){
+      rubis_ndt_pose_msg.instance = instance;
+      rubis_ndt_pose_msg.msg = ndt_pose_msg;
+      rubis_ndt_pose_pub.publish(rubis_ndt_pose_msg);
+    }
+
     // current_pose is published by vel_pose_mux
     //    current_pose_pub.publish(current_pose_msg);
     localizer_pose_pub.publish(localizer_pose_msg);
@@ -1506,9 +1522,16 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
   if(rubis::sched::is_task_ready_ == TASK_NOT_READY){
     rubis::sched::init_task();
     if(rubis::sched::gpu_profiling_flag_) rubis::sched::start_gpu_profiling();
-  }
-  
-  rubis::sched::task_state_ = TASK_STATE_DONE;
+  }  
+}
+
+static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input){
+  ndt_matching(input, RUBIS_NO_INSTANCE);
+}
+
+static void rubis_points_callback(const rubis_msgs::PointCloud2::ConstPtr& _input){
+  sensor_msgs::PointCloud2::ConstPtr input = boost::make_shared<const sensor_msgs::PointCloud2>(_input->msg);
+  ndt_matching(input, _input->instance);
 }
 
 void* thread_func(void* args)
@@ -1648,18 +1671,20 @@ int main(int argc, char** argv)
   std::string gpu_response_time_filename;
   std::string gpu_deadline_filename;
 
-  private_nh.param<int>("/ndt_matching/task_scheduling_flag", task_scheduling_flag, 0);
-  private_nh.param<int>("/ndt_matching/task_profiling_flag", task_profiling_flag, 0);
-  private_nh.param<std::string>("/ndt_matching/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/ndt_matching.csv");
-  private_nh.param<int>("/ndt_matching/rate", rate, 10);
-  private_nh.param("/ndt_matching/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
-  private_nh.param("/ndt_matching/task_execution_time", task_execution_time, (double)10);
-  private_nh.param("/ndt_matching/task_relative_deadline", task_relative_deadline, (double)10);
-  private_nh.param("/ndt_matching/gpu_scheduling_flag", gpu_scheduling_flag, 0);
-  private_nh.param("/ndt_matching/gpu_profiling_flag", gpu_profiling_flag, 0);
-  private_nh.param<std::string>("/ndt_matching/gpu_execution_time_filename", gpu_execution_time_filename, "~/Documents/gpu_profiling/test_ndt_matching_execution_time.csv");
-  private_nh.param<std::string>("/ndt_matching/gpu_response_time_filename", gpu_response_time_filename, "~/Documents/gpu_profiling/test_ndt_matching_response_time.csv");
-  private_nh.param<std::string>("/ndt_matching/gpu_deadline_filename", gpu_deadline_filename, "~/Documents/gpu_deadline/ndt_matching_gpu_deadline.csv");
+  std::string node_name = ros::this_node::getName();
+  private_nh.param<int>(node_name+"/task_scheduling_flag", task_scheduling_flag, 0);
+  private_nh.param<int>(node_name+"/task_profiling_flag", task_profiling_flag, 0);
+  private_nh.param<std::string>(node_name+"/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/ndt_matching.csv");
+  private_nh.param<int>(node_name+"/rate", rate, 10);
+  private_nh.param(node_name+"/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
+  private_nh.param(node_name+"/task_execution_time", task_execution_time, (double)10);
+  private_nh.param(node_name+"/task_relative_deadline", task_relative_deadline, (double)10);
+  private_nh.param(node_name+"/gpu_scheduling_flag", gpu_scheduling_flag, 0);
+  private_nh.param(node_name+"/gpu_profiling_flag", gpu_profiling_flag, 0);
+  private_nh.param<std::string>(node_name+"/gpu_execution_time_filename", gpu_execution_time_filename, "~/Documents/gpu_profiling/test_ndt_matching_execution_time.csv");
+  private_nh.param<std::string>(node_name+"/gpu_response_time_filename", gpu_response_time_filename, "~/Documents/gpu_profiling/test_ndt_matching_response_time.csv");
+  private_nh.param<std::string>(node_name+"/gpu_deadline_filename", gpu_deadline_filename, "~/Documents/gpu_deadline/ndt_matching_gpu_deadline.csv");
+  private_nh.param<int>(node_name+"/instance_mode", instance_mode_, 0);
   
   if(task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
   if(gpu_profiling_flag) rubis::sched::init_gpu_profiling(gpu_execution_time_filename, gpu_response_time_filename);
@@ -1691,7 +1716,10 @@ int main(int argc, char** argv)
   predict_pose_imu_pub = nh.advertise<geometry_msgs::PoseStamped>("/predict_pose_imu", 10);
   predict_pose_odom_pub = nh.advertise<geometry_msgs::PoseStamped>("/predict_pose_odom", 10);
   predict_pose_imu_odom_pub = nh.advertise<geometry_msgs::PoseStamped>("/predict_pose_imu_odom", 10);
+
   ndt_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/ndt_pose", 10);
+  if(instance_mode_) rubis_ndt_pose_pub = nh.advertise<rubis_msgs::PoseStamped>("/rubis_ndt_pose",10);
+  
   // current_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/current_pose", 10);
   localizer_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/localizer_pose", 10);
   estimate_twist_pub = nh.advertise<geometry_msgs::TwistStamped>("/estimate_twist", 10);
@@ -1707,27 +1735,19 @@ int main(int argc, char** argv)
   ros::Subscriber gnss_sub = nh.subscribe("gnss_pose", 10, gnss_callback); 
   ros::Subscriber map_sub = nh.subscribe("points_map", 1, map_callback);
   ros::Subscriber initialpose_sub = nh.subscribe("initialpose", 10, initialpose_callback); 
-  // ros::Subscriber points_sub = nh.subscribe("filtered_points", 1, points_callback); // origin: _queue_size
+
+  ros::Subscriber points_sub;
+  if(instance_mode_) points_sub = nh.subscribe("rubis_filtered_points", _queue_size, rubis_points_callback); // _queue_size = 1000
+  else points_sub = nh.subscribe("filtered_points", _queue_size, points_callback); // _queue_size = 1000
+  
   // ros::Subscriber odom_sub = nh.subscribe("/vehicle/odom", _queue_size * 10, odom_callback);
   // ros::Subscriber imu_sub = nh.subscribe(_imu_topic.c_str(), _queue_size * 10, imu_callback);
-
-  /*  RT Scheduling setup  */
-  // ros::Subscriber param_sub = nh.subscribe("config/ndt", 1, param_callback); // origin: 10
-  // ros::Subscriber gnss_sub = nh.subscribe("gnss_pose", 1, gnss_callback); // origin: 10
-  // ros::Subscriber map_sub = nh.subscribe("points_map", 1, map_callback);
-  // ros::Subscriber initialpose_sub = nh.subscribe("initialpose", 1, initialpose_callback); // origin: 10
   
-
-  // pthread_t thread;
-  // pthread_create(&thread, NULL, thread_func, NULL);
+  pthread_t thread;
+  pthread_create(&thread, NULL, thread_func, NULL);
 
   // SPIN  
   if(!task_scheduling_flag && !task_profiling_flag){
-    ros::Subscriber points_sub = nh.subscribe("filtered_points", _queue_size, points_callback); // _queue_size = 1000
-
-    /*  RT Scheduling setup  */
-    // ros::Subscriber points_sub = nh.subscribe("filtered_points", 1, points_callback); // origin: _queue_size
-
     ros::spin();
   }
   else{ 
@@ -1741,11 +1761,6 @@ int main(int argc, char** argv)
     }
     
     map_sub.shutdown();
-
-    ros::Subscriber points_sub = nh.subscribe("filtered_points", _queue_size, points_callback);
-
-    /*  RT Scheduling setup  */
-    // ros::Subscriber points_sub = nh.subscribe("filtered_points", 1, points_callback); // origin: _queue_size
 
     // Executing task
     while(ros::ok()){

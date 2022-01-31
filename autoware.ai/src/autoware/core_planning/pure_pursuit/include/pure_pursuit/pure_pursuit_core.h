@@ -20,6 +20,9 @@
 // ROS includes
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/TwistStamped.h>
+#include <rubis_msgs/PoseStamped.h>
+#include <rubis_msgs/TwistStamped.h>
+
 #include <ros/ros.h>
 #include <std_msgs/Float32.h>
 #include <visualization_msgs/Marker.h>
@@ -85,11 +88,11 @@ private:
   PurePursuit pp_;
 
   // publisher
-  ros::Publisher pub1_, pub2_,
+  ros::Publisher twist_pub_, rubis_twist_pub_, pub2_,
     pub11_, pub12_, pub13_, pub14_, pub15_, pub16_, pub17_, pub18_;
 
   // subscriber
-  ros::Subscriber sub1_, sub2_, sub3_, sub4_;
+  ros::Subscriber sub1_, pose_sub_, rubis_pose_sub_, sub3_, velocity_sub_;
 
   // constant
   const int LOOP_RATE_;  // processing frequency
@@ -108,18 +111,19 @@ private:
   double lookahead_distance_ratio_;
   // the next waypoint must be outside of this threshold.
   double minimum_lookahead_distance_;
+  unsigned long instance_;
 
   // Added by PHY
   bool dynamic_param_flag_;
   std::vector<DynamicParams> dynamic_params;
-
+  int instance_mode_ = 0;
 
   // callbacks
   void callbackFromConfig(
     const autoware_config_msgs::ConfigWaypointFollowerConstPtr& config);
   void callbackFromCurrentPose(const geometry_msgs::PoseStampedConstPtr& msg);
-  void callbackFromCurrentVelocity(
-    const geometry_msgs::TwistStampedConstPtr& msg);
+  void callbackFromRubisCurrentPose(const rubis_msgs::PoseStampedConstPtr& _msg);
+  void callbackFromCurrentVelocity(const geometry_msgs::TwistStampedConstPtr& msg);
   void callbackFromWayPoints(const autoware_msgs::LaneConstPtr& msg);
 
   // initializer
@@ -135,6 +139,8 @@ private:
     const std::vector<autoware_msgs::Waypoint>& waypoints) const;
   void connectVirtualLastWaypoints(
     autoware_msgs::Lane* expand_lane, LaneDirection direction);
+  inline void updateCurrentPose(const geometry_msgs::PoseStampedConstPtr& msg);
+
   
   // Added by PHY
   void setLookaheadParamsByVel();

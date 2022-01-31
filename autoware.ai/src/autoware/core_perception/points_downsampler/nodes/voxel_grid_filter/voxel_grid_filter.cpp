@@ -191,8 +191,6 @@ int main(int argc, char** argv)
   private_nh.param(node_name+"/task_relative_deadline", task_relative_deadline, (double)10);
   private_nh.param<int>(node_name+"/instance_mode", instance_mode_, 0);
 
-  std::cout<<"#### instance mode: "<<instance_mode_<<std::endl;
-
   /* For Task scheduling */
   if(task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
   
@@ -206,9 +204,10 @@ int main(int argc, char** argv)
   // Subscribers
   ros::Subscriber config_sub = nh.subscribe("config/voxel_grid_filter", 10, config_callback);
   // ros::Subscriber scan_sub = nh.subscribe(POINTS_TOPIC, 10, scan_callback);
-  ros::Subscriber scan_sub, rubis_scan_sub;
-  scan_sub = nh.subscribe(POINTS_TOPIC, 10, scan_callback);
-  if(instance_mode_) rubis_scan_sub = nh.subscribe("/rubis_"+POINTS_TOPIC, 10, rubis_scan_callback);
+  ros::Subscriber scan_sub;
+  
+  if(instance_mode_) scan_sub = nh.subscribe("/rubis_"+POINTS_TOPIC, 10, rubis_scan_callback);
+  else scan_sub = nh.subscribe(POINTS_TOPIC, 10, scan_callback);
 
   /*  RT Scheduling setup  */
   // ros::Subscriber config_sub = nh.subscribe("config/voxel_grid_filter", 1, config_callback); // origin 10

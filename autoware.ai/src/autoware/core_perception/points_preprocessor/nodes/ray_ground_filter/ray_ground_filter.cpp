@@ -478,7 +478,6 @@ void RayGroundFilter::Run()
   node_handle_.param(node_name+"/task_relative_deadline", task_relative_deadline, (double)10);
   node_handle_.param<int>(node_name+"/instance_mode", instance_mode_, 0);
 
-  std::cout<<node_name+"/instance_mode"<<"  ## instance_mode  "<<instance_mode_<<std::endl;
   if(instance_mode_) points_node_sub_ = node_handle_.subscribe("/rubis_"+input_point_topic_.substr(1), 1, &RayGroundFilter::RubisCloudCallback, this);
   else points_node_sub_ = node_handle_.subscribe(input_point_topic_, 1, &RayGroundFilter::CloudCallback, this);
 

@@ -22,6 +22,7 @@ find_package(
     tf
     tf2
     rubis_lib
+    rubis_msgs
 )
 
 catkin_package(

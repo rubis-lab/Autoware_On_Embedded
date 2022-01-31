@@ -14,7 +14,7 @@
   <arg name="sync" default="false" />
   <arg name="output_log_data" default="false" />
   <arg name="gnss_reinit_fitness" default="500.0" />
-  <arg name="instance_mode" default="0" />
+  <!-- <arg name="instance_mode" default="0" /> -->
 
   <node pkg="lidar_localizer" type="ndt_matching" name="ndt_matching" output="screen">
     <param name="method_type" value="$(arg method_type)" />
@@ -30,7 +30,7 @@
     <param name="output_log_data" value="$(arg output_log_data)" />
     <param name="gnss_reinit_fitness" value="$(arg gnss_reinit_fitness)" />
     <remap from="/points_raw" to="/sync_drivers/points_raw" if="$(arg sync)" />
-    <param name="instance_mode" value="$(arg instance_mode)" />
+    <!-- <param name="instance_mode" value="$(arg instance_mode)" /> -->
   </node>
 
 </launch>

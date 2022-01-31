@@ -17,6 +17,7 @@ find_package(
     roslint
     std_msgs
     rubis_lib
+    rubis_msgs
 )
 
 catkin_package(

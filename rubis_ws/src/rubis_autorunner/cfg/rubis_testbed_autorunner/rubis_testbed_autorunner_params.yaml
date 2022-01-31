@@ -11,6 +11,8 @@
 
 # Localization
 voxel_grid_filter:
+  instance_mode: 0
+
   task_scheduling_flag: 0
   task_profiling_flag: 1
   task_response_time_filename: "~/Documents/profiling/response_time/voxel_grid_filter.csv"
@@ -20,6 +22,8 @@ voxel_grid_filter:
   task_relative_deadline: 100_000_000
 
 ndt_matching:
+  instance_mode: 0
+
   tf_x: 1.0510799 
   tf_y: 0
   tf_z: 1.96
@@ -43,7 +47,6 @@ ndt_matching:
 
 # Detection
 ray_ground_filter_center:
-  instance_mode: 0
   task_scheduling_flag: 0
   task_profiling_flag: 1
   task_response_time_filename: "~/Documents/profiling/response_time/ray_ground_filter.csv"
@@ -159,6 +162,7 @@ op_motion_predictor:
 
 # Control
 pure_pursuit:
+  instance_mode: 0
   task_scheduling_flag: 0
   task_profiling_flag: 1
   task_response_time_filename: "~/Documents/profiling/response_time/pure_pursuit.csv"
@@ -170,6 +174,7 @@ pure_pursuit:
   dynamic_params_path: "~/autoware.ai/autoware_files/lgsvl_file/parameter/lgsvl_pure_pursuit.yaml"
 
 twist_filter:
+  instance_mode: 0
   task_scheduling_flag: 0
   task_profiling_flag: 1
   task_response_time_filename: "~/Documents/profiling/response_time/twist_filter.csv"
@@ -179,6 +184,7 @@ twist_filter:
   task_relative_deadline: 100_000_000
 
 twist_gate:
+  instance_mode: 0
   task_scheduling_flag: 0
   task_profiling_flag: 1
   task_response_time_filename: "~/Documents/profiling/response_time/twist_gate.csv"
@@ -209,6 +215,7 @@ vel_relay:
   task_relative_deadline: 100_000_000
 
 pose_relay:
+  instance_mode: 0
   task_scheduling_flag: 0
   task_profiling_flag: 1
   task_response_time_filename: "~/Documents/profiling/response_time/pose_relay.csv"
