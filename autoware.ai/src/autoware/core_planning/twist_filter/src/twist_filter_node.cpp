@@ -161,7 +161,6 @@ inline void TwistFilterNode::publishTwist(const geometry_msgs::TwistStampedConst
 void TwistFilterNode::rubisTwistCmdCallback(const rubis_msgs::TwistStampedConstPtr& _msg){
   geometry_msgs::TwistStampedConstPtr msg = boost::make_shared<const geometry_msgs::TwistStamped>(_msg-> msg);
   rubis::instance_ = _msg->instance;
-  std::cout<<"callback instacne: "<<rubis::instance_<<std::endl;
   publishTwist(msg);
 }
 

@@ -67,7 +67,6 @@ int main(int argc, char** argv)
       ros::spinOnce();
 
       if(task_profiling_flag){
-        std::cout<<"main instance: "<<rubis::instance_<<std::endl;
         rubis::sched::stop_task_profiling(rubis::instance_, rubis::sched::task_state_);
       }
 

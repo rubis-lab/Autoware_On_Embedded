@@ -46,12 +46,12 @@ void start_task_profiling(){
   if(task_profiling_flag_) clock_gettime(CLOCK_MONOTONIC, &task_start_time_);
 }
 
-void stop_task_profiling(unsigned long instance, int state){
+void stop_task_profiling(){
   if(task_profiling_flag_){
     int activation = 0;
     if(state == TASK_STATE_DONE) activation = 1;
     clock_gettime(CLOCK_MONOTONIC, &task_end_time_);
-    fprintf(task_response_time_fp_, "%d,%d,%lld.%.9ld,%lld.%.9ld,%lu,%d\n",iter_++, getpid(), (long long)task_start_time_.tv_sec, task_start_time_.tv_nsec, (long long)task_end_time_.tv_sec, task_end_time_.tv_nsec, instance, activation);
+    fprintf(task_response_time_fp_, "%d,%d,%lld.%.9ld,%lld.%.9ld,%lu,%d\n",iter_++, getpid(), (long long)task_start_time_.tv_sec, task_start_time_.tv_nsec, (long long)task_end_time_.tv_sec, task_end_time_.tv_nsec, instance_, activation);
     fflush(task_response_time_fp_);
   }
 }

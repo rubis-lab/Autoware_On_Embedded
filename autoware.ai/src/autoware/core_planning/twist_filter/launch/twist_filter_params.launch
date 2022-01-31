@@ -17,7 +17,7 @@
   <arg name="use_decision_maker" default="false" />
 
   <!-- rosrun waypoint_follower twist_filter -->
-  <node pkg="twist_filter" type="twist_filter" name="twist_filter" output="screen">
+  <node pkg="twist_filter" type="twist_filter" name="twist_filter">
     <param name="lateral_accel_limit" value="$(arg lateral_accel_limit)" />
     <param name="lateral_jerk_limit" value="$(arg lateral_jerk_limit)" />
     <param name="lowpass_gain_linear_x" value="$(arg lowpass_gain_linear_x)" />
@@ -27,7 +27,7 @@
     <!-- <param name="instance_mode" value="$(arg instance_mode)" /> -->
   </node>
 
-  <node pkg="twist_gate" type="twist_gate" name="twist_gate" output="screen">
+  <node pkg="twist_gate" type="twist_gate" name="twist_gate">
     <param name="loop_rate" value="$(arg loop_rate)" />
     <param name="use_decision_maker" value="$(arg use_decision_maker)" />
     <!-- <param name="instance_mode" value="$(arg instance_mode)" /> -->
