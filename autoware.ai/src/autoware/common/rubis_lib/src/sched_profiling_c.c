@@ -46,7 +46,7 @@ void start_task_profiling(){
   if(task_profiling_flag_) clock_gettime(CLOCK_MONOTONIC, &task_start_time_);
 }
 
-void stop_task_profiling(){
+void stop_task_profiling(unsigned long instance, int state){
   if(task_profiling_flag_){
     int activation = 0;
     if(state == TASK_STATE_DONE) activation = 1;
