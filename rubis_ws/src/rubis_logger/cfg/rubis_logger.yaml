@@ -1,0 +1,6 @@
+/rubis_logger/target_topics :
+  - "/odom"
+  - "/vehicle_cmd_test"
+  - "/ctrl_cmd"
+
+paramtest: 2020
