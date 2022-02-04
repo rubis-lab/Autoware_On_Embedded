@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<launch>
+
+  <rosparam>
+    speed_to_erpm_gain: 4614
+    speed_to_erpm_offset: 0.0
+    steering_angle_to_servo_gain: -1.2135
+    steering_angle_to_servo_offset: 0.5304
+    wheelbase: .25
+    vesc_to_odom/publish_tf: false
+    vesc_driver/port: /dev/ttyACM0
+    keyboard: false
+  </rosparam>
+
+  <rosparam>
+    from_lane_following: false
+    from_autoware: true
+    lane_following_speed_str: /lane_following/speed
+    lane_following_steer_str: /lane_following/steer
+    twist_str: /twist_cmd
+    end_threshold: 0.5
+  </rosparam>
+
+  <node pkg="vesc_driver" type="vesc_driver_node" name="vesc_driver" />
+  <node pkg="control_module" type="control_module" name="control_module" output="screen">
+  </node>
+</launch>

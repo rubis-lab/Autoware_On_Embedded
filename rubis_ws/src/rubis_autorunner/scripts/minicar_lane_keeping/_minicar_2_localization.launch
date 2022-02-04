@@ -1,0 +1,55 @@
+<launch>
+  <arg name="init_x" value="1.31" />
+  <arg name="init_y" value="0.18" />
+  <arg name="init_z" value="1.60" />
+  <arg name="init_roll" value="0.005" />
+  <arg name="init_pitch" value="-0.054" />
+  <arg name="init_yaw" value="0.431" />
+
+  <!-- vel/pose connect -->
+  <arg name="topic_pose_stamped" default="/ndt_pose" />
+  <arg name="topic_twist_stamped" default="/estimate_twist" />
+
+  <!-- points downsampler -->
+  <include file="$(find points_downsampler)/launch/points_downsample.launch" />
+
+  <!-- nmea2tfpose -->
+  <!-- <include file="$(find gnss_localizer)/launch/nmea2tfpose.launch">
+    <arg name="plane" value="0" />
+  </include> -->
+
+  <!-- ndt_matching --><!-- pcl_generic=0, pcl_anh=1, pcl_anh_gpu=2, pcl_openmp=3 -->
+  <include file="$(find lidar_localizer)/launch/ndt_matching.launch">
+    <arg name="method_type" value="1" /> 
+    <arg name="get_height" value="true" /> 
+  </include>
+
+  <!-- ndt config -->
+  <node pkg="rostopic" type="rostopic" name="config_ndt"
+  args="pub /config/ndt autoware_config_msgs/ConfigNDT
+  '{header: {seq: 8, stamp: {secs: 0, nsecs: 0}, frame_id: ''},
+    init_pos_gnss: 0,
+    x: $(arg init_x),
+    y: $(arg init_y),
+    z: $(arg init_z),
+    roll: $(arg init_roll),
+    pitch: $(arg init_pitch),
+    yaw: $(arg init_yaw),
+    use_predict_pose: 1,
+    error_threshold: 1,
+    resolution: 3,
+    step_size: 0.1,
+    trans_epsilon: 0.01,
+    max_iterations: 20}
+  '"/>
+
+  <!-- vel_pose_mux -->
+  <include file="$(find autoware_connector)/launch/vel_pose_connect.launch">
+    <arg name="topic_pose_stamped" value="$(arg topic_pose_stamped)" />
+    <arg name="topic_twist_stamped" value="$(arg topic_twist_stamped)" />
+  </include>
+
+  <node pkg="rostopic" type="rostopic" name="config_voxel" args="pub /config/voxel_grid_filter autoware_config_msgs/ConfigVoxelGridFilter '{voxel_leaf_size: 2.0, measurement_range: 50.0}'"/>
+
+
+</launch>

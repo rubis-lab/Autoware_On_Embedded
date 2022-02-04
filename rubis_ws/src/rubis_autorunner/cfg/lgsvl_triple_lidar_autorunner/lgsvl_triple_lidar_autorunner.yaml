@@ -1,0 +1,18 @@
+total_step_num: 9
+terminate_script_path: "~/rubis_ws/src/rubis_autorunner/scripts/lgsvl_triple_lidar_autorunner/terminate.sh"
+# step_# : 
+#     [0] pacakge name
+#     [1] target name( node name or launch script name )
+#     [2] state that create constraint topic or not ( "true" or "false" )
+#     [3] state that check constraint topic or not ( "true" or "false" )
+#     [4] target type( RUN or LAUNCH )
+
+step_1: ["rubis_autorunner", "lgsvl_triple_lidar_step1.launch", "true", "false", "LAUNCH"]
+step_2: ["rubis_autorunner", "lgsvl_triple_lidar_step2.launch", "true", "true", "LAUNCH"]
+step_3: ["rubis_autorunner", "lgsvl_triple_lidar_step3.launch", "true", "true", "LAUNCH"]
+step_4: ["rubis_autorunner", "lgsvl_triple_lidar_step4.launch", "true", "true", "LAUNCH"]
+step_5: ["rubis_autorunner", "lgsvl_triple_lidar_step5.launch", "true", "true", "LAUNCH"]
+step_6: ["rubis_autorunner", "lgsvl_triple_lidar_step6.launch", "true", "true", "LAUNCH"]
+step_7: ["rubis_autorunner", "lgsvl_triple_lidar_step7.launch", "true", "true", "LAUNCH"]
+step_8: ["rubis_autorunner", "lgsvl_triple_lidar_step8.launch", "true", "true", "LAUNCH"]
+step_9: ["rubis_autorunner", "lgsvl_triple_lidar_step9.launch", "false", "true", "LAUNCH"]

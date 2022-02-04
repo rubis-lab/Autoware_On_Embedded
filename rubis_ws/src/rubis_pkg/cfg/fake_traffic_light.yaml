@@ -1,0 +1,11 @@
+traffic_light_list:
+  -
+    id : 1
+    pose :
+      x : 2.0
+      y : 57.0
+      z : 0.0
+    routine :
+      red : 9999.0
+      green : 1.0
+      yellow : 1.0

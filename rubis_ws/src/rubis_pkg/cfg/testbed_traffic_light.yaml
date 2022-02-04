@@ -1,0 +1,41 @@
+traffic_light_list:
+  -
+    id : 1
+    pose :
+      x : 1741.44
+      y : 241.34
+      z : -0.288
+    routine :
+      red : 15.0
+      green : 5.0
+      yellow : 2.0
+  -
+    id : 2
+    pose :
+      x : 1741.44
+      y : 626.34
+      z : -0.288
+    routine :
+      red : 15.0
+      green : 5.0
+      yellow : 2.0
+  -
+    id : 3
+    pose :
+      x : 1147.59
+      y : 651.93
+      z : -0.288
+    routine :
+      red : 15.0
+      green : 5.0
+      yellow : 2.0
+  -
+    id : 4
+    pose :
+      x : 1121.421
+      y : 280.849
+      z : -0.288
+    routine :
+      red : 15.0
+      green : 5.0
+      yellow : 2.0

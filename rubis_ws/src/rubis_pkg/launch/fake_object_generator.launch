@@ -1,0 +1,4 @@
+<launch>
+    <rosparam command="load" file="$(find rubis_pkg)/cfg/fake_object_generator.yaml"/>
+    <node pkg="rubis_pkg" type="fake_object_generator" name="fake_object_generator" output="screen"/>        
+</launch>

@@ -1,0 +1,91 @@
+lane_info_list:
+  -
+    id : 1
+    start_idx : 4
+    end_idx : 4
+    left_turn : 0
+    right_turn : 1
+    pose :
+      -
+        x : 2006.1
+        y : -1007.4
+        z : 0.0
+      -
+        x : 1936.0
+        y : -932.6
+        z : 0.0
+  -
+    id : 2
+    start_idx : 2
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1936.0
+        y : -932.6
+        z : 0.0
+      -
+        x : 1937.1
+        y : -884.0
+        z : 0.0
+  -
+    id : 3
+    start_idx : 4
+    end_idx : 4
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1937.1
+        y : -884.0
+        z : 0.0
+      -
+        x : 1932.7
+        y : -808.5
+        z : 0.0
+  -
+    id : 4
+    start_idx : 4
+    end_idx : 6
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1932.7
+        y : -808.5
+        z : 0.0
+      -
+        x : 1936.8
+        y : -684.8
+        z : 0.0
+  -
+    id : 5
+    start_idx : 4
+    end_idx : 6
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1936.8
+        y : -684.8
+        z : 0.0
+      -
+        x : 1939.9
+        y : -565.0
+        z : 0.0
+  -
+    id : 5
+    start_idx : 4
+    end_idx : 6
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 1939.9
+        y : -565.0
+        z : 0.0
+      -
+        x : 1947.0
+        y : -364.7
+        z : 0.0

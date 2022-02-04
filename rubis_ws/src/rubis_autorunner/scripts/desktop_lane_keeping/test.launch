@@ -1,0 +1,26 @@
+<launch>
+  <rosparam command="load" file="$(env USER_HOME)/autoware.ai/autoware_files/data/yaml/desktop_lgsvl_params.yaml" />
+
+  <arg name="lidar_input_topic" default="/points_raw_origin"/>
+  <arg name="lidar_output_topic" default="/points_raw"/>
+  <arg name="image_input_topic" default="/image_raw_origin"/>
+
+  <!-- Map TF Publisher -->	
+	<include file="$(env USER_HOME)/autoware.ai/autoware_files/data/tf/tf.launch" />
+  
+  <!-- Vector Map Loader -->
+	<node pkg="map_file" type="vector_map_loader" name="vector_map_loader" args="
+	    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/cubetown_circle/dtlane.csv 
+	    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/cubetown_circle/idx.csv 
+	    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/cubetown_circle/lane.csv 
+	    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/cubetown_circle/node.csv 
+	    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/cubetown_circle/point.csv"/>
+
+  <!-- Point Map Loader -->
+	<include file="$(find map_file)/launch/points_map_loader.launch">
+    <arg name="scene_num" value="noupdate" />
+    <arg name="path_pcd" value="$(env USER_HOME)/autoware.ai/autoware_files/points_map/CubeTown.pcd"/>
+  </include>
+
+</launch>
+

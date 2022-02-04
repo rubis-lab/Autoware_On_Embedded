@@ -1,0 +1,8 @@
+prefix=/usr/local
+
+Name: vision_darknet_detect
+Description: Description of vision_darknet_detect
+Version: 1.12.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

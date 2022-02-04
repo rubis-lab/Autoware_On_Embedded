@@ -1,0 +1,3 @@
+<launch>
+    <rosparam command="load" file="/home/jwhan/autoware.ai/autoware_files/data/yaml/desktop_lgsvl_params.yaml" />   
+</launch>

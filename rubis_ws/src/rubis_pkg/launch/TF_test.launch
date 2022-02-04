@@ -1,0 +1,5 @@
+<!---->
+<launch>
+<!-- mapからmobilityへのtf -->
+<node pkg="rubis_pkg" type="TF_test" name="TF_test" output="screen" />
+</launch>

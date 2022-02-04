@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+
+<launch>
+  <arg name="speed_topic_str" default="/lane_following/speed" />
+  <arg name="steer_topic_str" default="/lane_following/steer" />
+  <arg name="image_topic_str" default="/cam1/raw_image" />
+
+  <node pkg="camera_image" type="camera_image" name="camera_image" args="1 60" output="screen"/>
+
+   <!-- Lane Line Detection -->
+  <node pkg="lane_following" type="lane_following_node" name="lane_following" output="screen">
+    <param name="speed_topic_str" value="$(arg speed_topic_str)" />
+    <param name="steer_topic_str" value="$(arg steer_topic_str)" />
+    <param name="image_topic_str" value="$(arg image_topic_str)" />
+  </node>
+</launch>

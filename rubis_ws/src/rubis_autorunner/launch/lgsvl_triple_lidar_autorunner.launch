@@ -1,0 +1,4 @@
+<launch>
+    <rosparam command="load" file="$(env HOME)/rubis_ws/src/rubis_autorunner/cfg/lgsvl_triple_lidar_autorunner/lgsvl_triple_lidar_autorunner.yaml" />
+    <node pkg="rubis_autorunner" type="lgsvl_triple_lidar_autorunner" name="lgsvl_triple_lidar_autorunner" output="screen" />
+</launch>
