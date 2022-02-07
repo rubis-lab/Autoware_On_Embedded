@@ -251,11 +251,11 @@ int main(int argc, char *argv[])
 
     gnss_pose_pub_ = nh.advertise<geometry_msgs::PoseStamped>("/gnss_pose", 10);
 
-    message_filters::Subscriber<inertiallabs_msgs::gps_data> gps_sub(nh, "/Inertial_Labs/gps_data", 3);
-    message_filters::Subscriber<geometry_msgs::PoseStamped> ndt_pose_sub(nh, "/ndt_pose", 3);
-    message_filters::Subscriber<inertiallabs_msgs::ins_data> ins_sub(nh, "/Inertial_Labs/ins_data", 3);
+    message_filters::Subscriber<inertiallabs_msgs::gps_data> gps_sub(nh, "/Inertial_Labs/gps_data", 10);
+    message_filters::Subscriber<geometry_msgs::PoseStamped> ndt_pose_sub(nh, "/ndt_pose", 10);
+    message_filters::Subscriber<inertiallabs_msgs::ins_data> ins_sub(nh, "/Inertial_Labs/ins_data", 10);
 
-    Synchronizer<SyncPolicy_1> sync_1(SyncPolicy_1(10), gps_sub, ins_sub, ndt_pose_sub);
+    Synchronizer<SyncPolicy_1> sync_1(SyncPolicy_1(100), gps_sub, ins_sub, ndt_pose_sub);
     Synchronizer<SyncPolicy_2> sync_2(SyncPolicy_2(10), gps_sub, ins_sub);
 
     ros::param::get("/gnss_converter/calculate_tf", calculate_tf);
@@ -287,6 +287,8 @@ int main(int argc, char *argv[])
             const char *file = "/opt/ros/melodic/bin/rosbag";
             char *exe_argv[] = {"/opt/ros/melodic/bin/rosbag",
                                 "play",
+                                "-r",
+                                "5",
                                 file_path_cstr,
                                 NULL};
 
