@@ -46,7 +46,7 @@
 
 #include <autoware_msgs/NDTStat.h>
 
-#include "rubis_sched/sched.hpp"
+#include "rubis_lib/sched.hpp"
 
 static int ready_;
 

@@ -7,7 +7,7 @@
     <arg name="output_unmatch_topic" value="/points_no_ground_center" />
   </include> -->
 
-  <include file="$(find points_preprocessor)/launch/ray_ground_filter.launch">
+  <include file="$(find points_preprocessor)/launch/ray_ground_filter_params.launch">
     <arg name="input_point_topic" value="/points_raw" />  <!-- input_point_topic, ground filtering will be performed over the pointcloud in this topic. -->
     <arg name="base_frame" value="base_link" />  <!-- Coordinate system to perform transform (default base_link) -->
     <arg name="max_clipping_height" value="5" />  <!-- Remove Points above this height value (default 2.0 meters) -->

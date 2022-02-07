@@ -19,7 +19,7 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   tf
   tf_conversions
-  rubis_sched
+  rubis_lib
 )
 
 find_package(OpenCV REQUIRED)
@@ -89,7 +89,7 @@ target_include_directories(range_vision_fusion PRIVATE
   ${OpenCV_INCLUDE_DIR}
   ${catkin_INCLUDE_DIRS}
   ${Boost_INCLUDE_DIRS}
-  $ENV{HOME}/autoware.ai/src/rubis/rubis_sched/include
+  $ENV{HOME}/autoware.ai/src/rubis/rubis_lib/include
 )
 
 target_link_libraries(range_vision_fusion

@@ -29,13 +29,15 @@
 
 #include "points_downsampler.h"
 
-#include <rubis_sched/sched.hpp>
+#include <rubis_lib/sched.hpp>
+#include <rubis_msgs/PointCloud2.h>
 
 #define SPIN_PROFILING
 
 #define MAX_MEASUREMENT_RANGE 200.0
 
 ros::Publisher filtered_points_pub;
+ros::Publisher rubis_filtered_points_pub;
 
 // Leaf size of VoxelGrid filter.
 static double voxel_leaf_size = 2.0;
@@ -58,7 +60,7 @@ static void config_callback(const autoware_config_msgs::ConfigVoxelGridFilter::C
   measurement_range = input->measurement_range;
 }
 
-static void scan_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
+inline static void publish_filtered_cloud(const sensor_msgs::PointCloud2::ConstPtr& input)
 {
   pcl::PointCloud<pcl::PointXYZI> scan;
   pcl::fromROSMsg(*input, scan);
@@ -93,6 +95,13 @@ static void scan_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
 
   filtered_msg.header = input->header;
   filtered_points_pub.publish(filtered_msg);
+
+  if(rubis::instance_mode_ && rubis::instance_ != RUBIS_NO_INSTANCE){
+    rubis_msgs::PointCloud2 rubis_filtered_msg;
+    rubis_filtered_msg.msg = filtered_msg;
+    rubis_filtered_msg.instance = rubis::instance_;
+    rubis_filtered_points_pub.publish(rubis_filtered_msg);
+  }
 
   points_downsampler_info_msg.header = input->header;
   points_downsampler_info_msg.filter_name = "voxel_grid_filter";
@@ -132,9 +141,22 @@ static void scan_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
   rubis::sched::task_state_ = TASK_STATE_DONE;
 }
 
+static void scan_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
+{
+  rubis::instance_ = RUBIS_NO_INSTANCE;
+  publish_filtered_cloud(input);
+}
+
+static void rubis_scan_callback(const rubis_msgs::PointCloud2::ConstPtr& _input)
+{
+  sensor_msgs::PointCloud2::ConstPtr input = boost::make_shared<const sensor_msgs::PointCloud2>(_input->msg);
+  rubis::instance_ = _input->instance;
+  publish_filtered_cloud(input);
+}
+
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "voxel_grid_filter");
+  ros::init(argc, argv, "rubis_voxel_grid_filter");
 
   ros::NodeHandle nh;
   ros::NodeHandle private_nh("~");
@@ -160,13 +182,15 @@ int main(int argc, char** argv)
   }
   private_nh.param<double>("measurement_range", measurement_range, MAX_MEASUREMENT_RANGE);
 
-  private_nh.param<int>("/voxel_grid_filter/task_scheduling_flag", task_scheduling_flag, 0);
-  private_nh.param<int>("/voxel_grid_filter/task_profiling_flag", task_profiling_flag, 0);
-  private_nh.param<std::string>("/voxel_grid_filter/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/voxel_grid_filter.csv");
-  private_nh.param<int>("/voxel_grid_filter/rate", rate, 10);
-  private_nh.param("/voxel_grid_filter/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
-  private_nh.param("/voxel_grid_filter/task_execution_time", task_execution_time, (double)10);
-  private_nh.param("/voxel_grid_filter/task_relative_deadline", task_relative_deadline, (double)10);
+  std::string node_name = ros::this_node::getName();
+  private_nh.param<int>(node_name+"/task_scheduling_flag", task_scheduling_flag, 0);
+  private_nh.param<int>(node_name+"/task_profiling_flag", task_profiling_flag, 0);
+  private_nh.param<std::string>(node_name+"/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/voxel_grid_filter.csv");
+  private_nh.param<int>(node_name+"/rate", rate, 10);
+  private_nh.param(node_name+"/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
+  private_nh.param(node_name+"/task_execution_time", task_execution_time, (double)10);
+  private_nh.param(node_name+"/task_relative_deadline", task_relative_deadline, (double)10);
+  private_nh.param<int>(node_name+"/instance_mode", rubis::instance_mode_, 0);
 
   /* For Task scheduling */
   if(task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
@@ -174,11 +198,17 @@ int main(int argc, char** argv)
 
   // Publishers
   filtered_points_pub = nh.advertise<sensor_msgs::PointCloud2>("/filtered_points", 10);
+  if(rubis::instance_mode_)
+    rubis_filtered_points_pub = nh.advertise<rubis_msgs::PointCloud2>("/rubis_filtered_points", 10);
   points_downsampler_info_pub = nh.advertise<points_downsampler::PointsDownsamplerInfo>("/points_downsampler_info", 1000);
 
   // Subscribers
   ros::Subscriber config_sub = nh.subscribe("config/voxel_grid_filter", 10, config_callback);
-  ros::Subscriber scan_sub = nh.subscribe(POINTS_TOPIC, 10, scan_callback);
+  // ros::Subscriber scan_sub = nh.subscribe(POINTS_TOPIC, 10, scan_callback);
+  ros::Subscriber scan_sub;
+  
+  if(rubis::instance_mode_) scan_sub = nh.subscribe("/rubis_"+POINTS_TOPIC, 10, rubis_scan_callback);
+  else scan_sub = nh.subscribe(POINTS_TOPIC, 10, scan_callback);
 
   /*  RT Scheduling setup  */
   // ros::Subscriber config_sub = nh.subscribe("config/voxel_grid_filter", 1, config_callback); // origin 10
@@ -206,7 +236,7 @@ int main(int argc, char** argv)
 
       ros::spinOnce();
 
-      if(task_profiling_flag) rubis::sched::stop_task_profiling(rubis::sched::task_state_);
+      if(task_profiling_flag) rubis::sched::stop_task_profiling(rubis::instance_, rubis::sched::task_state_);
       if(rubis::sched::task_state_ == TASK_STATE_DONE){        
         if(task_scheduling_flag) rubis::sched::yield_task_scheduling();        
         rubis::sched::task_state_ = TASK_STATE_READY;

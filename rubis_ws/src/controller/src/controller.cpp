@@ -57,9 +57,21 @@ inline void calculate_linear_acceleration(){ // Linear Control
     return;
 }
 
+inline void calculate_steering_wheel_angle(){
+    #ifdef SVL
+    svl_steering_angle_ = steering_angle_;
+    #endif
+    
+    #ifdef IONIC
+    ionic_steering_angle_ = steering_angle_;
+    #endif
+
+    return;
+}
+
 inline void send_control_signal(){
     calculate_linear_acceleration();
-
+    calculate_steering_wheel_angle();
     // TODO: Send control signal to interface
 
     #ifdef SVL
@@ -108,7 +120,7 @@ void svl_twist_cmd_callback(const nav_msgs::Odometry::ConstPtr& msg){
     svl_twist_.twist = msg->twist.twist;
     current_velocity_ = svl_twist_.twist.linear.x;
     process_variable_ = current_velocity_;
-    printf("current_velocity_ = %f\n", current_velocity_);
+    // printf("current_velocity_ = %f\n", current_velocity_);
 }
 #endif
 
@@ -146,6 +158,7 @@ int main(int argc, char* argv[]){
 
     #ifdef DEBUG
     nh.param("/controller/set_point_", set_point_, (float)1.0);
+    nh.param("/controller/steering_angle_", steering_angle_, (float)30.0);
     #else
     sub_ctrl_cmd_ = nh.subscribe("/ctrl_cmd", 1, ctrl_callback);
     #endif

@@ -17,7 +17,7 @@
 #include "op_motion_predictor_core.h"
 #include "op_planner/MappingHelpers.h"
 #include "op_ros_helpers/op_ROSHelpers.h"
-#include <rubis_sched/sched.hpp>
+#include <rubis_lib/sched.hpp>
 
 namespace MotionPredictorNS
 {
@@ -635,7 +635,7 @@ void MotionPrediction::MainLoop()
       UtilityHNS::UtilityH::GetTickCount(m_VisualizationTimer);
     }
 
-    if(task_profiling_flag) rubis::sched::stop_task_profiling(rubis::sched::task_state_);
+    if(task_profiling_flag) rubis::sched::stop_task_profiling(0, rubis::sched::task_state_);
 
     if(rubis::sched::is_task_ready_ == TASK_READY && rubis::sched::task_state_ == TASK_STATE_DONE){
       if(task_scheduling_flag) rubis::sched::yield_task_scheduling();

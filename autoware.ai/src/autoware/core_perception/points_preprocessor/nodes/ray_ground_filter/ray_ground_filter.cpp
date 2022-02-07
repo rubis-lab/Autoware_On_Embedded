@@ -37,9 +37,8 @@
 
 #include "points_preprocessor/ray_ground_filter/ray_ground_filter.h"
 
-#include <rubis_sched/sched.hpp>
-
-#include <rubis_sched/sched.hpp>
+#include <rubis_msgs/PointCloud2.h>
+#include <rubis_lib/sched.hpp>
 
 #define SPIN_PROFILING
 
@@ -326,8 +325,9 @@ void RayGroundFilter::RemovePointsUpTo(const pcl::PointCloud<pcl::PointXYZI>::Pt
   extractor.filter(*out_filtered_cloud_ptr);
 }
 
-void RayGroundFilter::CloudCallback(const sensor_msgs::PointCloud2ConstPtr& in_sensor_cloud)
-{
+
+
+inline void RayGroundFilter::PublishFilteredClouds(const sensor_msgs::PointCloud2ConstPtr& in_sensor_cloud){
   health_checker_ptr_->NODE_ACTIVATE();
   health_checker_ptr_->CHECK_RATE("topic_rate_points_raw_slow", 8, 5, 1, "topic points_raw subscribe rate slow.");
 
@@ -379,6 +379,18 @@ void RayGroundFilter::CloudCallback(const sensor_msgs::PointCloud2ConstPtr& in_s
 
   if(rubis::sched::is_task_ready_ == TASK_NOT_READY) rubis::sched::init_task();
   rubis::sched::task_state_ = TASK_STATE_DONE;
+}
+
+void RayGroundFilter::CloudCallback(const sensor_msgs::PointCloud2ConstPtr& in_sensor_cloud)
+{
+  PublishFilteredClouds(in_sensor_cloud); 
+}
+
+
+void RayGroundFilter::RubisCloudCallback(const rubis_msgs::PointCloud2ConstPtr in_rubis_cloud)
+{
+  sensor_msgs::PointCloud2ConstPtr in_sensor_cloud = boost::make_shared<const sensor_msgs::PointCloud2>(in_rubis_cloud->msg);
+  PublishFilteredClouds(in_sensor_cloud);
 }
 
 RayGroundFilter::RayGroundFilter() : node_handle_("~"), tf_listener_(tf_buffer_)
@@ -449,21 +461,25 @@ void RayGroundFilter::Run()
   ROS_INFO("Only Ground Output Point Cloud ground_topic: %s", ground_topic.c_str());
 
   ROS_INFO("Subscribing to... %s", input_point_topic_.c_str());
-  points_node_sub_ = node_handle_.subscribe(input_point_topic_, 1, &RayGroundFilter::CloudCallback, this);
 
   config_node_sub_ =
       node_handle_.subscribe("/config/ray_ground_filter", 1, &RayGroundFilter::update_config_params, this);
 
   groundless_points_pub_ = node_handle_.advertise<sensor_msgs::PointCloud2>(no_ground_topic, 2);
   ground_points_pub_ = node_handle_.advertise<sensor_msgs::PointCloud2>(ground_topic, 2);
- 
-  node_handle_.param<int>("/ray_ground_filter/task_scheduling_flag", task_scheduling_flag, 0);
-  node_handle_.param<int>("/ray_ground_filter/task_profiling_flag", task_profiling_flag, 0);
-  node_handle_.param<std::string>("/ray_ground_filter/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/ray_ground_filter.csv");
-  node_handle_.param<int>("/ray_ground_filter/rate", rate, 10);
-  node_handle_.param("/ray_ground_filter/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
-  node_handle_.param("/ray_ground_filter/task_execution_time", task_execution_time, (double)10);
-  node_handle_.param("/ray_ground_filter/task_relative_deadline", task_relative_deadline, (double)10);
+  
+  std::string node_name = ros::this_node::getName();
+  node_handle_.param<int>(node_name+"/task_scheduling_flag", task_scheduling_flag, 0);
+  node_handle_.param<int>(node_name+"/task_profiling_flag", task_profiling_flag, 0);
+  node_handle_.param<std::string>(node_name+"/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/ray_ground_filter.csv");
+  node_handle_.param<int>(node_name+"/rate", rate, 10);
+  node_handle_.param(node_name+"/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
+  node_handle_.param(node_name+"/task_execution_time", task_execution_time, (double)10);
+  node_handle_.param(node_name+"/task_relative_deadline", task_relative_deadline, (double)10);
+  node_handle_.param<int>(node_name+"/instance_mode", instance_mode_, 0);
+
+  if(instance_mode_) points_node_sub_ = node_handle_.subscribe("/rubis_"+input_point_topic_.substr(1), 1, &RayGroundFilter::RubisCloudCallback, this);
+  else points_node_sub_ = node_handle_.subscribe(input_point_topic_, 1, &RayGroundFilter::CloudCallback, this);
 
   ROS_INFO("Ready");
 
@@ -491,7 +507,7 @@ void RayGroundFilter::Run()
 
       ros::spinOnce();
 
-      if(task_profiling_flag) rubis::sched::stop_task_profiling(rubis::sched::task_state_);
+      if(task_profiling_flag) rubis::sched::stop_task_profiling(0, rubis::sched::task_state_);
       if(rubis::sched::task_state_ == TASK_STATE_DONE){
         if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
         rubis::sched::task_state_ = TASK_STATE_READY;

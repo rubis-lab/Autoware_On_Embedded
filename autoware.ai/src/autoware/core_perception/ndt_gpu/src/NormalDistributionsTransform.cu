@@ -3,7 +3,7 @@
 #include <cmath>
 #include <iostream>
 #include <pcl/common/transforms.h>
-#include "rubis_sched/sched.hpp"
+#include "rubis_lib/sched.hpp"
 
 using namespace rubis::sched;
 

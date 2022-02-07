@@ -21,7 +21,7 @@
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "ray_ground_filter");
+  ros::init(argc, argv, "rubis_ray_ground_filter");
   RayGroundFilter app;
 
   app.Run();

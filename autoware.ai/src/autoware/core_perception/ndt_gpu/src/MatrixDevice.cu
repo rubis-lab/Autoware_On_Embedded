@@ -1,6 +1,6 @@
 #include "ndt_gpu/MatrixDevice.h"
 #include "ndt_gpu/debug.h"
-#include "rubis_sched/sched.hpp"
+#include "rubis_lib/sched.hpp"
 
 namespace gpu {
 MatrixDevice::MatrixDevice(int rows, int cols) {

@@ -3,7 +3,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
-#include "rubis_sched/sched.hpp"
+#include "rubis_lib/sched.hpp"
 
 namespace gpu {
 

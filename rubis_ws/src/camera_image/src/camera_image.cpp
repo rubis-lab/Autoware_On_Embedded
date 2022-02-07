@@ -2,7 +2,7 @@
 #include "opencv2/opencv.hpp"
 #include "image_transport/image_transport.h"
 #include "cv_bridge/cv_bridge.h"
-#include "rubis_sched/sched.hpp"
+#include "rubis_lib/sched.hpp"
 
 // argv[0] : camera_id, argv[1] : frequency
 
@@ -117,7 +117,7 @@ void CameraImage::sendImage(){
         // int ckey = cv::waitKey(1);
         // if(ckey == 27)break;
 
-        if(task_profiling_flag) rubis::sched::stop_task_profiling(rubis::sched::task_state_);
+        if(task_profiling_flag) rubis::sched::stop_task_profiling(0, rubis::sched::task_state_);
 
         if(rubis::sched::task_state_ == TASK_STATE_DONE){            
             if(task_scheduling_flag) rubis::sched::yield_task_scheduling();

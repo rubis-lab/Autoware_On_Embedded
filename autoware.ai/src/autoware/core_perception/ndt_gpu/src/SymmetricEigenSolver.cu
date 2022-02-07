@@ -1,6 +1,6 @@
 #include "ndt_gpu/SymmetricEigenSolver.h"
 #include "ndt_gpu/debug.h"
-#include "rubis_sched/sched.hpp"
+#include "rubis_lib/sched.hpp"
 
 namespace gpu {
 

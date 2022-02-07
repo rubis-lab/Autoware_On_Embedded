@@ -1,0 +1,4 @@
+<launch>
+    <rosparam file="$(find rubis_logger)/cfg/rubis_logger.yaml" />
+    <node pkg="rubis_logger" type="rubis_logger" name="rubis_logger" clear_params="true" output="screen" />
+</launch>

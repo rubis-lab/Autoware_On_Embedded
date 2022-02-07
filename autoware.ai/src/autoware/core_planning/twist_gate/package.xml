@@ -20,5 +20,6 @@
   <depend>std_msgs</depend>
   <depend>tablet_socket_msgs</depend>
   <depend>ros_observer</depend>
-  <depend>rubis_sched</depend>
+  <depend>rubis_lib</depend>
+  <depend>rubis_msgs</depend>
 </package>

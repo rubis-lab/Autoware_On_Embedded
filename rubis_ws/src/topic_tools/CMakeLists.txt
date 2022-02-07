@@ -5,7 +5,7 @@ if(NOT WIN32)
   set_directory_properties(PROPERTIES COMPILE_OPTIONS "-Wall;-Wextra")
 endif()
 
-find_package(catkin COMPONENTS cpp_common message_generation rosconsole roscpp rostime std_msgs xmlrpcpp rubis_sched)
+find_package(catkin COMPONENTS cpp_common message_generation rosconsole roscpp rostime std_msgs xmlrpcpp rubis_lib)
 catkin_python_setup()
 
 include_directories(include)

@@ -16,7 +16,7 @@
 
 
 #include <imm_ukf_pda/imm_ukf_pda.h>
-#include <rubis_sched/sched.hpp>
+#include <rubis_lib/sched.hpp>
 
 ImmUkfPda::ImmUkfPda()
   : target_id_(0)

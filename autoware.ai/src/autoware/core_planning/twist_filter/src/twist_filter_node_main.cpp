@@ -15,7 +15,8 @@
  */
 
 #include "twist_filter/twist_filter_node.h"
-#include <rubis_sched/sched.hpp>
+
+extern unsigned long rubis::instance_;
 
 int main(int argc, char** argv)
 {
@@ -65,7 +66,9 @@ int main(int argc, char** argv)
 
       ros::spinOnce();
 
-      if(task_profiling_flag) rubis::sched::stop_task_profiling(rubis::sched::task_state_);
+      if(task_profiling_flag){
+        rubis::sched::stop_task_profiling(rubis::instance_, rubis::sched::task_state_);
+      }
 
       if(rubis::sched::task_state_ == TASK_STATE_DONE){
         if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
