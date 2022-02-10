@@ -85,6 +85,7 @@ class CanDataReadWrite{
         int hardware_id;
         int circuit_id;
         int bit_rate;
+        bool is_debug;
 
         /* Data handling */
         int data_pub_flag;
@@ -156,7 +157,7 @@ class CanDataReadWrite{
 
     public:
         // void init_CanDataReadWrite();
-        void init_CanDataReadWrite(int _hardware_id, int _circuit_id, int _bit_rate);
+        void init_CanDataReadWrite(int _hardware_id, int _circuit_id, int _bit_rate, bool _is_debug);
         //functions for read 
         inline int SIGNEX(unsigned int _value, unsigned int _size);
 
