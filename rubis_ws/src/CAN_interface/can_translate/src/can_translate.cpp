@@ -22,7 +22,6 @@ void CanDataReadWrite::init_CanDataReadWrite(int _hardware_id, int _circuit_id, 
     this->prev_alive = 0;
     this->read_ctrl_flag = 0;
 
-
     /* Data handling */
     this->data_pub_flag = 0;
 
@@ -113,7 +112,6 @@ void CanDataReadWrite::write_input_data_to_can_frame(){
     int16_t offset_applyed_angle;
     uint8_t offset_applyed_fliter_hz;
     uint16_t intput_acceleration;
-
     
     if(this->input_data.set_steering == 0 && this->input_data.set_accel == 0){
         set_accel_steering = 0;
