@@ -155,7 +155,8 @@ class CanDataReadWrite{
         int sensor_steering_speed_len;
 
     public:
-        void init_CanDataReadWrite();
+        // void init_CanDataReadWrite();
+        void init_CanDataReadWrite(int _hardware_id, int _circuit_id, int _bit_rate);
         //functions for read 
         inline int SIGNEX(unsigned int _value, unsigned int _size);
 

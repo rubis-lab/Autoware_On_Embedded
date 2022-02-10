@@ -2,20 +2,27 @@
 #include "can_translate/can_translate.hpp"
 #include "geometry_msgs/TwistStamped.h"
 
+#define HARDWARE_ID 11732
+#define CIRCUIT_ID 0
+#define BIT_RATE 500000
+
 class CanDataReadWrite candata;
 AS::CAN::KvaserCan can_reader, can_writer;
 ros::Publisher pub_translated_data;
 
-int hardware_id = 11732;
+int hardware_id = 0;
 int circuit_id = 0;
-int bit_rate = 500000;
+int bit_rate = 0;
 
-void CanDataReadWrite::init_CanDataReadWrite(){
+void CanDataReadWrite::init_CanDataReadWrite(int _hardware_id, int _circuit_id, int _bit_rate){
 
     /* kvaser setting */
-    this->hardware_id = hardware_id;
-    this->circuit_id = circuit_id;
-    this->bit_rate = bit_rate;
+    this->hardware_id = _hardware_id;
+    // ROS_INFO("hardware, %d\n", _hardware_id);
+    this->circuit_id = _circuit_id;
+    // ROS_INFO("circuit_id, %d\n", _circuit_id);
+    this->bit_rate = _bit_rate;
+    // ROS_INFO("bit_rate, %d\n",_bit_rate);
         
     this->prev_alive = 0;
     this->read_ctrl_flag = 0;
@@ -305,6 +312,8 @@ void CanDataReadWrite::ctrl_data_callback(const can_data_msgs::Car_ctrl_input::C
     {
         // Open the channel.
         ret = can_writer.open(this->hardware_id, this->circuit_id, this->bit_rate, false);
+        // ret = can_writer.open(11732, 0, 500000, false);
+        ROS_INFO("%d, %d, %d",this->hardware_id, this->circuit_id, this->bit_rate);
 
         if (ret != AS::CAN::ReturnStatuses::OK)
         {
@@ -349,6 +358,7 @@ void can_read()
         if (!can_reader.isOpen())
         {
             ret = can_reader.open(hardware_id, circuit_id, bit_rate, false);
+            // ret = can_reader.open(HARDWARE_ID, CIRCUIT_ID, BIT_RATE, false);
 
             if (ret != AS::CAN::ReturnStatuses::OK)
             {
@@ -407,8 +417,12 @@ int main(int argc, char* argv[]){
     
     sub_can_ctrl_data = nh.subscribe("/car_ctrl_input", 1, &CanDataReadWrite::ctrl_data_callback, &candata);
     pub_translated_data = nh.advertise<can_data_msgs::Car_ctrl_output>("/car_ctrl_output", 0);
+
+    nh.param<int>("/can_translate/hardware_id", hardware_id, 0);
+    nh.param<int>("/can_translate/circuit_id", circuit_id, 0);
+    nh.param<int>("/can_translate/bit_rate", bit_rate, 0);
     
-    candata.init_CanDataReadWrite();
+    candata.init_CanDataReadWrite(hardware_id, circuit_id, bit_rate);
 
     ros::AsyncSpinner spinner(1);
     
@@ -422,7 +436,7 @@ int main(int argc, char* argv[]){
     ROS_INFO("bit_rate : %d",bit_rate);
 
     // Open CAN reader channel
-    ret = can_reader.open(hardware_id, circuit_id, bit_rate, false);
+    ret = can_reader.open(HARDWARE_ID, CIRCUIT_ID, BIT_RATE, false);
     
     if (ret == AS::CAN::ReturnStatuses::OK)
     {

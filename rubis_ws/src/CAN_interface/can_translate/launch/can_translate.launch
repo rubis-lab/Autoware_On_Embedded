@@ -1,0 +1,5 @@
+<launch>
+    <rosparam command="load" file="$(find can_translate)/cfg/can_translate.yaml" />
+    <node pkg="can_translate" type="can_translate" name="can_translate" clear_params="true" output="screen" />
+    
+</launch>
