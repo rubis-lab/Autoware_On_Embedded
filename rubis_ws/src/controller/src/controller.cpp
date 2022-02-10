@@ -3,9 +3,11 @@
 #include "geometry_msgs/TwistStamped.h"
 #include "autoware_msgs/VehicleCmd.h"
 
-#define SVL
-// #define IONIC
+// #define SVL
+#define IONIC
 #include <nav_msgs/Odometry.h>
+#include <can_data_msgs/Car_ctrl_input.h>
+#include <can_data_msgs/Car_ctrl_output.h>
 #define DEBUG
 
 #ifndef IONIC
