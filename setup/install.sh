@@ -94,6 +94,7 @@ fi
 
 # Build other files
 sudo apt-get install -y ros-melodic-rosbridge-server net-tools
+sudo apt-get install -y ros-melodic-can-msgs
 
 # Python packages
 pip3 install --upgrade setuptools pip
