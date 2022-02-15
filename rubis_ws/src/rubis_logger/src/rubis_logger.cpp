@@ -77,14 +77,15 @@ void debugcallback() {
 
 void writelogcallback() {
     string log_instance = "";
+    log_instance += ("-------------------------------------------------------\n");
     log_instance += "time: ";
     log_instance += to_string(u_timestamp());
     log_instance += "\n";
-    for(int i=0; i<target_topics_.size(); i++) {
-        log_instance += "topic name: " + target_topics_[i] + "\n";
-        
-    }
     
+    for(int i=0; i<target_topics_.size(); i++) {
+        log_instance += log_topics_[target_topics_[i]];
+    }
+    log_instance += ("-------------------------------------------------------\n");
     if(logfile_.is_open()) {
         logfile_ << log_instance;
     }
@@ -97,9 +98,9 @@ void sub_ctrl_cmd(const autoware_msgs::ControlCommandStampedConstPtr& msg) {
     
     string log_topic = "";
 
-    log_topic += "target_topic: /ctrl_cmd\n"
-    log_topic += "ctrl_cmd.cmd.linear_velocity: " + msg.linear_velocity + "\n";
-    log_topic += "ctrl_cmd.cmd.steering_angle: " + msg.steering_angle + "\n";
+    log_topic += "target_topic: /ctrl_cmd\n";
+    log_topic += "ctrl_cmd.cmd.linear_velocity: " + to_string(msg->cmd.linear_velocity) + "\n";
+    log_topic += "ctrl_cmd.cmd.steering_angle: " + to_string(msg->cmd.steering_angle) + "\n";
 
     log_topics_["/ctrl_cmd"] = log_topic;
 }
@@ -109,15 +110,22 @@ void sub_odom(const nav_msgs::Odometry::ConstPtr& msg) {
 
     string log_topic = "";
 
-    log_topic += "target_topic: /odom\n"
-    log_topic += "odom.twist.twist.linear.x: " + msg.twist.twist.linear.x + "\n";
-    log_topic += "odom.twist.twist.angular.z: " + msg.twist.twist.angular.z + "\n";
+    log_topic += "target_topic: /odom\n";
+    log_topic += "odom.twist.twist.linear.x: " + to_string(msg->twist.twist.linear.x) + "\n";       //m/s
+    log_topic += "odom.twist.twist.angular.z: " + to_string(msg->twist.twist.angular.z) + "\n";     //radian
 
     log_topics_["/odom"] = log_topic;
 }
 
-void sub_vehicle_ctrl_cmd(const autoware_msgs::VehicleCmd& msg) {
-    log_topics_["/vehicle_ctrl_cmd"] = "";
+void sub_vehicle_cmd_test(const autoware_msgs::VehicleCmd::ConstPtr& msg) {
+
+    string log_topic = "";
+
+    log_topic += "target_topic: /vehicle_cmd_test\n";
+    log_topic += "vehicle_cmd_test.ctrl_cmd.linear_acceleration: " + to_string(msg->ctrl_cmd.linear_acceleration) + "\n";       //m/s
+    log_topic += "vehicle_cmd_test.ctrl_cmd.steering_angle: " + to_string(msg->ctrl_cmd.steering_angle) + "\n";       //m/s
+
+    log_topics_["/vehicle_cmd_test"] = log_topic;
 }
 
 //IONIC
@@ -127,7 +135,7 @@ void sub_car_ctrl_output(const can_data_msgs::Car_ctrl_output::ConstPtr& msg) {
 }
 
 // ros -> car
-void sub_car_ctrl_input(const can_data_msgs::Car_ctrl_input& msg) {
+void sub_car_ctrl_input(const can_data_msgs::Car_ctrl_input::ConstPtr& msg) {
     log_topics_["/car_ctrl_input"] = "";
 
 }
@@ -159,32 +167,27 @@ int main(int argc, char* argv[]){
 
     // svl_pub_vehicle_cmd_ = nh.advertise<autoware_msgs::VehicleCmd>("/vehicle_cmd_test", 1);
     for(int i=0; i<target_topics_.size(); i++) {
-        switch(target_topics_[i]) {
-            case "/ctrl_cmd":
-                sub_topics_.push_back(nh.subscribe(target_topics_[i], 1, sub_ctrl_cmd));
-                log_topics_["/ctrl_cmd"] = "";
-                break;
-            case "/odom":
-                sub_topics_.push_back(nh.subscribe(target_topics_[i], 1, sub_odom));
-                log_topics_["/odom"] = "";
-                break;
-            case "/vehicle_cmd_test":
-                sub_topics_.push_back(nh.subscribe(target_topics_[i], 1, sub_vehicle_ctrl_cmd));
-                log_topics_["/vehicle_cmd_test"] = "";
-                break;
-            case "/car_ctrl_output":
-                sub_topics_.push_back(nh.subscribe(target_topics_[i], 1, sub_car_ctrl_input));
-                log_topics_["/car_ctrl_output"] = "";
-                break;
-            case "/car_ctrl_input":
-                sub_topics_.push_back(nh.subscribe(target_topics_[i], 1, sub_car_ctrl_output));
-                log_topics_["/car_ctrl_input"] = "";
-                break;
+        if(!target_topics_[i].compare("/ctrl_cmd")) {
+            sub_topics_.push_back(nh.subscribe(target_topics_[i], 1, sub_ctrl_cmd));
+            log_topics_["/ctrl_cmd"] = "";
+        } else if(!target_topics_[i].compare("/odom")) {
+            sub_topics_.push_back(nh.subscribe(target_topics_[i], 1, sub_odom));
+            log_topics_["/odom"] = "";
+        } else if(!target_topics_[i].compare("/vehicle_cmd_test")) {
+            sub_topics_.push_back(nh.subscribe(target_topics_[i], 1, sub_vehicle_cmd_test));
+            log_topics_["/vehicle_cmd_test"] = "";
+        } else if(!target_topics_[i].compare("/car_ctrl_output")) {
+            sub_topics_.push_back(nh.subscribe(target_topics_[i], 1, sub_car_ctrl_input));
+            log_topics_["/car_ctrl_output"] = "";
+        } else if(!target_topics_[i].compare("/car_ctrl_input")) {
+            sub_topics_.push_back(nh.subscribe(target_topics_[i], 1, sub_car_ctrl_output));
+            log_topics_["/car_ctrl_input"] = "";
+        } else {
+            printf("not available topic\n");
         }
-        
     }
 
-    ros::Rate rate(1);
+    ros::Rate rate(10);
 
     while(ros::ok()){
 
