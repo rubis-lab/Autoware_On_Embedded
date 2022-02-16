@@ -17,9 +17,12 @@ static string logfilepath_;
 static ofstream logfile_;
 static int paramtest_;
 static int log_start_;
+static int u_stamp_recent_;
+static int time_small_unit_;
 
 static vector<ros::Subscriber> sub_topics_;
 static map<string, string> log_topics_;
+static map<string, int> log_topics_ok_;
 
 string YYYYMMDDHHmmSS() {
     time_t time_now;
@@ -76,13 +79,25 @@ void debugcallback() {
 }
 
 void writelogcallback() {
+    
+    if(u_timestamp() == u_stamp_recent_) {
+        time_small_unit_ += 1;
+    } else {
+        time_small_unit_ = 0;
+    }
+    u_stamp_recent_ = u_timestamp();
+    
     string log_instance = "";
     log_instance += ("-------------------------------------------------------\n");
     log_instance += "time: ";
-    log_instance += to_string(u_timestamp());
+    log_instance += to_string(u_stamp_recent_);
+    log_instance += "-";
+    log_instance += to_string(time_small_unit_);
     log_instance += "\n";
     
     for(int i=0; i<target_topics_.size(); i++) {
+        if(!log_topics_[target_topics_[i]].compare(""))
+            return;
         log_instance += log_topics_[target_topics_[i]];
     }
     log_instance += ("-------------------------------------------------------\n");
