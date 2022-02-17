@@ -146,13 +146,27 @@ void sub_vehicle_cmd_test(const autoware_msgs::VehicleCmd::ConstPtr& msg) {
 //IONIC
 // car -> ros
 void sub_car_ctrl_output(const can_data_msgs::Car_ctrl_output::ConstPtr& msg) {
-    log_topics_["/car_ctrl_output"] = "";
+
+    string log_topic = "";
+
+    log_topic += "target_topic: /car_ctrl_output\n";
+    log_topic += "car_ctrl_output.real_speed: " + to_string(msg->real_speed) + "\n";       //m/s
+    log_topic += "car_ctrl_output.steering_angle: " + to_string(msg->steering_angle) + "\n";       // radian
+
+    log_topics_["/car_ctrl_output"] = log_topic;
+    
 }
 
 // ros -> car
 void sub_car_ctrl_input(const can_data_msgs::Car_ctrl_input::ConstPtr& msg) {
-    log_topics_["/car_ctrl_input"] = "";
+    
+    string log_topic = "";
 
+    log_topic += "target_topic: /car_ctrl_input\n";
+    log_topic += "car_ctrl_input.acceleration: " + to_string(msg->acceleration) + "\n";       //m/s
+    log_topic += "car_ctrl_input.steering_angle: " + to_string(msg->steering_angle) + "\n";       // radian
+
+    log_topics_["/car_ctrl_input"] = log_topic;
 }
 
 int main(int argc, char* argv[]){
@@ -192,10 +206,10 @@ int main(int argc, char* argv[]){
             sub_topics_.push_back(nh.subscribe(target_topics_[i], 1, sub_vehicle_cmd_test));
             log_topics_["/vehicle_cmd_test"] = "";
         } else if(!target_topics_[i].compare("/car_ctrl_output")) {
-            sub_topics_.push_back(nh.subscribe(target_topics_[i], 1, sub_car_ctrl_input));
+            sub_topics_.push_back(nh.subscribe(target_topics_[i], 1, sub_car_ctrl_output));
             log_topics_["/car_ctrl_output"] = "";
         } else if(!target_topics_[i].compare("/car_ctrl_input")) {
-            sub_topics_.push_back(nh.subscribe(target_topics_[i], 1, sub_car_ctrl_output));
+            sub_topics_.push_back(nh.subscribe(target_topics_[i], 1, sub_car_ctrl_input));
             log_topics_["/car_ctrl_input"] = "";
         } else {
             printf("not available topic\n");

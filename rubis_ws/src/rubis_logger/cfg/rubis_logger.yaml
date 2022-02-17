@@ -1,7 +1,7 @@
 /rubis_logger/target_topics :
   - "/ctrl_cmd"
-  - "/odom"
-  - "/vehicle_cmd_test"
+  - "/car_ctrl_output"
+  - "/car_ctrl_input"
 
 paramtest: 2020
 logdirpath: "/home/akyeast/rubis_ws/log/"
