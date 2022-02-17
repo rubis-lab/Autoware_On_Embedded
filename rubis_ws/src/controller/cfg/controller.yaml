@@ -9,3 +9,5 @@
 
 /controller/set_point_ : 5.0  #m/s
 /controller/steering_angle_ : 0.0   #rad
+
+/controller/steering_angle_ratio_ : 12.99932

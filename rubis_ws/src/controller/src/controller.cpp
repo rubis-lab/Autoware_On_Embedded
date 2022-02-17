@@ -22,6 +22,7 @@ static float max_acc_, min_acc_;
 static float current_velocity_; // m/s
 static float set_point_, process_variable_, output_; // m/s^2
 static float steering_angle_;
+static float steering_angle_ratio_;
 static std_msgs::Header header_;
 ros::Subscriber sub_ctrl_cmd_;
 
@@ -65,7 +66,7 @@ inline void calculate_steering_wheel_angle(){
     #endif
     
     #ifdef IONIC
-    ionic_steering_angle_ = steering_angle_;
+    ionic_steering_angle_ = steering_angle_ * steering_angle_ratio_;
     #endif
 
     return;
@@ -96,8 +97,8 @@ inline void send_control_signal(){
     can_data_msgs::Car_ctrl_input msg;
     msg.header = header_;
     msg.set_accel = 1;
-    msg.set_steering = 0; // TODO
-    msg.angle_filter_hz = 0;
+    msg.set_steering = 1; // TODO
+    msg.angle_filter_hz = 0.1;
     msg.steering_angle = ionic_steering_angle_; // TODO
     msg.acceleration = output_;
     pub_vehicle_cmd_.publish(msg);
@@ -171,6 +172,8 @@ int main(int argc, char* argv[]){
     #endif
 
     #ifdef IONIC
+    nh.param("/controller/steering_angle_ratio_", steering_angle_ratio_, (float)12.99932);
+
     pub_vehicle_cmd_ = nh.advertise<can_data_msgs::Car_ctrl_input>("/car_ctrl_input", 1);
     sub_ctrl_output_ = nh.subscribe("/car_ctrl_output", 1, ctrl_output_callback);
     #endif
