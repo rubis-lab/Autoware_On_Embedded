@@ -159,12 +159,14 @@ int main(int argc, char* argv[]){
 
     nh.param("/controller/dt", dt_, (float)10.0); //ms
 
-    #ifdef DEBUG
-    nh.param("/controller/set_point_", set_point_, (float)1.0);
-    nh.param("/controller/steering_angle_", steering_angle_, (float)30.0);
-    #else
+    // #ifdef DEBUG
+    // nh.param("/controller/set_point_", set_point_, (float)1.0);
+    // nh.param("/controller/steering_angle_", steering_angle_, (float)30.0);
+    // #else
+    // sub_ctrl_cmd_ = nh.subscribe("/ctrl_cmd", 1, ctrl_callback);
+    // #endif
+
     sub_ctrl_cmd_ = nh.subscribe("/ctrl_cmd", 1, ctrl_callback);
-    #endif
 
     #ifdef SVL
     svl_pub_vehicle_cmd_ = nh.advertise<autoware_msgs::VehicleCmd>("/vehicle_cmd_test", 1);
