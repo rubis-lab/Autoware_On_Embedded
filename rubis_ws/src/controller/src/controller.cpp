@@ -9,8 +9,6 @@
 #include <nav_msgs/Odometry.h>
 #include <can_data_msgs/Car_ctrl_input.h>
 #include <can_data_msgs/Car_ctrl_output.h>
-#include <can_data_msgs/Car_ctrl_input.h>
-#include <can_data_msgs/Car_ctrl_output.h>
 #include <std_msgs/Header.h>
 
 #define DEBUG
