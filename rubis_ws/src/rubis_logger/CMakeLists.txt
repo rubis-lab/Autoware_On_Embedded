@@ -10,6 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
   can_data_msgs
   std_msgs
   nav_msgs
+  rubis_logger_msgs
 )
 
 catkin_package(

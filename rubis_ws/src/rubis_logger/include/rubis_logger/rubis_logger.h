@@ -18,3 +18,4 @@
 #include "autoware_msgs/VehicleCmd.h"
 #include <can_data_msgs/Car_ctrl_input.h>
 #include <can_data_msgs/Car_ctrl_output.h>
+#include <rubis_logger_msgs/rubis_log_handler.h>

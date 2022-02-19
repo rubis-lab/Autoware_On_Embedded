@@ -3,18 +3,17 @@
 #include "geometry_msgs/TwistStamped.h"
 #include "autoware_msgs/VehicleCmd.h"
 
-// #define SVL
-#define IONIC
+#define SVL
+// #define IONIC
+
 #include <nav_msgs/Odometry.h>
 #include <can_data_msgs/Car_ctrl_input.h>
 #include <can_data_msgs/Car_ctrl_output.h>
-#define DEBUG
-
-#ifndef IONIC
 #include <can_data_msgs/Car_ctrl_input.h>
 #include <can_data_msgs/Car_ctrl_output.h>
 #include <std_msgs/Header.h>
-#endif
+
+#define DEBUG
 
 static float dt_;
 static float kp_, ki_, kd_;
@@ -79,11 +78,13 @@ inline void send_control_signal(){
 
     #ifdef SVL
     autoware_msgs::VehicleCmd msg;
-    msg.ctrl_cmd.linear_velocity = current_velocity_; // TODO: (for simulation) change to goal velocity
+    // msg.ctrl_cmd.linear_velocity = current_velocity_; // TODO: (for simulation) change to goal velocity
+    msg.ctrl_cmd.linear_velocity = set_point_;
+    printf("befor publish, output_ = %f\n", output_);
     msg.ctrl_cmd.linear_acceleration = output_;
     msg.ctrl_cmd.steering_angle = svl_steering_angle_;
-    msg.twist_cmd = svl_twist_; // twist_cmd
-    msg.twist_cmd.twist.linear.x += output_ * dt_; // TODO: (for simulation) real current velocity + caclculated acccleration * dt -> 
+    // msg.twist_cmd = svl_twist_; // twist_cmd
+    // msg.twist_cmd.twist.linear.x += output_ * dt_; // TODO: (for simulation) real current velocity + caclculated acccleration * dt -> 
     if(output_ < 0) {
         msg.gear_cmd.gear=0;
     } else {

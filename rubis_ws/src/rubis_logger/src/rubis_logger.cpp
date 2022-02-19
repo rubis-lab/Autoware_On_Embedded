@@ -19,6 +19,7 @@ static int paramtest_;
 static int log_start_;
 static int u_stamp_recent_;
 static int time_small_unit_;
+static int logger_rate_;
 
 static vector<ros::Subscriber> sub_topics_;
 static map<string, string> log_topics_;
@@ -69,6 +70,29 @@ int u_timestamp() {
     return time_now;
 }
 
+void writelogheader() {
+    u_stamp_recent_ = u_timestamp();
+    
+    string log_instance = "";
+    log_instance += ("-------------------------------------------------------\n");
+    log_instance += "start_time: ";
+    log_instance += to_string(u_stamp_recent_);
+    log_instance += "\n";
+    log_instance += "number_target_topics: ";
+    log_instance += to_string(target_topics_.size());
+    log_instance += "\n";
+    for(int i=0; i<target_topics_.size(); i++) {
+        log_instance += "topic: ";
+        log_instance += target_topics_[i];
+        log_instance += "\n";
+    }
+
+    log_instance += ("-------------------------------------------------------\n");
+    if(logfile_.is_open()) {
+        logfile_ << log_instance;
+    }
+    return;
+}
 void debugcallback() {
     printf("log topics: ");
     for(int i=0; i<target_topics_.size(); i++) {
@@ -169,13 +193,26 @@ void sub_car_ctrl_input(const can_data_msgs::Car_ctrl_input::ConstPtr& msg) {
     log_topics_["/car_ctrl_input"] = log_topic;
 }
 
+void sub_rubis_log_handler(const rubis_logger_msgs::rubis_log_handler::ConstPtr& msg) {
+    
+    string log_topic = "";
+
+    log_topic += "target_topic: /rubis_log_handler\n";
+    log_topic += "rubis_log_handler.writeon: " + to_string(msg->writeon) + "\n";       //1 0
+    // log_topic += "rubis_log_handler.teststart: " + to_string(msg->teststart) + "\n";       //1 0
+    // log_topic += "rubis_log_handler.testend: " + to_string(msg->testend) + "\n";       //1 0
+
+    log_topics_["/rubis_log_handler"] = log_topic;
+}
+
 int main(int argc, char* argv[]){
     ros::init(argc, argv, "rubis_logger");
     ros::NodeHandle nh;
 
-    nh.param("/rubis_logger/target_topics", target_topics_, vector<string>());
+    nh.param("target_topics", target_topics_, vector<string>());
     nh.param("paramtest", paramtest_, (int)1010);
     nh.param("logdirpath", logdirpath_, (string)"");
+    nh.param("logger_rate", logger_rate_, (int)10);
 
     int u_ts = u_timestamp();
     string ts = YYYYMMDDHHmmSS();
@@ -211,12 +248,17 @@ int main(int argc, char* argv[]){
         } else if(!target_topics_[i].compare("/car_ctrl_input")) {
             sub_topics_.push_back(nh.subscribe(target_topics_[i], 1, sub_car_ctrl_input));
             log_topics_["/car_ctrl_input"] = "";
+        } else if(!target_topics_[i].compare("/rubis_log_handler")) {
+            sub_topics_.push_back(nh.subscribe(target_topics_[i], 1, sub_rubis_log_handler));
+            log_topics_["/rubis_log_handler"] = "";
         } else {
             printf("not available topic\n");
         }
     }
 
-    ros::Rate rate(10);
+    writelogheader();
+
+    ros::Rate rate(logger_rate_);
 
     while(ros::ok()){
 

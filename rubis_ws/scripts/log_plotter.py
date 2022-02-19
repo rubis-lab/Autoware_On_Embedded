@@ -9,12 +9,71 @@ from operator import itemgetter
 
 logdir = '/home/akyeast/rubis_ws/log/'
 outputdir = '/home/akyeast/rubis_ws/result/'
-logfile_name = ''
+logfile_name = 'test'
 outputfile_name = ''
 logfile_path = ''
 outputfile_path = ''
 
-datas = {}
+
+logs = {}
+    # {
+    #     'times': [0.0, 0.01, 0.02],
+    #     'topics': ['/ctrl_cmd', '/odom', '/vehicle_cmd_test', '/rubis_log_handler'],
+    #     '/ctrl_cmd': {
+    #         0.0: {
+    #             'ctrl_cmd.cmd.linear_velocity': '10.000000',
+    #             'ctrl_cmd.cmd.steering_angle': '0.000000'
+    #         },
+    #         0.01: {
+    #             'ctrl_cmd.cmd.linear_velocity': '10.000000',
+    #             'ctrl_cmd.cmd.steering_angle': '0.000000'
+    #         },
+    #         0.02: {
+    #             'ctrl_cmd.cmd.linear_velocity': '10.000000',
+    #             'ctrl_cmd.cmd.steering_angle': '0.000000'
+    #         }
+    #     },
+    #     '/odom': {
+    #         0.0: {
+    #             'odom.twist.twist.linear.x': '0.000000',
+    #             'odom.twist.twist.angular.z': '-0.000000'
+    #         },
+    #         0.01: {
+    #             'odom.twist.twist.linear.x': '0.000000',
+    #             'odom.twist.twist.angular.z': '-0.000001'
+    #         },
+    #         0.02: {
+    #             'odom.twist.twist.linear.x': '0.000000',
+    #             'odom.twist.twist.angular.z': '-0.000001'
+    #         }
+    #     }, 
+    #     '/vehicle_cmd_test': {
+    #         0.0: {
+    #             'vehicle_cmd_test.ctrl_cmd.linear_acceleration': '0.000000',
+    #             'vehicle_cmd_test.ctrl_cmd.steering_angle': '0.000000'
+    #         },
+    #         0.01: {
+    #             'vehicle_cmd_test.ctrl_cmd.linear_acceleration': '0.000000',
+    #             'vehicle_cmd_test.ctrl_cmd.steering_angle': '0.000000'
+    #         },
+    #         0.02: {
+    #             'vehicle_cmd_test.ctrl_cmd.linear_acceleration': '1.000000',
+    #             'vehicle_cmd_test.ctrl_cmd.steering_angle': '0.000000'
+    #         }
+    #     },
+    #     '/rubis_log_handler': {
+    #         0.0: {
+    #             'rubis_log_handler.writeon': '0'
+    #         },
+    #         0.01: {
+    #             'rubis_log_handler.writeon': '0'
+    #         },
+    #         0.02: {
+    #             'rubis_log_handler.writeon': '0'
+    #         }
+    #     }
+    # }
+
 
 def find_recentlog():
     recentlog = ''
@@ -33,26 +92,55 @@ def find_recentlog():
 def logtimeconverter(logtime):
     u_ts = logtime.split('-')[0]   #unix timestamp, sec
     msec = logtime.split('-')[-1]
-    time = u_ts + '.' + msec * 100
+    time = u_ts + '.' + msec
     return float(time)
 
 def parse_log():
     with open(logfile_path, 'r') as f:
-        parsing_status = None # None, divider, time, topicdef, topic
+        logger_start_time = 0.0
+        number_target_topics = 0
+        time_first = 0.0
+        time_instance = 0.0
+        topic_instance = ''
+
+        logs['times'] = []
+        logs['topics'] = []
+
         for line in f:
             # print(line.split('\n')[0])  #line includes \n
             line_wo_nl = line.split('\n')[0]
-            if line_wo_nl.split(':')[0] == '-------------------------------------------------------':
-                parsing_status = 'divider'
-            elif line_wo_nl.split(':')[0] == 'time':
-                parsing_status = 'time'
-                line_ = line_wo_nl.split(': ')[-1]
-            elif line_wo_nl.split(':')[0] == 'topicdef':
-                parsing_status = 'topicdef'
-                line_data = line_wo_nl.split(': ')[-1]
+            attr = line_wo_nl.split(': ')[0]
+            data = line_wo_nl.split(': ')[-1]
+            
+            if attr == '-------------------------------------------------------':
+                continue
+            
+            #parsing log header
+            elif attr == 'start_time':
+                logger_start_time = float(data)
+            elif attr == 'number_target_topics':
+                number_target_topics = int(data)
+            elif attr == 'topic':
+                logs[data] = {}
+                logs['topics'].append(data)
+            
+
+            #parsing log datas
+            elif attr == 'time':
+                # print(data)
+                time = logtimeconverter(data)
+                if time_first == 0.0:
+                    time_first = time
+                # print(time)
+                time_instance = round(time-time_first, 2)
+                # print(time_instance)
+                logs['times'].append(time_instance)
+            elif attr == 'target_topic':
+                topic_instance = data
+                logs[topic_instance][time_instance] = {}
             else:
-                parsing_status = 'topic'
-                line_data = line_wo_nl.split(': ')[-1]
+                print(attr)
+                logs[topic_instance][time_instance][attr] = data
             
             # if parsing_status = 'time':
             #     logtime
@@ -123,6 +211,8 @@ if __name__=="__main__":
     
     print(f'parsing\n{logfile_path}\n{outputfile_path}')
     parse_log()
+
+    print(logs)
 
     exit()
 
