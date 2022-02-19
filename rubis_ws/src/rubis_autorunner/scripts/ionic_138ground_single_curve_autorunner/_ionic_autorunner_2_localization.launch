@@ -40,7 +40,6 @@
     max_iterations: 10}
   '"/> 
   
-
   <!-- vel_pose_mux -->
   <include file="$(find rubis_pkg)/launch/vel_pose_connect_params.launch">
     <arg name="topic_pose_stamped" value="$(arg topic_pose_stamped)" />
