@@ -7,13 +7,16 @@ import numpy as np
 import os
 from operator import itemgetter
 
-logdir = '/home/akyeast/rubis_ws/log/'
-outputdir = '/home/akyeast/rubis_ws/result/'
-logfile_name = 'test'
+
+logdir = '/home/rubis/rubis_ws/log/'
+outputdir = '/home/rubis/rubis_ws/result/'
+logfile_name = '5to10'
 outputfile_name = ''
 logfile_path = ''
 outputfile_path = ''
 
+temp_target_vel = 10.0
+temp_init_vel = 5.0
 
 logs = {}
     # {
@@ -73,33 +76,51 @@ logs = {}
     #         }
     #     }
     # }
-def calculate_pid_score(target_vel):
+def calculate_pid_score(target_vel, init_vel):
     # for fixed target_velocity exp
 
     max_accel = 1
     time_start = None
     time_end = None
     time_sat = None
-    logging = False
+    logged = False
  
     last_log_handler = '0'
     for t in logs['times']:
         log_handler = logs['/rubis_log_handler'][t]['rubis_log_handler.writeon']
-        if log_handler == '1' and last_log_handler == '0':
-            logged = True
-            time_start = t
-        if log_handler == '0' and last_log_handler == '1':
-            logged = False
-            time_end = t
+        # if log_handler == '1' and last_log_handler == '0':
+        #     logged = True
+        #     time_start = t
+        
+        # if log_handler == '0' and last_log_handler == '1':
+        #     logged = False
+        #     # print(t)
+        #     time_end = t
+        # print(float(target_vel))
+        diff = float(logs['/ctrl_cmd'][t]['ctrl_cmd.cmd.linear_velocity']) - float(target_vel)
+        if diff <= 0.00000000001 and diff >= -0.00000000001:
+            if time_start is None:
+                # print(diff)
+                time_start = t
 
-        if logged:
-            real_speed = logs['/car_ctrl_output'][t]['car_ctrl_output.real_speed']
-            if real_speed >= target_vel*0.95 and real_speed <= target_vel * 1.05:
+        real_speed_kmph = float(logs['/car_ctrl_output'][t]['car_ctrl_output.real_speed'])
+        real_speed = float(real_speed_kmph / 3.6)
+        if real_speed >= target_vel*0.95 and real_speed <= target_vel * 1.05:
+            if time_sat is None:
                 time_sat = t
 
-    # milli second
-    pid_score = (time_sat - time_start) * 1000 - target_vel / max_accel * 1000 * 0.95
+        # if logged:
+        #     # real_speed = float(logs['/car_ctrl_output'][t]['car_ctrl_output.real_speed'])
+        #     real_speed_kmph = float(logs['/car_ctrl_output'][t]['car_ctrl_output.real_speed'])
+        #     real_speed = float(real_speed_kmph / 3.6)
+        #     if real_speed >= target_vel*0.95 and real_speed <= target_vel * 1.05:
+        #         time_sat = t
 
+        last_log_handler = log_handler
+
+    # milli second
+
+    pid_score = (time_sat - time_start) * 1000 - target_vel- init_vel / max_accel * 1000 * 0.95
     print(f'time_start: {time_start}')
     print(f'time_sat: {time_sat}')
     print(f'saturation_time: {(time_sat - time_start) * 1000}')
@@ -173,7 +194,7 @@ def parse_log():
                 topic_instance = data
                 logs[topic_instance][time_instance] = {}
             else:
-                print(attr)
+                # print(attr)
                 logs[topic_instance][time_instance][attr] = data
             
             # if parsing_status = 'time':
@@ -248,7 +269,7 @@ if __name__=="__main__":
 
     # print(logs)
 
-    calculate_pid_score(10)
+    calculate_pid_score(temp_target_vel, temp_init_vel)
     
 
     exit()
