@@ -134,7 +134,7 @@ if __name__ == '__main__':
         ctrl_cmd_msg.cmd.linear_velocity = target_velocity
         ctrl_cmd_msg.cmd.steering_angle = target_steering_angle
         
-        ctrl_cmd_pub.publish(ctrl_cmd_msg)
+        # ctrl_cmd_pub.publish(ctrl_cmd_msg)
 
         if logging:
             rubis_log_handler_msg.writeon = 1

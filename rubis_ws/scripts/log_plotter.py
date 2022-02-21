@@ -73,6 +73,40 @@ logs = {}
     #         }
     #     }
     # }
+def calculate_pid_score(target_vel):
+    # for fixed target_velocity exp
+
+    max_accel = 1
+    time_start = None
+    time_end = None
+    time_sat = None
+    logging = False
+ 
+    last_log_handler = '0'
+    for t in logs['times']:
+        log_handler = logs['/rubis_log_handler'][t]['rubis_log_handler.writeon']
+        if log_handler == '1' and last_log_handler == '0':
+            logged = True
+            time_start = t
+        if log_handler == '0' and last_log_handler == '1':
+            logged = False
+            time_end = t
+
+        if logged:
+            real_speed = logs['/car_ctrl_output'][t]['car_ctrl_output.real_speed']
+            if real_speed >= target_vel*0.95 and real_speed <= target_vel * 1.05:
+                time_sat = t
+
+    # milli second
+    pid_score = (time_sat - time_start) * 1000 - target_vel / max_accel * 1000 * 0.95
+
+    print(f'time_start: {time_start}')
+    print(f'time_sat: {time_sat}')
+    print(f'saturation_time: {(time_sat - time_start) * 1000}')
+    print(f'pid score: {pid_score}')
+
+
+            
 
 
 def find_recentlog():
@@ -212,7 +246,10 @@ if __name__=="__main__":
     print(f'parsing\n{logfile_path}\n{outputfile_path}')
     parse_log()
 
-    print(logs)
+    # print(logs)
+
+    calculate_pid_score(10)
+    
 
     exit()
 
