@@ -33,7 +33,8 @@
   </include> -->
 
 <!-- TF -->
-  <node pkg="tf" type="static_transform_publisher" name="base_link_to_velodyne" args="3.3 -0.8 0.09 -0.53 0 0 base_link velodyne 10"/>
+  <!-- <node pkg="tf" type="static_transform_publisher" name="base_link_to_velodyne" args="3.3 -0.8 0.09 -0.53 0 0 base_link velodyne 10"/> -->
+  <node pkg="tf" type="static_transform_publisher" name="base_link_to_velodyne" args="3.3 -0.8 0.09 -0.40 0 0 base_link velodyne 10"/>
   <!-- <node pkg="tf" type="static_transform_publisher" name="gps_to_base_link" args="0 0 0 0 0 0 gps base_link 10"/> -->
   <!-- <node pkg="tf" type="static_transform_publisher" name="lidar_to_camera" args="0.029 -0.574 -1.820 4.712 0.009 -1.883 velodyne camera 10" /> -->
 
