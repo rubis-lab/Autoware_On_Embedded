@@ -1,7 +1,7 @@
 target_topics:
   - "/ctrl_cmd"
-  - "/odom"
-  - "/vehicle_cmd_test"
+  - "/car_ctrl_output"
+  - "/car_ctrl_input"
   - "/rubis_log_handler"
   
 available_topics:

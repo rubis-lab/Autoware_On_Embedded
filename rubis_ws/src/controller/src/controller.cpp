@@ -2,16 +2,14 @@
 #include "autoware_msgs/ControlCommandStamped.h"
 #include "geometry_msgs/TwistStamped.h"
 #include "autoware_msgs/VehicleCmd.h"
-
-#define SVL
-// #define IONIC
-
 #include <nav_msgs/Odometry.h>
 #include <can_data_msgs/Car_ctrl_input.h>
 #include <can_data_msgs/Car_ctrl_output.h>
 #include <std_msgs/Header.h>
 
-#define DEBUG
+// #define SVL
+#define IONIC
+// #define DEBUG
 
 static float dt_;
 static float kp_, ki_, kd_;

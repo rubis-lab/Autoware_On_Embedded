@@ -1,9 +1,13 @@
 /controller/max_acc : 1.0
 /controller/min_acc : -3.0
 
-/controller/kp : 0.5      # default: 0.5
-/controller/ki : 0.08      # default: 0.5
-/controller/kd : 0.001    # default: 0.001
+# /controller/kp : 0.5      # default: 0.5
+# /controller/ki : 0.08      # default: 0.5
+# /controller/kd : 0.001    # default: 0.001
+
+/controller/kp : 10.0      # default: 0.5
+/controller/ki : 5.0      # default: 0.5
+/controller/kd : 5.0    # default: 0.001
 
 /controller/dt : 10.0 # ms
 
