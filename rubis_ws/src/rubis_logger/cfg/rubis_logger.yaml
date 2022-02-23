@@ -15,4 +15,4 @@ available_topics:
 logger_rate: 100
 paramtest: 2020
 
-logdirpath: "/home/akyeast/rubis_ws/log/"
+logdirpath: "/home/nvidia/rubis_ws/log/"
