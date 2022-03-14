@@ -108,7 +108,13 @@ void PurePursuitNode::initForROS()
   sub3_ = nh_.subscribe("config/waypoint_follower", 10,
     &PurePursuitNode::callbackFromConfig, this);
   
+  #ifdef SVL
   velocity_sub_ = nh_.subscribe("current_velocity", 10, &PurePursuitNode::callbackFromCurrentVelocity, this);
+  #endif
+
+  #ifdef IONIC
+  car_ctrl_output_sub = nh_.subscribe("car_ctrl_output", 10, &PurePursuitNode::callbackCtrlOutput, this);
+  #endif
 
   // setup publisher
   twist_pub_ = nh_.advertise<geometry_msgs::TwistStamped>("twist_raw", 10);
@@ -379,17 +385,28 @@ void PurePursuitNode::callbackFromRubisCurrentPose(const rubis_msgs::PoseStamped
   updateCurrentPose(msg);
 }
 
+#ifdef SVL
 void PurePursuitNode::callbackFromCurrentVelocity(const geometry_msgs::TwistStampedConstPtr& msg)
 {
   current_linear_velocity_ = msg->twist.linear.x;
   pp_.setCurrentVelocity(current_linear_velocity_);
   is_velocity_set_ = true;
 }
+#endif
+
+#ifdef IONIC
+void PurePursuitNode::callbackCtrlOutput(const can_data_msgs::Car_ctrl_output::ConstPtr &msg)
+{
+  current_linear_velocity_ = kmph2mps(msg->real_speed);
+  pp_.setCurrentVelocity(current_linear_velocity_);
+  is_velocity_set_ = true;
+}
+#endif
 
 void PurePursuitNode::setLookaheadParamsByVel(){
   for(auto it=dynamic_params.begin(); it != dynamic_params.end(); ++it){
     DynamicParams param = *it;
-    if(command_linear_velocity_>param.min_vel && command_linear_velocity_ <= param.max_vel){
+    if(current_linear_velocity_>param.min_vel && current_linear_velocity_ <= param.max_vel){
       lookahead_distance_ratio_ = param.lookahead_ratio;
       minimum_lookahead_distance_ = param.lookahead_distance;
       break;

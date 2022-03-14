@@ -36,10 +36,16 @@
 
 #include <autoware_health_checker/health_checker/health_checker.h>
 
+#include <can_data_msgs/Car_ctrl_output.h>
+
 #include <vector>
 #include <memory>
 
 #include <XmlRpcException.h>
+
+// #define SVL
+#define IONIC
+// #define DEBUG
 
 namespace waypoint_follower
 {
@@ -92,7 +98,7 @@ private:
     pub11_, pub12_, pub13_, pub14_, pub15_, pub16_, pub17_, pub18_;
 
   // subscriber
-  ros::Subscriber sub1_, pose_sub_, rubis_pose_sub_, sub3_, velocity_sub_;
+  ros::Subscriber sub1_, pose_sub_, rubis_pose_sub_, sub3_, velocity_sub_, car_ctrl_output_sub;
 
   // constant
   const int LOOP_RATE_;  // processing frequency
@@ -121,8 +127,15 @@ private:
     const autoware_config_msgs::ConfigWaypointFollowerConstPtr& config);
   void callbackFromCurrentPose(const geometry_msgs::PoseStampedConstPtr& msg);
   void callbackFromRubisCurrentPose(const rubis_msgs::PoseStampedConstPtr& _msg);
-  void callbackFromCurrentVelocity(const geometry_msgs::TwistStampedConstPtr& msg);
   void callbackFromWayPoints(const autoware_msgs::LaneConstPtr& msg);
+
+  #ifdef SVL
+  void callbackFromCurrentVelocity(const geometry_msgs::TwistStampedConstPtr& msg);
+  #endif
+
+  #ifdef IONIC
+  void callbackCtrlOutput(const can_data_msgs::Car_ctrl_output::ConstPtr &msg);
+  #endif
 
   // initializer
   void initForROS();
@@ -138,7 +151,6 @@ private:
   void connectVirtualLastWaypoints(
     autoware_msgs::Lane* expand_lane, LaneDirection direction);
   inline void updateCurrentPose(const geometry_msgs::PoseStampedConstPtr& msg);
-
   
   // Added by PHY
   void setLookaheadParamsByVel();

@@ -23,6 +23,7 @@ find_package(
     tf2
     rubis_lib
     rubis_msgs
+    can_data_msgs
 )
 
 catkin_package(
