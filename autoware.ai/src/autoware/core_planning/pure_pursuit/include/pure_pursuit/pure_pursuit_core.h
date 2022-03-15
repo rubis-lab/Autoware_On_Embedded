@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+// #define SVL
+#define IONIC
+// #define DEBUG
+
 #ifndef PURE_PURSUIT_PURE_PURSUIT_CORE_H
 #define PURE_PURSUIT_PURE_PURSUIT_CORE_H
 
@@ -36,16 +40,14 @@
 
 #include <autoware_health_checker/health_checker/health_checker.h>
 
-#include <can_data_msgs/Car_ctrl_output.h>
-
 #include <vector>
 #include <memory>
 
 #include <XmlRpcException.h>
 
-// #define SVL
-#define IONIC
-// #define DEBUG
+#ifdef IONIC
+#include <can_data_msgs/Car_ctrl_output.h>
+#endif
 
 namespace waypoint_follower
 {

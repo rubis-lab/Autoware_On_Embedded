@@ -96,6 +96,16 @@ fi
 sudo apt-get install -y ros-melodic-rosbridge-server net-tools
 sudo apt-get install -y ros-melodic-can-msgs
 
+# Kvaser Interface
+sudo apt-add-repository ppa:astuff/kvaser-linux
+sudo apt update
+sudo apt install -y kvaser-canlib-dev kvaser-drivers-dkms
+
+sudo apt install -y apt-transport-https
+sudo sh -c 'echo "deb [trusted=yes] https://s3.amazonaws.com/autonomoustuff-repo/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/autonomoustuff-public.list'
+sudo apt update
+sudo apt install -y ros-melodic-kvaser-interface
+
 # Python packages
 pip3 install --upgrade setuptools pip
 pip3 install -U PyYAML
