@@ -59,6 +59,19 @@ PurePursuitNode::~PurePursuitNode()
 
 void PurePursuitNode::initForROS()
 {
+  #ifdef IONIC
+  private_nh_.param("/vel_setting/straight_velocity", straight_velocity, 10.0);
+  private_nh_.param("/vel_setting/buffer_velocity", buffer_velocity, 6.0);
+  private_nh_.param("/vel_setting/curve_velocity", curve_velocity, 3.0);
+
+  private_nh_.getParam("/vel_setting/curve_line_start", curve_line_start);
+  private_nh_.getParam("/vel_setting/straight_line_start", straight_line_start);
+  private_nh_.getParam("/vel_setting/curve_line_end", curve_line_end);
+  private_nh_.getParam("/vel_setting/straight_line_end", straight_line_end);
+  private_nh_.getParam("/vel_setting/way_points_x", way_points_x);
+  private_nh_.getParam("/vel_setting/way_points_y", way_points_y);
+  #endif
+  
   // ros parameter settings
   private_nh_.param("velocity_source", velocity_source_, 0);
   private_nh_.param("is_linear_interpolation", is_linear_interpolation_, true);
@@ -416,11 +429,50 @@ void PurePursuitNode::setLookaheadParamsByVel(){
   // std::cout<<"Waypoint Vel:"<<command_linear_velocity_<<"/ ratio"<<lookahead_distance_ratio_<<"/ disdtance"<<minimum_lookahead_distance_<<std::endl;
 }
 
+#ifdef IONIC
+double PurePursuitNode::findWayPointVelocity(autoware_msgs::Waypoint msg){
+  int minDist = 9999, idx = 0;
+  int len = way_points_x.size();
+  double x, y;
+
+  for(int i = 0; i < len; i++){
+    x = msg.pose.pose.position.x;
+    y = msg.pose.pose.position.y;
+
+    if(pow(way_points_x[i] - x, 2) + pow(way_points_y[i] - y, 2) < minDist){
+      minDist = pow(way_points_x[i] - x, 2) + pow(way_points_y[i] - y, 2);
+      idx = i + 1;
+    }
+  }
+
+  for(int i = 0; i < straight_line_start.size(); i++){
+    if(idx >= straight_line_start[i] && idx <= straight_line_end[i]){
+      return straight_velocity;
+    }
+  }
+
+  for(int i = 0; i < curve_line_start.size(); i++){
+    if(idx >= curve_line_start[i] && idx <= curve_line_end[i]){
+      return curve_velocity;
+    }
+  }
+
+  return buffer_velocity;
+}
+#endif
+
 void PurePursuitNode::callbackFromWayPoints(
   const autoware_msgs::LaneConstPtr& msg)
 {
+  #ifdef SVL
   command_linear_velocity_ =
     (!msg->waypoints.empty()) ? msg->waypoints.at(0).twist.twist.linear.x : 0;
+  #endif
+
+  #ifdef IONIC
+  command_linear_velocity_ = findWayPointVelocity(msg->waypoints.at(0));
+  #endif
+  
   setLookaheadParamsByVel();
   
   if (add_virtual_end_waypoints_)

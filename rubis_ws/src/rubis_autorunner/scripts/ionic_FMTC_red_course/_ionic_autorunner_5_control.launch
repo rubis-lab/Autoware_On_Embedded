@@ -1,7 +1,8 @@
 <launch>
   <!--  Dynamic Pure Pursuit Param -->
   <rosparam command="load" file="$(env USER_HOME)/rubis_ws/src/rubis_autorunner/cfg/ionic_autorunner/ionic_pure_pursuit_params.yaml" />
-  
+  <rosparam command="load" file="$(env USER_HOME)/rubis_ws/src/rubis_autorunner/cfg/ionic_autorunner/ionic_FMTC_red_course_vel.yaml" />
+
   <!-- TODO: param tunning -->
   <!-- pure_pursuit  -->
   <include file="$(find pure_pursuit)/launch/pure_pursuit_params.launch">   
