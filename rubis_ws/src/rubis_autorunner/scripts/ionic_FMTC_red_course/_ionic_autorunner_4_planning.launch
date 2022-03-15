@@ -46,14 +46,15 @@
     <arg name="steeringDelay"                   default="1.2" />
     <!-- Not included in app window -->
     <arg name="minPursuiteDistance"             default="3.0"  />
-    <arg name="additionalBrakingDistance"       default="5.0"  />
+    <arg name="additionalBrakingDistance"       default="30.0"  />
     <arg name="giveUpDistance"                  default="-4.0"  />
     <arg name="mapSource"                       default="0" />        <!-- Autoware=0, Vector Map Folder=1, kml=2 -->
     <arg name="mapFileName"                     default="" />
     <arg name="minVelocity"                     default="0.1" />  
     <arg name="speedProfileFactor"              default="1.2"  />
     <arg name="smoothingDataWeight"             default="0.45"  />
-    <arg name="smoothingSmoothWeight"           default="0.4"  />  
+    <arg name="smoothingSmoothWeight"           default="0.4"  />
+    <arg name="enableSlowDownOnCurve"           default="true" />
   </include>
 
   <!-- op_trajectory_generator -->
