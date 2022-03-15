@@ -613,7 +613,6 @@ bool DecisionMaker::SelectSafeTrajectory()
       target_velocity *= 0.5;
       bSlowBecauseChange = true;
     }
-
     
     double e = target_velocity - CurrStatus.speed;
     double desiredVelocity = 0; 
@@ -634,8 +633,25 @@ bool DecisionMaker::SelectSafeTrajectory()
     else if(desiredVelocity < m_params.minSpeed)
       desiredVelocity = 0;
 
-    // for(unsigned int i = 0; i < m_Path.size(); i++)
-    //   m_Path.at(i).v = desiredVelocity;
+    if(m_params.enableSlowDownOnCurve){
+      GPSPoint curr_point = m_Path.at(info.iFront).pos;
+      GPSPoint near_point = m_Path.at(std::min(info.iFront + 3, int(m_Path.size())-1)).pos;
+      GPSPoint far_point = m_Path.at(std::min(info.iFront + 40, int(m_Path.size())-1)).pos;
+
+      double deg_1 = atan2((near_point.y - curr_point.y), (near_point.x - curr_point.x)) / 3.14 * 180;
+      double deg_2 = atan2((far_point.y - curr_point.y), (far_point.x - curr_point.x)) / 3.14 * 180;
+      double angle_diff = std::abs(deg_1 - deg_2);
+      if (angle_diff > 180){
+        angle_diff = 360 - angle_diff;
+      }
+
+      // std::cout << angle_diff << std::endl;
+
+      if (angle_diff > 5){
+        desiredVelocity = desiredVelocity * 20 / (angle_diff + 15);
+      }
+    }
+
     for(auto it = m_Path.begin(); it != m_Path.end(); ++it){
       (*it).v = desiredVelocity;
     }
