@@ -4,30 +4,55 @@ import csv
 import yaml
 import os
 
-point_csv_path = os.environ["HOME"] + "/autoware.ai/autoware_files/vector_map/220203_fmtc_red/point.csv"
-yaml_path = os.environ["HOME"] + "/rubis_ws/src/rubis_autorunner/cfg/ionic_autorunner/ionic_FMTC_red_course_vel.yaml"
-course_color = "RED"
-
 straight_area = []
 curve_area = []
 
-
 ########### TODO ###########
+
+########## FMTC RED Course Setting ##########
+
+point_csv_path = os.environ["HOME"] + "/autoware.ai/autoware_files/vector_map/220203_fmtc_red/point.csv"
+yaml_path = os.environ["HOME"] + "/rubis_ws/src/rubis_autorunner/cfg/ionic_autorunner/ionic_FMTC_red_course_vel.yaml"
+
 use_algorithm = True
 
 curve_velocity = 2
 buffer_velocity = 3
 straight_velocity = 5
 
-if course_color == "RED" :
-    straight_area.append([1, 215])
-    curve_area.append([236, 260])
-    straight_area.append([270, 288])
-    curve_area.append([295, 317])
-    straight_area.append([330, 445])
-    curve_area.append([465, 584])
-    straight_area.append([600, 637])
-############################
+straight_area.append([1, 215])
+straight_area.append([270, 288])
+straight_area.append([330, 445])
+straight_area.append([600, 637])
+
+curve_area.append([236, 260])
+curve_area.append([295, 317])
+curve_area.append([465, 584])
+
+#############################################
+
+########## CubeTown Setting ##########
+
+# point_csv_path = os.environ["HOME"] + "/autoware.ai/autoware_files/vector_map/cubetown_circle/point.csv"
+# yaml_path = os.environ["HOME"] + "/rubis_ws/src/rubis_autorunner/cfg/cubetown_autorunner/cubetown_vel.yaml"
+
+# use_algorithm = True
+
+# curve_velocity = 2
+# buffer_velocity = 4
+# straight_velocity = 7
+
+# straight_area.append([1, 20])
+# straight_area.append([88, 130])
+# straight_area.append([195, 218])
+# straight_area.append([250, 318])
+
+# curve_area.append([40, 75])
+# curve_area.append([145, 180])
+# curve_area.append([230, 260])
+# curve_area.append([330, 362])
+
+#############################################
 
 
 if __name__ == "__main__":
@@ -54,7 +79,7 @@ if __name__ == "__main__":
             line_counter = line_counter + 1
 
     ##########################################
-    # distinguish curve area (FMTC red course)
+    # distinguish curve area
     ##########################################
     is_check = False
 
