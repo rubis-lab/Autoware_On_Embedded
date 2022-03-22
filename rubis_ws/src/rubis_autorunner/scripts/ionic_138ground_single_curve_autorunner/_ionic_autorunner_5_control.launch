@@ -1,6 +1,7 @@
 <launch>
   <!--  Dynamic Pure Pursuit Param -->
-  <rosparam command="load" file="$(env USER_HOME)/autoware.ai/autoware_files/lgsvl_file/parameter/lgsvl_pure_pursuit.yaml" />
+  <rosparam command="load" file="$(env USER_HOME)/rubis_ws/src/rubis_autorunner/cfg/ionic_autorunner/ionic_pure_pursuit_params.yaml" />
+  <rosparam command="load" file="$(env USER_HOME)/rubis_ws/src/rubis_autorunner/cfg/ionic_autorunner/138ground_single_curve_vel.yaml" />
   
   <!-- TODO: param tunning -->
   <!-- pure_pursuit  -->

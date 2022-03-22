@@ -448,16 +448,18 @@ void PurePursuitNode::setLookaheadParamsByVel(){
 }
 
 double PurePursuitNode::findWayPointVelocity(autoware_msgs::Waypoint msg){
-  int minDist = 9999, idx = 0;
+  int idx = 0;
   int len = way_points_x_.size();
   double x, y;
+  double minDist = 9999.0, tmp_dist;
 
   x = msg.pose.pose.position.x;
   y = msg.pose.pose.position.y;
 
   for(int i = 0; i < len; i++){
-    if(pow(way_points_x_[i] - x, 2) + pow(way_points_y_[i] - y, 2) < minDist){
-      minDist = pow(way_points_x_[i] - x, 2) + pow(way_points_y_[i] - y, 2);
+    tmp_dist = pow(way_points_x_[i] - x, 2.0) + pow(way_points_y_[i] - y, 2.0);
+    if(tmp_dist < minDist){
+      minDist = tmp_dist;
       idx = i + 1;
     }
   }

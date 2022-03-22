@@ -11,23 +11,23 @@ curve_area = []
 
 ########## FMTC RED Course Setting ##########
 
-point_csv_path = os.environ["HOME"] + "/autoware.ai/autoware_files/vector_map/220203_fmtc_red/point.csv"
-yaml_path = os.environ["HOME"] + "/rubis_ws/src/rubis_autorunner/cfg/ionic_autorunner/ionic_FMTC_red_course_vel.yaml"
+# point_csv_path = os.environ["HOME"] + "/autoware.ai/autoware_files/vector_map/220203_fmtc_red/point.csv"
+# yaml_path = os.environ["HOME"] + "/rubis_ws/src/rubis_autorunner/cfg/ionic_autorunner/ionic_FMTC_red_course_vel.yaml"
 
-use_algorithm = True
+# use_algorithm = True
 
-curve_velocity = 2
-buffer_velocity = 3
-straight_velocity = 5
+# curve_velocity = 2
+# buffer_velocity = 3
+# straight_velocity = 5
 
-straight_area.append([1, 215])
-straight_area.append([270, 288])
-straight_area.append([330, 445])
-straight_area.append([600, 637])
+# straight_area.append([1, 215])
+# straight_area.append([270, 288])
+# straight_area.append([330, 445])
+# straight_area.append([600, 637])
 
-curve_area.append([236, 260])
-curve_area.append([295, 317])
-curve_area.append([465, 584])
+# curve_area.append([236, 260])
+# curve_area.append([295, 317])
+# curve_area.append([465, 584])
 
 #############################################
 
@@ -51,6 +51,23 @@ curve_area.append([465, 584])
 # curve_area.append([145, 180])
 # curve_area.append([230, 260])
 # curve_area.append([330, 362])
+
+#############################################
+
+########## 138 Ground Single Curve Setting ##########
+
+point_csv_path = os.environ["HOME"] + "/autoware.ai/autoware_files/vector_map/220118_138ground/single_curve/point.csv"
+yaml_path = os.environ["HOME"] + "/rubis_ws/src/rubis_autorunner/cfg/ionic_autorunner/138ground_single_curve_vel.yaml"
+
+use_algorithm = True
+
+curve_velocity = 2
+buffer_velocity = 4
+straight_velocity = 7
+
+straight_area.append([1, 10])
+
+curve_area.append([15, 40])
 
 #############################################
 
@@ -78,9 +95,9 @@ if __name__ == "__main__":
 
             line_counter = line_counter + 1
 
-    ##########################################
+    ########################
     # distinguish curve area
-    ##########################################
+    ########################
     is_check = False
 
     for i in range(len(pid)):
@@ -125,7 +142,7 @@ if __name__ == "__main__":
         file.writelines("  way_points_y: " + str(np.array(data)[:, 1].tolist()) + "\n")
 
     ##########################
-    # visualize (FMTC setting)
+    # visualize
     ##########################
     plt.figure(figsize=(6,10))
     plt.scatter(straight_data[:, 0], straight_data[:, 1], c="red")
