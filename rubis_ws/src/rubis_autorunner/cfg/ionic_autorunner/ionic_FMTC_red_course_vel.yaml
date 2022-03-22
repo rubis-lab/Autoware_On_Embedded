@@ -1,7 +1,8 @@
 vel_setting:
-  buffer_velocity: 6
-  curve_velocity: 3
-  straight_velocity: 10
+  buffer_velocity: 3
+  curve_velocity: 2
+  straight_velocity: 5
+  use_algorithm: false
   straight_line_start: [1, 270, 330, 600]
   straight_line_end: [215, 288, 445, 637]
   curve_line_start: [236, 295, 465]

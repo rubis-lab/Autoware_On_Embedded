@@ -64,10 +64,14 @@ void PurePursuitNode::initForROS()
   private_nh_.param("/vel_setting/buffer_velocity", buffer_velocity, 6.0);
   private_nh_.param("/vel_setting/curve_velocity", curve_velocity, 3.0);
 
-  private_nh_.getParam("/vel_setting/curve_line_start", curve_line_start);
+  private_nh_.param("/vel_setting/use_algorithm", use_algorithm, false);
+
   private_nh_.getParam("/vel_setting/straight_line_start", straight_line_start);
-  private_nh_.getParam("/vel_setting/curve_line_end", curve_line_end);
   private_nh_.getParam("/vel_setting/straight_line_end", straight_line_end);
+
+  private_nh_.getParam("/vel_setting/curve_line_start", curve_line_start);
+  private_nh_.getParam("/vel_setting/curve_line_end", curve_line_end);
+  
   private_nh_.getParam("/vel_setting/way_points_x", way_points_x);
   private_nh_.getParam("/vel_setting/way_points_y", way_points_y);
   #endif
@@ -294,11 +298,26 @@ double PurePursuitNode::computeLookaheadDistance() const
     return const_lookahead_distance_;
   }
 
-  double maximum_lookahead_distance = current_linear_velocity_ * 10;
+  // std::cout << "Curve : " << angle_diff_ << std::endl;
+  // if(angle_diff_ < 5)
+  //   return 25;
+  
   double ld = current_linear_velocity_ * lookahead_distance_ratio_;
+  if(ld < minimum_lookahead_distance_)
+    return minimum_lookahead_distance_;
+  
+  return ld;
 
-  return ld < minimum_lookahead_distance_ ? minimum_lookahead_distance_ :
-    ld > maximum_lookahead_distance ? maximum_lookahead_distance : ld;
+
+  // double maximum_lookahead_distance = current_linear_velocity_ * 10;
+  // double ld = current_linear_velocity_ * lookahead_distance_ratio_;
+
+  // if(ld < minimum_lookahead_distance_)
+  //   return minimum_lookahead_distance_;
+  // else if(ld > maximum_lookahead_distance)
+  //   return maximum_lookahead_distance;
+  // else
+  //   return ld;
 }
 
 int PurePursuitNode::getSgn() const
@@ -469,11 +488,31 @@ void PurePursuitNode::callbackFromWayPoints(
     (!msg->waypoints.empty()) ? msg->waypoints.at(0).twist.twist.linear.x : 0;
   #endif
 
+  geometry_msgs::Point curr_point = msg->waypoints.at(0).pose.pose.position;
+  geometry_msgs::Point near_point = msg->waypoints.at(std::min(3, (int)msg->waypoints.size() - 1)).pose.pose.position;
+  geometry_msgs::Point far_point = msg->waypoints.at(std::min(30, (int)msg->waypoints.size() - 1)).pose.pose.position;
+
+  double deg_1 = atan2((near_point.y - curr_point.y), (near_point.x - curr_point.x)) / 3.14 * 180;
+  double deg_2 = atan2((far_point.y - curr_point.y), (far_point.x - curr_point.x)) / 3.14 * 180;
+  double angle_diff = std::abs(deg_1 - deg_2);
+  if (angle_diff > 180){
+    angle_diff = 360 - angle_diff;
+  }
+
+  angle_diff_ = angle_diff;
+
   #ifdef IONIC
-  command_linear_velocity_ = findWayPointVelocity(msg->waypoints.at(0));
+  if(use_algorithm){
+    command_linear_velocity_ = findWayPointVelocity(msg->waypoints.at(0));
+  }
+  else{
+    command_linear_velocity_ = (!msg->waypoints.empty()) ? msg->waypoints.at(0).twist.twist.linear.x : 0;
+  }
   #endif
   
-  setLookaheadParamsByVel();
+  if(dynamic_param_flag_){
+    setLookaheadParamsByVel();
+  }
   
   if (add_virtual_end_waypoints_)
   {

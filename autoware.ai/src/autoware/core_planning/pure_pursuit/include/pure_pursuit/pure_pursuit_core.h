@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-// #define SVL
-#define IONIC
+#define SVL
+// #define IONIC
 // #define DEBUG
 
 #ifndef PURE_PURSUIT_PURE_PURSUIT_CORE_H
@@ -24,6 +24,7 @@
 // ROS includes
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/TwistStamped.h>
+#include <geometry_msgs/Point.h>
 #include <rubis_msgs/PoseStamped.h>
 #include <rubis_msgs/TwistStamped.h>
 
@@ -120,6 +121,11 @@ private:
   // the next waypoint must be outside of this threshold.
   double minimum_lookahead_distance_;
 
+  // HJW added
+  double angle_diff_;
+  double lookahead_distance_ratio_from_param;
+  double minimum_lookahead_distance_from_param;
+
   // Added by PHY
   bool dynamic_param_flag_;
   std::vector<DynamicParams> dynamic_params;
@@ -141,6 +147,7 @@ private:
   double straight_velocity, buffer_velocity, curve_velocity;
   std::vector<int> curve_line_start, straight_line_start, curve_line_end, straight_line_end;
   std::vector<double> way_points_x, way_points_y;
+  bool use_algorithm;
 
   double findWayPointVelocity(autoware_msgs::Waypoint msg);
   #endif

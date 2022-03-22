@@ -64,6 +64,9 @@ public:
   bool m_riskyRight;
   double m_closestIntersectionDistance;
 
+  int curveSlowDownCount;
+  double previous_velocity;
+
   void InitBehaviorStates();
 
   //For Simulation

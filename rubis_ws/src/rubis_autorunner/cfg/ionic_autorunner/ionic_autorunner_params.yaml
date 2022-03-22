@@ -109,7 +109,7 @@ op_global_planner:
 op_common_params:
   rollOutDensity: 4
   rollOutsNumber: 0
-  maxVelocity: 3.0
+  maxVelocity: 5.0
   maxAcceleration: 10.0
   maxDeceleration: -10.0
 

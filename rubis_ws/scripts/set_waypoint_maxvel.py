@@ -2,9 +2,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import csv
 import yaml
+import os
 
-point_csv_path = "../autoware.ai/autoware_files/vector_map/220203_fmtc_red/point.csv"
-yaml_path = "../rubis_ws/src/rubis_autorunner/cfg/ionic_autorunner/ionic_FMTC_red_course_vel.yaml"
+point_csv_path = os.environ["HOME"] + "/autoware.ai/autoware_files/vector_map/220203_fmtc_red/point.csv"
+yaml_path = os.environ["HOME"] + "/rubis_ws/src/rubis_autorunner/cfg/ionic_autorunner/ionic_FMTC_red_course_vel.yaml"
 course_color = "RED"
 
 straight_area = []
@@ -12,9 +13,11 @@ curve_area = []
 
 
 ########### TODO ###########
-curve_velocity = 3
-buffer_velocity = 6
-straight_velocity = 10
+use_algorithm = True
+
+curve_velocity = 2
+buffer_velocity = 3
+straight_velocity = 5
 
 if course_color == "RED" :
     straight_area.append([1, 215])
@@ -82,7 +85,8 @@ if __name__ == "__main__":
         "vel_setting" : {
             "straight_velocity" : straight_velocity,
             "buffer_velocity" : buffer_velocity,
-            "curve_velocity" : curve_velocity
+            "curve_velocity" : curve_velocity,
+            "use_algorithm" : use_algorithm
         }
     }
 
