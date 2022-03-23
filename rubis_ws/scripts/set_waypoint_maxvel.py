@@ -56,8 +56,25 @@ curve_area = []
 
 ########## 138 Ground Single Curve Setting ##########
 
-point_csv_path = os.environ["HOME"] + "/autoware.ai/autoware_files/vector_map/220118_138ground/single_curve/point.csv"
-yaml_path = os.environ["HOME"] + "/rubis_ws/src/rubis_autorunner/cfg/ionic_autorunner/138ground_single_curve_vel.yaml"
+# point_csv_path = os.environ["HOME"] + "/autoware.ai/autoware_files/vector_map/220118_138ground/single_curve/point.csv"
+# yaml_path = os.environ["HOME"] + "/rubis_ws/src/rubis_autorunner/cfg/ionic_autorunner/138ground_single_curve_vel.yaml"
+
+# use_algorithm = True
+
+# curve_velocity = 2
+# buffer_velocity = 4
+# straight_velocity = 7
+
+# straight_area.append([1, 10])
+
+# curve_area.append([15, 40])
+
+#############################################
+
+########## 138 Ground Double Curve Setting ##########
+
+point_csv_path = os.environ["HOME"] + "/autoware.ai/autoware_files/vector_map/220118_138ground/double_curve/point.csv"
+yaml_path = os.environ["HOME"] + "/rubis_ws/src/rubis_autorunner/cfg/ionic_autorunner/138ground_double_curve_vel.yaml"
 
 use_algorithm = True
 
@@ -70,6 +87,7 @@ straight_area.append([1, 10])
 curve_area.append([15, 40])
 
 #############################################
+
 
 
 if __name__ == "__main__":
