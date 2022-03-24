@@ -17,7 +17,6 @@ curve_area = []
 # use_algorithm = True
 
 # curve_velocity = 2
-# buffer_velocity = 3
 # straight_velocity = 5
 
 # straight_area.append([1, 215])
@@ -33,24 +32,24 @@ curve_area = []
 
 ########## CubeTown Setting ##########
 
-# point_csv_path = os.environ["HOME"] + "/autoware.ai/autoware_files/vector_map/cubetown_circle/point.csv"
-# yaml_path = os.environ["HOME"] + "/rubis_ws/src/rubis_autorunner/cfg/cubetown_autorunner/cubetown_vel.yaml"
+point_csv_path = os.environ["HOME"] + "/autoware.ai/autoware_files/vector_map/cubetown_circle/point.csv"
+yaml_path = os.environ["HOME"] + "/rubis_ws/src/rubis_autorunner/cfg/cubetown_autorunner/cubetown_vel.yaml"
 
-# use_algorithm = True
+use_algorithm = True
 
-# curve_velocity = 2
-# buffer_velocity = 4
-# straight_velocity = 7
+curve_velocity = 4
+straight_velocity = 6
 
-# straight_area.append([1, 20])
-# straight_area.append([88, 130])
-# straight_area.append([195, 218])
-# straight_area.append([250, 318])
+straight_area.append([1, 20])
+straight_area.append([88, 130])
+straight_area.append([195, 218])
+straight_area.append([275, 318])
+straight_area.append([379, 380])
 
-# curve_area.append([40, 75])
-# curve_area.append([145, 180])
-# curve_area.append([230, 260])
-# curve_area.append([330, 362])
+curve_area.append([40, 75])
+curve_area.append([145, 180])
+curve_area.append([230, 260])
+curve_area.append([330, 362])
 
 #############################################
 
@@ -62,7 +61,6 @@ curve_area = []
 # use_algorithm = True
 
 # curve_velocity = 2
-# buffer_velocity = 4
 # straight_velocity = 7
 
 # straight_area.append([1, 10])
@@ -73,18 +71,17 @@ curve_area = []
 
 ########## 138 Ground Double Curve Setting ##########
 
-point_csv_path = os.environ["HOME"] + "/autoware.ai/autoware_files/vector_map/220118_138ground/double_curve/point.csv"
-yaml_path = os.environ["HOME"] + "/rubis_ws/src/rubis_autorunner/cfg/ionic_autorunner/138ground_double_curve_vel.yaml"
+# point_csv_path = os.environ["HOME"] + "/autoware.ai/autoware_files/vector_map/220118_138ground/double_curve/point.csv"
+# yaml_path = os.environ["HOME"] + "/rubis_ws/src/rubis_autorunner/cfg/ionic_autorunner/138ground_double_curve_vel.yaml"
 
-use_algorithm = True
+# use_algorithm = True
 
-curve_velocity = 2
-buffer_velocity = 4
-straight_velocity = 7
+# curve_velocity = 2
+# straight_velocity = 7
 
-straight_area.append([1, 10])
+# straight_area.append([1, 10])
 
-curve_area.append([15, 40])
+# curve_area.append([15, 40])
 
 #############################################
 
@@ -144,7 +141,6 @@ if __name__ == "__main__":
     dict_file = {
         "vel_setting" : {
             "straight_velocity" : straight_velocity,
-            "buffer_velocity" : buffer_velocity,
             "curve_velocity" : curve_velocity,
             "use_algorithm" : use_algorithm
         }

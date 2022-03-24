@@ -59,21 +59,76 @@ PurePursuitNode::~PurePursuitNode()
 
 void PurePursuitNode::initForROS()
 {
-  // velocity setting 
-  private_nh_.param("/vel_setting/straight_velocity", straight_velocity_, 10.0);
-  private_nh_.param("/vel_setting/buffer_velocity", buffer_velocity_, 6.0);
-  private_nh_.param("/vel_setting/curve_velocity", curve_velocity_, 3.0);
-
+  // way point velocity setting 
   private_nh_.param("/vel_setting/use_algorithm", use_algorithm_, false);
 
-  private_nh_.getParam("/vel_setting/straight_line_start", straight_line_start_);
-  private_nh_.getParam("/vel_setting/straight_line_end", straight_line_end_);
+  if(use_algorithm_){
+    std::vector<int> curve_line_start, straight_line_start, curve_line_end, straight_line_end;
+    double straight_velocity, curve_velocity;
+    double prev_velocity, next_velocity;
+    int prev_point, next_point;
+    bool is_vel_set;
 
-  private_nh_.getParam("/vel_setting/curve_line_start", curve_line_start_);
-  private_nh_.getParam("/vel_setting/curve_line_end", curve_line_end_);
+    private_nh_.param("/vel_setting/straight_velocity", straight_velocity, 5.0);
+    private_nh_.param("/vel_setting/curve_velocity", curve_velocity, 3.0);
+
+    private_nh_.getParam("/vel_setting/straight_line_start", straight_line_start);
+    private_nh_.getParam("/vel_setting/straight_line_end", straight_line_end);
+
+    private_nh_.getParam("/vel_setting/curve_line_start", curve_line_start);
+    private_nh_.getParam("/vel_setting/curve_line_end", curve_line_end);
   
-  private_nh_.getParam("/vel_setting/way_points_x", way_points_x_);
-  private_nh_.getParam("/vel_setting/way_points_y", way_points_y_);
+    private_nh_.getParam("/vel_setting/way_points_x", way_points_x_);
+    private_nh_.getParam("/vel_setting/way_points_y", way_points_y_);
+
+    for(int i = 1; i <= way_points_x_.size(); i++){
+      is_vel_set = false;
+      prev_point = 0;
+      next_point = way_points_x_.size();
+
+      for(int j = 0; j < straight_line_start.size(); j++){
+        if ((i >= straight_line_start[j]) && (i <= straight_line_end[j])){
+          is_vel_set = true;
+          way_points_velocity_.push_back(straight_velocity);
+        }
+        else if(i < straight_line_start[j]){
+          if(next_point > straight_line_start[j]){
+            next_point = straight_line_start[j];
+            next_velocity = straight_velocity;
+          }
+        }
+        else if(i > straight_line_end[j]){
+          if(prev_point < straight_line_end[j]){
+            prev_point = straight_line_end[j];
+            prev_velocity = straight_velocity;
+          }
+        }
+      }
+
+      for(int j = 0; j < curve_line_start.size(); j++){
+        if ((i >= curve_line_start[j]) && (i <= curve_line_end[j])){
+          is_vel_set = true;
+          way_points_velocity_.push_back(curve_velocity);
+        }
+        else if(i < curve_line_start[j]){
+          if(next_point > curve_line_start[j]){
+            next_point = curve_line_start[j];
+            next_velocity = curve_velocity;
+          }
+        }
+        else if(i > curve_line_end[j]){
+          if(prev_point < curve_line_end[j]){
+            prev_point = curve_line_end[j];
+            prev_velocity = curve_velocity;
+          }
+        }
+      }
+
+      if(!is_vel_set){
+        way_points_velocity_.push_back((prev_velocity * (next_point - i) + next_velocity * (i - prev_point)) / (next_point - prev_point));
+      }
+    }
+  }
   
   // ros parameter settings
   private_nh_.param("velocity_source", velocity_source_, 0);
@@ -448,37 +503,24 @@ void PurePursuitNode::setLookaheadParamsByVel(){
 }
 
 double PurePursuitNode::findWayPointVelocity(autoware_msgs::Waypoint msg){
-  int idx = 0;
-  int len = way_points_x_.size();
+  int len, idx = 0;
+  
   double x, y;
   double minDist = 9999.0, tmp_dist;
 
   x = msg.pose.pose.position.x;
   y = msg.pose.pose.position.y;
 
+  len = way_points_x_.size();
   for(int i = 0; i < len; i++){
     tmp_dist = pow(way_points_x_[i] - x, 2.0) + pow(way_points_y_[i] - y, 2.0);
     if(tmp_dist < minDist){
       minDist = tmp_dist;
-      idx = i + 1;
+      idx = i;
     }
   }
 
-  len = straight_line_start_.size();
-  for(int i = 0; i < len; i++){
-    if(idx >= straight_line_start_[i] && idx <= straight_line_end_[i]){
-      return straight_velocity_;
-    }
-  }
-
-  len = curve_line_start_.size();
-  for(int i = 0; i < len; i++){
-    if(idx >= curve_line_start_[i] && idx <= curve_line_end_[i]){
-      return curve_velocity_;
-    }
-  }
-
-  return buffer_velocity_;
+  return way_points_velocity_[idx];
 }
 
 void PurePursuitNode::callbackFromWayPoints(
