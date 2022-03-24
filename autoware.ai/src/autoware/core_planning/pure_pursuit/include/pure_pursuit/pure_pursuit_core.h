@@ -145,9 +145,8 @@ private:
   void callbackCtrlOutput(const can_data_msgs::Car_ctrl_output::ConstPtr &msg);
   #endif
 
-  double straight_velocity_, buffer_velocity_, curve_velocity_;
   bool use_algorithm_;
-  std::vector<int> curve_line_start_, straight_line_start_, curve_line_end_, straight_line_end_;
+  std::vector<double> way_points_velocity_;
   std::vector<double> way_points_x_, way_points_y_;
 
   double findWayPointVelocity(autoware_msgs::Waypoint msg);
