@@ -298,7 +298,7 @@ double PurePursuitNode::computeLookaheadDistance() const
   }
 
   // std::cout << "Curve : " << angle_diff_ << std::endl;
-  // if(angle_diff_ < 5)
+  // if(angle_diff_ < 5) // if curvature is too low, set lookahead distance to 25 statically.
   //   return 25;
   
   double ld = current_linear_velocity_ * lookahead_distance_ratio_;
@@ -308,6 +308,7 @@ double PurePursuitNode::computeLookaheadDistance() const
   return ld;
 
 
+  // Original Autoware Code
   // double maximum_lookahead_distance = current_linear_velocity_ * 10;
   // double ld = current_linear_velocity_ * lookahead_distance_ratio_;
 

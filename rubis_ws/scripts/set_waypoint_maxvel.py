@@ -7,6 +7,8 @@ import os
 straight_area = []
 curve_area = []
 
+# buffer : middle area between curve and straight area
+
 ########### TODO ###########
 
 ########## FMTC RED Course Setting ##########

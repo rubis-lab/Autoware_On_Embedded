@@ -635,20 +635,20 @@ bool DecisionMaker::SelectSafeTrajectory()
       desiredVelocity = 0;
 
     if(m_params.enableSlowDownOnCurve){
-      GPSPoint curr_point = m_Path.at(info.iFront).pos;
-      GPSPoint near_point = m_Path.at(std::min(info.iFront + 3, int(m_Path.size())-1)).pos;
-      GPSPoint far_point = m_Path.at(std::min(info.iFront + 60, int(m_Path.size())-1)).pos;
+      GPSPoint curr_point = m_Path.at(info.iFront).pos; // current waypoint (p1)
+      GPSPoint near_point = m_Path.at(std::min(info.iFront + 3, int(m_Path.size())-1)).pos; // waypoint after 1.5m (p2)
+      GPSPoint far_point = m_Path.at(std::min(info.iFront + 60, int(m_Path.size())-1)).pos; // waypoint afeter 30m (p3)
 
       double deg_1 = atan2((near_point.y - curr_point.y), (near_point.x - curr_point.x)) / 3.14 * 180;
       double deg_2 = atan2((far_point.y - curr_point.y), (far_point.x - curr_point.x)) / 3.14 * 180;
-      double angle_diff = std::abs(deg_1 - deg_2);
+      double angle_diff = std::abs(deg_1 - deg_2); // angle between p1p2 and p1p3
       if (angle_diff > 180){
         angle_diff = 360 - angle_diff;
       }
 
       // std::cout << "curvature : " << angle_diff << std::endl;
 
-      if (angle_diff > 7){
+      if (angle_diff > 7){ // Slow down when angle is large
         desiredVelocity = m_params.maxSpeed * 40 / (angle_diff + 33);
         if(desiredVelocity > previous_velocity){
           desiredVelocity = previous_velocity;
@@ -664,7 +664,7 @@ bool DecisionMaker::SelectSafeTrajectory()
       //   desiredVelocity = m_params.maxSpeed * 0.6;
       //   curveSlowDownCount = 0;
       // }
-      else if(curveSlowDownCount < 400){
+      else if(curveSlowDownCount < 400){ // wait 4 sec when angle become less than 7 // TODO: Check its feasibility when pure pursuit is sufficiently tuned
         desiredVelocity += (m_params.maxSpeed - previous_velocity) / 100;
         curveSlowDownCount += 1;
       }
@@ -672,7 +672,7 @@ bool DecisionMaker::SelectSafeTrajectory()
         desiredVelocity = m_params.maxSpeed;
       }
 
-      if(desiredVelocity < m_params.maxSpeed * 0.5){
+      if(desiredVelocity < m_params.maxSpeed * 0.5){ // minimum of target velocity is max_speed / 2
         desiredVelocity = m_params.maxSpeed * 0.5;
       }
       previous_velocity = desiredVelocity;
