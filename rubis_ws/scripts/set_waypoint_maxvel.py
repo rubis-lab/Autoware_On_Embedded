@@ -13,45 +13,45 @@ curve_area = []
 
 ########## FMTC RED Course Setting ##########
 
-# point_csv_path = os.environ["HOME"] + "/autoware.ai/autoware_files/vector_map/220203_fmtc_red/point.csv"
-# yaml_path = os.environ["HOME"] + "/rubis_ws/src/rubis_autorunner/cfg/ionic_autorunner/ionic_FMTC_red_course_vel.yaml"
+point_csv_path = os.environ["HOME"] + "/autoware.ai/autoware_files/vector_map/220203_fmtc_red/point.csv"
+yaml_path = os.environ["HOME"] + "/rubis_ws/src/rubis_autorunner/cfg/ionic_autorunner/ionic_FMTC_red_course_vel.yaml"
 
-# use_algorithm = True
+use_algorithm = True
 
-# curve_velocity = 2
-# straight_velocity = 5
+curve_velocity = 2
+straight_velocity = 5
 
-# straight_area.append([1, 215])
-# straight_area.append([270, 288])
-# straight_area.append([330, 445])
-# straight_area.append([600, 637])
+straight_area.append([1, 215])
+straight_area.append([270, 288])
+straight_area.append([330, 445])
+straight_area.append([600, 637])
 
-# curve_area.append([236, 260])
-# curve_area.append([295, 317])
-# curve_area.append([465, 584])
+curve_area.append([236, 260])
+curve_area.append([295, 317])
+curve_area.append([465, 584])
 
 #############################################
 
 ########## CubeTown Setting ##########
 
-point_csv_path = os.environ["HOME"] + "/autoware.ai/autoware_files/vector_map/cubetown_circle/point.csv"
-yaml_path = os.environ["HOME"] + "/rubis_ws/src/rubis_autorunner/cfg/cubetown_autorunner/cubetown_vel.yaml"
+# point_csv_path = os.environ["HOME"] + "/autoware.ai/autoware_files/vector_map/cubetown_circle/point.csv"
+# yaml_path = os.environ["HOME"] + "/rubis_ws/src/rubis_autorunner/cfg/cubetown_autorunner/cubetown_vel.yaml"
 
-use_algorithm = True
+# use_algorithm = False
 
-curve_velocity = 4
-straight_velocity = 6
+# curve_velocity = 4
+# straight_velocity = 6
 
-straight_area.append([1, 20])
-straight_area.append([88, 130])
-straight_area.append([195, 218])
-straight_area.append([275, 318])
-straight_area.append([379, 380])
+# straight_area.append([1, 20])
+# straight_area.append([88, 130])
+# straight_area.append([195, 218])
+# straight_area.append([275, 318])
+# straight_area.append([379, 380])
 
-curve_area.append([40, 75])
-curve_area.append([145, 180])
-curve_area.append([230, 260])
-curve_area.append([330, 362])
+# curve_area.append([40, 75])
+# curve_area.append([145, 180])
+# curve_area.append([230, 260])
+# curve_area.append([330, 362])
 
 #############################################
 
@@ -122,16 +122,16 @@ if __name__ == "__main__":
 
         for j in range(len(straight_area)):
             if ((i+1) >= straight_area[j][0]) & ((i+1) <= straight_area[j][1]):
-                straight_area_data.append([data[i][0], data[i][1]])
+                straight_area_data.append([data[i][1], data[i][0]])
                 is_check = True
             
         for j in range(len(curve_area)):
             if ((i+1) >= curve_area[j][0]) & ((i+1) <= curve_area[j][1]):
-                curve_area_data.append([data[i][0], data[i][1]])
+                curve_area_data.append([data[i][1], data[i][0]])
                 is_check = True
             
         if (is_check == False) :
-            buffer_area_data.append([data[i][0], data[i][1]])
+            buffer_area_data.append([data[i][1], data[i][0]])
     
     straight_data = np.array(straight_area_data)
     curve_data = np.array(curve_area_data)
@@ -160,7 +160,7 @@ if __name__ == "__main__":
     ##########################
     # visualize
     ##########################
-    plt.figure(figsize=(6,10))
+    plt.figure(figsize=(10,6))
     plt.scatter(straight_data[:, 0], straight_data[:, 1], c="red")
     plt.scatter(curve_data[:, 0], curve_data[:, 1], c="blue")
     plt.scatter(buffer_data[:, 0], buffer_data[:, 1], c="green")
