@@ -38,6 +38,8 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   geometry_msgs
   nav_msgs
+  inertiallabs_msgs
+  tf
 )
 ##   * add "message_runtime" and every package in MSG_DEP_SET to
 ##     catkin_package(CATKIN_DEPENDS ...)
@@ -212,5 +214,21 @@ add_executable(odom_converter
 )
 add_dependencies(odom_converter ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(odom_converter
+  ${catkin_LIBRARIES}
+)
+
+add_executable(quaternion_to_rpy
+  src/quaternion_to_rpy.cpp
+)
+add_dependencies(quaternion_to_rpy ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(quaternion_to_rpy
+  ${catkin_LIBRARIES}
+)
+
+add_executable(ins_sync
+  src/ins_sync.cpp
+)
+add_dependencies(ins_sync ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(ins_sync
   ${catkin_LIBRARIES}
 )

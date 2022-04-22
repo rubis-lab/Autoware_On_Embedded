@@ -52,6 +52,7 @@
 
   <depend>nav_msgs</depend>
   <depend>geometry_masgs</depend>
+  <depend>tf</depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->

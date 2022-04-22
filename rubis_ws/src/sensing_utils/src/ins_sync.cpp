@@ -1,0 +1,112 @@
+#include <ros/ros.h>
+#include "inertiallabs_msgs/ins_data.h"
+#include <tf/transform_listener.h>
+#include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/TwistStamped.h>
+
+double ins_yaw = 0, ndt_yaw = 0;
+
+void ins_callback(const inertiallabs_msgs::ins_dataConstPtr msg){
+    double roll, pitch, yaw;
+
+    roll = msg->YPR.z;
+    pitch = msg->YPR.y;
+    yaw = msg->YPR.x;
+
+    std::cout<<"# INS RPY: "<<roll<<" "<<pitch<<" "<<yaw<<std::endl;
+
+    double velocity;
+    velocity = sqrt(pow(msg->Vel_ENU.x,2) + pow(msg->Vel_ENU.y,2) + pow(msg->Vel_ENU.z,2)) * 3.6;
+    std::cout<<"# INS Vel: "<<velocity<<" "<<msg->Vel_ENU.x<<" "<<msg->Vel_ENU.y<<" "<<msg->Vel_ENU.z<<std::endl;
+    ins_yaw = yaw;
+}
+
+void ndt_callback(const geometry_msgs::PoseStampedConstPtr msg){
+    static double prev_pose_x;
+    static double prev_pose_y;
+    static double prev_t;
+    static bool is_init = false;
+    if(!is_init){
+        prev_pose_x = msg->pose.position.x;
+        prev_pose_y = msg->pose.position.y;
+        prev_t = msg->header.stamp.sec + msg->header.stamp.nsec * 0.000000001;
+        is_init = true;
+        return;
+    }
+
+    tf::Quaternion q(   msg->pose.orientation.x, 
+                        msg->pose.orientation.y, 
+                        msg->pose.orientation.z, 
+                        msg->pose.orientation.w);
+    tf::Matrix3x3 m(q);
+    double roll, pitch, yaw;
+    m.getRPY(roll, pitch, yaw);
+    roll *= 180/3.14;
+    pitch *= 180/3.14;
+    yaw *= 180/3.14;
+    std::cout<<"# NDT RPY: "<<roll<<" "<<pitch<<" "<<yaw<<std::endl;
+    ndt_yaw = yaw;
+
+    double cur_pose_x = msg->pose.position.x;
+    double cur_pose_y = msg->pose.position.y;
+    double cur_t = msg->header.stamp.sec + msg->header.stamp.nsec * 0.000000001;
+    
+    double theta_t = cur_t - prev_t;
+    double theta_x = cur_pose_x - prev_pose_x;
+    double theta_y = cur_pose_y - prev_pose_y;
+    double vel_x = theta_x * theta_t;
+    double vel_y = theta_y * theta_t;
+
+    double velocity;
+    velocity = sqrt(pow(vel_x,2) + pow(vel_y,2)) * 3.6;
+    std::cout<<"# NDT Vel: "<<velocity<<" "<<vel_x<<" "<<vel_y<<" "<<std::endl;
+    prev_pose_x = cur_pose_x;
+    prev_pose_y = cur_pose_y;
+    prev_t = cur_t;
+}
+
+void twist_callback(const geometry_msgs::TwistStampedConstPtr msg){
+    double velocity;
+    velocity = sqrt(pow(msg->twist.linear.x,2) + pow(msg->twist.linear.y,2) + pow(msg->twist.linear.z,2)) * 3.6;
+    std::cout<<"## NDT Vel: "<<velocity<<" "<<msg->twist.linear.x<<" "<<msg->twist.linear.y<<" "<<msg->twist.linear.z<<std::endl;
+
+    return;
+}
+
+int main(int argc, char* argv[]){
+    ros::init(argc, argv, "ins_sync");
+    ros::NodeHandle nh;
+
+    ros::Subscriber sub1  = nh.subscribe("/Inertial_Labs/ins_data", 1, ins_callback);
+    // ros::Subscriber sub2  = nh.subscribe("/ndt_pose", 1, ndt_callback);
+    ros::Subscriber sub3  = nh.subscribe("/estimate_twist", 1, twist_callback);
+    
+    tf::TransformListener listener;
+
+    ros::Rate rate(5);
+        while(nh.ok()){
+        tf::StampedTransform tf;
+        try{
+            listener.lookupTransform("/map", "/base_link", ros::Time(0), tf);
+            auto q = tf.getRotation();
+            tf::Matrix3x3 m(q);
+            double roll, pitch, yaw;
+            m.getRPY(roll, pitch, yaw);
+
+            roll *= 180/3.14;
+            pitch *= 180/3.14;
+            yaw *= 180/3.14;
+
+            std::cout<<"## TF RPY: "<<roll<<" "<<pitch<<" "<<yaw<<std::endl;            
+            std::cout<<"## YAW diff: "<<ins_yaw-yaw<<std::endl;
+        }
+        catch(tf::TransformException ex){
+
+        }
+        std::cout<<std::endl;
+        ros::spinOnce();
+        rate.sleep();
+    }
+
+    return 0;
+}
