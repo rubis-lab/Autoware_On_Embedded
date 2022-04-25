@@ -1,0 +1,6 @@
+<launch>
+    <arg name="yaw_offset" default="-115.139" />
+    <node pkg="ins_twist_generator" type="ins_twist_generator" name="ins_twist_generator" output="screen">
+        <param name="yaw_offset" value="$(arg yaw_offset)" />
+    </node>
+</launch>
