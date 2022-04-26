@@ -54,7 +54,7 @@
     <arg name="speedProfileFactor"              default="1.2"  />
     <arg name="smoothingDataWeight"             default="0.45"  />
     <arg name="smoothingSmoothWeight"           default="0.4"  />
-    <arg name="enableSlowDownOnCurve"           default="true" />
+    <arg name="enableSlowDownOnCurve"           default="false" />
   </include>
 
   <!-- op_trajectory_generator -->

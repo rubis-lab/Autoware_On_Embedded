@@ -650,6 +650,7 @@ bool DecisionMaker::SelectSafeTrajectory()
 
       if (angle_diff > 7){ // Slow down when angle is large
         desiredVelocity = m_params.maxSpeed * 40 / (angle_diff + 33);
+        // desiredVelocity = m_params.maxSpeed * 17 / (angle_diff + 10);
         if(desiredVelocity > previous_velocity){
           desiredVelocity = previous_velocity;
         }
@@ -673,7 +674,7 @@ bool DecisionMaker::SelectSafeTrajectory()
       }
 
       if(desiredVelocity < m_params.maxSpeed * 0.5){ // minimum of target velocity is max_speed / 2
-        desiredVelocity = m_params.maxSpeed * 0.5;
+        desiredVelocity = m_params.maxSpeed * 0.5; 
       }
       previous_velocity = desiredVelocity;
     }
