@@ -73,8 +73,8 @@ Eigen::Vector2f LKF::run(float theta_t, Eigen::Vector2f u_k, Eigen::Vector2f z_k
     Eigen::Matrix2f P_prime_k; // Update prediction covariance
     P_prime_k = P_k - K_prime * H_k * P_k;
 
-    x_hat_k_prev = x_hat_prime_k;
-    P_k_prev = P_prime_k;
+    x_hat_k_prev = Eigen::Vector2f(x_hat_prime_k);
+    P_k_prev = Eigen::Matrix2f(P_prime_k);
 
     return x_hat_prime_k;
 }

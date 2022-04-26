@@ -45,6 +45,8 @@
 
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include <geometry_msgs/TwistStamped.h>
+#include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/Quaternion.h>
 
 #include <tf/tf.h>
 #include <tf/transform_broadcaster.h>
@@ -89,6 +91,8 @@
 #define Wa 0.4
 #define Wb 0.3
 #define Wc 0.3
+#define M_PI 3.14159265358979323846
+
 
 static std::shared_ptr<autoware_health_checker::HealthChecker> health_checker_ptr_;
 
@@ -214,10 +218,11 @@ static double angular_velocity = 0.0;
 static int use_predict_pose = 0;
 
 // INS Stat information
+static bool _is_ins_stat_received = false;
 static double _ins_stat_vel_x = 0.0, _ins_stat_vel_y = 0.0;
 static double _ins_stat_acc_x = 0.0, _ins_stat_acc_y = 0.0;
 static double _ins_stat_yaw = 0.0;
-static double _ins_stat_angular_velocity = 0.0;
+static double _ins_stat_linear_velocity = 0.0, _ins_stat_linear_acceleration = 0.0, _ins_stat_angular_velocity = 0.0;
 static ros::Publisher is_kalman_filter_on_pub, kalman_filtered_pose_pub;
 static bool _is_kalman_filter_on = false;
 static LKF linear_kalman_filter;
@@ -278,6 +283,21 @@ pthread_mutex_t mutex;
 static bool _is_init_match_finished = false;
 static float _init_match_threshold = 4.0;
 
+
+void ToQuaternion(double yaw, double pitch, double roll, geometry_msgs::Quaternion &q)
+{
+    double cy = cos(yaw * 0.5);
+    double sy = sin(yaw * 0.5);
+    double cp = cos(pitch * 0.5);
+    double sp = sin(pitch * 0.5);
+    double cr = cos(roll * 0.5);
+    double sr = sin(roll * 0.5);
+
+    q.w = cr * cp * cy + sr * sp * sy;
+    q.x = sr * cp * cy - cr * sp * sy;
+    q.y = cr * sp * cy + sr * cp * sy;
+    q.z = cr * cp * sy - sr * sp * cy;
+}
 
 static pose convertPoseIntoRelativeCoordinate(const pose &target_pose, const pose &reference_pose)
 {
@@ -1518,32 +1538,33 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
     offset_imu_odom_pitch = 0.0;
     offset_imu_odom_yaw = 0.0;
 
-    // Update previous_***
-    previous_pose.x = current_pose.x;
-    previous_pose.y = current_pose.y;
-    previous_pose.z = current_pose.z;
-    previous_pose.roll = current_pose.roll;
-    previous_pose.pitch = current_pose.pitch;
-    previous_pose.yaw = current_pose.yaw;
+    if(!_is_kalman_filter_on){
+      // Update previous_*** when kalman filter is not enabled
+      previous_pose.x = current_pose.x;
+      previous_pose.y = current_pose.y;
+      previous_pose.z = current_pose.z;
+      previous_pose.roll = current_pose.roll;
+      previous_pose.pitch = current_pose.pitch;
+      previous_pose.yaw = current_pose.yaw;
 
-    previous_scan_time = current_scan_time;
+      previous_scan_time = current_scan_time;
 
-    previous_previous_velocity = previous_velocity;
-    previous_velocity = current_velocity;
-    previous_velocity_x = current_velocity_x;
-    previous_velocity_y = current_velocity_y;
-    previous_velocity_z = current_velocity_z;
-    previous_accel = current_accel;
+      previous_previous_velocity = previous_velocity;
+      previous_velocity = current_velocity;
+      previous_velocity_x = current_velocity_x;
+      previous_velocity_y = current_velocity_y;
+      previous_velocity_z = current_velocity_z;
+      previous_accel = current_accel;
 
-    previous_estimated_vel_kmph.data = estimated_vel_kmph.data;
+      previous_estimated_vel_kmph.data = estimated_vel_kmph.data;    
+    }
 
     // Setup Kalman Filter
-    if(_use_kalman_filter && !_is_kalman_filter_on && _is_init_match_finished){
+    if(!_is_kalman_filter_on && _use_kalman_filter && _is_init_match_finished && _is_ins_stat_received){
       _is_kalman_filter_on = true;
       linear_kalman_filter.set_init_pose(ndt_pose_msg.pose.position.x, ndt_pose_msg.pose.position.y);
     }
 
-    
     // Run Kalman Filter
     if(_is_kalman_filter_on){
       Eigen::Vector2f u_k, z_k;
@@ -1551,12 +1572,51 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
       u_k << _ins_stat_vel_x + 0.5f * _ins_stat_acc_x * diff_time, _ins_stat_vel_y + 0.5f * _ins_stat_acc_y * diff_time;
       z_k << ndt_pose_msg.pose.position.x, ndt_pose_msg.pose.position.y;
 
-      linear_kalman_filter.run(diff_time, u_k, z_k);
+      Eigen::Vector2f kalman_filtered_pose = linear_kalman_filter.run(diff_time, u_k, z_k);
+
+      geometry_msgs::PoseStamped kalman_filtered_pose_msg;
+      kalman_filtered_pose_msg.header = ndt_pose_msg.header;
+      kalman_filtered_pose_msg.pose.position.x = kalman_filtered_pose(0);
+      kalman_filtered_pose_msg.pose.position.y = kalman_filtered_pose(1);
+      kalman_filtered_pose_msg.pose.position.z = ndt_pose_msg.pose.position.z;
+
+      geometry_msgs::Quaternion q;
+      ToQuaternion(_ins_stat_yaw*M_PI/180.0, 0.0, 0.0, q);
+      kalman_filtered_pose_msg.pose.orientation = q;
+
+      kalman_filtered_pose_pub.publish(kalman_filtered_pose_msg);
+
+      static tf::TransformBroadcaster kalman_br;
+      static tf::StampedTransform kalman_transform;
+      kalman_transform.setOrigin(tf::Vector3(kalman_filtered_pose(0), kalman_filtered_pose(1), ndt_pose_msg.pose.position.z));
+      tf::Quaternion kalman_q;
+      kalman_q.setRPY(0.0, 0.0, _ins_stat_yaw * M_PI / 180.0);      
+      kalman_transform.setRotation(kalman_q);
+      kalman_br.sendTransform(tf::StampedTransform(kalman_transform, current_scan_time, "/map", "/kalman"));
+
+      // Update previous by kalman filter output
+      previous_pose.x = kalman_filtered_pose_msg.pose.position.x;
+      previous_pose.y = kalman_filtered_pose_msg.pose.position.y;
+      previous_pose.z = kalman_filtered_pose_msg.pose.position.z;
+      previous_pose.roll = 0.0;
+      previous_pose.pitch = 0.0;
+      previous_pose.yaw = _ins_stat_yaw*M_PI/180.0;
+
+      previous_scan_time = current_scan_time;
+
+      previous_previous_velocity = previous_velocity;
+      previous_velocity = _ins_stat_linear_velocity;
+      previous_velocity_x = _ins_stat_vel_x;
+      previous_velocity_y = _ins_stat_vel_y;
+      previous_velocity_z = 0.0;
+      previous_accel = _ins_stat_linear_acceleration;
+
+      previous_estimated_vel_kmph.data = _ins_stat_linear_velocity*3.6;
     }
 
-    std_msgs::Bool kalman_filter_msgs;
-    kalman_filter_msgs.data = _is_kalman_filter_on;
-    is_kalman_filter_on_pub.publish(kalman_filter_msgs);
+    std_msgs::Bool is_kalman_filter_on_msgs;
+    is_kalman_filter_on_msgs.data = _is_kalman_filter_on;
+    is_kalman_filter_on_pub.publish(is_kalman_filter_on_msgs);
   }
 
   if(rubis::sched::is_task_ready_ == TASK_NOT_READY){
@@ -1577,11 +1637,14 @@ static void rubis_points_callback(const rubis_msgs::PointCloud2::ConstPtr& _inpu
 }
 
 static void ins_stat_callback(const rubis_msgs::InsStat::ConstPtr& input){
+  _is_ins_stat_received = true;
   _ins_stat_vel_x = input->vel_x;
   _ins_stat_vel_y = input->vel_y;
   _ins_stat_acc_x = input->acc_x;
   _ins_stat_acc_y = input->acc_y;
   _ins_stat_yaw = input->yaw;
+  _ins_stat_linear_velocity = input->linear_velocity;
+  _ins_stat_linear_acceleration = input->linear_acceleration;
   _ins_stat_angular_velocity = input->angular_velocity;
   return;
 }
