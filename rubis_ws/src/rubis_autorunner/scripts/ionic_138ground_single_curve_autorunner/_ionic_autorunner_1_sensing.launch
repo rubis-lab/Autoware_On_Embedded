@@ -9,11 +9,10 @@
   
   <!-- Vector Map Loader -->
 	<node pkg="map_file" type="vector_map_loader" name="vector_map_loader" args="
-	    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/220118_138ground/single_curve/dtlane.csv 
-	    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/220118_138ground/single_curve/idx.csv 
-	    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/220118_138ground/single_curve/lane.csv 
-	    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/220118_138ground/single_curve/node.csv 
-	    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/220118_138ground/single_curve/point.csv"/>
+	    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/220118_138ground/long_circle/dtlane.csv
+	    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/220118_138ground/long_circle/lane.csv 
+	    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/220118_138ground/long_circle/node.csv 
+	    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/220118_138ground/long_circle/point.csv"/>
 
   <!-- Point Map Loader -->
 	<include file="$(find map_file)/launch/points_map_loader.launch">
