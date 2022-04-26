@@ -43,8 +43,16 @@
     <param name="plane" value="$(arg plane)"/>
   </node> -->
 
-<!-- CAN Interface -->
+  <!-- CAN Interface -->
   <include file="$(find can_translate)/launch/can_translate.launch" />
+
+  <!-- INS-D Sensor -->
+  <include file="$(find inertiallabs_ins)/launch/ins.launch" />  
+
+  <!-- INS twist generator -->
+  <include file="$(find can_translate)/launch/can_translate.launch">
+    <arg name="yaw_offset" value="-115.139" />
+  </include>
 
 </launch>
 

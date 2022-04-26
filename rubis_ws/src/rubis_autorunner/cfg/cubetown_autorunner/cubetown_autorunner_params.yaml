@@ -23,7 +23,7 @@ voxel_grid_filter:
 
 ndt_matching:
   instance_mode: 1
-  use_kalman_filter: False
+  use_kalman_filter: True
 
   tf_x: 1.0510799 
   tf_y: 0
