@@ -28,6 +28,8 @@
 #include <sstream>
 #include <string>
 
+#include <LKF.hpp>
+
 #include <boost/filesystem.hpp>
 
 #include <nav_msgs/Odometry.h>
@@ -37,6 +39,7 @@
 #include <std_msgs/Bool.h>
 #include <std_msgs/Float32.h>
 #include <std_msgs/String.h>
+#include <std_msgs/Bool.h>
 #include <velodyne_pointcloud/point_types.h>
 #include <velodyne_pointcloud/rawdata.h>
 
@@ -75,6 +78,7 @@
 #include <rubis_lib/sched.hpp>
 #include <rubis_msgs/PointCloud2.h>
 #include <rubis_msgs/PoseStamped.h>
+#include <rubis_msgs/InsStat.h>
 
 #define SPIN_PROFILING
 
@@ -209,6 +213,16 @@ static double angular_velocity = 0.0;
 
 static int use_predict_pose = 0;
 
+// INS Stat information
+static double _ins_stat_vel_x = 0.0, _ins_stat_vel_y = 0.0;
+static double _ins_stat_acc_x = 0.0, _ins_stat_acc_y = 0.0;
+static double _ins_stat_yaw = 0.0;
+static double _ins_stat_angular_velocity = 0.0;
+static ros::Publisher is_kalman_filter_on_pub, kalman_filtered_pose_pub;
+static bool _is_kalman_filter_on = false;
+static LKF linear_kalman_filter;
+
+
 static ros::Publisher estimated_vel_mps_pub, estimated_vel_kmph_pub, estimated_vel_pub;
 static std_msgs::Float32 estimated_vel_mps, estimated_vel_kmph, previous_estimated_vel_kmph;
 
@@ -242,6 +256,7 @@ static bool _get_height = false;
 static bool _use_local_transform = false;
 static bool _use_imu = false;
 static bool _use_odom = false;
+static bool _use_kalman_filter = false;
 static bool _imu_upside_down = false;
 static bool _output_log_data = false;
 
@@ -261,6 +276,8 @@ static unsigned int points_map_num = 0;
 pthread_mutex_t mutex;
 
 static bool _is_init_match_finished = false;
+static float _init_match_threshold = 4.0;
+
 
 static pose convertPoseIntoRelativeCoordinate(const pose &target_pose, const pose &reference_pose)
 {
@@ -923,7 +940,7 @@ static void imu_callback(const sensor_msgs::Imu::Ptr& input)
 static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
 { 
   // Check inital matching is success or not
-  if(_is_init_match_finished == false && previous_score < USING_GPS_THRESHOLD && previous_score != 0.0)
+  if(_is_init_match_finished == false && previous_score < _init_match_threshold && previous_score != 0.0)
     _is_init_match_finished = true;
 
   health_checker_ptr_->CHECK_RATE("topic_rate_filtered_points_slow", 8, 5, 1, "topic filtered_points subscribe rate slow.");
@@ -1426,6 +1443,10 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
     ndt_stat_msg.use_predict_pose = 0;
 
     ndt_stat_pub.publish(ndt_stat_msg);
+
+
+
+
     /* Compute NDT_Reliability */
     ndt_reliability.data = Wa * (exe_time / 100.0) * 100.0 + Wb * (iteration / 10.0) * 100.0 +
                            Wc * ((2.0 - trans_probability) / 2.0) * 100.0;
@@ -1515,6 +1536,27 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
     previous_accel = current_accel;
 
     previous_estimated_vel_kmph.data = estimated_vel_kmph.data;
+
+    // Setup Kalman Filter
+    if(_use_kalman_filter && !_is_kalman_filter_on && _is_init_match_finished){
+      _is_kalman_filter_on = true;
+      linear_kalman_filter.set_init_pose(ndt_pose_msg.pose.position.x, ndt_pose_msg.pose.position.y);
+    }
+
+    
+    // Run Kalman Filter
+    if(_is_kalman_filter_on){
+      Eigen::Vector2f u_k, z_k;
+
+      u_k << _ins_stat_vel_x + 0.5f * _ins_stat_acc_x * diff_time, _ins_stat_vel_y + 0.5f * _ins_stat_acc_y * diff_time;
+      z_k << ndt_pose_msg.pose.position.x, ndt_pose_msg.pose.position.y;
+
+      linear_kalman_filter.run(diff_time, u_k, z_k);
+    }
+
+    std_msgs::Bool kalman_filter_msgs;
+    kalman_filter_msgs.data = _is_kalman_filter_on;
+    is_kalman_filter_on_pub.publish(kalman_filter_msgs);
   }
 
   if(rubis::sched::is_task_ready_ == TASK_NOT_READY){
@@ -1532,6 +1574,16 @@ static void rubis_points_callback(const rubis_msgs::PointCloud2::ConstPtr& _inpu
   sensor_msgs::PointCloud2::ConstPtr input = boost::make_shared<const sensor_msgs::PointCloud2>(_input->msg);
   rubis::instance_ = _input->instance;
   ndt_matching(input);
+}
+
+static void ins_stat_callback(const rubis_msgs::InsStat::ConstPtr& input){
+  _ins_stat_vel_x = input->vel_x;
+  _ins_stat_vel_y = input->vel_y;
+  _ins_stat_acc_x = input->acc_x;
+  _ins_stat_acc_y = input->acc_y;
+  _ins_stat_yaw = input->yaw;
+  _ins_stat_angular_velocity = input->angular_velocity;
+  return;
 }
 
 void* thread_func(void* args)
@@ -1585,13 +1637,42 @@ int main(int argc, char** argv)
   private_nh.getParam("offset", _offset);
   private_nh.getParam("get_height", _get_height);
   private_nh.getParam("use_local_transform", _use_local_transform);
-  private_nh.getParam("use_imu", _use_imu);
+  private_nh.getParam("use_kalman_filter", _use_kalman_filter);
+  private_nh.getParam("use_odom", _use_odom);
   private_nh.getParam("use_odom", _use_odom);
   private_nh.getParam("imu_upside_down", _imu_upside_down);
   private_nh.getParam("imu_topic", _imu_topic);
   private_nh.param<double>("gnss_reinit_fitness", _gnss_reinit_fitness, 500.0);
+  private_nh.param<float>("init_match_threshold", _init_match_threshold, 4.0);
 
   nh.param<std::string>("/ndt_matching/localizer", _localizer, "velodyne");
+
+  if(_use_kalman_filter){
+    std::vector<float> H_k_vec, Q_k_vec, R_k_vec, P_k_vec;
+
+    if(!nh.getParam("/ndt_matching/H_k", H_k_vec)){
+      ROS_ERROR("Failed to get parameter H_k");
+      exit(1);
+    }
+    if(!nh.getParam("/ndt_matching/Q_k", Q_k_vec)){
+      ROS_ERROR("Failed to get parameter Q_k");
+      exit(1);
+    }
+    if(!nh.getParam("/ndt_matching/R_k", R_k_vec)){
+      ROS_ERROR("Failed to get parameter R_k");
+      exit(1);
+    }
+    if(!nh.getParam("/ndt_matching/P_k", P_k_vec)){
+      ROS_ERROR("Failed to get parameter P_k");
+      exit(1);
+    }
+    
+    Eigen::Matrix2f H_k = Eigen::Matrix2f(H_k_vec.data());
+    Eigen::Matrix2f Q_k = Eigen::Matrix2f(Q_k_vec.data());
+    Eigen::Matrix2f R_k = Eigen::Matrix2f(R_k_vec.data());
+    Eigen::Matrix2f P_k = Eigen::Matrix2f(P_k_vec.data());
+    linear_kalman_filter = LKF(H_k, Q_k, R_k, P_k);
+  }
 
   try
   {
@@ -1716,6 +1797,8 @@ int main(int argc, char** argv)
   predict_pose_imu_pub = nh.advertise<geometry_msgs::PoseStamped>("/predict_pose_imu", 10);
   predict_pose_odom_pub = nh.advertise<geometry_msgs::PoseStamped>("/predict_pose_odom", 10);
   predict_pose_imu_odom_pub = nh.advertise<geometry_msgs::PoseStamped>("/predict_pose_imu_odom", 10);
+  is_kalman_filter_on_pub = nh.advertise<std_msgs::Bool>("/is_kalman_filter_on", 10);
+  kalman_filtered_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/kalman_filtered_pose", 10);
 
   ndt_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/ndt_pose", 10);
   if(rubis::instance_mode_) rubis_ndt_pose_pub = nh.advertise<rubis_msgs::PoseStamped>("/rubis_ndt_pose",10);
@@ -1742,6 +1825,8 @@ int main(int argc, char** argv)
   
   // ros::Subscriber odom_sub = nh.subscribe("/vehicle/odom", _queue_size * 10, odom_callback);
   // ros::Subscriber imu_sub = nh.subscribe(_imu_topic.c_str(), _queue_size * 10, imu_callback);
+
+  ros::Subscriber ins_stat_sub = nh.subscribe("/ins_stat", 1, ins_stat_callback);
   
   pthread_t thread;
   pthread_create(&thread, NULL, thread_func, NULL);
