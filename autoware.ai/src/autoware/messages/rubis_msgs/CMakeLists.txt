@@ -17,6 +17,7 @@ add_message_files(
     PoseStamped.msg
     TwistStamped.msg
     VehicleCmd.msg
+    InsStat.msg
 )
 
 generate_messages(
