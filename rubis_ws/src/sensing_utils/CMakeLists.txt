@@ -225,10 +225,10 @@ target_link_libraries(quaternion_to_rpy
   ${catkin_LIBRARIES}
 )
 
-add_executable(ins_sync
-  src/ins_sync.cpp
+add_executable(ins_sync_test
+  src/ins_sync_test.cpp
 )
-add_dependencies(ins_sync ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(ins_sync
+add_dependencies(ins_sync_test ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(ins_sync_test
   ${catkin_LIBRARIES}
 )

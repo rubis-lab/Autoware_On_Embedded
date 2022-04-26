@@ -72,6 +72,7 @@ catkin_package(
 
 include_directories(
   include
+  lib
   ${catkin_INCLUDE_DIRS}
   ${EIGEN3_INCLUDE_DIRS}
 )
@@ -80,7 +81,8 @@ link_directories(lib)
 
 SET(CMAKE_CXX_FLAGS "-O2 -g -Wall ${CMAKE_CXX_FLAGS}")
 
-add_executable(ndt_matching nodes/ndt_matching/ndt_matching.cpp)
+add_executable(ndt_matching   nodes/ndt_matching/ndt_matching.cpp
+                              lib/LKF.cpp)
 target_link_libraries(ndt_matching ${catkin_LIBRARIES})
 add_dependencies(ndt_matching ${catkin_EXPORTED_TARGETS})
 
@@ -138,6 +140,11 @@ target_link_libraries(ndt_matching_monitor ndt_matching_monitor_lib ${catkin_LIB
 add_executable(icp_matching nodes/icp_matching/icp_matching.cpp)
 target_link_libraries(icp_matching ${catkin_LIBRARIES})
 add_dependencies(icp_matching ${catkin_EXPORTED_TARGETS})
+
+install(DIRECTORY cfg/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/cfg
+)
+
 
 install(
   TARGETS
