@@ -17,7 +17,7 @@ void ins_callback(const inertiallabs_msgs::ins_dataConstPtr msg){
     roll = msg->YPR.z;
     pitch = msg->YPR.y;
     yaw = msg->YPR.x;
-    yaw -= 180;
+    
     yaw *= -1;
     if(yaw > 180.0) yaw -= 360.0;
     if(yaw < -180.0) yaw += 360.0;

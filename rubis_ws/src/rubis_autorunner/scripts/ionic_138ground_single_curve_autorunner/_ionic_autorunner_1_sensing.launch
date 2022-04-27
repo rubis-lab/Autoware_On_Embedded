@@ -50,7 +50,7 @@
 
   <!-- INS twist generator -->
   <include file="$(find ins_twist_generator)/launch/ins_twist_generator.launch">
-    <arg name="yaw_offset" value="-114.996" />
+    <arg name="yaw_offset" value="-89.2731" />
   </include>
 
 </launch>

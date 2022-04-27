@@ -22,6 +22,7 @@
   <include file="$(find lidar_localizer)/launch/ndt_matching_params.launch">
     <arg name="method_type" value="0" /> 
     <arg name="get_height" value="true" /> 
+    <arg name="init_match_threshold" value="0.5" /> 
   </include>
 
   <!-- ndt config -->

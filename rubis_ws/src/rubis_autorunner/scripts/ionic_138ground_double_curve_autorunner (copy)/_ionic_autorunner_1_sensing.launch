@@ -47,7 +47,7 @@
   <include file="$(find can_translate)/launch/can_translate.launch" />
 
   <!-- INS-D Sensor -->
-  <include file="$(find inertiallabs_ins)/launch/ins.launch" />  
+  <!-- <include file="$(find inertiallabs_ins)/launch/ins.launch" />   -->
 
   <!-- INS twist generator -->
   <include file="$(find can_translate)/launch/can_translate.launch">

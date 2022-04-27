@@ -101,7 +101,7 @@ void gps_callback(const inertiallabs_msgs::gps_dataConstPtr msg){
     
     double velocity = msg->HorSpeed * 3.6;
 
-    std::cout<<"## HorSpeed: "<<velocity<<std::endl;
+    // std::cout<<"## HorSpeed: "<<velocity<<std::endl;
 
     return;
 }
@@ -122,6 +122,8 @@ int main(int argc, char* argv[]){
     double prev_yaw_diff = 0;
     std::vector<int> yaw_diff_vec;
 
+    ros::Publisher ndt_yaw_pub = nh.advertise<geometry_msgs::PoseStamped>("/ndt_yaw", 1);
+
     ros::Rate rate(10);
     while(nh.ok()){
         tf::StampedTransform tf;
@@ -138,6 +140,10 @@ int main(int argc, char* argv[]){
             
             std::cout<<"## TF RPY: "<<roll<<" "<<pitch<<" "<<yaw<<std::endl;            
             std::cout<<"## ins yaw - tf yaw: "<<ins_yaw-yaw<<std::endl<<std::endl;            
+
+            geometry_msgs::PoseStamped msg;
+            msg.pose.position.x = yaw;
+            ndt_yaw_pub.publish(msg);
 
             double yaw_diff = ins_yaw - yaw;    
 
