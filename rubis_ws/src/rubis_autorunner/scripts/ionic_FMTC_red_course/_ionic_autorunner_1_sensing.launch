@@ -51,7 +51,7 @@
   <!-- <include file="$(find inertiallabs_ins)/launch/ins.launch" />   -->
   
   <!-- INS twist generator -->
-  <include file="$(find can_translate)/launch/can_translate.launch">
+  <include file="$(find ins_twist_generator)/launch/ins_twist_generator.launch">
     <arg name="yaw_offset" value="-115.139" />
   </include>
 

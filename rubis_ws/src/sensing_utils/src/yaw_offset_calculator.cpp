@@ -54,19 +54,19 @@ int main(int argc, char* argv[]){
             listener.lookupTransform("/map", "/base_link", ros::Time(0), tf);
             auto q = tf.getRotation();
             tf::Matrix3x3 m(q);
-            double roll, pitch, yaw;
-            m.getRPY(roll, pitch, yaw);
+            double tf_roll, tf_pitch, tf_yaw;
+            m.getRPY(tf_roll, tf_pitch, tf_yaw);
 
-            roll *= 180/M_PI;
-            pitch *= 180/M_PI;
-            yaw *= 180/M_PI;
+            tf_roll *= 180/M_PI;
+            tf_pitch *= 180/M_PI;
+            tf_yaw *= 180/M_PI;
 
             #ifdef DEBUG
-                std::cout<<"## TF RPY: "<<roll<<" "<<pitch<<" "<<yaw<<std::endl;            
-                std::cout<<"## ins yaw - tf yaw: "<<ins_yaw-yaw<<std::endl<<std::endl;
+                std::cout<<"## TF RPY: "<<tf_roll<<" "<<tf_pitch<<" "<<tf_yaw<<std::endl;            
+                std::cout<<"## ins yaw - tf yaw: "<<ins_yaw-tf_yaw<<std::endl<<std::endl;
             #endif
 
-            double yaw_diff = ins_yaw - yaw;
+            double yaw_diff = ins_yaw - tf_yaw;
             
             if(cnt++ > 10){
                 yaw_diff_vec.push_back(yaw_diff);
