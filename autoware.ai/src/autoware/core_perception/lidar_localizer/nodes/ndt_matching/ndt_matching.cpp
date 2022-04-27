@@ -1658,6 +1658,8 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
     previous_kalman_pose.pitch = current_kalman_pose.pitch;
     previous_kalman_pose.yaw = current_kalman_pose.yaw;
 
+    if(is_matching_failed) previous_pose = previous_kalman_pose;
+
     _previous_ins_stat_vel_x = _current_ins_stat_vel_x;
     _previous_ins_stat_vel_y = _current_ins_stat_vel_y;
     _previous_ins_stat_acc_x = _current_ins_stat_acc_x;
@@ -1760,9 +1762,11 @@ int main(int argc, char** argv)
   private_nh.getParam("imu_topic", _imu_topic);
   private_nh.param<double>("gnss_reinit_fitness", _gnss_reinit_fitness, 500.0);
   private_nh.param<float>("init_match_threshold", _init_match_threshold, 4.0);
+  
 
-  nh.param<std::string>("/ndt_matching/localizer", _localizer, "velodyne");
+  nh.param<std::string>("/ndt_matching/localizer", _localizer, "velodyne");  
 
+  nh.param<double>("/ndt_matching/ndt_kalman_error_threshold", _ndt_kalman_error_threshold, 100.0);
   if(_use_kalman_filter){
     std::vector<float> H_k_vec, Q_k_vec, R_k_vec, P_k_vec;
 

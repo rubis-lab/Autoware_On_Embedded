@@ -16,6 +16,7 @@
   <arg name="output_log_data" default="false" />
   <arg name="gnss_reinit_fitness" default="500.0" />
   <arg name="init_match_threshold" default="4.0" />
+  <arg name="ndt_kalman_error_threshold" default="100.0" />
   <!-- <arg name="instance_mode" default="0" /> -->
   <!-- <arg name="kalman_filter_cfg" default="$(find lidar_localizer)/cfg/kalman_filter.yaml"/> -->
 
@@ -37,6 +38,7 @@
     <param name="gnss_reinit_fitness" value="$(arg gnss_reinit_fitness)" />
     <remap from="/points_raw" to="/sync_drivers/points_raw" if="$(arg sync)" />
     <param name="init_match_threshold" value="$(arg init_match_threshold)" />
+    <param name="ndt_kalman_error_threshold" value="$(arg ndt_kalman_error_threshold)" />    
     <!-- <param name="instance_mode" value="$(arg instance_mode)" /> -->
   </node>
 
