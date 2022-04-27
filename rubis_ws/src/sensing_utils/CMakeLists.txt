@@ -232,3 +232,11 @@ add_dependencies(ins_sync_test ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPO
 target_link_libraries(ins_sync_test
   ${catkin_LIBRARIES}
 )
+
+add_executable(yaw_offset_calculator
+  src/yaw_offset_calculator.cpp
+)
+add_dependencies(yaw_offset_calculator ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(yaw_offset_calculator
+  ${catkin_LIBRARIES}
+)

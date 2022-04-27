@@ -23,7 +23,7 @@ void ins_callback(const inertiallabs_msgs::ins_dataConstPtr msg){
     if(yaw > 180.0) yaw -= 360.0;
     if(yaw < -180.0) yaw += 360.0;
 
-    // std::cout<<"# INS RPY: "<<roll<<" "<<pitch<<" "<<yaw<<std::endl;
+    std::cout<<"# INS RPY: "<<roll<<" "<<pitch<<" "<<yaw<<std::endl;
 
     double velocity;
     velocity = sqrt(pow(msg->Vel_ENU.x,2) + pow(msg->Vel_ENU.y,2));
@@ -65,7 +65,7 @@ void ndt_callback(const geometry_msgs::PoseStampedConstPtr msg){
     roll *= 180/M_PI;
     pitch *= 180/M_PI;
     yaw *= 180/M_PI;
-    // std::cout<<"# NDT RPY: "<<roll<<" "<<pitch<<" "<<yaw<<std::endl;
+    std::cout<<"# NDT RPY: "<<roll<<" "<<pitch<<" "<<yaw<<std::endl;
     
     ndt_yaw = yaw;
 
@@ -136,8 +136,8 @@ int main(int argc, char* argv[]){
             pitch *= 180/M_PI;
             yaw *= 180/M_PI;
             
-            // std::cout<<"## TF RPY: "<<roll<<" "<<pitch<<" "<<yaw<<std::endl;            
-            // std::cout<<"## ins yaw - tf yaw: "<<ins_yaw-yaw<<std::endl<<std::endl;            
+            std::cout<<"## TF RPY: "<<roll<<" "<<pitch<<" "<<yaw<<std::endl;            
+            std::cout<<"## ins yaw - tf yaw: "<<ins_yaw-yaw<<std::endl<<std::endl;            
 
             double yaw_diff = ins_yaw - yaw;    
 

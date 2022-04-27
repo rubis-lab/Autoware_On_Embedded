@@ -21,7 +21,8 @@
   <!-- ndt_matching --><!-- pcl_generic=0, pcl_anh=1, pcl_anh_gpu=2, pcl_openmp=3 -->
   <include file="$(find lidar_localizer)/launch/ndt_matching_params.launch">
     <arg name="method_type" value="0" /> 
-    <arg name="get_height" value="true" /> 
+    <arg name="get_height" value="true" />
+    <arg name="init_match_threshold" value="0.3" /> 
   </include>
 
   <!-- ndt config -->

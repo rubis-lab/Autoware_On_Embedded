@@ -959,9 +959,16 @@ static void imu_callback(const sensor_msgs::Imu::Ptr& input)
 
 static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
 { 
+  static int match_cnt = 10;
   // Check inital matching is success or not
-  if(_is_init_match_finished == false && previous_score < _init_match_threshold && previous_score != 0.0)
-    _is_init_match_finished = true;
+  if(_is_init_match_finished == false){
+
+    if(previous_score < _init_match_threshold) match_cnt--;
+    else match_cnt = 10;
+
+    if(previous_score < _init_match_threshold && previous_score != 0.0 && match_cnt <0)
+      _is_init_match_finished = true;
+  }
 
   health_checker_ptr_->CHECK_RATE("topic_rate_filtered_points_slow", 8, 5, 1, "topic filtered_points subscribe rate slow.");
 
@@ -1413,19 +1420,6 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
     //    current_pose_pub.publish(current_pose_msg);
     localizer_pose_pub.publish(localizer_pose_msg);
 
-    // Send TF "/base_link" to "/map"
-    transform.setOrigin(tf::Vector3(current_pose.x, current_pose.y, current_pose.z));
-    transform.setRotation(current_q);
-    //    br.sendTransform(tf::StampedTransform(transform, current_scan_time, "/map", "/base_link"));
-    if (_use_local_transform == true)
-    {
-      br.sendTransform(tf::StampedTransform(local_transform * transform, current_scan_time, "/map", "/base_link"));
-    }
-    else
-    {
-      br.sendTransform(tf::StampedTransform(transform, current_scan_time, "/map", "/base_link"));
-    }
-
     matching_end = std::chrono::system_clock::now();
     exe_time = std::chrono::duration_cast<std::chrono::microseconds>(matching_end - matching_start).count() / 1000.0;
     time_ndt_matching.data = exe_time;
@@ -1539,6 +1533,19 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
     offset_imu_odom_yaw = 0.0;
 
     if(!_is_kalman_filter_on){
+      // Send TF "/base_link" to "/map"
+      transform.setOrigin(tf::Vector3(current_pose.x, current_pose.y, current_pose.z));
+      transform.setRotation(current_q);
+      //    br.sendTransform(tf::StampedTransform(transform, current_scan_time, "/map", "/base_link"));
+      if (_use_local_transform == true)
+      {
+        br.sendTransform(tf::StampedTransform(local_transform * transform, current_scan_time, "/map", "/base_link"));
+      }
+      else
+      {
+        br.sendTransform(tf::StampedTransform(transform, current_scan_time, "/map", "/base_link"));
+      }
+
       // Update previous_*** when kalman filter is not enabled
       previous_pose.x = current_pose.x;
       previous_pose.y = current_pose.y;
@@ -1592,7 +1599,7 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
       tf::Quaternion kalman_q;
       kalman_q.setRPY(0.0, 0.0, _ins_stat_yaw * M_PI / 180.0);      
       kalman_transform.setRotation(kalman_q);
-      kalman_br.sendTransform(tf::StampedTransform(kalman_transform, current_scan_time, "/map", "/kalman"));
+      kalman_br.sendTransform(tf::StampedTransform(kalman_transform, current_scan_time, "/map", "/base_link"));
 
       // Update previous by kalman filter output
       previous_pose.x = kalman_filtered_pose_msg.pose.position.x;
