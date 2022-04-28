@@ -1312,18 +1312,17 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
       _is_matching_failed = true;
 
       #ifdef DEBUG
-        std::cout<<"NDT matching is FAILED!"<<std::endl;
+        std::cout<<"NDT matching is FAILED! || current_score: " << fitness_score << "|| pose_diff: " << ndt_kalman_pose_diff <<std::endl;
       #endif
     }    
-    else if( _is_matching_failed && abs(_previous_success_score - fitness_score) < _restore_score_diff_threshold){ // Recover success
+    else if( _is_matching_failed && (abs(_previous_success_score - fitness_score) < _restore_score_diff_threshold && ndt_kalman_pose_diff < 1.0)){ // Recover success
       if(success_cnt-- < 0){
         _is_matching_failed = false;
         success_cnt = 10;
+        #ifdef DEBUG
+        std::cout<<"NDT matching is ON! || current score: "<<fitness_score<<" || previous_success_score: "<<_previous_success_score<<" || pose_diff: "<<ndt_kalman_pose_diff<<std::endl;
+        #endif
       }
-
-      #ifdef DEBUG
-        std::cout<<"NDT matching is ON! || current score: "<<fitness_score<<" || previous_success_score: "<<_previous_success_score<<std::endl;
-      #endif
     }
 
     if(_is_matching_failed){

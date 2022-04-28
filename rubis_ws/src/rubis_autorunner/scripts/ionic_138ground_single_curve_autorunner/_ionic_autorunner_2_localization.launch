@@ -23,7 +23,7 @@
     <arg name="method_type" value="0" /> 
     <arg name="get_height" value="true" />
     <arg name="init_match_threshold" value="8.0" /> 
-    <arg name="ndt_kalman_error_threshold" value="8.0" /> 
+    <arg name="ndt_kalman_error_threshold" value="4.0" /> 
     <arg name="restore_score_diff_threshold" value="1.0" /> 
   </include>
 
