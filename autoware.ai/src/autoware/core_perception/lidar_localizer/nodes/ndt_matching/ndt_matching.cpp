@@ -980,8 +980,12 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
     if(previous_score < _init_match_threshold) match_cnt--;
     else match_cnt = 10;
 
-    if(previous_score < _init_match_threshold && previous_score != 0.0 && match_cnt <0)
+    if(previous_score < _init_match_threshold && previous_score != 0.0 && match_cnt <0){
       _is_init_match_finished = true;
+      #ifdef DEBUG
+        std::cout<<"Success initial matching!"<<std::endl;
+      #endif
+    }
   }
 
   health_checker_ptr_->CHECK_RATE("topic_rate_filtered_points_slow", 8, 5, 1, "topic filtered_points subscribe rate slow.");
@@ -1303,6 +1307,7 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
     // Check ndt matching failure    
     double ndt_kalman_pose_diff = sqrt(pow(current_pose.x - current_kalman_pose.x,2) + pow(current_pose.y - current_kalman_pose.y, 2));
 
+    static int success_cnt = 10;
     if(!_is_matching_failed && (ndt_kalman_pose_diff > _ndt_kalman_error_threshold || abs(previous_score - fitness_score) > 10.0)){ 
       _is_matching_failed = true;
 
@@ -1311,7 +1316,10 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
       #endif
     }    
     else if( _is_matching_failed && abs(_previous_success_score - fitness_score) < _restore_score_diff_threshold){ // Recover success
-      _is_matching_failed = false;
+      if(success_cnt-- < 0){
+        _is_matching_failed = false;
+        success_cnt = 10;
+      }
 
       #ifdef DEBUG
         std::cout<<"NDT matching is ON! || current score: "<<fitness_score<<" || previous_success_score: "<<_previous_success_score<<std::endl;

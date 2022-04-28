@@ -112,8 +112,10 @@ Eigen::Vector2f LKF::run_without_update(float theta_t, Eigen::Vector2f u_k){
     Eigen::Matrix2f K_prime; // Kalman gain(Modified)
     K_prime = P_k * H_k * (H_k * P_k * H_k.transpose() + R_k).completeOrthogonalDecomposition().pseudoInverse();
 
+    Eigen::Vector2f z_k = x_hat_k;
+
     Eigen::Vector2f x_hat_prime_k; // Update result
-    x_hat_prime_k = x_hat_k;
+    x_hat_prime_k = x_hat_k + K_prime * (z_k - H_k * x_hat_k);
 
     Eigen::Matrix2f P_prime_k; // Update prediction covariance
     P_prime_k = P_k - K_prime * H_k * P_k;
