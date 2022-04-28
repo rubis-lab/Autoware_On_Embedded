@@ -1289,7 +1289,7 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
     Eigen::Vector2f u_k, z_k;
 
     u_k << _previous_ins_stat_vel_x + 0.5f * _previous_ins_stat_acc_x * diff_time, _previous_ins_stat_vel_y + 0.5f * _previous_ins_stat_acc_y * diff_time;
-    z_k << ndt_pose_msg.pose.position.x, ndt_pose_msg.pose.position.y;
+    z_k << current_pose.x, current_pose.y;
 
     Eigen::Vector2f kalman_filtered_pose = linear_kalman_filter.run(diff_time, u_k, z_k);
 
