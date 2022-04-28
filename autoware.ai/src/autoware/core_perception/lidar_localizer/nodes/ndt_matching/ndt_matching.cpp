@@ -234,6 +234,8 @@ static ros::Publisher is_kalman_filter_on_pub, kalman_filtered_pose_pub;
 static bool _is_kalman_filter_on = false;
 static double _ndt_kalman_error_threshold = 100.0;
 static LKF linear_kalman_filter;
+static double _previous_success_score;
+static bool _is_matching_failed = false;
 
 
 static ros::Publisher estimated_vel_mps_pub, estimated_vel_kmph_pub, estimated_vel_pub;
@@ -290,6 +292,7 @@ pthread_mutex_t mutex;
 
 static bool _is_init_match_finished = false;
 static float _init_match_threshold = 4.0;
+static float _restore_score_diff_threshold = 1.0;
 
 
 void ToQuaternion(double yaw, double pitch, double roll, geometry_msgs::Quaternion &q)
@@ -1281,7 +1284,6 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
     linear_kalman_filter.set_init_pose(current_pose.x, current_pose.y);
   }
 
-  bool is_matching_failed = false;
   // Run Kalman Filter
   if(_is_kalman_filter_on){
     Eigen::Vector2f u_k, z_k;
@@ -1300,21 +1302,29 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
 
     // Check ndt matching failure    
     double ndt_kalman_pose_diff = sqrt(pow(current_pose.x - current_kalman_pose.x,2) + pow(current_pose.y - current_kalman_pose.y, 2));
-    
-    if(ndt_kalman_pose_diff > _ndt_kalman_error_threshold){
-      is_matching_failed = true;
+
+    if(!_is_matching_failed && (ndt_kalman_pose_diff > _ndt_kalman_error_threshold || abs(previous_score - fitness_score) > 10.0)){ 
+      _is_matching_failed = true;
+
       #ifdef DEBUG
         std::cout<<"NDT matching is FAILED!"<<std::endl;
       #endif
+    }    
+    else if( _is_matching_failed && abs(_previous_success_score - fitness_score) < _restore_score_diff_threshold){ // Recover success
+      _is_matching_failed = false;
+
+      #ifdef DEBUG
+        std::cout<<"NDT matching is ON! || current score: "<<fitness_score<<" || previous_success_score: "<<_previous_success_score<<std::endl;
+      #endif
     }
 
-    if(is_matching_failed){
+    if(_is_matching_failed){
       linear_kalman_filter.restore();
       kalman_filtered_pose = linear_kalman_filter.run_without_update(diff_time, u_k);
 
       current_kalman_pose.x = kalman_filtered_pose(0);
       current_kalman_pose.y = kalman_filtered_pose(1);
-      // current_kalman_pose.z = 0.0;
+      current_kalman_pose.z = 0.0;
       // current_kalman_pose.roll = 0.0;
       // current_kalman_pose.pitch = 0.0;
       // current_kalman_pose.yaw = _current_ins_stat_yaw*M_PI/180.0;
@@ -1500,6 +1510,7 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
   estimated_vel_pub.publish(estimate_vel_msg);
 
   previous_score = fitness_score;
+  if(!_is_matching_failed) _previous_success_score = previous_score;
 
   // Set values for /ndt_stat
   ndt_stat_msg.header.stamp = current_scan_time;
@@ -1587,7 +1598,7 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
   offset_imu_odom_yaw = 0.0;
 
   // Send TF "/base_link" to "/map"
-  if(!is_matching_failed){
+  if(!_is_matching_failed){
     transform.setOrigin(tf::Vector3(current_pose.x, current_pose.y, current_pose.z));
     transform.setRotation(current_q);
     //    br.sendTransform(tf::StampedTransform(transform, current_scan_time, "/map", "/base_link"));
@@ -1658,7 +1669,7 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
     previous_kalman_pose.pitch = current_kalman_pose.pitch;
     previous_kalman_pose.yaw = current_kalman_pose.yaw;
 
-    if(is_matching_failed) previous_pose = previous_kalman_pose;
+    if(_is_matching_failed) previous_pose = previous_kalman_pose;
 
     _previous_ins_stat_vel_x = _current_ins_stat_vel_x;
     _previous_ins_stat_vel_y = _current_ins_stat_vel_y;
@@ -1668,6 +1679,7 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
     _previous_ins_stat_linear_velocity = _current_ins_stat_linear_velocity;
     _previous_ins_stat_linear_acceleration = _current_ins_stat_linear_acceleration;
     _previous_ins_stat_angular_velocity = _current_ins_stat_angular_velocity;
+
   }
 
   std_msgs::Bool is_kalman_filter_on_msgs;
@@ -1763,10 +1775,13 @@ int main(int argc, char** argv)
   private_nh.param<double>("gnss_reinit_fitness", _gnss_reinit_fitness, 500.0);
   private_nh.param<float>("init_match_threshold", _init_match_threshold, 4.0);
   
+  
 
   nh.param<std::string>("/ndt_matching/localizer", _localizer, "velodyne");  
 
   nh.param<double>("/ndt_matching/ndt_kalman_error_threshold", _ndt_kalman_error_threshold, 100.0);
+  nh.param<float>("restore_score_diff_threshold", _restore_score_diff_threshold, 1.0);
+
   if(_use_kalman_filter){
     std::vector<float> H_k_vec, Q_k_vec, R_k_vec, P_k_vec;
 
