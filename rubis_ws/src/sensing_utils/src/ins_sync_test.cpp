@@ -127,7 +127,6 @@ int main(int argc, char* argv[]){
     tf::TransformListener listener;
 
     int cnt = 0, n = 100;
-    double prev_yaw_diff = 0;
     std::vector<int> yaw_diff_vec;
 
     ros::Publisher ndt_yaw_pub = nh.advertise<geometry_msgs::PoseStamped>("/ndt_yaw", 1);
@@ -156,8 +155,6 @@ int main(int argc, char* argv[]){
             ndt_yaw_pub.publish(msg);
 
             double yaw_diff = ins_yaw_default - tf_yaw;    
-
-            prev_yaw_diff = yaw_diff;
         }
         catch(tf::TransformException ex){
 
