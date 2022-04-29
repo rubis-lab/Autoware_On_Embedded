@@ -232,7 +232,6 @@ static double _previous_ins_stat_linear_velocity = 0.0, _previous_ins_stat_linea
 
 static ros::Publisher is_kalman_filter_on_pub, kalman_filtered_pose_pub;
 static bool _is_kalman_filter_on = false;
-static double _ndt_kalman_error_threshold = 100.0;
 static LKF linear_kalman_filter;
 static double _previous_success_score;
 static bool _is_matching_failed = false;
@@ -291,8 +290,12 @@ static unsigned int points_map_num = 0;
 pthread_mutex_t mutex;
 
 static bool _is_init_match_finished = false;
-static float _init_match_threshold = 4.0;
-static float _restore_score_diff_threshold = 1.0;
+static float _init_match_threshold = 8.0;
+// Failure detection and recovery parpameters
+static float _failure_score_diff_threshold = 10.0;
+static float _recovery_score_diff_threshold = 1.0;
+static float _failure_pose_diff_threshold = 4.0;
+static float _recovery_pose_diff_threshold = 1.0;
 
 
 void ToQuaternion(double yaw, double pitch, double roll, geometry_msgs::Quaternion &q)
@@ -1308,14 +1311,14 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
     double ndt_kalman_pose_diff = sqrt(pow(current_pose.x - current_kalman_pose.x,2) + pow(current_pose.y - current_kalman_pose.y, 2));
 
     static int success_cnt = 10;
-    if(!_is_matching_failed && (ndt_kalman_pose_diff > _ndt_kalman_error_threshold || abs(previous_score - fitness_score) > 10.0)){ 
+    if(!_is_matching_failed && (ndt_kalman_pose_diff > _failure_pose_diff_threshold || abs(previous_score - fitness_score) > _failure_score_diff_threshold)){ 
       _is_matching_failed = true;
 
       #ifdef DEBUG
         std::cout<<"NDT matching is FAILED! || current_score: " << fitness_score << "|| pose_diff: " << ndt_kalman_pose_diff <<std::endl;
       #endif
     }    
-    else if( _is_matching_failed && (abs(_previous_success_score - fitness_score) < _restore_score_diff_threshold && ndt_kalman_pose_diff < 1.0)){ // Recover success
+    else if( _is_matching_failed && (ndt_kalman_pose_diff < _recovery_pose_diff_threshold && abs(_previous_success_score - fitness_score) < _recovery_score_diff_threshold)){ // Recover success
       if(success_cnt-- < 0){
         _is_matching_failed = false;
         success_cnt = 10;
@@ -1780,14 +1783,16 @@ int main(int argc, char** argv)
   private_nh.getParam("imu_upside_down", _imu_upside_down);
   private_nh.getParam("imu_topic", _imu_topic);
   private_nh.param<double>("gnss_reinit_fitness", _gnss_reinit_fitness, 500.0);
-  private_nh.param<float>("init_match_threshold", _init_match_threshold, 4.0);
+  private_nh.param<float>("init_match_threshold", _init_match_threshold, 8.0);
   
   
 
   nh.param<std::string>("/ndt_matching/localizer", _localizer, "velodyne");  
 
-  nh.param<double>("/ndt_matching/ndt_kalman_error_threshold", _ndt_kalman_error_threshold, 100.0);
-  nh.param<float>("restore_score_diff_threshold", _restore_score_diff_threshold, 1.0);
+  nh.param<float>("/ndt_matching/failure_score_diff_threshold", _failure_score_diff_threshold, 10.0);  
+  nh.param<float>("/ndt_matching/recovery_score_diff_threshold", _recovery_score_diff_threshold, 1.0);  
+  nh.param<float>("/ndt_matching/failure_pose_diff_threshold", _failure_pose_diff_threshold, 4.0);
+  nh.param<float>("/ndt_matching/recovery_pose_diff_threshold", _failure_pose_diff_threshold, 1.0);
 
   if(_use_kalman_filter){
     std::vector<float> H_k_vec, Q_k_vec, R_k_vec, P_k_vec;
