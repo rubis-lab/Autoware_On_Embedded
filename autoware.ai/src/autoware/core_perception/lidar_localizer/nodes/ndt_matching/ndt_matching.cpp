@@ -995,9 +995,9 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
 
   matching_start = std::chrono::system_clock::now();
 
-  static tf::TransformBroadcaster br;
-  tf::Transform transform;
-  tf::Quaternion predict_q, ndt_q, current_q, localizer_q;
+  static tf::TransformBroadcaster br, kalman_br;
+  tf::Transform transform, kalman_transform;
+  tf::Quaternion predict_q, ndt_q, current_q, localizer_q, kalman_q;
 
   pcl::PointXYZ p;
   pcl::PointCloud<pcl::PointXYZ> filtered_scan;
@@ -1410,8 +1410,23 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
   predict_pose_imu_odom_pub.publish(predict_pose_imu_odom_msg);
 
   ndt_q.setRPY(ndt_pose.roll, ndt_pose.pitch, ndt_pose.yaw);
-  if (_use_local_transform == true)
-  {
+  
+  if(_is_kalman_filter_on){
+    kalman_q.setRPY(current_kalman_pose.roll, current_kalman_pose.pitch, current_kalman_pose.yaw);
+  }
+  
+  if(_is_matching_failed && _is_kalman_filter_on){
+    ndt_pose_msg.header.frame_id = "/map";
+    ndt_pose_msg.header.stamp = current_scan_time;
+    ndt_pose_msg.pose.position.x = current_kalman_pose.x;
+    ndt_pose_msg.pose.position.y = current_kalman_pose.y;
+    ndt_pose_msg.pose.position.z = current_kalman_pose.z;
+    ndt_pose_msg.pose.orientation.x = kalman_q.x();
+    ndt_pose_msg.pose.orientation.y = kalman_q.y();
+    ndt_pose_msg.pose.orientation.z = kalman_q.z();
+    ndt_pose_msg.pose.orientation.w = kalman_q.w();
+  }
+  else if (_use_local_transform == true){
     tf::Vector3 v(ndt_pose.x, ndt_pose.y, ndt_pose.z);
     tf::Transform transform(ndt_q, v);
     ndt_pose_msg.header.frame_id = "/map";
@@ -1424,8 +1439,7 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
     ndt_pose_msg.pose.orientation.z = (local_transform * transform).getRotation().z();
     ndt_pose_msg.pose.orientation.w = (local_transform * transform).getRotation().w();
   }
-  else
-  {
+  else{
     ndt_pose_msg.header.frame_id = "/map";
     ndt_pose_msg.header.stamp = current_scan_time;
     ndt_pose_msg.pose.position.x = ndt_pose.x;
@@ -1434,8 +1448,9 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
     ndt_pose_msg.pose.orientation.x = ndt_q.x();
     ndt_pose_msg.pose.orientation.y = ndt_q.y();
     ndt_pose_msg.pose.orientation.z = ndt_q.z();
-    ndt_pose_msg.pose.orientation.w = ndt_q.w();
+    ndt_pose_msg.pose.orientation.w = ndt_q.w();    
   }
+
 
   current_q.setRPY(current_pose.roll, current_pose.pitch, current_pose.yaw);
   // current_pose is published by vel_pose_mux
@@ -1621,7 +1636,7 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
       br.sendTransform(tf::StampedTransform(transform, current_scan_time, "/map", "/base_link"));
     }
   }
-  else{
+  else{ // When matching is failed
     transform.setOrigin(tf::Vector3(current_kalman_pose.x, current_kalman_pose.y, current_kalman_pose.z));
     current_q.setRPY(current_kalman_pose.roll, current_kalman_pose.pitch, current_kalman_pose.yaw);      
     transform.setRotation(current_q);
@@ -1630,12 +1645,7 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
   
   // Send TF "/kalman" to "/map"
   if(_is_kalman_filter_on){
-    static tf::TransformBroadcaster kalman_br;
-    static tf::StampedTransform kalman_transform;
-    kalman_transform.setOrigin(tf::Vector3(current_kalman_pose.x, current_kalman_pose.y, current_kalman_pose.z));
-    
-    tf::Quaternion kalman_q;
-    kalman_q.setRPY(current_kalman_pose.roll, current_kalman_pose.pitch, current_kalman_pose.yaw);
+    kalman_transform.setOrigin(tf::Vector3(current_kalman_pose.x, current_kalman_pose.y, current_kalman_pose.z));    
     kalman_transform.setRotation(kalman_q);
     kalman_br.sendTransform(tf::StampedTransform(kalman_transform, current_scan_time, "/map", "/kalman"));
   }
