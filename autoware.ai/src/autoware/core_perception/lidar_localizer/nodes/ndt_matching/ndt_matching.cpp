@@ -1310,12 +1310,15 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
     // Check ndt matching failure    
     double ndt_kalman_pose_diff = sqrt(pow(current_pose.x - current_kalman_pose.x,2) + pow(current_pose.y - current_kalman_pose.y, 2));
 
+    // std::cout<<"## pose diff: "<<ndt_kalman_pose_diff<< " | score diff: "<< abs(previous_score - fitness_score)<<std::endl;
+    // std::cout<<"fail score threshold: "<< _failure_score_diff_threshold <<" | restore score threshold: "<<_recovery_score_diff_threshold<<std::endl;\
+    // std::cout<<"fail pose threshold: "<< _failure_pose_diff_threshold <<" | restore pose threshold: "<<_recovery_pose_diff_threshold<<std::endl;
     static int success_cnt = 10;
     if(!_is_matching_failed && (ndt_kalman_pose_diff > _failure_pose_diff_threshold || abs(previous_score - fitness_score) > _failure_score_diff_threshold)){ 
       _is_matching_failed = true;
 
       #ifdef DEBUG
-        std::cout<<"NDT matching is FAILED! || current_score: " << fitness_score << "|| pose_diff: " << ndt_kalman_pose_diff <<std::endl;
+        std::cout<<"NDT matching is FAILED! || score diff: " << abs(previous_score - fitness_score) << "|| pose_diff: " << ndt_kalman_pose_diff <<std::endl;
       #endif
     }    
     else if( _is_matching_failed && (ndt_kalman_pose_diff < _recovery_pose_diff_threshold && abs(_previous_success_score - fitness_score) < _recovery_score_diff_threshold)){ // Recover success
@@ -1335,6 +1338,9 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
       current_kalman_pose.x = kalman_filtered_pose(0);
       current_kalman_pose.y = kalman_filtered_pose(1);
       current_kalman_pose.z = 0.0;
+
+      std::cout<<"Pose with resotre: "<< current_kalman_pose.x<<" " <<current_kalman_pose.y<<std::endl;
+
       // current_kalman_pose.roll = 0.0;
       // current_kalman_pose.pitch = 0.0;
       // current_kalman_pose.yaw = _current_ins_stat_yaw*M_PI/180.0;
@@ -1415,18 +1421,19 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
     kalman_q.setRPY(current_kalman_pose.roll, current_kalman_pose.pitch, current_kalman_pose.yaw);
   }
   
-  if(_is_matching_failed && _is_kalman_filter_on){
-    ndt_pose_msg.header.frame_id = "/map";
-    ndt_pose_msg.header.stamp = current_scan_time;
-    ndt_pose_msg.pose.position.x = current_kalman_pose.x;
-    ndt_pose_msg.pose.position.y = current_kalman_pose.y;
-    ndt_pose_msg.pose.position.z = current_kalman_pose.z;
-    ndt_pose_msg.pose.orientation.x = kalman_q.x();
-    ndt_pose_msg.pose.orientation.y = kalman_q.y();
-    ndt_pose_msg.pose.orientation.z = kalman_q.z();
-    ndt_pose_msg.pose.orientation.w = kalman_q.w();
-  }
-  else if (_use_local_transform == true){
+  // if(_is_matching_failed && _is_kalman_filter_on){
+  //   ndt_pose_msg.header.frame_id = "/map";
+  //   ndt_pose_msg.header.stamp = current_scan_time;
+  //   ndt_pose_msg.pose.position.x = current_kalman_pose.x;
+  //   ndt_pose_msg.pose.position.y = current_kalman_pose.y;
+  //   ndt_pose_msg.pose.position.z = current_kalman_pose.z;
+  //   ndt_pose_msg.pose.orientation.x = kalman_q.x();
+  //   ndt_pose_msg.pose.orientation.y = kalman_q.y();
+  //   ndt_pose_msg.pose.orientation.z = kalman_q.z();
+  //   ndt_pose_msg.pose.orientation.w = kalman_q.w();
+  // }
+  // else 
+  if (_use_local_transform == true){
     tf::Vector3 v(ndt_pose.x, ndt_pose.y, ndt_pose.z);
     tf::Transform transform(ndt_q, v);
     ndt_pose_msg.header.frame_id = "/map";
