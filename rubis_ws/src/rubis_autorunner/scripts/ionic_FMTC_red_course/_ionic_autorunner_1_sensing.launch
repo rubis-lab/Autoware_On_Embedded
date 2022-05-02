@@ -19,7 +19,7 @@
 	<include file="$(find map_file)/launch/points_map_loader.launch">
     <arg name="scene_num" value="noupdate" />
     <arg name="path_pcd" value="$(env USER_HOME)/autoware.ai/autoware_files/points_map/FMTC_merged.pcd"/>
-  </include>
+  </include>  
 
   <!-- Re-publishing simulator/camera_node/image/compressed topic to /image_raw as expected by Autoware -->
   <!-- <node name="republish" type="republish" pkg="image_transport" output="screen" args="compressed in:=/simulator/camera_node/image raw out:=/image_raw"  /> -->
@@ -52,8 +52,13 @@
   
   <!-- INS twist generator -->
   <include file="$(find ins_twist_generator)/launch/ins_twist_generator.launch">
-    <arg name="yaw_offset" value="-72.7014" />
+    <arg name="yaw_offset" value="-68.1605" />
   </include>
+
+  <!-- <include file="$(find ins_twist_generator)/launch/dynamic_ins_twist_generator.launch">
+    <arg name="yaw_offset" value="-72.7014" />
+    <arg name="yaw_diff_threshold" value="2.0" />
+  </include> -->
 
 </launch>
 

@@ -666,7 +666,7 @@ bool DecisionMaker::SelectSafeTrajectory()
       //   curveSlowDownCount = 0;
       // }
       else if(curveSlowDownCount < 400){ // wait 4 sec when angle become less than 7 // TODO: Check its feasibility when pure pursuit is sufficiently tuned
-        desiredVelocity += (m_params.maxSpeed - previous_velocity) / 100;
+        desiredVelocity = previous_velocity + (m_params.maxSpeed - previous_velocity) / 100;
         curveSlowDownCount += 1;
       }
       else{

@@ -1339,7 +1339,7 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
       current_kalman_pose.y = kalman_filtered_pose(1);
       current_kalman_pose.z = 0.0;
 
-      std::cout<<"Pose with resotre: "<< current_kalman_pose.x<<" " <<current_kalman_pose.y<<std::endl;
+      std::cout<<"[Restore] pose_diff]: "<< ndt_kalman_pose_diff << " | score diff: "<< abs(previous_score - fitness_score) <<std::endl;
 
       // current_kalman_pose.roll = 0.0;
       // current_kalman_pose.pitch = 0.0;
@@ -1421,19 +1421,18 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
     kalman_q.setRPY(current_kalman_pose.roll, current_kalman_pose.pitch, current_kalman_pose.yaw);
   }
   
-  // if(_is_matching_failed && _is_kalman_filter_on){
-  //   ndt_pose_msg.header.frame_id = "/map";
-  //   ndt_pose_msg.header.stamp = current_scan_time;
-  //   ndt_pose_msg.pose.position.x = current_kalman_pose.x;
-  //   ndt_pose_msg.pose.position.y = current_kalman_pose.y;
-  //   ndt_pose_msg.pose.position.z = current_kalman_pose.z;
-  //   ndt_pose_msg.pose.orientation.x = kalman_q.x();
-  //   ndt_pose_msg.pose.orientation.y = kalman_q.y();
-  //   ndt_pose_msg.pose.orientation.z = kalman_q.z();
-  //   ndt_pose_msg.pose.orientation.w = kalman_q.w();
-  // }
-  // else 
-  if (_use_local_transform == true){
+  if(_is_matching_failed && _is_kalman_filter_on){
+    ndt_pose_msg.header.frame_id = "/map";
+    ndt_pose_msg.header.stamp = current_scan_time;
+    ndt_pose_msg.pose.position.x = current_kalman_pose.x;
+    ndt_pose_msg.pose.position.y = current_kalman_pose.y;
+    ndt_pose_msg.pose.position.z = current_kalman_pose.z;
+    ndt_pose_msg.pose.orientation.x = kalman_q.x();
+    ndt_pose_msg.pose.orientation.y = kalman_q.y();
+    ndt_pose_msg.pose.orientation.z = kalman_q.z();
+    ndt_pose_msg.pose.orientation.w = kalman_q.w();
+  }
+  else if (_use_local_transform == true){
     tf::Vector3 v(ndt_pose.x, ndt_pose.y, ndt_pose.z);
     tf::Transform transform(ndt_q, v);
     ndt_pose_msg.header.frame_id = "/map";
@@ -1474,6 +1473,7 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
   */
 
   localizer_q.setRPY(localizer_pose.roll, localizer_pose.pitch, localizer_pose.yaw);
+  
   if (_use_local_transform == true)
   {
     tf::Vector3 v(localizer_pose.x, localizer_pose.y, localizer_pose.z);

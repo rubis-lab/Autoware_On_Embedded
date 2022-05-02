@@ -24,9 +24,9 @@
     <arg name="get_height" value="true" /> 
     <arg name="init_match_threshold" value="5.0" /> 
     <arg name="failure_score_diff_threshold" default="50.0" />   
-    <arg name="recovery_score_diff_threshold" default="3.0" />  
-    <arg name="failure_pose_diff_threshold" default="1000.0" /> 
-    <arg name="recovery_pose_diff_threshold" default="2.0" />
+    <arg name="recovery_score_diff_threshold" default="100.0" />  
+    <arg name="failure_pose_diff_threshold" default="2.0" /> 
+    <arg name="recovery_pose_diff_threshold" default="1.0" />
   </include>
 
   <!-- ndt config -->
