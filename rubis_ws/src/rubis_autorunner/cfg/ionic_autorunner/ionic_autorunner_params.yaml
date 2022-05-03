@@ -23,6 +23,7 @@ voxel_grid_filter:
 
 ndt_matching:
   instance_mode: 0
+  use_kalman_filter: False
 
   tf_x: 3.3
   tf_y: -0.8
@@ -44,6 +45,8 @@ ndt_matching:
   gpu_execution_time_filename: "~/Documents/gpu_profiling/test_ndt_matching_execution_time.csv"
   gpu_response_time_filename: "~/Documents/gpu_profiling/test_ndt_matching_response_time.csv"
   gpu_deadline_filename: "~/Documents/gpu_deadline/ndt_matching_gpu_deadline.csv"
+
+
 
 # Detection
 ray_ground_filter_center:

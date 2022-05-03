@@ -28,6 +28,8 @@
 #include <sstream>
 #include <string>
 
+#include <LKF.hpp>
+
 #include <boost/filesystem.hpp>
 
 #include <nav_msgs/Odometry.h>
@@ -37,11 +39,14 @@
 #include <std_msgs/Bool.h>
 #include <std_msgs/Float32.h>
 #include <std_msgs/String.h>
+#include <std_msgs/Bool.h>
 #include <velodyne_pointcloud/point_types.h>
 #include <velodyne_pointcloud/rawdata.h>
 
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include <geometry_msgs/TwistStamped.h>
+#include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/Quaternion.h>
 
 #include <tf/tf.h>
 #include <tf/transform_broadcaster.h>
@@ -75,6 +80,7 @@
 #include <rubis_lib/sched.hpp>
 #include <rubis_msgs/PointCloud2.h>
 #include <rubis_msgs/PoseStamped.h>
+#include <rubis_msgs/InsStat.h>
 
 #define SPIN_PROFILING
 
@@ -85,6 +91,8 @@
 #define Wa 0.4
 #define Wb 0.3
 #define Wc 0.3
+#define M_PI 3.14159265358979323846
+
 
 static std::shared_ptr<autoware_health_checker::HealthChecker> health_checker_ptr_;
 
@@ -209,6 +217,17 @@ static double angular_velocity = 0.0;
 
 static int use_predict_pose = 0;
 
+// INS Stat information
+static bool _is_ins_stat_received = false;
+static double _ins_stat_vel_x = 0.0, _ins_stat_vel_y = 0.0;
+static double _ins_stat_acc_x = 0.0, _ins_stat_acc_y = 0.0;
+static double _ins_stat_yaw = 0.0;
+static double _ins_stat_linear_velocity = 0.0, _ins_stat_linear_acceleration = 0.0, _ins_stat_angular_velocity = 0.0;
+static ros::Publisher is_kalman_filter_on_pub, kalman_filtered_pose_pub;
+static bool _is_kalman_filter_on = false;
+static LKF linear_kalman_filter;
+
+
 static ros::Publisher estimated_vel_mps_pub, estimated_vel_kmph_pub, estimated_vel_pub;
 static std_msgs::Float32 estimated_vel_mps, estimated_vel_kmph, previous_estimated_vel_kmph;
 
@@ -242,6 +261,7 @@ static bool _get_height = false;
 static bool _use_local_transform = false;
 static bool _use_imu = false;
 static bool _use_odom = false;
+static bool _use_kalman_filter = false;
 static bool _imu_upside_down = false;
 static bool _output_log_data = false;
 
@@ -261,6 +281,23 @@ static unsigned int points_map_num = 0;
 pthread_mutex_t mutex;
 
 static bool _is_init_match_finished = false;
+static float _init_match_threshold = 4.0;
+
+
+void ToQuaternion(double yaw, double pitch, double roll, geometry_msgs::Quaternion &q)
+{
+    double cy = cos(yaw * 0.5);
+    double sy = sin(yaw * 0.5);
+    double cp = cos(pitch * 0.5);
+    double sp = sin(pitch * 0.5);
+    double cr = cos(roll * 0.5);
+    double sr = sin(roll * 0.5);
+
+    q.w = cr * cp * cy + sr * sp * sy;
+    q.x = sr * cp * cy - cr * sp * sy;
+    q.y = cr * sp * cy + sr * cp * sy;
+    q.z = cr * cp * sy - sr * sp * cy;
+}
 
 static pose convertPoseIntoRelativeCoordinate(const pose &target_pose, const pose &reference_pose)
 {
@@ -922,9 +959,16 @@ static void imu_callback(const sensor_msgs::Imu::Ptr& input)
 
 static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
 { 
+  static int match_cnt = 10;
   // Check inital matching is success or not
-  if(_is_init_match_finished == false && previous_score < USING_GPS_THRESHOLD && previous_score != 0.0)
-    _is_init_match_finished = true;
+  if(_is_init_match_finished == false){
+
+    if(previous_score < _init_match_threshold) match_cnt--;
+    else match_cnt = 10;
+
+    if(previous_score < _init_match_threshold && previous_score != 0.0 && match_cnt <0)
+      _is_init_match_finished = true;
+  }
 
   health_checker_ptr_->CHECK_RATE("topic_rate_filtered_points_slow", 8, 5, 1, "topic filtered_points subscribe rate slow.");
 
@@ -1376,19 +1420,6 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
     //    current_pose_pub.publish(current_pose_msg);
     localizer_pose_pub.publish(localizer_pose_msg);
 
-    // Send TF "/base_link" to "/map"
-    transform.setOrigin(tf::Vector3(current_pose.x, current_pose.y, current_pose.z));
-    transform.setRotation(current_q);
-    //    br.sendTransform(tf::StampedTransform(transform, current_scan_time, "/map", "/base_link"));
-    if (_use_local_transform == true)
-    {
-      br.sendTransform(tf::StampedTransform(local_transform * transform, current_scan_time, "/map", "/base_link"));
-    }
-    else
-    {
-      br.sendTransform(tf::StampedTransform(transform, current_scan_time, "/map", "/base_link"));
-    }
-
     matching_end = std::chrono::system_clock::now();
     exe_time = std::chrono::duration_cast<std::chrono::microseconds>(matching_end - matching_start).count() / 1000.0;
     time_ndt_matching.data = exe_time;
@@ -1426,6 +1457,10 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
     ndt_stat_msg.use_predict_pose = 0;
 
     ndt_stat_pub.publish(ndt_stat_msg);
+
+
+
+
     /* Compute NDT_Reliability */
     ndt_reliability.data = Wa * (exe_time / 100.0) * 100.0 + Wb * (iteration / 10.0) * 100.0 +
                            Wc * ((2.0 - trans_probability) / 2.0) * 100.0;
@@ -1497,24 +1532,98 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
     offset_imu_odom_pitch = 0.0;
     offset_imu_odom_yaw = 0.0;
 
-    // Update previous_***
-    previous_pose.x = current_pose.x;
-    previous_pose.y = current_pose.y;
-    previous_pose.z = current_pose.z;
-    previous_pose.roll = current_pose.roll;
-    previous_pose.pitch = current_pose.pitch;
-    previous_pose.yaw = current_pose.yaw;
+    if(!_is_kalman_filter_on){
+      // Send TF "/base_link" to "/map"
+      transform.setOrigin(tf::Vector3(current_pose.x, current_pose.y, current_pose.z));
+      transform.setRotation(current_q);
+      //    br.sendTransform(tf::StampedTransform(transform, current_scan_time, "/map", "/base_link"));
+      if (_use_local_transform == true)
+      {
+        br.sendTransform(tf::StampedTransform(local_transform * transform, current_scan_time, "/map", "/base_link"));
+      }
+      else
+      {
+        br.sendTransform(tf::StampedTransform(transform, current_scan_time, "/map", "/base_link"));
+      }
 
-    previous_scan_time = current_scan_time;
+      // Update previous_*** when kalman filter is not enabled
+      previous_pose.x = current_pose.x;
+      previous_pose.y = current_pose.y;
+      previous_pose.z = current_pose.z;
+      previous_pose.roll = current_pose.roll;
+      previous_pose.pitch = current_pose.pitch;
+      previous_pose.yaw = current_pose.yaw;
 
-    previous_previous_velocity = previous_velocity;
-    previous_velocity = current_velocity;
-    previous_velocity_x = current_velocity_x;
-    previous_velocity_y = current_velocity_y;
-    previous_velocity_z = current_velocity_z;
-    previous_accel = current_accel;
+      previous_scan_time = current_scan_time;
 
-    previous_estimated_vel_kmph.data = estimated_vel_kmph.data;
+      previous_previous_velocity = previous_velocity;
+      previous_velocity = current_velocity;
+      previous_velocity_x = current_velocity_x;
+      previous_velocity_y = current_velocity_y;
+      previous_velocity_z = current_velocity_z;
+      previous_accel = current_accel;
+
+      previous_estimated_vel_kmph.data = estimated_vel_kmph.data;    
+    }
+
+    // Setup Kalman Filter
+    if(!_is_kalman_filter_on && _use_kalman_filter && _is_init_match_finished && _is_ins_stat_received){
+      _is_kalman_filter_on = true;
+      linear_kalman_filter.set_init_pose(ndt_pose_msg.pose.position.x, ndt_pose_msg.pose.position.y);
+    }
+
+    // Run Kalman Filter
+    if(_is_kalman_filter_on){
+      Eigen::Vector2f u_k, z_k;
+
+      u_k << _ins_stat_vel_x + 0.5f * _ins_stat_acc_x * diff_time, _ins_stat_vel_y + 0.5f * _ins_stat_acc_y * diff_time;
+      z_k << ndt_pose_msg.pose.position.x, ndt_pose_msg.pose.position.y;
+
+      Eigen::Vector2f kalman_filtered_pose = linear_kalman_filter.run(diff_time, u_k, z_k);
+
+      geometry_msgs::PoseStamped kalman_filtered_pose_msg;
+      kalman_filtered_pose_msg.header = ndt_pose_msg.header;
+      kalman_filtered_pose_msg.pose.position.x = kalman_filtered_pose(0);
+      kalman_filtered_pose_msg.pose.position.y = kalman_filtered_pose(1);
+      kalman_filtered_pose_msg.pose.position.z = ndt_pose_msg.pose.position.z;
+
+      geometry_msgs::Quaternion q;
+      ToQuaternion(_ins_stat_yaw*M_PI/180.0, 0.0, 0.0, q);
+      kalman_filtered_pose_msg.pose.orientation = q;
+
+      kalman_filtered_pose_pub.publish(kalman_filtered_pose_msg);
+
+      static tf::TransformBroadcaster kalman_br;
+      static tf::StampedTransform kalman_transform;
+      kalman_transform.setOrigin(tf::Vector3(kalman_filtered_pose(0), kalman_filtered_pose(1), ndt_pose_msg.pose.position.z));
+      tf::Quaternion kalman_q;
+      kalman_q.setRPY(0.0, 0.0, _ins_stat_yaw * M_PI / 180.0);      
+      kalman_transform.setRotation(kalman_q);
+      kalman_br.sendTransform(tf::StampedTransform(kalman_transform, current_scan_time, "/map", "/base_link"));
+
+      // Update previous by kalman filter output
+      previous_pose.x = kalman_filtered_pose_msg.pose.position.x;
+      previous_pose.y = kalman_filtered_pose_msg.pose.position.y;
+      previous_pose.z = kalman_filtered_pose_msg.pose.position.z;
+      previous_pose.roll = 0.0;
+      previous_pose.pitch = 0.0;
+      previous_pose.yaw = _ins_stat_yaw*M_PI/180.0;
+
+      previous_scan_time = current_scan_time;
+
+      previous_previous_velocity = previous_velocity;
+      previous_velocity = _ins_stat_linear_velocity;
+      previous_velocity_x = _ins_stat_vel_x;
+      previous_velocity_y = _ins_stat_vel_y;
+      previous_velocity_z = 0.0;
+      previous_accel = _ins_stat_linear_acceleration;
+
+      previous_estimated_vel_kmph.data = _ins_stat_linear_velocity*3.6;
+    }
+
+    std_msgs::Bool is_kalman_filter_on_msgs;
+    is_kalman_filter_on_msgs.data = _is_kalman_filter_on;
+    is_kalman_filter_on_pub.publish(is_kalman_filter_on_msgs);
   }
 
   if(rubis::sched::is_task_ready_ == TASK_NOT_READY){
@@ -1532,6 +1641,19 @@ static void rubis_points_callback(const rubis_msgs::PointCloud2::ConstPtr& _inpu
   sensor_msgs::PointCloud2::ConstPtr input = boost::make_shared<const sensor_msgs::PointCloud2>(_input->msg);
   rubis::instance_ = _input->instance;
   ndt_matching(input);
+}
+
+static void ins_stat_callback(const rubis_msgs::InsStat::ConstPtr& input){
+  _is_ins_stat_received = true;
+  _ins_stat_vel_x = input->vel_x;
+  _ins_stat_vel_y = input->vel_y;
+  _ins_stat_acc_x = input->acc_x;
+  _ins_stat_acc_y = input->acc_y;
+  _ins_stat_yaw = input->yaw;
+  _ins_stat_linear_velocity = input->linear_velocity;
+  _ins_stat_linear_acceleration = input->linear_acceleration;
+  _ins_stat_angular_velocity = input->angular_velocity;
+  return;
 }
 
 void* thread_func(void* args)
@@ -1585,13 +1707,42 @@ int main(int argc, char** argv)
   private_nh.getParam("offset", _offset);
   private_nh.getParam("get_height", _get_height);
   private_nh.getParam("use_local_transform", _use_local_transform);
-  private_nh.getParam("use_imu", _use_imu);
+  private_nh.getParam("use_kalman_filter", _use_kalman_filter);
+  private_nh.getParam("use_odom", _use_odom);
   private_nh.getParam("use_odom", _use_odom);
   private_nh.getParam("imu_upside_down", _imu_upside_down);
   private_nh.getParam("imu_topic", _imu_topic);
   private_nh.param<double>("gnss_reinit_fitness", _gnss_reinit_fitness, 500.0);
+  private_nh.param<float>("init_match_threshold", _init_match_threshold, 4.0);
 
   nh.param<std::string>("/ndt_matching/localizer", _localizer, "velodyne");
+
+  if(_use_kalman_filter){
+    std::vector<float> H_k_vec, Q_k_vec, R_k_vec, P_k_vec;
+
+    if(!nh.getParam("/ndt_matching/H_k", H_k_vec)){
+      ROS_ERROR("Failed to get parameter H_k");
+      exit(1);
+    }
+    if(!nh.getParam("/ndt_matching/Q_k", Q_k_vec)){
+      ROS_ERROR("Failed to get parameter Q_k");
+      exit(1);
+    }
+    if(!nh.getParam("/ndt_matching/R_k", R_k_vec)){
+      ROS_ERROR("Failed to get parameter R_k");
+      exit(1);
+    }
+    if(!nh.getParam("/ndt_matching/P_k", P_k_vec)){
+      ROS_ERROR("Failed to get parameter P_k");
+      exit(1);
+    }
+    
+    Eigen::Matrix2f H_k = Eigen::Matrix2f(H_k_vec.data());
+    Eigen::Matrix2f Q_k = Eigen::Matrix2f(Q_k_vec.data());
+    Eigen::Matrix2f R_k = Eigen::Matrix2f(R_k_vec.data());
+    Eigen::Matrix2f P_k = Eigen::Matrix2f(P_k_vec.data());
+    linear_kalman_filter = LKF(H_k, Q_k, R_k, P_k);
+  }
 
   try
   {
@@ -1716,6 +1867,8 @@ int main(int argc, char** argv)
   predict_pose_imu_pub = nh.advertise<geometry_msgs::PoseStamped>("/predict_pose_imu", 10);
   predict_pose_odom_pub = nh.advertise<geometry_msgs::PoseStamped>("/predict_pose_odom", 10);
   predict_pose_imu_odom_pub = nh.advertise<geometry_msgs::PoseStamped>("/predict_pose_imu_odom", 10);
+  is_kalman_filter_on_pub = nh.advertise<std_msgs::Bool>("/is_kalman_filter_on", 10);
+  kalman_filtered_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/kalman_filtered_pose", 10);
 
   ndt_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/ndt_pose", 10);
   if(rubis::instance_mode_) rubis_ndt_pose_pub = nh.advertise<rubis_msgs::PoseStamped>("/rubis_ndt_pose",10);
@@ -1742,6 +1895,8 @@ int main(int argc, char** argv)
   
   // ros::Subscriber odom_sub = nh.subscribe("/vehicle/odom", _queue_size * 10, odom_callback);
   // ros::Subscriber imu_sub = nh.subscribe(_imu_topic.c_str(), _queue_size * 10, imu_callback);
+
+  ros::Subscriber ins_stat_sub = nh.subscribe("/ins_stat", 1, ins_stat_callback);
   
   pthread_t thread;
   pthread_create(&thread, NULL, thread_func, NULL);

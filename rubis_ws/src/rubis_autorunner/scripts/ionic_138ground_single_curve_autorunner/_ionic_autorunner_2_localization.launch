@@ -15,10 +15,14 @@
   <!-- points downsampler -->
   <include file="$(find points_downsampler)/launch/voxel_grid_filter_params.launch" />
 
+  <!-- ndt matching kalman filter parameters -->
+  <rosparam command="load" file="$(env USER_HOME)/rubis_ws/src/rubis_autorunner/cfg/ionic_autorunner/kalman_filter.yaml" />
+
   <!-- ndt_matching --><!-- pcl_generic=0, pcl_anh=1, pcl_anh_gpu=2, pcl_openmp=3 -->
   <include file="$(find lidar_localizer)/launch/ndt_matching_params.launch">
     <arg name="method_type" value="0" /> 
-    <arg name="get_height" value="true" /> 
+    <arg name="get_height" value="true" />
+    <arg name="init_match_threshold" value="0.5" /> 
   </include>
 
   <!-- ndt config -->
@@ -33,8 +37,8 @@
     pitch: $(arg init_pitch),
     yaw: $(arg init_yaw),
     use_predict_pose: 1,
-    error_threshold: 1,
-    resolution: 7.0,
+    error_threshold: 1.2,
+    resolution: 4.0,
     step_size: 0.5,
     trans_epsilon: 0.05,
     max_iterations: 10}

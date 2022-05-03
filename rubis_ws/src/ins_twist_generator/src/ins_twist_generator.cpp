@@ -89,10 +89,12 @@ int main(int argc, char* argv[]){
 
         ins_stat_msg.header = ins_twist_msg.header;
 
-        ins_stat_msg.x_vel = linear_velocity_ * cos(yaw_ * M_PI/180.0);
-        ins_stat_msg.y_vel = linear_velocity_ * sin(yaw_ * M_PI/180.0);
-        ins_stat_msg.x_acc = linear_acceleration_ * cos(yaw_ * M_PI/180.0);
-        ins_stat_msg.y_acc = linear_acceleration_ * sin(yaw_ * M_PI/180.0);
+        ins_stat_msg.vel_x = linear_velocity_ * cos(yaw_ * M_PI/180.0);
+        ins_stat_msg.vel_y = linear_velocity_ * sin(yaw_ * M_PI/180.0);
+        ins_stat_msg.acc_x = linear_acceleration_ * cos(yaw_ * M_PI/180.0);
+        ins_stat_msg.acc_y = linear_acceleration_ * sin(yaw_ * M_PI/180.0);
+        ins_stat_msg.linear_velocity = linear_velocity_;
+        ins_stat_msg.linear_acceleration = linear_acceleration_;
         ins_stat_msg.angular_velocity = angular_velocity_;
         ins_stat_msg.yaw = yaw_;
 

@@ -9,7 +9,7 @@
 
 #define M_PI           3.14159265358979323846
 
-double ins_yaw = 0, ndt_yaw = 0;
+double ins_yaw_default = 0, ins_yaw_modified = 0, ins_yaw_offset = 0, ndt_yaw = 0;
 bool is_done = 0;
 
 void ins_callback(const inertiallabs_msgs::ins_dataConstPtr msg){
@@ -18,18 +18,26 @@ void ins_callback(const inertiallabs_msgs::ins_dataConstPtr msg){
     roll = msg->YPR.z;
     pitch = msg->YPR.y;
     yaw = msg->YPR.x;
+    ins_yaw_default = yaw;
+    std::cout<<"# INS RPY(default): "<<roll<<" "<<pitch<<" "<<yaw<<std::endl;
 
     yaw *= -1;
     if(yaw > 180.0) yaw -= 360.0;
     if(yaw < -180.0) yaw += 360.0;
-
-    // std::cout<<"# INS RPY: "<<roll<<" "<<pitch<<" "<<yaw<<std::endl;
+    ins_yaw_modified = yaw;
+    std::cout<<"# INS RPY(modified): "<<roll<<" "<<pitch<<" "<<yaw<<std::endl;
 
     double velocity;
     velocity = sqrt(pow(msg->Vel_ENU.x,2) + pow(msg->Vel_ENU.y,2));
     // std::cout<<"# INS Vel: "<<velocity<<" "<<msg->Vel_ENU.x<<" "<<msg->Vel_ENU.y<<std::endl;
     
-    ins_yaw = yaw;
+    yaw += 88.9;
+    if(yaw > 180.0) yaw -= 360.0;
+    if(yaw < -180.0) yaw += 360.0;
+    ins_yaw_offset = yaw;
+    std::cout<<"# INS RPY(offset): "<<roll<<" "<<pitch<<" "<<yaw + 88.9<<std::endl<<std::endl;
+    
+    
 }
 
 void sensor_callback(const inertiallabs_msgs::sensor_dataConstPtr msg){
@@ -65,7 +73,7 @@ void ndt_callback(const geometry_msgs::PoseStampedConstPtr msg){
     roll *= 180/M_PI;
     pitch *= 180/M_PI;
     yaw *= 180/M_PI;
-    // std::cout<<"# NDT RPY: "<<roll<<" "<<pitch<<" "<<yaw<<std::endl;
+    std::cout<<"# NDT RPY: "<<roll<<" "<<pitch<<" "<<yaw<<std::endl;
     
     ndt_yaw = yaw;
 
@@ -101,7 +109,7 @@ void gps_callback(const inertiallabs_msgs::gps_dataConstPtr msg){
     
     double velocity = msg->HorSpeed * 3.6;
 
-    std::cout<<"## HorSpeed: "<<velocity<<std::endl;
+    // std::cout<<"## HorSpeed: "<<velocity<<std::endl;
 
     return;
 }
@@ -122,6 +130,8 @@ int main(int argc, char* argv[]){
     double prev_yaw_diff = 0;
     std::vector<int> yaw_diff_vec;
 
+    ros::Publisher ndt_yaw_pub = nh.advertise<geometry_msgs::PoseStamped>("/ndt_yaw", 1);
+
     ros::Rate rate(10);
     while(nh.ok()){
         tf::StampedTransform tf;
@@ -129,17 +139,23 @@ int main(int argc, char* argv[]){
             listener.lookupTransform("/map", "/base_link", ros::Time(0), tf);
             auto q = tf.getRotation();
             tf::Matrix3x3 m(q);
-            double roll, pitch, yaw;
-            m.getRPY(roll, pitch, yaw);
+            double tf_roll, tf_pitch, tf_yaw;
+            m.getRPY(tf_roll, tf_pitch, tf_yaw);
 
-            roll *= 180/M_PI;
-            pitch *= 180/M_PI;
-            yaw *= 180/M_PI;
+            tf_roll *= 180/M_PI;
+            tf_pitch *= 180/M_PI;
+            tf_yaw *= 180/M_PI;
             
-            // std::cout<<"## TF RPY: "<<roll<<" "<<pitch<<" "<<yaw<<std::endl;            
-            // std::cout<<"## ins yaw - tf yaw: "<<ins_yaw-yaw<<std::endl<<std::endl;            
+            std::cout<<"## TF RPY: "<<tf_roll<<" "<<tf_pitch<<" "<<tf_yaw<<std::endl;            
+            std::cout<<"## ins yaw default - tf yaw: "<<ins_yaw_default-tf_yaw<<std::endl;
+            std::cout<<"## ins yaw modified - tf yaw: "<<ins_yaw_modified-tf_yaw<<std::endl;
+            std::cout<<"## ins yaw offset - tf yaw: "<<ins_yaw_offset-tf_yaw<<std::endl<<std::endl;            
 
-            double yaw_diff = ins_yaw - yaw;    
+            geometry_msgs::PoseStamped msg;
+            msg.pose.position.x = tf_yaw;
+            ndt_yaw_pub.publish(msg);
+
+            double yaw_diff = ins_yaw_default - tf_yaw;    
 
             prev_yaw_diff = yaw_diff;
         }

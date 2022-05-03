@@ -99,7 +99,7 @@ inline void send_control_signal()
     msg.header = header_;
     msg.set_accel = 1;
     msg.set_steering = 1;
-    msg.angle_filter_hz = 0.1;
+    msg.angle_filter_hz = 2.5;
     msg.steering_angle = ionic_steering_angle_;
     msg.acceleration = output_;
     pub_vehicle_cmd_.publish(msg);
