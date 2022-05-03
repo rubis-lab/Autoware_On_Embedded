@@ -5,7 +5,7 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
 
-set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+set(CMAKE_CXX_FLAGS_RELEASE "-Ofast")
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -238,6 +238,20 @@ add_executable(gnss_converter
 )
 add_dependencies(gnss_converter ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(gnss_converter
+  ${catkin_LIBRARIES}
+  ${EIGEN3_LIBRARIES}
+  ${OpenCV_LIBS}
+)
+
+add_executable(gnss_pose_pub
+  include/gnss_converter/LLH2UTM.h
+  include/gnss_converter/quaternion_euler.h
+  src/gnss_pose_pub.cpp
+  src/LLH2UTM.cpp
+  src/quaternion_euler.cpp
+)
+add_dependencies(gnss_pose_pub ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(gnss_pose_pub
   ${catkin_LIBRARIES}
   ${EIGEN3_LIBRARIES}
   ${OpenCV_LIBS}
