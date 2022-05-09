@@ -1,0 +1,12 @@
+<launch>
+    <!-- 138ground offset -->
+    <!-- <arg name="x_offset" default="10011.0" />
+    <arg name="y_offset" default="12403.0" /> -->
+    
+    <arg name="x_offset" default="0.0" />
+    <arg name="y_offset" default="0.0" />
+    <node pkg="gnss_converter" type="gnss_pose_pub" name="gnss_pose_pub" output="screen">
+        <param name="x_offset" value="$(arg x_offset)"/>
+        <param name="y_offset" value="$(arg y_offset)"/>
+    </node>
+</launch>

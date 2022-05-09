@@ -1310,21 +1310,27 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
     // Check ndt matching failure    
     double ndt_kalman_pose_diff = sqrt(pow(current_pose.x - current_kalman_pose.x,2) + pow(current_pose.y - current_kalman_pose.y, 2));
 
-    static int success_cnt = 10;
+    // std::cout<<"## pose diff: "<<ndt_kalman_pose_diff<< " | score diff: "<< abs(previous_score - fitness_score)<<std::endl;
+    // std::cout<<"fail score threshold: "<< _failure_score_diff_threshold <<" | restore score threshold: "<<_recovery_score_diff_threshold<<std::endl;\
+    // std::cout<<"fail pose threshold: "<< _failure_pose_diff_threshold <<" | restore pose threshold: "<<_recovery_pose_diff_threshold<<std::endl;
+    static int success_cnt = 1;
     if(!_is_matching_failed && (ndt_kalman_pose_diff > _failure_pose_diff_threshold || abs(previous_score - fitness_score) > _failure_score_diff_threshold)){ 
-      _is_matching_failed = true;
-
       #ifdef DEBUG
-        std::cout<<"NDT matching is FAILED! || current_score: " << fitness_score << "|| pose_diff: " << ndt_kalman_pose_diff <<std::endl;
+        std::cout<<"NDT matching is FAILED! || FAILED?"<<_is_matching_failed <<" | score diff: " << abs(previous_score - fitness_score) << "|| pose_diff: " << ndt_kalman_pose_diff <<std::endl;
       #endif
+      
+      _is_matching_failed = true;
+      
     }    
     else if( _is_matching_failed && (ndt_kalman_pose_diff < _recovery_pose_diff_threshold && abs(_previous_success_score - fitness_score) < _recovery_score_diff_threshold)){ // Recover success
       if(success_cnt-- < 0){
-        _is_matching_failed = false;
-        success_cnt = 10;
         #ifdef DEBUG
-        std::cout<<"NDT matching is ON! || current score: "<<fitness_score<<" || previous_success_score: "<<_previous_success_score<<" || pose_diff: "<<ndt_kalman_pose_diff<<std::endl;
+        std::cout<<"NDT matching is ON! || FAILED?"<<_is_matching_failed << " | current score: "<<fitness_score<<" || previous_success_score: "<<_previous_success_score<<" || pose_diff: "<<ndt_kalman_pose_diff<<std::endl;
         #endif
+        
+        _is_matching_failed = false;
+        success_cnt = 1;
+        
       }
     }
 
@@ -1335,6 +1341,9 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
       current_kalman_pose.x = kalman_filtered_pose(0);
       current_kalman_pose.y = kalman_filtered_pose(1);
       current_kalman_pose.z = 0.0;
+
+      std::cout<<"[Restore] pose_diff]: "<< ndt_kalman_pose_diff << " | score diff: "<< abs(previous_score - fitness_score) <<std::endl;
+
       // current_kalman_pose.roll = 0.0;
       // current_kalman_pose.pitch = 0.0;
       // current_kalman_pose.yaw = _current_ins_stat_yaw*M_PI/180.0;
@@ -1467,6 +1476,7 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
   */
 
   localizer_q.setRPY(localizer_pose.roll, localizer_pose.pitch, localizer_pose.yaw);
+  
   if (_use_local_transform == true)
   {
     tf::Vector3 v(localizer_pose.x, localizer_pose.y, localizer_pose.z);
@@ -1802,7 +1812,7 @@ int main(int argc, char** argv)
   nh.param<float>("/ndt_matching/failure_score_diff_threshold", _failure_score_diff_threshold, 10.0);  
   nh.param<float>("/ndt_matching/recovery_score_diff_threshold", _recovery_score_diff_threshold, 1.0);  
   nh.param<float>("/ndt_matching/failure_pose_diff_threshold", _failure_pose_diff_threshold, 4.0);
-  nh.param<float>("/ndt_matching/recovery_pose_diff_threshold", _failure_pose_diff_threshold, 1.0);
+  nh.param<float>("/ndt_matching/recovery_pose_diff_threshold", _recovery_pose_diff_threshold, 1.0);
 
   if(_use_kalman_filter){
     std::vector<float> H_k_vec, Q_k_vec, R_k_vec, P_k_vec;
