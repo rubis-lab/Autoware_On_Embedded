@@ -53,8 +53,10 @@ LKF::LKF(Eigen::Matrix2f _H_k, Eigen::Matrix2f _Q_k, Eigen::Matrix2f _R_k, Eigen
 }
 
 void LKF::set_init_pose(float init_pose_x, float init_pose_y){
-    P_k_prev(0) = init_pose_x;
-    P_k_prev(1) = init_pose_y;
+    x_hat_k_prev_prev(0) = init_pose_x;
+    x_hat_k_prev_prev(1) = init_pose_y;
+    x_hat_k_prev(0) = init_pose_x;
+    x_hat_k_prev(1) = init_pose_y;
 }
 
 Eigen::Vector2f LKF::run(float theta_t, Eigen::Vector2f u_k, Eigen::Vector2f z_k){ // z_k: observation vector
