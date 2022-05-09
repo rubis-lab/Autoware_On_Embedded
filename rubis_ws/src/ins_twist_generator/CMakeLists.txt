@@ -236,6 +236,13 @@ add_executable(ins_twist_generator
 add_dependencies(ins_twist_generator ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(ins_twist_generator
   ${catkin_LIBRARIES}
-  ${EIGEN3_LIBRARIES}
-  ${OpenCV_LIBS}
 )
+
+add_executable(dynamic_ins_twist_generator
+  src/dynamic_ins_twist_generator.cpp
+)
+add_dependencies(dynamic_ins_twist_generator ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(dynamic_ins_twist_generator
+  ${catkin_LIBRARIES}
+)
+
