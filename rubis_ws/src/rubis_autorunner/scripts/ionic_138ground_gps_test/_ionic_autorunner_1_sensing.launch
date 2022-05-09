@@ -9,23 +9,23 @@
   
   <!-- Vector Map Loader -->
 	<node pkg="map_file" type="vector_map_loader" name="vector_map_loader" args="
-	    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/220203_fmtc_red/dtlane.csv 
-	    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/220203_fmtc_red/idx.csv 
-	    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/220203_fmtc_red/lane.csv 
-	    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/220203_fmtc_red/node.csv 
-	    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/220203_fmtc_red/point.csv"/>
+	    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/220503_138gound_gps/dtlane.csv 
+	    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/220503_138gound_gps/idx.csv 
+	    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/220503_138gound_gps/lane.csv 
+	    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/220503_138gound_gps/node.csv 
+	    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/220503_138gound_gps/point.csv"/>
 
   <!-- Point Map Loader -->
-	<include file="$(find map_file)/launch/points_map_loader.launch">
+	<!-- <include file="$(find map_file)/launch/points_map_loader.launch">
     <arg name="scene_num" value="noupdate" />
     <arg name="path_pcd" value="$(env USER_HOME)/autoware.ai/autoware_files/points_map/FMTC_merged.pcd"/>
-  </include>  
+  </include>   -->
 
   <!-- Re-publishing simulator/camera_node/image/compressed topic to /image_raw as expected by Autoware -->
   <!-- <node name="republish" type="republish" pkg="image_transport" output="screen" args="compressed in:=/simulator/camera_node/image raw out:=/image_raw"  /> -->
 
 <!-- Lidar Launch File -->
-  <include file="$(find runtime_manager)/launch_files/velodyne_vlp16_hires.launch" />
+  <!-- <include file="$(find runtime_manager)/launch_files/velodyne_vlp16_hires.launch" /> -->
   
   <!-- <include file="$(find rubis_pkg)/launch/lidar_republisher_params.launch">
     <arg name="input_topic" value="$(arg lidar_input_topic)" />
@@ -52,7 +52,7 @@
   
   <!-- INS twist generator -->
   <include file="$(find ins_twist_generator)/launch/ins_twist_generator.launch">
-    <arg name="yaw_offset" value="-64.569" />
+    <arg name="yaw_offset" value="0.0" />
   </include>
 
   <!-- <include file="$(find ins_twist_generator)/launch/dynamic_ins_twist_generator.launch">
