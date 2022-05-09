@@ -24,6 +24,9 @@
 #include <memory>
 
 #include <geometry_msgs/TwistStamped.h>
+#include <rubis_msgs/TwistStamped.h>
+#include <rubis_lib/sched.hpp>
+
 #include <ros/ros.h>
 #include <std_msgs/Bool.h>
 #include <std_msgs/Int32.h>
@@ -33,6 +36,7 @@
 #include "autoware_msgs/ControlCommandStamped.h"
 #include "autoware_msgs/RemoteCmd.h"
 #include "autoware_msgs/VehicleCmd.h"
+#include "rubis_msgs/VehicleCmd.h"
 #include "autoware_msgs/Gear.h"
 
 #include "tablet_socket_msgs/gear_cmd.h"
@@ -41,6 +45,8 @@
 // headers in Autowae Health Checker
 #include <autoware_health_checker/health_checker/health_checker.h>
 
+
+extern int zero_flag_;
 
 class TwistGate
 {
@@ -58,6 +64,7 @@ private:
   void watchdogTimer();
   void remoteCmdCallback(const remote_msgs_t::ConstPtr& input_msg);
   void autoCmdTwistCmdCallback(const geometry_msgs::TwistStamped::ConstPtr& input_msg);
+  void autoCmdRubisTwistCmdCallback(const rubis_msgs::TwistStamped::ConstPtr& _input_msg);
   void modeCmdCallback(const tablet_socket_msgs::mode_cmd::ConstPtr& input_msg);
   void gearCmdCallback(const tablet_socket_msgs::gear_cmd::ConstPtr& input_msg);
   void accelCmdCallback(const autoware_msgs::AccelCmd::ConstPtr& input_msg);
@@ -70,6 +77,8 @@ private:
   void timerCallback(const ros::TimerEvent& e);
   void configCallback(const autoware_config_msgs::ConfigTwistFilter& msg);
 
+  inline void updateTwistGateMsg(const geometry_msgs::TwistStamped::ConstPtr& input_msg);
+
   void resetVehicleCmdMsg();
 
   // spinOnce for test
@@ -80,17 +89,19 @@ private:
   std::shared_ptr<autoware_health_checker::HealthChecker> health_checker_ptr_;
   ros::Publisher control_command_pub_;
   ros::Publisher vehicle_cmd_pub_;
+  ros::Publisher rubis_vehicle_cmd_pub_;
   ros::Subscriber remote_cmd_sub_;
   ros::Subscriber config_sub_;
   std::map<std::string, ros::Subscriber> auto_cmd_sub_stdmap_;
   ros::Timer timer_;
 
   vehicle_cmd_msg_t twist_gate_msg_;
+  rubis_msgs::VehicleCmd rubis_twist_gate_msg_;
   std_msgs::Bool emergency_stop_msg_;
   ros::Time remote_cmd_time_, emergency_handling_time_;
   ros::Time state_time_;
   ros::Duration timeout_period_;
-  double loop_rate_;
+  double loop_rate_;  
 
   std::thread watchdog_timer_thread_;
   bool is_alive;

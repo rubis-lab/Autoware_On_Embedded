@@ -17,15 +17,7 @@
 #include "op_trajectory_evaluator_core.h"
 #include "op_ros_helpers/op_ROSHelpers.h"
 #include "op_planner/MappingHelpers.h"
-#include <rubis_sched/sched.hpp>
-
-int scheduling_flag_;
-int profiling_flag_;
-std::string response_time_filename_;
-int rate_;
-double minimum_inter_release_time_;
-double execution_time_;
-double relative_deadline_;
+#include <rubis_lib/sched.hpp>
 
 namespace TrajectoryEvaluatorNS
 {
@@ -68,6 +60,19 @@ TrajectoryEval::TrajectoryEval()
     sub_current_velocity = nh.subscribe("/current_velocity", 10, &TrajectoryEval::callbackGetVehicleStatus, this);
   else if(bVelSource == 2)
     sub_can_info = nh.subscribe("/can_info", 10, &TrajectoryEval::callbackGetCANInfo, this);
+
+  /*  RT Scheduling setup  */
+  // sub_current_pose = nh.subscribe("/current_pose", 1, &TrajectoryEval::callbackGetCurrentPose, this); //origin 10
+  // sub_current_state = nh.subscribe("/current_state", 1, &TrajectoryEval::callbackGetCurrentState, this); //origin 10
+
+  // int bVelSource = 1;
+  // _nh.getParam("/op_trajectory_evaluator/velocitySource", bVelSource);
+  // if(bVelSource == 0)
+  //   sub_robot_odom = nh.subscribe("/odom", 1, &TrajectoryEval::callbackGetRobotOdom, this); //origin 10
+  // else if(bVelSource == 1)
+  //   sub_current_velocity = nh.subscribe("/current_velocity", 1, &TrajectoryEval::callbackGetVehicleStatus, this); //origin 10
+  // else if(bVelSource == 2)
+  //   sub_can_info = nh.subscribe("/can_info", 1, &TrajectoryEval::callbackGetCANInfo, this); //origin 10
 
   sub_GlobalPlannerPaths = nh.subscribe("/lane_waypoints_array", 1, &TrajectoryEval::callbackGetGlobalPlannerPath, this);
   sub_LocalPlannerPaths = nh.subscribe("/local_trajectories", 1, &TrajectoryEval::callbackGetLocalPlannerPath, this);
@@ -136,6 +141,7 @@ void TrajectoryEval::UpdatePlanningParams(ros::NodeHandle& _nh)
   _nh.param("/op_trajectory_evaluator/PedestrianRightThreshold", m_PedestrianRightThreshold, 7.0);
   _nh.param("/op_trajectory_evaluator/PedestrianLeftThreshold", m_PedestrianLeftThreshold, 2.0);
   _nh.param("/op_trajectory_evaluator/PedestrianImageDetectionRange", m_PedestrianImageDetectionRange, 0.7);
+  _nh.param("/op_trajectory_evaluator/PedstrianStopImgHeightThreshold", m_pedestrian_stop_img_height_threshold, 120);
   _nh.param("/op_trajectory_evaluator/ImageWidth", m_ImageWidth, 1920);
   _nh.param("/op_trajectory_evaluator/ImageHeight", m_ImageHeight, 1080);
   _nh.param("/op_trajectory_evaluator/VehicleImageDetectionRange", m_VehicleImageDetectionRange, 0.3);
@@ -162,6 +168,8 @@ void TrajectoryEval::callbackGetVehicleStatus(const geometry_msgs::TwistStampedC
     m_VehicleStatus.steer = atan(m_CarInfo.wheel_base * msg->twist.angular.z/msg->twist.linear.x);
   UtilityHNS::UtilityH::GetTickCount(m_VehicleStatus.tStamp);
   bVehicleStatus = true;
+
+  if(rubis::sched::is_task_ready_ == TASK_NOT_READY) rubis::sched::init_task();
 }
 
 void TrajectoryEval::callbackGetCANInfo(const autoware_can_msgs::CANInfoConstPtr &msg)
@@ -265,14 +273,17 @@ void TrajectoryEval::callbackGetPredictedObjects(const autoware_msgs::DetectedOb
 
   PlannerHNS::DetectedObject obj;
   for(unsigned int i = 0 ; i <msg->objects.size(); i++)
-  {
+  {    
     // if(msg->objects.at(i).pose.position.y < -20 || msg->objects.at(i).pose.position.y > 20)
+    //   continue;    
+      
+    // if(msg->objects.at(i).pose.position.z > 1 || msg->objects.at(i).pose.position.z < -1.5)
     //   continue;
-    if(msg->objects.at(i).pose.position.z > 1 || msg->objects.at(i).pose.position.z < -1.5)
-      continue;
 
     autoware_msgs::DetectedObject msg_obj = msg->objects.at(i);     
 
+    // #### Decison making for objects
+    
     if(msg_obj.id > 0) // If fusion object is detected
     {
       // calculate distance to person first
@@ -347,28 +358,46 @@ void TrajectoryEval::callbackGetPredictedObjects(const autoware_msgs::DetectedOb
 
       m_PredictedObjects.push_back(obj);
     }
+    /*
     else{ // If object is only detected at vision
       int image_obj_center_x = msg_obj.x+msg_obj.width/2;
       int image_obj_center_y = msg_obj.y+msg_obj.height/2;
-      
-      if (msg_obj.label == "person"){// If person is detected only in image
-        if(image_obj_center_x >= image_person_detection_range_left && image_obj_center_x <= image_person_detection_range_right){ 
-          double temp_x_distance = 1000;
-          if(msg_obj.height>=195) temp_x_distance = 10.0;
-          else if(msg_obj.height>=125) temp_x_distance = 15.0;
-          else if(msg_obj.height>=105) temp_x_distance = 20.0;                
-          if(abs(temp_x_distance) < abs(distance_to_pedestrian)) distance_to_pedestrian = temp_x_distance;
-        }
-      }                    
-      else if(msg_obj.label == "car" || msg_obj.label == "truck" || msg_obj.label == "bus"){            
+      // if (msg_obj.label == "person"){// If person is detected only in image
+      //   // TO ERASE
+      //   std::cout<<"object height:" << msg_obj.height << " / threshold:" << m_pedestrian_stop_img_height_threshold << std::endl;
+      //   if(image_obj_center_x >= image_person_detection_range_left && image_obj_center_x <= image_person_detection_range_right){ 
+      //     double temp_x_distance = 1000;
+      //     if(msg_obj.height >= m_pedestrian_stop_img_height_threshold) temp_x_distance = 10;
+      //     if(abs(temp_x_distance) < abs(distance_to_pedestrian)) distance_to_pedestrian = temp_x_distance;
+      //   }
+      // }                    
+      // else 
+      if(msg_obj.label == "car" || msg_obj.label == "truck" || msg_obj.label == "bus"){            
         if((msg_obj.width > m_VehicleImageWidthThreshold) 
               && (image_obj_center_x > image_vehicle_detection_range_left) 
               && (image_obj_center_x < image_vehicle_detection_range_right)
-        ){          
+        )
+        {          
           vehicle_cnt+=1;        
         }
       }
     }
+    */
+
+    int image_obj_center_x = msg_obj.x+msg_obj.width/2;
+    int image_obj_center_y = msg_obj.y+msg_obj.height/2;
+    if (msg_obj.label == "person"){// If person is detected only in image
+      
+      // TO ERASE
+      // ROS_WARN("object height:%d // thr: %d\n", msg_obj.height, m_pedestrian_stop_img_height_threshold);
+
+      if(image_obj_center_x >= image_person_detection_range_left && image_obj_center_x <= image_person_detection_range_right){ 
+        double temp_x_distance = 1000;
+        if(msg_obj.height >= m_pedestrian_stop_img_height_threshold) temp_x_distance = 10;
+        if(abs(temp_x_distance) < abs(distance_to_pedestrian)) distance_to_pedestrian = temp_x_distance;
+      }
+    }
+    
   }
 
   // Publish Sprint Switch
@@ -434,13 +463,25 @@ bool TrajectoryEval::UpdateTf()
 void TrajectoryEval::MainLoop()
 {
   ros::NodeHandle private_nh("~");
-  private_nh.param<int>("/op_trajectory_evaluator/scheduling_flag", scheduling_flag_, 0);
-  private_nh.param<int>("/op_trajectory_evaluator/profiling_flag", profiling_flag_, 0);
-  private_nh.param<std::string>("/op_trajectory_evaluator/response_time_filename", response_time_filename_, "/home/hypark/Documents/profiling/response_time/op_trajectory_evaluator.csv");
-  private_nh.param<int>("/op_trajectory_evaluator/rate", rate_, 10);
-  private_nh.param("/op_trajectory_evaluator/minimum_inter_release_time", minimum_inter_release_time_, (double)10);
-  private_nh.param("/op_trajectory_evaluator/execution_time", execution_time_, (double)10);
-  private_nh.param("/op_trajectory_evaluator/relative_deadline", relative_deadline_, (double)10);
+
+  // Scheduling Setup
+  int task_scheduling_flag;
+  int task_profiling_flag;
+  std::string task_response_time_filename;
+  int rate;
+  double task_minimum_inter_release_time;
+  double task_execution_time;
+  double task_relative_deadline; 
+
+  private_nh.param<int>("/op_trajectory_evaluator/task_scheduling_flag", task_scheduling_flag, 0);
+  private_nh.param<int>("/op_trajectory_evaluator/task_profiling_flag", task_profiling_flag, 0);
+  private_nh.param<std::string>("/op_trajectory_evaluator/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/op_trajectory_evaluator.csv");
+  private_nh.param<int>("/op_trajectory_evaluator/rate", rate, 10);
+  private_nh.param("/op_trajectory_evaluator/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
+  private_nh.param("/op_trajectory_evaluator/task_execution_time", task_execution_time, (double)10);
+  private_nh.param("/op_trajectory_evaluator/task_relative_deadline", task_relative_deadline, (double)10);  
+
+  if(task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
 
   PlannerHNS::WayPoint prevState, state_change;
 
@@ -450,28 +491,21 @@ void TrajectoryEval::MainLoop()
   nh.getParam("/op_trajectory_evaluator/intersection_list", intersection_xml);
   PlannerHNS::MappingHelpers::ConstructIntersection_RUBIS(intersection_list, intersection_xml);
 
-  // FILE *fp;
-  // if(profiling_flag_){      
-  //   fp = fopen(response_time_filename_.c_str(), "a");
-  // }
+  
 
-  ros::Rate loop_rate(100);
-  // if(scheduling_flag_) loop_rate = ros::Rate(rate_);
+  ros::Rate loop_rate(rate);
+  if(!task_scheduling_flag && !task_profiling_flag) loop_rate = ros::Rate(100);
 
   struct timespec start_time, end_time;
 
   while (ros::ok())
   {
-    // if(profiling_flag_){        
-    //   clock_gettime(CLOCK_MONOTONIC, &start_time);
-    // }
-    // if(scheduling_flag_){
-    //   rubis::sched::set_sched_deadline(gettid(), 
-    //     static_cast<uint64_t>(execution_time_), 
-    //     static_cast<uint64_t>(relative_deadline_), 
-    //     static_cast<uint64_t>(minimum_inter_release_time_)
-    //   );
-    // }      
+    if(task_profiling_flag) rubis::sched::start_task_profiling();
+
+    if(rubis::sched::is_task_ready_ == TASK_READY && rubis::sched::task_state_ == TASK_STATE_READY){
+      if(task_scheduling_flag) rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline); 
+      rubis::sched::task_state_ = TASK_STATE_RUNNING;     
+    }
 
     UpdateMyParams();
     UpdateTf();
@@ -542,6 +576,7 @@ void TrajectoryEval::MainLoop()
         }
 
         pub_LocalWeightedTrajectories.publish(local_lanes);
+        rubis::sched::task_state_ = TASK_STATE_DONE;
       }
       else
       {
@@ -566,14 +601,14 @@ void TrajectoryEval::MainLoop()
     else
       sub_GlobalPlannerPaths = nh.subscribe("/lane_waypoints_array",   1,    &TrajectoryEval::callbackGetGlobalPlannerPath,   this);
 
-    // if(profiling_flag_){
-    //   clock_gettime(CLOCK_MONOTONIC, &end_time);
-    //   fprintf(fp, "%lld.%.9ld,%lld.%.9ld,%d\n",start_time.tv_sec,start_time.tv_nsec,end_time.tv_sec,end_time.tv_nsec,getpid());    
-    //   fflush(fp);
-    // }
+    if(task_profiling_flag) rubis::sched::stop_task_profiling(0, rubis::sched::task_state_);
+
+    if(rubis::sched::is_task_ready_ == TASK_READY && rubis::sched::task_state_ == TASK_STATE_DONE){
+      if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
+      rubis::sched::task_state_ = TASK_STATE_READY;
+    }
     loop_rate.sleep();
   }
-  // fclose(fp);
 }
 
 }

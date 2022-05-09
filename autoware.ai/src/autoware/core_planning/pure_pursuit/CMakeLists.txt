@@ -21,7 +21,9 @@ find_package(
     std_msgs
     tf
     tf2
-    rubis_sched
+    rubis_lib
+    rubis_msgs
+    can_data_msgs
 )
 
 catkin_package(

@@ -1,5 +1,5 @@
 <launch>
-  <rosparam command="load" file="$(env USER_HOME)/autoware.ai/autoware_files/data/yaml/desktop_scheduling_params.yaml" />
+  <rosparam command="load" file="$(env USER_HOME)/autoware.ai/autoware_files/data/yaml/desktop_lgsvl_params.yaml" />
   <!-- op_global_planning -->
   <include file="$(find op_global_planner)/launch/op_global_planner.launch">
     <arg name="pathDensity"           value="1" /> <!-- distance between each two waypoints-->
@@ -11,7 +11,7 @@
     <arg name="mapSource"             value="0" /> <!-- Autoware=0, Vector Map Folder=1, kml file=2 -->
     <arg name="mapFileName"           value="" /> <!-- incase of kml map source -->
     <!-- Borregas Avenue -->
-    <arg name="use_static_goal"       value="true" />
+    <arg name="use_static_goal"       value="false" />
     <arg name="goal_pose_x"           value="-104.992" />
     <arg name="goal_pose_y"           value="-320.855" />
     <arg name="goal_pose_z"           value="0.0" />
@@ -52,7 +52,7 @@
     <arg name="mapSource"                       default="0" />        <!-- Autoware=0, Vector Map Folder=1, kml=2 -->
     <arg name="mapFileName"                     default="" />
     <arg name="minVelocity"                     default="0.1" />  
-    <arg name="speedProfileFactor"              default="1.2"  />
+    <arg name="speedProfileFactor"              default="1.2"  />     <!-- Minimum waypoint velocity -->   
     <arg name="smoothingDataWeight"             default="0.45"  />
     <arg name="smoothingSmoothWeight"           default="0.4"  />  
   </include>
@@ -100,10 +100,6 @@
   <!-- op_behavior_selector -->
   <include file="$(find op_local_planner)/launch/op_behavior_selector_parameter.launch">
     <arg name="evidence_tust_number"            default="25"/>
-    <arg name="distanceToPedestrianThreshold"   default="15.0" />
-    <arg name="sprintSpeed"                    default="10.0" />
-    <arg name="obstacleWaitingTimeinIntersection"  default="2.0" />
-    <arg name="turnThreshold"                   default="30.0" />
     <arg name="trafficLightFile"                default="crossing_test/crossing_traffic_light.yaml" />
     <arg name="stopLineFile"                    default="crossing_test/crossing_stop_line.yaml" />
     <!-- <arg name="intersectionFile"                default="crossing_test/crossing_intersection.yaml" /> -->

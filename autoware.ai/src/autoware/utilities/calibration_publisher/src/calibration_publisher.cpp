@@ -24,11 +24,8 @@
 #include "autoware_msgs/ProjectionMatrix.h"
 
 #include <yaml-cpp/yaml.h>
+#include <stdlib.h>
 
-// static cv::Mat CameraExtrinsicMat;
-// static cv::Mat CameraMat;
-// static cv::Mat DistCoeff;
-// static cv::Size ImageSize;
 struct SimpleMatrix{
   int rows;
   int cols;
@@ -225,7 +222,14 @@ int main(int argc, char *argv[])
 
   std::string calibration_file;
   private_nh.param<std::string>("calibration_file", calibration_file, "");
+
+  if(calibration_file.at(0) == '~'){
+    calibration_file.erase(0,1);
+    std::string user_home_str(std::getenv("USER_HOME"));
+    calibration_file = user_home_str + calibration_file;
+  }
   
+  ROS_INFO("[%s] calibration_file: '%s'", __APP_NAME__, calibration_file.c_str());  
   if (calibration_file.empty())
   {
     ROS_ERROR("[%s] Missing calibration file path '%s'.", __APP_NAME__, calibration_file.c_str());

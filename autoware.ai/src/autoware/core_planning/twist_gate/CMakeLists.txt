@@ -17,7 +17,8 @@ find_package(
     roslint
     std_msgs
     tablet_socket_msgs
-    rubis_sched
+    rubis_lib
+    rubis_msgs
 )
 
 catkin_package(

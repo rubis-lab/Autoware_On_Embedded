@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>rubis_lib</name>
+  <version>1.12.0</version>
+  <description>Rubis library for Autoware implemented by HYP</description>
+  
+  <maintainer email="kite9240@gmail.com">hypark</maintainer>
+  <license>MIT</license>
+  <buildtool_depend>autoware_build_flags</buildtool_depend>
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>pcl_conversions</depend>
+  <depend>pcl_omp_registration</depend>
+  <depend>pcl_ros</depend>
+  <depend>sensor_msgs</depend>
+  <depend>rubis_msgs</depend>
+  <depend>velodyne_pointcloud</depend>
+  <depend>tf</depend>
+</package>

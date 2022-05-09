@@ -1,18 +1,11 @@
 <launch>
-  <!-- testbed -->
-  <!-- <arg name="init_x" value="-8.72" />
-  <arg name="init_y" value="51.74" />
-  <arg name="init_z" value="-0.71" />
-  <arg name="init_roll" value="0.0" />
-  <arg name="init_pitch" value="0.0" />
-  <arg name="init_yaw" value="-1.8" /> -->
-  <!-- cubetown -->
-  <arg name="init_x" value="57.1" />
-  <arg name="init_y" value="1.38" />
-  <arg name="init_z" value="0.48" />
-  <arg name="init_roll" value="0.0" />
-  <arg name="init_pitch" value="0.0" />
-  <arg name="init_yaw" value="1.57" />
+  <!-- Borregas -->
+  <arg name="init_x" value=" -8.77106285095" />
+  <arg name="init_y" value="51.5894699097" />
+  <arg name="init_z" value="-0.675319433212" />
+  <arg name="init_roll" value="0.025" />
+  <arg name="init_pitch" value="-0.014" />
+  <arg name="init_yaw" value="-1.829" />
 
   <!-- vel/pose connect -->
   <arg name="topic_pose_stamped" default="/ndt_pose" />
@@ -48,9 +41,9 @@
     resolution: 3.0,
     step_size: 0.5,
     trans_epsilon: 0.01,
-    max_iterations: 5}
+    max_iterations: 10}
   '"/>
-
+  
   <!-- vel_pose_mux -->
   <include file="$(find autoware_connector)/launch/vel_pose_connect.launch">
     <arg name="topic_pose_stamped" value="$(arg topic_pose_stamped)" />

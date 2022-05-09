@@ -15,69 +15,69 @@
  */
 
 #include <imm_ukf_pda/imm_ukf_pda.h>
-#include <rubis_sched/sched.hpp>
+#include <rubis_lib/sched.hpp>
 #define SPIN_PROFILING
-
-int scheduling_flag_;
-int profiling_flag_;
-std::string response_time_filename_;
-int rate_;
-double minimum_inter_release_time_;
-double execution_time_;
-double relative_deadline_;
 
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "imm_ukf_pda_tracker");
   ros::NodeHandle private_nh("~");
 
-  private_nh.param<int>("/imm_ukf_pda_track/scheduling_flag", scheduling_flag_, 0);
-  private_nh.param<int>("/imm_ukf_pda_track/profiling_flag", profiling_flag_, 0);
-  private_nh.param<std::string>("/imm_ukf_pda_track/response_time_filename", response_time_filename_, "/home/hypark/Documents/profiling/response_time/imm_ukf_pda_track.csv");
-  private_nh.param<int>("/imm_ukf_pda_track/rate", rate_, 10);
-  private_nh.param("/imm_ukf_pda_track/minimum_inter_release_time", minimum_inter_release_time_, (double)10);
-  private_nh.param("/imm_ukf_pda_track/execution_time", execution_time_, (double)10);
-  private_nh.param("/imm_ukf_pda_track/relative_deadline", relative_deadline_, (double)10);
+  // Scheduling Setup
+  int task_scheduling_flag;
+  int task_profiling_flag;
+  std::string task_response_time_filename;
+  int rate;
+  double task_minimum_inter_release_time;
+  double task_execution_time;
+  double task_relative_deadline; 
+
+  private_nh.param<int>("/imm_ukf_pda_track/task_scheduling_flag", task_scheduling_flag, 0);
+  private_nh.param<int>("/imm_ukf_pda_track/task_profiling_flag", task_profiling_flag, 0);
+  private_nh.param<std::string>("/imm_ukf_pda_track/task_response_time_filename", task_response_time_filename, "~/profiling/response_time/imm_ukf_pda_track.csv");
+  private_nh.param<int>("/imm_ukf_pda_track/rate", rate, 10);
+  private_nh.param("/imm_ukf_pda_track/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
+  private_nh.param("/imm_ukf_pda_track/task_execution_time", task_execution_time, (double)10);
+  private_nh.param("/imm_ukf_pda_track/task_relative_deadline", task_relative_deadline, (double)10);
 
   ImmUkfPda app;
   app.run();
 
-  // SPIN
-  // if(!scheduling_flag_ && !profiling_flag_){
+  if(task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
+
+  if(!task_scheduling_flag && !task_profiling_flag){
     ros::spin();
-  // }
-  // else{
-  //   FILE *fp;
-  //   if(profiling_flag_){      
-  //     fp = fopen(response_time_filename_.c_str(), "a");
-  //   }
+  }
+  else{
+    ros::Rate r(rate);
+    // Initialize task ( Wait until first necessary topic is published )
+    while(ros::ok()){
+      if(rubis::sched::is_task_ready_) break;
+      ros::spinOnce();
+      r.sleep();      
+    }
 
-  //   ros::Rate r(rate_);
-  //   struct timespec start_time, end_time;
-  //   while(ros::ok()){
-  //     if(profiling_flag_){        
-  //       clock_gettime(CLOCK_MONOTONIC, &start_time);
-  //     }
-  //     if(scheduling_flag_){
-  //       rubis::sched::set_sched_deadline(gettid(), 
-  //         static_cast<uint64_t>(execution_time_), 
-  //         static_cast<uint64_t>(relative_deadline_), 
-  //         static_cast<uint64_t>(minimum_inter_release_time_)
-  //       );
-  //     }      
+    // Executing task
+    while(ros::ok()){
+      if(task_profiling_flag) rubis::sched::start_task_profiling();
 
-  //     ros::spinOnce();
+      if(rubis::sched::task_state_ == TASK_STATE_READY){
+        if(task_scheduling_flag) rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline); 
+        rubis::sched::task_state_ = TASK_STATE_RUNNING;     
+      }
 
-  //     if(profiling_flag_){
-  //       clock_gettime(CLOCK_MONOTONIC, &end_time);
-  //       fprintf(fp, "%lld.%.9ld,%lld.%.9ld,%d\n",start_time.tv_sec,start_time.tv_nsec,end_time.tv_sec,end_time.tv_nsec,getpid());    
-  //       fflush(fp);
-  //     }
+      ros::spinOnce();
 
-  //     r.sleep();
-  //   }  
-  // fclose(fp);
-  // }
+      if(task_profiling_flag) rubis::sched::stop_task_profiling(0, rubis::sched::task_state_);
+
+      if(rubis::sched::task_state_ == TASK_STATE_DONE){
+        if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
+        rubis::sched::task_state_ = TASK_STATE_READY;
+      }
+      
+      r.sleep();
+    }
+  }
 
   return 0;
 }

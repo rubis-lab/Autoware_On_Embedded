@@ -1,0 +1,237 @@
+# Unit of rate: hz
+# Unit of task information: nano seconds
+
+# 1s  : 1000000000
+# 1ms : 1000000
+# 1us : 1000
+# 1ns : 1
+
+#rate = hz
+# other time unut = ns
+
+# Localization
+voxel_grid_filter:
+  instance_mode: 0
+
+  task_scheduling_flag: 0
+  task_profiling_flag: 0
+  task_response_time_filename: "~/Documents/profiling/response_time/voxel_grid_filter.csv"
+  rate: 10
+  task_minimum_inter_release_time: 100_000_000
+  task_execution_time: 1_600_000
+  task_relative_deadline: 100_000_000
+
+ndt_matching:
+  instance_mode: 0
+  use_kalman_filter: False
+
+  tf_x: 3.3
+  tf_y: -0.8
+  tf_z: 0.09
+  tf_roll: 0
+  tf_pitch: 0
+  tf_yaw: 0
+  localizer: "velodyne"
+
+  task_scheduling_flag: 0
+  task_profiling_flag: 0
+  task_response_time_filename: "~/Documents/profiling/response_time/ndt_matching.csv"
+  rate: 10
+  task_minimum_inter_release_time: 100_000_000
+  task_execution_time: 80_000_000
+  task_relative_deadline: 80_000_000
+  gpu_scheduling_flag: 0
+  gpu_profiling_flag: 0
+  gpu_execution_time_filename: "~/Documents/gpu_profiling/test_ndt_matching_execution_time.csv"
+  gpu_response_time_filename: "~/Documents/gpu_profiling/test_ndt_matching_response_time.csv"
+  gpu_deadline_filename: "~/Documents/gpu_deadline/ndt_matching_gpu_deadline.csv"
+
+
+
+# Detection
+ray_ground_filter_center:
+  task_scheduling_flag: 0
+  task_profiling_flag: 0
+  task_response_time_filename: "~/Documents/profiling/response_time/ray_ground_filter.csv"
+  rate: 10 
+  task_minimum_inter_release_time: 100_000_000
+  task_execution_time: 100_000_000
+  task_relative_deadline: 100_000_000
+
+
+lidar_euclidean_cluster_detect:
+  task_scheduling_flag: 0
+  task_profiling_flag: 0
+  task_response_time_filename: "~/Documents/profiling/response_time/lidar_euclidean_cluster_detect.csv"
+  rate: 10
+  task_minimum_inter_release_time: 200_000_000
+  task_execution_time: 50_000_000
+  task_relative_deadline: 200_000_000
+  gpu_scheduling_flag: 0
+  gpu_profiling_flag: 0
+  gpu_execution_time_filename: "~/Documents/gpu_profiling/test_clustering_execution_time.csv"
+  gpu_response_time_filename: "~/Documents/gpu_profiling/test_clustering_response_time.csv"
+  gpu_deadline_filename: "~/Documents/gpu_deadline/clustering_gpu_deadline.csv"
+
+vision_darknet_detect:
+  task_scheduling_flag: 0
+  task_profiling_flag: 0
+  task_response_time_filename: "~/Documents/profiling/response_time/vision_darknet_detect.csv"
+  rate: 10
+  task_minimum_inter_release_time: 100_000_000
+  task_execution_time: 75_000_000
+  task_relative_deadline: 80_000_000
+  gpu_scheduling_flag: 0
+  gpu_profiling_flag: 0
+  gpu_execution_time_filename: "~/Documents/gpu_profiling/test_yolo_execution_time.csv"
+  gpu_response_time_filename: "~/Documents/gpu_profiling/test_yolo_response_time.csv"
+  gpu_deadline_filename: "~/Documents/gpu_deadline/yolo_gpu_deadline.csv"
+  network_definition_file: "~/autoware.ai/autoware_files/vision/yolov3-320.cfg"
+  pretrained_model_file: "~/autoware.ai/autoware_files/vision/yolov3-320.weights"
+
+imm_ukf_pda_track:
+  task_scheduling_flag: 0
+  task_profiling_flag: 0
+  task_response_time_filename: "~/Documents/profiling/response_time/imm_ukf_pda_track.csv"
+  rate: 10
+  task_minimum_inter_release_time: 200_000_000
+  task_execution_time: 100_000_000
+  task_relative_deadline: 200_000_000
+
+# Planning
+op_global_planner:
+  task_scheduling_flag: 0
+  task_profiling_flag: 0
+  task_response_time_filename: "~/Documents/profiling/response_time/op_global_planner.csv"
+  rate: 25 #25
+  task_minimum_inter_release_time: 100_000_000
+  task_execution_time: 45_000_000
+  task_relative_deadline: 100_000_000
+  multilap_flag: 1
+
+op_common_params:
+  rollOutDensity: 4
+  rollOutsNumber: 0
+  maxVelocity: 10.0
+  maxAcceleration: 10.0
+  maxDeceleration: -10.0
+
+op_trajectory_generator:
+  task_scheduling_flag: 0
+  task_profiling_flag: 0
+  task_response_time_filename: "~/Documents/profiling/response_time/op_trajectory_generator.csv"
+  rate: 100 #100
+  task_minimum_inter_release_time: 100_000_000
+  task_execution_time: 2_900_000
+  task_relative_deadline: 100_000_000
+
+op_trajectory_evaluator:
+  task_scheduling_flag: 0
+  task_profiling_flag: 0
+  task_response_time_filename: "~/Documents/profiling/response_time/op_trajectory_evaluator.csv"
+  rate: 100 #100
+  task_minimum_inter_release_time: 100_000_000
+  task_execution_time: 3_600_000
+  task_relative_deadline: 100_000_000
+  weightPriority: 0
+  weightTransition: 5
+  weightLong: 4
+  weightLat: 4
+  ImageWidth: 1920
+  ImageHeight: 1080
+  SprintDecisionTime: 9999999.0
+
+op_behavior_selector:
+  task_scheduling_flag: 0
+  task_profiling_flag: 0
+  task_response_time_filename: "~/Documents/profiling/response_time/op_behavior_selector.csv"
+  rate: 100 #100
+  task_minimum_inter_release_time: 100_000_000
+  task_execution_time: 20_800_000
+  task_relative_deadline: 100_000_000
+  distanceToPedestrianThreshold: 15.0
+  sprintSpeed: 10.0
+  obstacleWaitingTimeinIntersection: 2.0
+  turnThreshold: 30.0
+
+op_motion_predictor:
+  task_scheduling_flag: 0
+  task_profiling_flag: 0
+  task_response_time_filename: "~/Documents/profiling/response_time/op_motion_predictor.csv"
+  rate: 25 #25
+  task_minimum_inter_release_time: 100_000_000
+  task_execution_time: 3_800_000
+  task_relative_deadline: 100_000_000
+
+# Control
+pure_pursuit:
+  instance_mode: 0
+  task_scheduling_flag: 0
+  task_profiling_flag: 0
+  task_response_time_filename: "~/Documents/profiling/response_time/pure_pursuit.csv"
+  rate: 30 #30
+  task_minimum_inter_release_time: 100_000_000
+  task_execution_time: 3_000_000
+  task_relative_deadline: 100_000_000
+  dynamic_params_flag: False
+  dynamic_params_path: "~/autoware.ai/autoware_files/lgsvl_file/parameter/lgsvl_pure_pursuit.yaml"
+
+twist_filter:
+  instance_mode: 0
+  task_scheduling_flag: 0
+  task_profiling_flag: 0
+  task_response_time_filename: "~/Documents/profiling/response_time/twist_filter.csv"
+  rate: 10
+  task_minimum_inter_release_time: 100_000_000
+  task_execution_time: 2_000_000
+  task_relative_deadline: 100_000_000
+
+twist_gate:
+  instance_mode: 0
+  task_scheduling_flag: 0
+  task_profiling_flag: 0
+  task_response_time_filename: "~/Documents/profiling/response_time/twist_gate.csv"
+  rate: 10
+  task_minimum_inter_release_time: 100_000_000
+  task_execution_time: 2_000_000
+  task_relative_deadline: 100_000_000
+  zero_flag: 0 ## Publish target velocity as 0
+
+# Others
+lidar_republisher:
+  instance_mode: 0
+  task_scheduling_flag: 0
+  task_profiling_flag: 0
+  task_response_time_filename: "~/Documents/profiling/response_time/lidar_republisher.csv"
+  rate: 10
+  task_minimum_inter_release_time: 100_000_000
+  task_execution_time: 70_000_000
+  task_relative_deadline: 100_000_000
+
+vel_relay:
+  task_scheduling_flag: 0
+  task_profiling_flag: 0
+  task_response_time_filename: "~/Documents/profiling/response_time/vel_relay.csv"
+  rate: 10
+  task_minimum_inter_release_time: 100_000_000
+  task_execution_time: 300_000
+  task_relative_deadline: 100_000_000
+
+pose_relay:
+  instance_mode: 0
+  task_scheduling_flag: 0
+  task_profiling_flag: 0
+  task_response_time_filename: "~/Documents/profiling/response_time/pose_relay.csv"
+  rate: 10
+  task_minimum_inter_release_time: 100_000_000
+  task_execution_time: 300_000
+  task_relative_deadline: 100_000_000
+
+republish:
+  task_scheduling_flag: 0
+  task_profiling_flag: 0
+  task_response_time_filename: "~/Documents/profiling/response_time/republish.csv"
+  rate: 10
+  task_minimum_inter_release_time: 100_000_000
+  task_execution_time: 35_000_000
+  task_relative_deadline: 100_000_000

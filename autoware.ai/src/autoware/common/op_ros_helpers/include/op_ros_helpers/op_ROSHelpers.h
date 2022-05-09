@@ -241,7 +241,7 @@ public:
 
   static void ConvertFromPlannerHToAutowareVisualizePathFormat(const std::vector<std::vector<PlannerHNS::WayPoint> >& globalPaths, visualization_msgs::MarkerArray& markerArray);
 
-  static void ConvertFromRoadNetworkToAutowareVisualizeMapFormat(const PlannerHNS::RoadNetwork& map,  visualization_msgs::MarkerArray& markerArray);
+  static void ConvertFromRoadNetworkToAutowareVisualizeMapFormat(const PlannerHNS::RoadNetwork& map,  visualization_msgs::MarkerArray& markerArray, double scale = 1.0);
 
   static void ConvertFromAutowareBoundingBoxObstaclesToPlannerH(const jsk_recognition_msgs::BoundingBoxArray& detectedObstacles,
       std::vector<PlannerHNS::DetectedObject>& impObstacles);
@@ -255,11 +255,11 @@ public:
 
   static void ConvertFromAutowareLaneToLocalLane(const autoware_msgs::Lane& trajectory, std::vector<PlannerHNS::WayPoint>& path);
 
-  static void createGlobalLaneArrayMarker(std_msgs::ColorRGBA color, const autoware_msgs::LaneArray &lane_waypoints_array, visualization_msgs::MarkerArray& markerArray);
+  static void createGlobalLaneArrayMarker(std_msgs::ColorRGBA color, const autoware_msgs::LaneArray &lane_waypoints_array, visualization_msgs::MarkerArray& markerArray, double scale = 1.0);
 
-  static void createGlobalLaneArrayVelocityMarker(const autoware_msgs::LaneArray &lane_waypoints_array , visualization_msgs::MarkerArray& markerArray);
+  static void createGlobalLaneArrayVelocityMarker(const autoware_msgs::LaneArray &lane_waypoints_array , visualization_msgs::MarkerArray& markerArray, double scale = 1.0);
 
-  static void createGlobalLaneArrayOrientationMarker(const autoware_msgs::LaneArray &lane_waypoints_array , visualization_msgs::MarkerArray& markerArray);
+  static void createGlobalLaneArrayOrientationMarker(const autoware_msgs::LaneArray &lane_waypoints_array , visualization_msgs::MarkerArray& markerArray, double scale = 1.0);
 
   static void GetTrafficLightForVisualization(std::vector<PlannerHNS::TrafficLight>& lights, visualization_msgs::MarkerArray& markerArray);
 

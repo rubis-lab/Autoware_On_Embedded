@@ -35,6 +35,8 @@
 #include <sensor_msgs/point_cloud_conversion.h>
 #include <sensor_msgs/PointCloud2.h>
 
+#include <geometry_msgs/PoseStamped.h>
+
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl_ros/transforms.h>
 #include <pcl/search/kdtree.h>
@@ -42,10 +44,18 @@
 
 #include <autoware_config_msgs/ConfigCompareMapFilter.h>
 
+#include <autoware_msgs/NDTStat.h>
+
+#include "rubis_lib/sched.hpp"
+
+static int ready_;
+
 class CompareMapFilter
 {
 public:
   CompareMapFilter();
+  int map_flag;
+  void ready();
 
 private:
   ros::NodeHandle nh_;
@@ -54,6 +64,7 @@ private:
   ros::Subscriber config_sub_;
   ros::Subscriber sensor_points_sub_;
   ros::Subscriber map_sub_;
+  ros::Subscriber ndt_stat_sub_;
   ros::Publisher match_points_pub_;
   ros::Publisher unmatch_points_pub_;
 
@@ -65,14 +76,15 @@ private:
   double min_clipping_height_;
   double max_clipping_height_;
 
-  std::string map_frame_;
+  std::string map_frame_;  
 
   void configCallback(const autoware_config_msgs::ConfigCompareMapFilter::ConstPtr& config_msg_ptr);
   void pointsMapCallback(const sensor_msgs::PointCloud2::ConstPtr& map_cloud_msg_ptr);
   void sensorPointsCallback(const sensor_msgs::PointCloud2::ConstPtr& sensorTF_cloud_msg_ptr);
   void searchMatchingCloud(const pcl::PointCloud<pcl::PointXYZI>::Ptr in_cloud_ptr,
                            pcl::PointCloud<pcl::PointXYZI>::Ptr match_cloud_ptr,
-                           pcl::PointCloud<pcl::PointXYZI>::Ptr unmatch_cloud_ptr);
+                           pcl::PointCloud<pcl::PointXYZI>::Ptr unmatch_cloud_ptr);  
+  void ndtStatCallback(const autoware_msgs::NDTStat& msg);
 };
 
 CompareMapFilter::CompareMapFilter()
@@ -88,11 +100,26 @@ CompareMapFilter::CompareMapFilter()
   nh_private_.param("min_clipping_height", min_clipping_height_, min_clipping_height_);
   nh_private_.param("max_clipping_height", max_clipping_height_, max_clipping_height_);
 
+  map_flag = 0;
+
+  ndt_stat_sub_ = nh_.subscribe("/ndt_stat", 1, &CompareMapFilter::ndtStatCallback, this);
+  match_points_pub_ = nh_.advertise<sensor_msgs::PointCloud2>("/points_ground", 1);
+  unmatch_points_pub_ = nh_.advertise<sensor_msgs::PointCloud2>("/points_no_ground", 1);
+
+  ROS_INFO("[Compare_map_filter] INIT\n");
+}
+
+void CompareMapFilter::ready(){
   config_sub_ = nh_.subscribe("/config/compare_map_filter", 10, &CompareMapFilter::configCallback, this);
   sensor_points_sub_ = nh_.subscribe("/points_raw", 1, &CompareMapFilter::sensorPointsCallback, this);
   map_sub_ = nh_.subscribe("/points_map", 10, &CompareMapFilter::pointsMapCallback, this);
-  match_points_pub_ = nh_.advertise<sensor_msgs::PointCloud2>("/points_ground", 10);
-  unmatch_points_pub_ = nh_.advertise<sensor_msgs::PointCloud2>("/points_no_ground", 10);
+
+  /*  RT Scheduling setup  */
+  // config_sub_ = nh_.subscribe("/config/compare_map_filter", 1, &CompareMapFilter::configCallback, this); // origin 10
+  // sensor_points_sub_ = nh_.subscribe("/points_raw", 1, &CompareMapFilter::sensorPointsCallback, this);
+  // map_sub_ = nh_.subscribe("/points_map", 1, &CompareMapFilter::pointsMapCallback, this); // origin 10
+  
+  ndt_stat_sub_.shutdown();
 }
 
 void CompareMapFilter::configCallback(const autoware_config_msgs::ConfigCompareMapFilter::ConstPtr& config_msg_ptr)
@@ -109,27 +136,40 @@ void CompareMapFilter::pointsMapCallback(const sensor_msgs::PointCloud2::ConstPt
   tree_.setInputCloud(map_cloud_ptr);
 
   map_frame_ = map_cloud_msg_ptr->header.frame_id;
+  map_flag = 1;
+  ROS_INFO("[Compare_map_filter] Points_Map_callback\n");
+}
+
+void CompareMapFilter::ndtStatCallback(const autoware_msgs::NDTStat& msg){
+  std::cout<<"################## "<<msg.score<<std::endl;
+  if(msg.score < 0.5 && msg.score > 0.0) ready_ = 1;
 }
 
 void CompareMapFilter::sensorPointsCallback(const sensor_msgs::PointCloud2::ConstPtr& sensorTF_cloud_msg_ptr)
-{
+{  
+  if(!map_flag){
+    ROS_INFO("[Compare_map_filter] map is not subscribed\n");
+    return;
+  }
+
   const ros::Time sensor_time = sensorTF_cloud_msg_ptr->header.stamp;
   const std::string sensor_frame = sensorTF_cloud_msg_ptr->header.frame_id;
 
   pcl::PointCloud<pcl::PointXYZI>::Ptr sensorTF_cloud_ptr(new pcl::PointCloud<pcl::PointXYZI>);
   pcl::fromROSMsg(*sensorTF_cloud_msg_ptr, *sensorTF_cloud_ptr);
-
   pcl::PointCloud<pcl::PointXYZI>::Ptr sensorTF_clipping_height_cloud_ptr(new pcl::PointCloud<pcl::PointXYZI>);
   sensorTF_clipping_height_cloud_ptr->header = sensorTF_cloud_ptr->header;
   for (size_t i = 0; i < sensorTF_cloud_ptr->points.size(); ++i)
   {
+    if(sensorTF_cloud_ptr->points[i].x < 4 && sensorTF_cloud_ptr->points[i].x > -2) continue; // Ego length filtering
+    if(abs(sensorTF_cloud_ptr->points[i].y) < 1.5) continue; // Ego width filtering
+
     if (sensorTF_cloud_ptr->points[i].z > min_clipping_height_ &&
         sensorTF_cloud_ptr->points[i].z < max_clipping_height_)
     {
       sensorTF_clipping_height_cloud_ptr->points.push_back(sensorTF_cloud_ptr->points[i]);
     }
   }
-
   pcl::PointCloud<pcl::PointXYZI>::Ptr mapTF_cloud_ptr(new pcl::PointCloud<pcl::PointXYZI>);
   try
   {
@@ -142,7 +182,6 @@ void CompareMapFilter::sensorPointsCallback(const sensor_msgs::PointCloud2::Cons
     ROS_ERROR("Transform error: %s", ex.what());
     return;
   }
-
   pcl::PointCloud<pcl::PointXYZI>::Ptr mapTF_match_cloud_ptr(new pcl::PointCloud<pcl::PointXYZI>);
   pcl::PointCloud<pcl::PointXYZI>::Ptr mapTF_unmatch_cloud_ptr(new pcl::PointCloud<pcl::PointXYZI>);
   searchMatchingCloud(mapTF_cloud_ptr, mapTF_match_cloud_ptr, mapTF_unmatch_cloud_ptr);
@@ -182,6 +221,8 @@ void CompareMapFilter::sensorPointsCallback(const sensor_msgs::PointCloud2::Cons
     return;
   }
   unmatch_points_pub_.publish(sensorTF_unmatch_cloud_msg);
+  if(rubis::sched::is_task_ready_ == TASK_NOT_READY) rubis::sched::init_task();
+  rubis::sched::task_state_ = TASK_STATE_DONE;
 }
 
 void CompareMapFilter::searchMatchingCloud(const pcl::PointCloud<pcl::PointXYZI>::Ptr in_cloud_ptr,
@@ -214,8 +255,10 @@ void CompareMapFilter::searchMatchingCloud(const pcl::PointCloud<pcl::PointXYZI>
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "compare_map_filter");
-  CompareMapFilter node;
+  ros::init(argc, argv, "compare_map_filter");  
+
+  CompareMapFilter node;  
+
   ros::spin();
 
   return 0;

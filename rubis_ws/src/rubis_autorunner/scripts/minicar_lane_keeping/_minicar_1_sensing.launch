@@ -1,0 +1,25 @@
+<launch>
+  <rosparam command="load" file="$(env USER_HOME)/rubis_ws/src/rubis_autorunner/cfg/minicar_lane_keeping/minicar_lene_keeping_params.yaml" />
+
+  <!-- Map TF Publisher -->	
+	<include file="$(env USER_HOME)/autoware.ai/autoware_files/data/tf/tf.launch" />
+  
+  <!-- Vector Map Loader -->
+	<node pkg="map_file" type="vector_map_loader" name="vector_map_loader" args="
+	    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/210803_138/dtlane.csv 
+	    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/210803_138/lane.csv 
+	    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/210803_138/node.csv 
+	    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/210803_138/point.csv"/>
+
+  <!-- Point Map Loader -->
+	<include file="$(find map_file)/launch/points_map_loader.launch">
+    <arg name="scene_num" value="noupdate" />
+    <arg name="path_pcd" value="$(env USER_HOME)/autoware.ai/autoware_files/points_map/210803_138_with_voxel.pcd"/>
+  </include>
+
+  <node pkg="tf" type="static_transform_publisher" name="base_link_to_velodyne" args="0.2 0.005 0.21 -0.436 0 0 base_link velodyne 10"/>
+
+	<include file="$(find runtime_manager)/launch_files/velodyne_vlp16_hires.launch"/>
+
+</launch>
+

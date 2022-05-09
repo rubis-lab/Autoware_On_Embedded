@@ -1,0 +1,49 @@
+<launch>
+  <!-- Trajectory Evaluation Specific Parameters -->
+  
+  <arg name="enablePrediction"       default="false" />                
+  <arg name="horizontalSafetyDistance"   default="1.2" />
+  <arg name="verticalSafetyDistance"     default="0.8" />
+
+  <!-- <arg name="weightPriority"   default="0.5" />
+  <arg name="weightTransition"     default="4" />
+  <arg name="weightLong"   default="0.5" />
+  <arg name="weightLat"     default="5" /> -->
+  <arg name="LateralSkipDistance"   default="5.0" />
+
+  <!-- <arg name="ImageWidth" default="1920" />
+  <arg name="ImageHeight" default="1080" /> -->
+  <arg name="PedestrianRightThreshold" default="7.0" />
+  <arg name="PedestrianLeftThreshold" default="2.0" />
+  <arg name="PedestrianImageDetectionRange" default="0.7" /> <!-- (Ratio If pedestrian's center point is located in this range, our car will be stopped -->               
+  <arg name="VehicleImageDetectionRange" default="0.3" /> <!-- (Ratio) If vehicle's center point is located in this range, our car set speed as max velocity --> 
+  <arg name="VehicleImageWidthThreshold" default="0.025" /> <!-- (Ratio) If vehilce's width ratio is lower than this, it will be not detected -->
+  <!-- <arg name="SprintDecisionTime" default="5.0" />  -->
+
+  <arg name="intersectionFile" default="crossing_test/crossing_intersection.yaml" />
+      
+  <node pkg="op_local_planner" type="op_trajectory_evaluator" name="op_trajectory_evaluator" output="screen">
+    <rosparam command="load" file="$(find rubis_pkg)/cfg/$(arg intersectionFile)"/>
+  
+    <param name="enablePrediction"       value="$(arg enablePrediction)" />            
+    <param name="horizontalSafetyDistance"   value="$(arg horizontalSafetyDistance)" />
+    <param name="verticalSafetyDistance"   value="$(arg verticalSafetyDistance)" />    
+
+    <!-- <param name="weightPriority"       value="$(arg weightPriority)" />            
+    <param name="weightTransition"       value="$(arg weightTransition)" />            
+    <param name="weightLong"       value="$(arg weightLong)" />            
+    <param name="weightLat"       value="$(arg weightLat)" />             -->
+    <param name="LateralSkipDistance"       value="$(arg LateralSkipDistance)" />                
+
+    <!-- For detecting person and vehicle -->
+    <!-- <param name="ImageWidth" value="$(arg ImageWidth)" /> -->
+    <!-- <param name="ImageHeight" value="$(arg ImageHeight)" /> -->
+    <param name="PedestrianRightThreshold"  value="$(arg PedestrianRightThreshold)" />                
+    <param name="PedestrianLeftThreshold"   value="$(arg PedestrianLeftThreshold)" />  
+    <param name="PedestrianImageDetectionRange" value="$(arg PedestrianImageDetectionRange)" />        
+    <param name="VehicleImageDetectionRange" value="$(arg VehicleImageDetectionRange)" />    
+    <param name="VehicleImageWidthThreshold" value="$(arg VehicleImageWidthThreshold)" />
+    <!-- <param name="SprintDecisionTime" value="$(arg SprintDecisionTime)" /> -->
+  </node>        
+      
+</launch>

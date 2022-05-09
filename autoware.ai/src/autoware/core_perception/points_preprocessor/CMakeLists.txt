@@ -8,6 +8,7 @@ endif()
 find_package(autoware_build_flags REQUIRED)
 
 find_package(catkin REQUIRED COMPONENTS
+  autoware_msgs
   autoware_config_msgs
   autoware_health_checker
   cv_bridge
@@ -22,7 +23,8 @@ find_package(catkin REQUIRED COMPONENTS
   tf2_eigen
   tf2_ros
   velodyne_pointcloud
-  rubis_sched
+  rubis_lib
+  rubis_msgs
 )
 
 catkin_package()

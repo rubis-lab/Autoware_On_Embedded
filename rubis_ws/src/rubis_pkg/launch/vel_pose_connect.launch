@@ -1,0 +1,16 @@
+
+<!-- -->
+<launch>
+
+  <!-- send table.xml to param server -->
+  <arg name="topic_pose_stamped" default="" />
+  <arg name="topic_twist_stamped" default="" />
+  <arg name="instance_mode" default="0" />
+
+  <node pkg="rubis_pkg" type="rubis_pose_relay" name="pose_relay" output="screen" args="$(arg topic_pose_stamped) /current_pose">
+    <param name="instance_mode" value="$(arg instance_mode)" />
+  </node>
+  <node pkg="topic_tools" type="relay" name="vel_relay" output="screen" args="$(arg topic_twist_stamped) /current_velocity"/>
+  
+
+</launch>

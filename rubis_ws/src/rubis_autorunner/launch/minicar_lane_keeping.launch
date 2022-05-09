@@ -1,0 +1,4 @@
+<launch>
+    <rosparam command="load" file="$(env USER_HOME)/rubis_ws/src/rubis_autorunner/cfg/minicar_lane_keeping/minicar_lane_keeping.yaml" />
+    <node pkg="rubis_autorunner" type="minicar_lane_keeping" name="minicar_lane_keeping" output="screen" />
+</launch>

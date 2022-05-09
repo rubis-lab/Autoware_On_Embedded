@@ -114,6 +114,8 @@ protected:
   ros::Publisher pub_Paths;
   ros::Publisher pub_PathsRviz;
   ros::Publisher pub_TrafficInfo;
+  ros::Publisher pub_PathsRvizMinicar;
+  ros::Publisher pub_MapRvizMinicar;
   //ros::Publisher pub_TrafficInfoRviz;
   //ros::Publisher pub_StartPointRviz;
   //ros::Publisher pub_GoalPointRviz;
@@ -151,7 +153,10 @@ private:
     PlannerHNS::RoadNetwork m_Map;
     bool  m_bKmlMap;
     PlannerHNS::PlannerH m_PlannerH;
-    std::vector<std::vector<PlannerHNS::WayPoint> > m_GeneratedTotalPaths;
+    // std::vector<std::vector<PlannerHNS::WayPoint> > m_GeneratedTotalPaths;
+
+    std::vector<std::vector<std::vector<PlannerHNS::WayPoint>>> m_GeneratedTotalPaths;
+    int selectedGlobalPathIdx;
 
     bool GenerateGlobalPlan(PlannerHNS::WayPoint& startPoint, PlannerHNS::WayPoint& goalPoint, std::vector<std::vector<PlannerHNS::WayPoint> >& generatedTotalPaths);
     void VisualizeAndSend(const std::vector<std::vector<PlannerHNS::WayPoint> > generatedTotalPaths);

@@ -15,9 +15,11 @@
  */
 
 #include "can_status_translator_core.h"
+int is_topic_ready = 0;
 
 namespace autoware_connector
 {
+
 // Constructor
 CanStatusTranslatorNode::CanStatusTranslatorNode() : private_nh_("~"), v_info_()
 {
@@ -80,6 +82,7 @@ void CanStatusTranslatorNode::publishVelocity(const autoware_msgs::VehicleStatus
       kmph2mps(msg->speed), v_info_.getCurrentSteeringAngle(deg2rad(msg->angle)));
 
   pub1_.publish(tw);
+  if(!is_topic_ready) is_topic_ready = 1;
 }
 
 void CanStatusTranslatorNode::publishVelocityViz(const autoware_msgs::VehicleStatusConstPtr& msg)

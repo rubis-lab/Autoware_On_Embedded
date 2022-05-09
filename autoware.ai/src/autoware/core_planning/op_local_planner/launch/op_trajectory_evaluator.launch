@@ -16,6 +16,7 @@
   <arg name="PedestrianRightThreshold" default="7.0" />
   <arg name="PedestrianLeftThreshold" default="2.0" />
   <arg name="PedestrianImageDetectionRange" default="0.7" /> <!-- (Ratio If pedestrian's center point is located in this range, our car will be stopped -->               
+  <arg name="PedestrianStopImgHeightThreshold" default="120" /> <!-- Threshold value of detected pedestrian object box's height. If pedestrian object's hegiht is lower than this value, ego will be stoped -->               
   <arg name="VehicleImageDetectionRange" default="0.3" /> <!-- (Ratio) If vehicle's center point is located in this range, our car set speed as max velocity --> 
   <arg name="VehicleImageWidthThreshold" default="0.025" /> <!-- (Ratio) If vehilce's width ratio is lower than this, it will be not detected -->
   <arg name="SprintDecisionTime" default="5.0" /> <!-- Seconds -->
@@ -41,6 +42,7 @@
     <param name="PedestrianRightThreshold"  value="$(arg PedestrianRightThreshold)" />                
     <param name="PedestrianLeftThreshold"   value="$(arg PedestrianLeftThreshold)" />  
     <param name="PedestrianImageDetectionRange" value="$(arg PedestrianImageDetectionRange)" />        
+    <param name="PedestrianStopImgHeightThreshold" value="$(arg PedestrianStopImgHeightThreshold)" />        
     <param name="VehicleImageDetectionRange" value="$(arg VehicleImageDetectionRange)" />    
     <param name="VehicleImageWidthThreshold" value="$(arg VehicleImageWidthThreshold)" />
     <param name="SprintDecisionTime" value="$(arg SprintDecisionTime)" />

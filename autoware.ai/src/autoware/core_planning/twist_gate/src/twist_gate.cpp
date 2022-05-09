@@ -37,6 +37,8 @@
 
 using AwDiagStatus = autoware_system_msgs::DiagnosticStatus;
 
+int zero_flag_ = 0;
+
 TwistGate::TwistGate(const ros::NodeHandle& nh, const ros::NodeHandle& private_nh)
   : nh_(nh)
   , private_nh_(private_nh)
@@ -46,16 +48,20 @@ TwistGate::TwistGate(const ros::NodeHandle& nh, const ros::NodeHandle& private_n
 {
   private_nh_.param<double>("loop_rate", loop_rate_, 30.0);
   private_nh_.param<bool>("use_decision_maker", use_decision_maker_, false);
+  private_nh_.param<int>("instance_mode", rubis::instance_mode_, 0);
 
   health_checker_ptr_ = std::make_shared<autoware_health_checker::HealthChecker>(nh_, private_nh_);
   control_command_pub_ = nh_.advertise<std_msgs::String>("/ctrl_mode", 1);
   vehicle_cmd_pub_ = nh_.advertise<vehicle_cmd_msg_t>("/vehicle_cmd", 1, true);
+  if(rubis::instance_mode_) rubis_vehicle_cmd_pub_ = nh_.advertise<rubis_msgs::VehicleCmd>("/rubis_vehicle_cmd", 1, true);
   remote_cmd_sub_ = nh_.subscribe("/remote_cmd", 1, &TwistGate::remoteCmdCallback, this);
   config_sub_ = nh_.subscribe("config/twist_filter", 1, &TwistGate::configCallback, this);
 
   timer_ = nh_.createTimer(ros::Duration(1.0 / loop_rate_), &TwistGate::timerCallback, this);
 
-  auto_cmd_sub_stdmap_["twist_cmd"] = nh_.subscribe("/twist_cmd", 1, &TwistGate::autoCmdTwistCmdCallback, this);
+  if(rubis::instance_mode_) auto_cmd_sub_stdmap_["twist_cmd"] = nh_.subscribe("/rubis_twist_cmd", 1, &TwistGate::autoCmdRubisTwistCmdCallback, this);
+  else auto_cmd_sub_stdmap_["twist_cmd"] = nh_.subscribe("/twist_cmd", 1, &TwistGate::autoCmdTwistCmdCallback, this);
+  
   auto_cmd_sub_stdmap_["mode_cmd"] = nh_.subscribe("/mode_cmd", 1, &TwistGate::modeCmdCallback, this);
   auto_cmd_sub_stdmap_["gear_cmd"] = nh_.subscribe("/gear_cmd", 1, &TwistGate::gearCmdCallback, this);
   auto_cmd_sub_stdmap_["accel_cmd"] = nh_.subscribe("/accel_cmd", 1, &TwistGate::accelCmdCallback, this);
@@ -66,6 +72,7 @@ TwistGate::TwistGate(const ros::NodeHandle& nh, const ros::NodeHandle& private_n
   auto_cmd_sub_stdmap_["state"] = nh_.subscribe("/decision_maker/state", 1, &TwistGate::stateCallback, this);
   auto_cmd_sub_stdmap_["emergency_velocity"] =
       nh_.subscribe("emergency_velocity", 1, &TwistGate::emergencyCmdCallback, this);
+
 
   twist_gate_msg_.header.seq = 0;
   emergency_stop_msg_.data = false;
@@ -192,6 +199,18 @@ void TwistGate::remoteCmdCallback(const remote_msgs_t::ConstPtr& input_msg)
 
 void TwistGate::autoCmdTwistCmdCallback(const geometry_msgs::TwistStamped::ConstPtr& input_msg)
 {
+  rubis::instance_ = RUBIS_NO_INSTANCE;
+  updateTwistGateMsg(input_msg); 
+}
+
+void TwistGate::autoCmdRubisTwistCmdCallback(const rubis_msgs::TwistStamped::ConstPtr& _input_msg)
+{
+  geometry_msgs::TwistStamped::ConstPtr input_msg = boost::make_shared<const geometry_msgs::TwistStamped>(_input_msg->msg);
+  rubis::instance_ = _input_msg->instance;
+  updateTwistGateMsg(input_msg); 
+}
+
+inline void TwistGate::updateTwistGateMsg(const geometry_msgs::TwistStamped::ConstPtr& input_msg){
   health_checker_ptr_->CHECK_RATE("topic_rate_twist_cmd_slow", 8, 5, 1, "topic twist_cmd subscribe rate slow.");
   health_checker_ptr_->CHECK_MAX_VALUE("twist_cmd_linear_high", input_msg->twist.linear.x,
     DBL_MAX, DBL_MAX, DBL_MAX, "linear twist_cmd is too high");
@@ -202,9 +221,15 @@ void TwistGate::autoCmdTwistCmdCallback(const geometry_msgs::TwistStamped::Const
     twist_gate_msg_.header.stamp = input_msg->header.stamp;
     twist_gate_msg_.header.seq++;
     twist_gate_msg_.twist_cmd.twist = input_msg->twist;
-
+    
+    if(rubis::instance_mode_ && rubis::instance_ != RUBIS_NO_INSTANCE){
+      rubis_twist_gate_msg_.instance = rubis::instance_;
+    }
     checkState();
   }
+
+  if(rubis::sched::is_task_ready_ == TASK_NOT_READY) rubis::sched::init_task();
+  rubis::sched::task_state_ = TASK_STATE_DONE;
 }
 
 void TwistGate::modeCmdCallback(const tablet_socket_msgs::mode_cmd::ConstPtr& input_msg)
@@ -333,7 +358,15 @@ void TwistGate::emergencyCmdCallback(const vehicle_cmd_msg_t::ConstPtr& input_ms
 
 void TwistGate::timerCallback(const ros::TimerEvent& e)
 {
+  if(zero_flag_ == 1)
+    resetVehicleCmdMsg();
+
   vehicle_cmd_pub_.publish(twist_gate_msg_);
+  if(rubis::instance_mode_){
+    rubis_twist_gate_msg_.msg = twist_gate_msg_;
+    rubis_vehicle_cmd_pub_.publish(rubis_twist_gate_msg_);
+  }
+  rubis::sched::task_state_ = TASK_STATE_DONE;
 }
 
 void TwistGate::configCallback(const autoware_config_msgs::ConfigTwistFilter& msg)

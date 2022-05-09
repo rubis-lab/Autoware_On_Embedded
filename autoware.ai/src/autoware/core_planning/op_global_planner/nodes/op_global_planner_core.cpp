@@ -16,17 +16,11 @@
 
 #include "op_global_planner_core.h"
 #include "op_ros_helpers/op_ROSHelpers.h"
-#include <rubis_sched/sched.hpp>
-
-int scheduling_flag_;
-int profiling_flag_;
-std::string response_time_filename_;
-int rate_;
-double minimum_inter_release_time_;
-double execution_time_;
-double relative_deadline_;
+#include <rubis_lib/sched.hpp>
 
 #define SPIN_PROFILING
+
+#define MINICAR_SCALE 0.3
 
 namespace GlobalPlanningNS
 {
@@ -88,6 +82,8 @@ GlobalPlanner::GlobalPlanner()
   pub_PathsRviz = nh.advertise<visualization_msgs::MarkerArray>("global_waypoints_rviz", 1, true);
   pub_MapRviz  = nh.advertise<visualization_msgs::MarkerArray>("vector_map_center_lines_rviz", 1, true);
   pub_GoalsListRviz = nh.advertise<visualization_msgs::MarkerArray>("op_destinations_rviz", 1, true);
+  pub_PathsRvizMinicar = nh.advertise<visualization_msgs::MarkerArray>("global_waypoints_rviz_minicar", 1, true);
+  pub_MapRvizMinicar = nh.advertise<visualization_msgs::MarkerArray>("vector_map_center_lines_rviz_minicar", 1, true);
 
   if(m_params.bEnableRvizInput)
   {
@@ -99,16 +95,25 @@ GlobalPlanner::GlobalPlanner()
     LoadSimulationData();
   }
 
-  sub_current_pose = nh.subscribe("/current_pose", 10, &GlobalPlanner::callbackGetCurrentPose, this);
+  sub_current_pose = nh.subscribe("/current_pose", 10, &GlobalPlanner::callbackGetCurrentPose, this); // origin: 10
 
   int bVelSource = 1;
   nh.getParam("/op_global_planner/velocitySource", bVelSource);
   if(bVelSource == 0)
-    sub_robot_odom = nh.subscribe("/odom", 10, &GlobalPlanner::callbackGetRobotOdom, this);
+    sub_robot_odom = nh.subscribe("/odom", 10, &GlobalPlanner::callbackGetRobotOdom, this); // origin: 10
   else if(bVelSource == 1)
-    sub_current_velocity = nh.subscribe("/current_velocity", 10, &GlobalPlanner::callbackGetVehicleStatus, this);
+    sub_current_velocity = nh.subscribe("/current_velocity", 10, &GlobalPlanner::callbackGetVehicleStatus, this); // origin: 10
   else if(bVelSource == 2)
-    sub_can_info = nh.subscribe("/can_info", 10, &GlobalPlanner::callbackGetCANInfo, this);
+    sub_can_info = nh.subscribe("/can_info", 10, &GlobalPlanner::callbackGetCANInfo, this); // origin: 10
+
+  /*  RT Scheduling setup  */
+  // sub_current_pose = nh.subscribe("/current_pose", 1, &GlobalPlanner::callbackGetCurrentPose, this); // origin: 10
+  // if(bVelSource == 0)
+  //   sub_robot_odom = nh.subscribe("/odom", 1, &GlobalPlanner::callbackGetRobotOdom, this); // origin: 10
+  // else if(bVelSource == 1)
+  //   sub_current_velocity = nh.subscribe("/current_velocity", 1, &GlobalPlanner::callbackGetVehicleStatus, this); // origin: 10
+  // else if(bVelSource == 2)
+  //   sub_can_info = nh.subscribe("/can_info", 1, &GlobalPlanner::callbackGetCANInfo, this); // origin: 10
 
   if(m_params.bEnableDynamicMapUpdate)
     sub_road_status_occupancy = nh.subscribe<>("/occupancy_road_status", 1, &GlobalPlanner::callbackGetRoadStatusOccupancyGrid, this);
@@ -234,6 +239,8 @@ void GlobalPlanner::callbackGetVehicleStatus(const geometry_msgs::TwistStampedCo
   if(fabs(msg->twist.linear.x) > 0.25)
     m_VehicleState.steer = atan(2.7 * msg->twist.angular.z/msg->twist.linear.x);
   UtilityHNS::UtilityH::GetTickCount(m_VehicleState.tStamp);
+
+  if(rubis::sched::is_task_ready_ == TASK_NOT_READY) rubis::sched::init_task();
 }
 
 void GlobalPlanner::callbackGetCANInfo(const autoware_can_msgs::CANInfoConstPtr &msg)
@@ -296,6 +303,7 @@ void GlobalPlanner::VisualizeAndSend(const std::vector<std::vector<PlannerHNS::W
 {
   autoware_msgs::LaneArray lane_array;
   visualization_msgs::MarkerArray pathsToVisualize;
+  visualization_msgs::MarkerArray pathsToVisualizeMinicar;
 
   for(unsigned int i=0; i < generatedTotalPaths.size(); i++)
   {
@@ -311,7 +319,13 @@ void GlobalPlanner::VisualizeAndSend(const std::vector<std::vector<PlannerHNS::W
   total_color.a = 0.9;
   PlannerHNS::ROSHelpers::createGlobalLaneArrayMarker(total_color, lane_array, pathsToVisualize);
   PlannerHNS::ROSHelpers::createGlobalLaneArrayOrientationMarker(lane_array, pathsToVisualize);
-  PlannerHNS::ROSHelpers::createGlobalLaneArrayVelocityMarker(lane_array, pathsToVisualize);
+  // PlannerHNS::ROSHelpers::createGlobalLaneArrayVelocityMarker(lane_array, pathsToVisualize);
+
+  PlannerHNS::ROSHelpers::createGlobalLaneArrayMarker(total_color, lane_array, pathsToVisualizeMinicar, MINICAR_SCALE);
+  PlannerHNS::ROSHelpers::createGlobalLaneArrayOrientationMarker(lane_array, pathsToVisualizeMinicar, MINICAR_SCALE);
+  // PlannerHNS::ROSHelpers::createGlobalLaneArrayVelocityMarker(lane_array, pathsToVisualizeMinicar, MINICAR_SCALE);
+  
+  pub_PathsRvizMinicar.publish(pathsToVisualizeMinicar);
   pub_PathsRviz.publish(pathsToVisualize);
   if((m_bFirstStart && m_params.bEnableHMI) || !m_params.bEnableHMI)
     pub_Paths.publish(lane_array);
@@ -431,48 +445,48 @@ int GlobalPlanner::LoadSimulationData()
 void GlobalPlanner::MainLoop()
 {
   ros::NodeHandle private_nh("~");
-  private_nh.param<int>("/op_global_planner/scheduling_flag", scheduling_flag_, 0);
-  private_nh.param<int>("/op_global_planner/profiling_flag", profiling_flag_, 0);
-  private_nh.param<std::string>("/op_global_planner/response_time_filename", response_time_filename_, "/home/hypark/Documents/profiling/response_time/op_global_planner.csv");
-  private_nh.param<int>("/op_global_planner/rate", rate_, 10);
-  private_nh.param("/op_global_planner/minimum_inter_release_time", minimum_inter_release_time_, (double)10);
-  private_nh.param("/op_global_planner/execution_time", execution_time_, (double)10);
-  private_nh.param("/op_global_planner/relative_deadline", relative_deadline_, (double)10);
 
-  std::cout<<"scheduling_flag_"<<scheduling_flag_<<std::endl;
-  std::cout<<"profiling_flag_"<<profiling_flag_<<std::endl;
-  std::cout<<"response_time_filename_"<<response_time_filename_<<std::endl;
-  std::cout<<"rate_"<<rate_<<std::endl;
-  std::cout<<"minimum_inter_release_time_"<<minimum_inter_release_time_<<std::endl;
-  std::cout<<"execution_time_"<<execution_time_<<std::endl;
-  std::cout<<"relative_deadline_"<<relative_deadline_<<std::endl;
+  // Scheduling Setup
+  int task_scheduling_flag;
+  int task_profiling_flag;
+  std::string task_response_time_filename;
+  int rate;
+  double task_minimum_inter_release_time;
+  double task_execution_time;
+  double task_relative_deadline; 
+  int multilap_flag;
+  double multilap_replanning_distance;
+  int planning_fail_cnt;
 
+  private_nh.param<int>("/op_global_planner/task_scheduling_flag", task_scheduling_flag, 0);
+  private_nh.param<int>("/op_global_planner/task_profiling_flag", task_profiling_flag, 0);
+  private_nh.param<std::string>("/op_global_planner/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/op_global_planner.csv");
+  private_nh.param<int>("/op_global_planner/rate", rate, 10);
+  private_nh.param("/op_global_planner/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
+  private_nh.param("/op_global_planner/task_execution_time", task_execution_time, (double)10);
+  private_nh.param("/op_global_planner/task_relative_deadline", task_relative_deadline, (double)10);
+  private_nh.param("/op_global_planner/multilap_flag", multilap_flag, 0);
+  private_nh.param("/op_global_planner/multilap_replanning_distance", multilap_replanning_distance, (double)50);
+
+  if(task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
 
   timespec animation_timer;
   UtilityHNS::UtilityH::GetTickCount(animation_timer);
 
-  // FILE *fp;
-  // if(profiling_flag_){      
-  //   fp = fopen(response_time_filename_.c_str(), "a");
-  // }
+  ros::Rate loop_rate(rate);
+  if(!task_scheduling_flag && !task_profiling_flag) loop_rate = ros::Rate(25);
+  
 
-  ros::Rate loop_rate(25);
-  // if(scheduling_flag_) loop_rate = ros::Rate(rate_);
-
-  struct timespec start_time, end_time;
 
   while (ros::ok())
   {
-    // if(profiling_flag_){        
-    //   clock_gettime(CLOCK_MONOTONIC, &start_time);
-    // }
-    // if(scheduling_flag_){
-    //   rubis::sched::set_sched_deadline(gettid(), 
-    //     static_cast<uint64_t>(execution_time_), 
-    //     static_cast<uint64_t>(relative_deadline_), 
-    //     static_cast<uint64_t>(minimum_inter_release_time_)
-    //   );
-    // }      
+    if(task_profiling_flag) rubis::sched::start_task_profiling();
+
+    if(rubis::sched::is_task_ready_ == TASK_READY && rubis::sched::task_state_ == TASK_STATE_READY){
+      if(task_scheduling_flag) rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline); 
+      rubis::sched::task_state_ = TASK_STATE_RUNNING;     
+    }
+
     ros::spinOnce();
     bool bMakeNewPlan = false;
 
@@ -523,60 +537,87 @@ void GlobalPlanner::MainLoop()
       if(m_bKmlMap)
       {
         visualization_msgs::MarkerArray map_marker_array;
+        visualization_msgs::MarkerArray map_marker_array_minicar;
         PlannerHNS::ROSHelpers::ConvertFromRoadNetworkToAutowareVisualizeMapFormat(m_Map, map_marker_array);
+        PlannerHNS::ROSHelpers::ConvertFromRoadNetworkToAutowareVisualizeMapFormat(m_Map, map_marker_array_minicar, MINICAR_SCALE);
+
+        pub_MapRvizMinicar.publish(map_marker_array_minicar);
         pub_MapRviz.publish(map_marker_array);
       }
     }
 
     ClearOldCostFromMap();
 
+    // HJW updated for multi-lab
+    // goal pose is appended at goal pose callback function
     if(m_GoalsPos.size() > 0)
     {
-      if(m_GeneratedTotalPaths.size() > 0 && m_GeneratedTotalPaths.at(0).size() > 3)
+      if(m_GeneratedTotalPaths.size() == 0) // initialize two paths
       {
-        if(m_params.bEnableReplanning)
-        {
-          PlannerHNS::RelativeInfo info;
-          bool ret = PlannerHNS::PlanningHelpers::GetRelativeInfoRange(m_GeneratedTotalPaths, m_CurrentPose, 0.75, info);
-          if(ret == true && info.iGlobalPath >= 0 &&  info.iGlobalPath < m_GeneratedTotalPaths.size() && info.iFront > 0 && info.iFront < m_GeneratedTotalPaths.at(info.iGlobalPath).size())
-          {
-            double remaining_distance =    m_GeneratedTotalPaths.at(info.iGlobalPath).at(m_GeneratedTotalPaths.at(info.iGlobalPath).size()-1).cost - (m_GeneratedTotalPaths.at(info.iGlobalPath).at(info.iFront).cost + info.to_front_distance);
-            if(remaining_distance <= REPLANNING_DISTANCE)
-            {
-              bMakeNewPlan = true;
-              if(m_GoalsPos.size() > 0)
-                m_iCurrentGoalIndex = (m_iCurrentGoalIndex + 1) % m_GoalsPos.size();
-              std::cout << "Current Goal Index = " << m_iCurrentGoalIndex << std::endl << std::endl;
-            }
-          }
+        // Try 50 Times to planning
+        if(planning_fail_cnt == 0){
+          planning_fail_cnt = 50;
         }
-      }
-      else
-        bMakeNewPlan = true;
-
-      if(bMakeNewPlan || (m_params.bEnableDynamicMapUpdate && UtilityHNS::UtilityH::GetTimeDiffNow(m_ReplnningTimer) > REPLANNING_TIME))
-      {
-        UtilityHNS::UtilityH::GetTickCount(m_ReplnningTimer);
+        std::vector<std::vector<PlannerHNS::WayPoint>> tmp_path_list;
+        std::vector<std::vector<PlannerHNS::WayPoint>> tmp_path_list_2;
         PlannerHNS::WayPoint goalPoint = m_GoalsPos.at(m_iCurrentGoalIndex);
-        bool bNewPlan = GenerateGlobalPlan(m_CurrentPose, goalPoint, m_GeneratedTotalPaths);
 
+        // Generate path from initial pose to goal pose (rviz axis) and save to tmp_path_list
+        bool bNewPlan = GenerateGlobalPlan(m_CurrentPose, goalPoint, tmp_path_list);
 
         if(bNewPlan)
         {
-          bMakeNewPlan = false;
-          VisualizeAndSend(m_GeneratedTotalPaths);
+          m_GeneratedTotalPaths.push_back(tmp_path_list);
+
+          // Do multi-lab driving only current position and goal point is close
+          if(multilap_flag){
+            if(hypot(m_CurrentPose.pos.x - goalPoint.pos.x, m_CurrentPose.pos.y - goalPoint.pos.y) < 30){
+              int wp_size = tmp_path_list.at(0).size();
+              PlannerHNS::WayPoint path2_start_wp = tmp_path_list.at(0).at(wp_size / 2 + 10);
+              PlannerHNS::WayPoint path2_end_wp = tmp_path_list.at(0).at(wp_size / 2 - 10);
+              bool bNewPlan_2 = GenerateGlobalPlan(path2_start_wp, path2_end_wp, tmp_path_list_2);
+
+              if(bNewPlan_2){
+                m_GeneratedTotalPaths.push_back(tmp_path_list_2);
+              }
+            }
+          }
+          selectedGlobalPathIdx = 0;
+          VisualizeAndSend(m_GeneratedTotalPaths.at(selectedGlobalPathIdx));
+        }
+        else{
+          planning_fail_cnt--;
+          if(planning_fail_cnt == 0){
+            m_GoalsPos.clear();
+          }
+        }
+      }
+      else if(m_GeneratedTotalPaths.size() > 1){
+        PlannerHNS::RelativeInfo info;
+        bool ret = PlannerHNS::PlanningHelpers::GetRelativeInfoRange(m_GeneratedTotalPaths.at(selectedGlobalPathIdx), m_CurrentPose, 0.75, info);
+        if(ret == true && info.iGlobalPath >= 0 &&  info.iGlobalPath < m_GeneratedTotalPaths.at(selectedGlobalPathIdx).size() && info.iFront > 0 && info.iFront < m_GeneratedTotalPaths.at(selectedGlobalPathIdx).at(info.iGlobalPath).size())
+        {
+          double remaining_distance = m_GeneratedTotalPaths.at(selectedGlobalPathIdx).at(info.iGlobalPath).at(m_GeneratedTotalPaths.at(selectedGlobalPathIdx).at(info.iGlobalPath).size()-1).cost - (m_GeneratedTotalPaths.at(selectedGlobalPathIdx).at(info.iGlobalPath).at(info.iFront).cost + info.to_front_distance);
+          if(remaining_distance <= multilap_replanning_distance)
+          {
+            selectedGlobalPathIdx = 1 - selectedGlobalPathIdx;
+            VisualizeAndSend(m_GeneratedTotalPaths.at(selectedGlobalPathIdx));
+          }
         }
       }
       VisualizeDestinations(m_GoalsPos, m_iCurrentGoalIndex);
     }
-    // if(profiling_flag_){
-    //   clock_gettime(CLOCK_MONOTONIC, &end_time);
-    //   fprintf(fp, "%lld.%.9ld,%lld.%.9ld,%d\n",start_time.tv_sec,start_time.tv_nsec,end_time.tv_sec,end_time.tv_nsec,getpid());    
-    //   fflush(fp);
-    // }
+
+    rubis::sched::task_state_ = TASK_STATE_DONE;
+
+    if(task_profiling_flag) rubis::sched::stop_task_profiling(0, rubis::sched::task_state_);
+
+    if(rubis::sched::is_task_ready_ == TASK_READY && rubis::sched::task_state_ == TASK_STATE_DONE){
+      if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
+      rubis::sched::task_state_ = TASK_STATE_READY;
+    }
     loop_rate.sleep();
   }
-  // fclose(fp);
 }
 
 

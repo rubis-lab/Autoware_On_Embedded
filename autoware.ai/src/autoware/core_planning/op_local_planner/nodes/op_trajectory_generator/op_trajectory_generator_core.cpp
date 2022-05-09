@@ -16,15 +16,7 @@
 
 #include "op_trajectory_generator_core.h"
 #include "op_ros_helpers/op_ROSHelpers.h"
-#include <rubis_sched/sched.hpp>
-
-int scheduling_flag_;
-int profiling_flag_;
-std::string response_time_filename_;
-int rate_;
-double minimum_inter_release_time_;
-double execution_time_;
-double relative_deadline_;
+#include <rubis_lib/sched.hpp>
 
 #define SPIN_PROFILING
 
@@ -63,6 +55,21 @@ TrajectoryGen::TrajectoryGen()
     sub_can_info = nh.subscribe("/can_info", 10, &TrajectoryGen::callbackGetCANInfo, this);
 
   sub_GlobalPlannerPaths = nh.subscribe("/lane_waypoints_array", 1, &TrajectoryGen::callbackGetGlobalPlannerPath, this);
+  
+  /*  RT Scheduling setup  */
+  // sub_initialpose = nh.subscribe("/initialpose", 1, &TrajectoryGen::callbackGetInitPose, this);
+  // sub_current_pose = nh.subscribe("/current_pose", 1, &TrajectoryGen::callbackGetCurrentPose, this); //origin 10
+
+  // int bVelSource = 1;
+  // _nh.getParam("/op_trajectory_generator/velocitySource", bVelSource);
+  // if(bVelSource == 0)
+  //   sub_robot_odom = nh.subscribe("/odom", 1,  &TrajectoryGen::callbackGetRobotOdom, this); //origin 10
+  // else if(bVelSource == 1)
+  //   sub_current_velocity = nh.subscribe("/current_velocity", 1, &TrajectoryGen::callbackGetVehicleStatus, this); //origin 10
+  // else if(bVelSource == 2)
+  //   sub_can_info = nh.subscribe("/can_info", 1, &TrajectoryGen::callbackGetCANInfo, this); //origin 10
+
+  // sub_GlobalPlannerPaths = nh.subscribe("/lane_waypoints_array", 1, &TrajectoryGen::callbackGetGlobalPlannerPath, this);
 }
 
 TrajectoryGen::~TrajectoryGen()
@@ -152,6 +159,8 @@ void TrajectoryGen::callbackGetVehicleStatus(const geometry_msgs::TwistStampedCo
     m_VehicleStatus.steer = atan(m_CarInfo.wheel_base * msg->twist.angular.z/msg->twist.linear.x);
   UtilityHNS::UtilityH::GetTickCount(m_VehicleStatus.tStamp);
   bVehicleStatus = true;
+
+  if(rubis::sched::is_task_ready_ == TASK_NOT_READY) rubis::sched::init_task();  
 }
 
 void TrajectoryGen::callbackGetCANInfo(const autoware_can_msgs::CANInfoConstPtr &msg)
@@ -207,38 +216,41 @@ void TrajectoryGen::MainLoop()
 {
   ros::NodeHandle private_nh("~");
 
-  private_nh.param<int>("/op_trajectory_generator/scheduling_flag", scheduling_flag_, 0);
-  private_nh.param<int>("/op_trajectory_generator/profiling_flag", profiling_flag_, 0);
-  private_nh.param<std::string>("/op_trajectory_generator/response_time_filename", response_time_filename_, "/home/hypark/Documents/profiling/response_time/op_trajectory_generator.csv");
-  private_nh.param<int>("/op_trajectory_generator/rate", rate_, 10);
-  private_nh.param("/op_trajectory_generator/minimum_inter_release_time", minimum_inter_release_time_, (double)10);
-  private_nh.param("/op_trajectory_generator/execution_time", execution_time_, (double)10);
-  private_nh.param("/op_trajectory_generator/relative_deadline", relative_deadline_, (double)10);
+  // Scheduling Setup
+  int task_scheduling_flag;
+  int task_profiling_flag;
+  std::string task_response_time_filename;
+  int rate;
+  double task_minimum_inter_release_time;
+  double task_execution_time;
+  double task_relative_deadline; 
+
+  private_nh.param<int>("/op_trajectory_generator/task_scheduling_flag", task_scheduling_flag, 0);
+  private_nh.param<int>("/op_trajectory_generator/task_profiling_flag", task_profiling_flag, 0);
+  private_nh.param<std::string>("/op_trajectory_generator/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/op_trajectory_generator.csv");
+  private_nh.param<int>("/op_trajectory_generator/rate", rate, 10);
+  private_nh.param("/op_trajectory_generator/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
+  private_nh.param("/op_trajectory_generator/task_execution_time", task_execution_time, (double)10);
+  private_nh.param("/op_trajectory_generator/task_relative_deadline", task_relative_deadline, (double)10);
+
+  if(task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
 
   PlannerHNS::WayPoint prevState, state_change;
 
-  // FILE *fp;
-  // if(profiling_flag_){      
-  //   fp = fopen(response_time_filename_.c_str(), "a");
-  // }
 
-  ros::Rate loop_rate(100);
-  // if(scheduling_flag_) loop_rate = ros::Rate(rate_);
+  ros::Rate loop_rate(rate);
+  if(!task_scheduling_flag && !task_profiling_flag) loop_rate = ros::Rate(100);
 
   struct timespec start_time, end_time;
 
   while (ros::ok())
   {
-    // if(profiling_flag_){        
-    //   clock_gettime(CLOCK_MONOTONIC, &start_time);
-    // }
-    // if(scheduling_flag_){
-    //   rubis::sched::set_sched_deadline(gettid(), 
-    //     static_cast<uint64_t>(execution_time_), 
-    //     static_cast<uint64_t>(relative_deadline_), 
-    //     static_cast<uint64_t>(minimum_inter_release_time_)
-    //   );
-    // }      
+    if(task_profiling_flag) rubis::sched::start_task_profiling();
+
+    if(rubis::sched::is_task_ready_ == TASK_READY && rubis::sched::task_state_ == TASK_STATE_READY){
+      if(task_scheduling_flag) rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline); 
+      rubis::sched::task_state_ = TASK_STATE_RUNNING;     
+    }
 
     ros::spinOnce();
 
@@ -293,6 +305,7 @@ void TrajectoryGen::MainLoop()
         }
       }
       pub_LocalTrajectories.publish(local_lanes);
+      rubis::sched::task_state_ = TASK_STATE_DONE;
     }
     else
       sub_GlobalPlannerPaths = nh.subscribe("/lane_waypoints_array",   1,    &TrajectoryGen::callbackGetGlobalPlannerPath,   this);
@@ -301,16 +314,15 @@ void TrajectoryGen::MainLoop()
     PlannerHNS::ROSHelpers::TrajectoriesToMarkers(m_RollOuts, all_rollOuts);
     pub_LocalTrajectoriesRviz.publish(all_rollOuts);
 
-    // if(profiling_flag_){
-    //   clock_gettime(CLOCK_MONOTONIC, &end_time);
-    //   fprintf(fp, "%lld.%.9ld,%lld.%.9ld,%d\n",start_time.tv_sec,start_time.tv_nsec,end_time.tv_sec,end_time.tv_nsec,getpid());    
-    //   fflush(fp);
-    // }
+    if(task_profiling_flag) rubis::sched::stop_task_profiling(0, rubis::sched::task_state_);
+
+    if(rubis::sched::is_task_ready_ == TASK_READY && rubis::sched::task_state_ == TASK_STATE_DONE){
+      if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
+      rubis::sched::task_state_ = TASK_STATE_READY;
+    }
 
     loop_rate.sleep();
-  }
-
-  // fclose(fp);  
+  } 
 }
 
 }

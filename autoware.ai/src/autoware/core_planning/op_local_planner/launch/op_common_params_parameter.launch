@@ -38,6 +38,7 @@
   <arg name="steeringDelay"       default="1.2" />
   <arg name="minPursuiteDistance"   default="3.0"  />
   <arg name="additionalBrakingDistance" default="5.0"  />
+  <arg name="enableSlowDownOnCurve"       default="false" />
   
   <arg name="giveUpDistance"       default="-4.0"  />
   
@@ -92,6 +93,8 @@
   <param name="steeringDelay"       value="$(arg steeringDelay)" />
   <param name="minPursuiteDistance"     value="$(arg minPursuiteDistance)"  />  
   <param name="additionalBrakingDistance" value="$(arg additionalBrakingDistance)"  />
+
+  <param name="enableSlowDownOnCurve" value="$(arg enableSlowDownOnCurve)"  />
   
   <param name="giveUpDistance" value="$(arg giveUpDistance)"  />
   

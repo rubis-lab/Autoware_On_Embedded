@@ -6,15 +6,11 @@
   <arg name="image_input_topic" default="/image_raw_origin"/>
 
   <!-- Re-publishing simulator/camera_node/image/compressed topic to /image_raw as expected by Autoware -->
-  <node name="republish" type="republish" pkg="image_transport" output="screen" args="compressed in:=/simulator/camera_node/image raw out:=/image_raw_origin"  />
+  <node name="republish" type="republish" pkg="image_transport" output="screen" args="compressed in:=/simulator/camera_node/image raw out:=/image_raw"  />
 
   <node pkg="rubis_pkg" type="lidar_republisher" name="lidar_republisher" output="screen">
     <param name="/input_topic" value="$(arg lidar_input_topic)" />
     <param name="/output_topic" value="$(arg lidar_output_topic)" />
-  </node>
-
-  <node pkg="rubis_pkg" type="camera_republisher" name="camera_republisher" output="screen">
-    <param name="/input_topic" value="$(arg image_input_topic)" />
   </node>
 
   <arg name="init_x" value="-8.57" />

@@ -1,0 +1,13 @@
+# true : calculate tf matrix
+# false : publish /gnss_pose topic
+/gnss_converter/calculate_tf : true
+
+/gnss_converter/bag_file_path : /home/sunhokim/Documents/RUBIS/data/220111_pose_gnss_138ground.bag
+
+# map : 220111_138ground
+
+# ========= position tf matrix =========
+/gnss_converter/pos_tf : [-1.372640, -1.384772, -27.949656, 13944.211735, 0.410968, -0.109160, -11.105078, -9490.840625, -0.318483, -0.086243, -6.272676, 453.012563, 0.000000, -0.000000, 0.000000, 1.000000] 
+
+# ========= orientation tf matrix =========
+/gnss_converter/ori_tf : [-1.000448, 0.345540, 0.569044, 0.987319, 0.021691, -2.279683, -4.681593, -0.067717, 0.056971, 1.608331, -3.444783, -0.114943, 0.000000, -0.000000, 0.000000, 1.000000]

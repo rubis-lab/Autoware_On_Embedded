@@ -18,6 +18,9 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   tf
   gnss
+  rubis_lib
+  rubis_msgs
+  geometry_msgs
 )
 
 catkin_package(
@@ -69,5 +72,32 @@ add_executable(gnss_localizer
 )
 add_dependencies(gnss_localizer ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(gnss_localizer
+  ${catkin_LIBRARIES}
+)
+
+add_executable(fake_current_pose
+  src/fake_current_pose.cpp
+)
+add_dependencies(fake_current_pose ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+target_link_libraries(fake_current_pose
+  ${catkin_LIBRARIES}
+)
+
+add_executable(fake_traffic_signal_generator
+  src/fake_traffic_signal_generator.cpp
+)
+add_dependencies(fake_traffic_signal_generator ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+target_link_libraries(fake_traffic_signal_generator
+  ${catkin_LIBRARIES}
+)
+
+add_executable(rubis_pose_relay
+  src/rubis_pose_relay.cpp
+)
+add_dependencies(rubis_pose_relay ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+target_link_libraries(rubis_pose_relay
   ${catkin_LIBRARIES}
 )

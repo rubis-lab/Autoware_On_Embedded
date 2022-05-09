@@ -3,6 +3,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
+#include "rubis_lib/sched.hpp"
 
 namespace gpu {
 
@@ -59,24 +60,36 @@ bool MatrixHost::moveToGpu(MatrixDevice output) {
 		return false;
 
 	if (offset_ == output.offset()) {
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaMemcpy(output.buffer(), buffer_, sizeof(double) * rows_ * cols_ * offset_, cudaMemcpyHostToDevice));
+		rubis::sched::yield_gpu("8_htod");
 		return true;
 	}
 	else {
 		double *tmp;
 
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaMalloc(&tmp, sizeof(double) * rows_ * cols_ * offset_));
+		rubis::sched::yield_gpu("9_cudaMalloc");
+
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaMemcpy(tmp, buffer_, sizeof(double) * rows_ * cols_ * offset_, cudaMemcpyHostToDevice));
+		rubis::sched::yield_gpu("10_htod");
 
 		MatrixDevice tmp_output(rows_, cols_, offset_, tmp);
 
 		dim3 block_x(rows_, cols_, 1);
 		dim3 grid_x(1, 1, 1);
 
+		rubis::sched::request_gpu();
 		copyMatrixDevToDev<<<grid_x, block_x>>>(tmp_output, output);
+		rubis::sched::yield_gpu("11_copyMatrixDevToDev");
+
 		checkCudaErrors(cudaDeviceSynchronize());
 
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaFree(tmp));
+		rubis::sched::yield_gpu("12_free");
 
 		return true;
 	}
@@ -87,24 +100,36 @@ bool MatrixHost::moveToHost(MatrixDevice input) {
 		return false;
 
 	if (offset_ == input.offset()) {
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaMemcpy(buffer_, input.buffer(), sizeof(double) * rows_ * cols_ * offset_, cudaMemcpyDeviceToHost));
+		rubis::sched::yield_gpu("13_dtoh");
 		return true;
 	}
 	else {
 		double *tmp;
 
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaMalloc(&tmp, sizeof(double) * rows_ * cols_ * offset_));
+		rubis::sched::yield_gpu("14_cudaMalloc");
 
 		MatrixDevice tmp_output(rows_, cols_, offset_, tmp);
 
 		dim3 block_x(rows_, cols_, 1);
 		dim3 grid_x(1, 1, 1);
 
+		rubis::sched::request_gpu();
 		copyMatrixDevToDev << <grid_x, block_x >> >(input, tmp_output);
+		rubis::sched::yield_gpu("15_copyMatrixDevToDev");
+
 		checkCudaErrors(cudaDeviceSynchronize());
 
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaMemcpy(buffer_, tmp, sizeof(double) * rows_ * cols_ * offset_, cudaMemcpyDeviceToHost));
+		rubis::sched::yield_gpu("16_dtoh");
+
+		rubis::sched::request_gpu();
 		checkCudaErrors(cudaFree(tmp));
+		rubis::sched::yield_gpu("17_free");
 
 		return true;
 	}

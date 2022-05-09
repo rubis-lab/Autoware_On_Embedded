@@ -37,17 +37,10 @@
 
 #include "points_preprocessor/ray_ground_filter/ray_ground_filter.h"
 
-#include <rubis_sched/sched.hpp>
+#include <rubis_msgs/PointCloud2.h>
+#include <rubis_lib/sched.hpp>
 
 #define SPIN_PROFILING
-
-int scheduling_flag_;
-int profiling_flag_;
-std::string response_time_filename_;
-int rate_;
-double minimum_inter_release_time_;
-double execution_time_;
-double relative_deadline_;
 
 void RayGroundFilter::update_config_params(const autoware_config_msgs::ConfigRayGroundFilter::ConstPtr& param)
 {
@@ -332,8 +325,9 @@ void RayGroundFilter::RemovePointsUpTo(const pcl::PointCloud<pcl::PointXYZI>::Pt
   extractor.filter(*out_filtered_cloud_ptr);
 }
 
-void RayGroundFilter::CloudCallback(const sensor_msgs::PointCloud2ConstPtr& in_sensor_cloud)
-{
+
+
+inline void RayGroundFilter::PublishFilteredClouds(const sensor_msgs::PointCloud2ConstPtr& in_sensor_cloud){
   health_checker_ptr_->NODE_ACTIVATE();
   health_checker_ptr_->CHECK_RATE("topic_rate_points_raw_slow", 8, 5, 1, "topic points_raw subscribe rate slow.");
 
@@ -382,6 +376,21 @@ void RayGroundFilter::CloudCallback(const sensor_msgs::PointCloud2ConstPtr& in_s
 
   publish_cloud(ground_points_pub_, ground_cloud_ptr, in_sensor_cloud->header);
   publish_cloud(groundless_points_pub_, no_ground_cloud_ptr, in_sensor_cloud->header);
+
+  if(rubis::sched::is_task_ready_ == TASK_NOT_READY) rubis::sched::init_task();
+  rubis::sched::task_state_ = TASK_STATE_DONE;
+}
+
+void RayGroundFilter::CloudCallback(const sensor_msgs::PointCloud2ConstPtr& in_sensor_cloud)
+{
+  PublishFilteredClouds(in_sensor_cloud); 
+}
+
+
+void RayGroundFilter::RubisCloudCallback(const rubis_msgs::PointCloud2ConstPtr in_rubis_cloud)
+{
+  sensor_msgs::PointCloud2ConstPtr in_sensor_cloud = boost::make_shared<const sensor_msgs::PointCloud2>(in_rubis_cloud->msg);
+  PublishFilteredClouds(in_sensor_cloud);
 }
 
 RayGroundFilter::RayGroundFilter() : node_handle_("~"), tf_listener_(tf_buffer_)
@@ -395,6 +404,15 @@ RayGroundFilter::RayGroundFilter() : node_handle_("~"), tf_listener_(tf_buffer_)
 
 void RayGroundFilter::Run()
 {
+  // Scheduling Setup
+  int task_scheduling_flag;
+  int task_profiling_flag;
+  std::string task_response_time_filename;
+  int rate;
+  double task_minimum_inter_release_time;
+  double task_execution_time;
+  double task_relative_deadline;
+
   // Model   |   Horizontal   |   Vertical   | FOV(Vertical)    degrees / rads
   // ----------------------------------------------------------
   // HDL-64  |0.08-0.35(0.32) |     0.4      |  -24.9 <=x<=2.0   (26.9  / 0.47)
@@ -443,56 +461,59 @@ void RayGroundFilter::Run()
   ROS_INFO("Only Ground Output Point Cloud ground_topic: %s", ground_topic.c_str());
 
   ROS_INFO("Subscribing to... %s", input_point_topic_.c_str());
-  points_node_sub_ = node_handle_.subscribe(input_point_topic_, 1, &RayGroundFilter::CloudCallback, this);
 
   config_node_sub_ =
       node_handle_.subscribe("/config/ray_ground_filter", 1, &RayGroundFilter::update_config_params, this);
 
   groundless_points_pub_ = node_handle_.advertise<sensor_msgs::PointCloud2>(no_ground_topic, 2);
   ground_points_pub_ = node_handle_.advertise<sensor_msgs::PointCloud2>(ground_topic, 2);
- 
-  node_handle_.param<int>("/ray_ground_filter/scheduling_flag", scheduling_flag_, 0);
-  node_handle_.param<int>("/ray_ground_filter/profiling_flag", profiling_flag_, 0);
-  node_handle_.param<std::string>("/ray_ground_filter/response_time_filename", response_time_filename_, "/home/hypark/Documents/profiling/response_time/ray_ground_filter.csv");
-  node_handle_.param<int>("/ray_ground_filter/rate", rate_, 10);
-  node_handle_.param("/ray_ground_filter/minimum_inter_release_time", minimum_inter_release_time_, (double)10);
-  node_handle_.param("/ray_ground_filter/execution_time", execution_time_, (double)10);
-  node_handle_.param("/ray_ground_filter/relative_deadline", relative_deadline_, (double)10);
+  
+  std::string node_name = ros::this_node::getName();
+  node_handle_.param<int>(node_name+"/task_scheduling_flag", task_scheduling_flag, 0);
+  node_handle_.param<int>(node_name+"/task_profiling_flag", task_profiling_flag, 0);
+  node_handle_.param<std::string>(node_name+"/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/ray_ground_filter.csv");
+  node_handle_.param<int>(node_name+"/rate", rate, 10);
+  node_handle_.param(node_name+"/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
+  node_handle_.param(node_name+"/task_execution_time", task_execution_time, (double)10);
+  node_handle_.param(node_name+"/task_relative_deadline", task_relative_deadline, (double)10);
+  node_handle_.param<int>(node_name+"/instance_mode", instance_mode_, 0);
+
+  if(instance_mode_) points_node_sub_ = node_handle_.subscribe("/rubis_"+input_point_topic_.substr(1), 1, &RayGroundFilter::RubisCloudCallback, this);
+  else points_node_sub_ = node_handle_.subscribe(input_point_topic_, 1, &RayGroundFilter::CloudCallback, this);
 
   ROS_INFO("Ready");
 
-  // if(!scheduling_flag_ && !profiling_flag_){
+  /* For Task scheduling */
+  if(task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
+
+  if(!task_scheduling_flag && !task_profiling_flag){
     ros::spin();
-  // }
-  // else{
-  //   FILE *fp;
-  //   if(profiling_flag_){      
-  //     fp = fopen(response_time_filename_.c_str(), "a");
-  //   }
+  }
+  else{
+    ros::Rate r(rate);    
+    while(ros::ok()){
+      if(rubis::sched::is_task_ready_) break;
+      ros::spinOnce();
+      r.sleep();      
+    }
 
-  //   ros::Rate r(rate_);
-  //   struct timespec start_time, end_time;
-  //   while(ros::ok()){
-  //     if(profiling_flag_){        
-  //       clock_gettime(CLOCK_MONOTONIC, &start_time);
-  //     }
-  //     if(scheduling_flag_){
-  //       rubis::sched::set_sched_deadline(gettid(), 
-  //         static_cast<uint64_t>(execution_time_), 
-  //         static_cast<uint64_t>(relative_deadline_), 
-  //         static_cast<uint64_t>(minimum_inter_release_time_)
-  //       );
-  //     }      
+    // Executing task
+    while(ros::ok()){
+      if(task_profiling_flag) rubis::sched::start_task_profiling();
+      if(rubis::sched::task_state_ == TASK_STATE_READY){        
+        if(task_scheduling_flag) rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline); 
+        rubis::sched::task_state_ = TASK_STATE_RUNNING;     
+      }
 
-  //     ros::spinOnce();
+      ros::spinOnce();
 
-  //     if(profiling_flag_){
-  //       clock_gettime(CLOCK_MONOTONIC, &end_time);
-  //       fprintf(fp, "%lld.%.9ld,%lld.%.9ld,%d\n",start_time.tv_sec,start_time.tv_nsec,end_time.tv_sec,end_time.tv_nsec,getpid());    
-  //       fflush(fp);
-  //     }
-  //     r.sleep();
-  //   }  
-  // fclose(fp);
-  // }
+      if(task_profiling_flag) rubis::sched::stop_task_profiling(0, rubis::sched::task_state_);
+      if(rubis::sched::task_state_ == TASK_STATE_DONE){
+        if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
+        rubis::sched::task_state_ = TASK_STATE_READY;
+      }
+      
+      r.sleep();
+    }
+  }
 }

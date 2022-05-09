@@ -1,0 +1,5 @@
+can_translate:
+  hardware_id: 11732
+  circuit_id: 0
+  bit_rate: 500000
+  is_debug: false

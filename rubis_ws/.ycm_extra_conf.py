@@ -21,11 +21,23 @@ flags = [
 '-isystem',
 '/home/hypark/git/Autoware_On_Embedded/rubis_ws/devel/include',
 '-isystem',
+'/home/hypark/git/Autoware_On_Embedded/rubis_ws/src/camera_image/include',
+'-isystem',
+'/home/hypark/git/Autoware_On_Embedded/rubis_ws/src/control_module/include',
+'-isystem',
+'/home/hypark/git/Autoware_On_Embedded/rubis_ws/src/controller/include',
+'-isystem',
+'/home/hypark/git/Autoware_On_Embedded/rubis_ws/src/image_common/include',
+'-isystem',
+'/home/hypark/git/Autoware_On_Embedded/rubis_ws/src/lane_following/include',
+'-isystem',
 '/home/hypark/git/Autoware_On_Embedded/rubis_ws/src/rubis_autorunner/include',
 '-isystem',
 '/home/hypark/git/Autoware_On_Embedded/rubis_ws/src/rubis_pkg/include',
 '-isystem',
-'/home/hypark/git/Autoware_On_Embedded/rubis_ws/src/rubis_sched/include'
+'/home/hypark/git/Autoware_On_Embedded/rubis_ws/src/topic_tools/include',
+'-isystem',
+'/home/hypark/git/Autoware_On_Embedded/rubis_ws/src/vesc/include'
 ]
 
 compilation_database_folder = ''

@@ -4,7 +4,7 @@ project(ndt_gpu)
 find_package(autoware_build_flags REQUIRED)
 find_package(PCL REQUIRED)
 find_package(CUDA)
-find_package(catkin REQUIRED COMPONENTS rubis_sched)
+find_package(catkin REQUIRED COMPONENTS rubis_lib)
 
 find_package(Eigen3 QUIET)
 

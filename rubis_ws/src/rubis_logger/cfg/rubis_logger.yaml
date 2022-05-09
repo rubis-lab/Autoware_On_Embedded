@@ -1,0 +1,18 @@
+target_topics:
+  - "/ctrl_cmd"
+  - "/car_ctrl_output"
+  - "/car_ctrl_input"
+  - "/rubis_log_handler"
+  
+available_topics:
+  - "/ctrl_cmd"
+  - "/car_ctrl_output"
+  - "/car_ctrl_input"
+  - "/odom"
+  - "/vehicle_cmd_test"
+  - "/rubis_log_handler"
+
+logger_rate: 100
+paramtest: 2020
+
+logdirpath: "/home/nvidia/rubis_ws/log/"

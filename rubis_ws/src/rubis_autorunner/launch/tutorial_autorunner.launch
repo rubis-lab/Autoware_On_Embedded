@@ -1,0 +1,4 @@
+<launch>
+    <rosparam command="load" file="$(env USER_HOME)/rubis_ws/src/rubis_autorunner/cfg/tutorial_autorunner/tutorial_autorunner.yaml" />
+    <node pkg="rubis_autorunner" type="tutorial_autorunner" name="tutorial_autorunner" output="screen" />
+</launch>

@@ -29,6 +29,7 @@
 #include "autoware_msgs/VehicleStatus.h"
 #include "autoware_msgs/Gear.h"
 #include "can_vehicle_info.h"
+#include <rubis_lib/sched.hpp>
 
 namespace autoware_connector
 {
