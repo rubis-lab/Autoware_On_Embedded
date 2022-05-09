@@ -223,6 +223,13 @@ void publishDetectedObjects(const autoware_msgs::CloudClusterArray &in_clusters)
     detected_objects.objects.push_back(detected_object);
   }
   _pub_detected_objects.publish(detected_objects);
+  
+  if(rubis::sched::is_task_ready_ == TASK_NOT_READY){
+    rubis::sched::init_task();
+    if(rubis::sched::gpu_profiling_flag_) rubis::sched::start_gpu_profiling();
+  }
+  
+  rubis::sched::task_state_ = TASK_STATE_DONE;
 }
 
 void publishCloudClusters(const ros::Publisher *in_publisher, const autoware_msgs::CloudClusterArray &in_clusters,
@@ -278,16 +285,7 @@ void publishCloudClusters(const ros::Publisher *in_publisher, const autoware_msg
   { 
     in_publisher->publish(in_clusters);
     publishDetectedObjects(in_clusters);
-  }
-
-  if(rubis::sched::is_task_ready_ == TASK_NOT_READY){
-    rubis::sched::init_task();
-    std::cout<<"INIT TASK"<<std::endl;
-    if(rubis::sched::gpu_profiling_flag_) rubis::sched::start_gpu_profiling();
-  }
-  
-  rubis::sched::task_state_ = TASK_STATE_DONE;
-  
+  }  
 }
 
 void publishCentroids(const ros::Publisher *in_publisher, const autoware_msgs::Centroids &in_centroids,
@@ -1149,8 +1147,8 @@ int main(int argc, char **argv)
 
     // Executing task
     while(ros::ok()){
+      if(task_profiling_flag) rubis::sched::start_task_profiling();        
       if(rubis::sched::task_state_ == TASK_STATE_READY){
-        if(task_profiling_flag) rubis::sched::start_task_profiling();        
         if(task_scheduling_flag) rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline); 
         if(gpu_profiling_flag || gpu_scheduling_flag) rubis::sched::start_job();
         rubis::sched::task_state_ = TASK_STATE_RUNNING;     
@@ -1158,9 +1156,9 @@ int main(int argc, char **argv)
 
       ros::spinOnce();
 
+      if(task_profiling_flag) rubis::sched::stop_task_profiling(0, rubis::sched::task_state_);
       if(rubis::sched::task_state_ == TASK_STATE_DONE){
-        if(gpu_profiling_flag || gpu_scheduling_flag) rubis::sched::finish_job();
-        if(task_profiling_flag) rubis::sched::stop_task_profiling();
+        if(gpu_profiling_flag || gpu_scheduling_flag) rubis::sched::finish_job();        
         if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
         rubis::sched::task_state_ = TASK_STATE_READY;
       }

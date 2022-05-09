@@ -7,7 +7,7 @@
 #include "common.h"
 #include "VoxelGrid.h"
 #include "Eigen/Geometry"
-#include "rubis_sched/sched.hpp"
+#include "rubis_lib/sched.hpp"
 
 using namespace rubis;
 

@@ -1,0 +1,112 @@
+<launch>
+  <!-- op_global_planning -->
+  <include file="$(find op_global_planner)/launch/op_global_planner.launch">
+    <arg name="pathDensity"           value="1" /> <!-- distance between each two waypoints-->
+    <arg name="enableSmoothing"       value="false" /> <!-- 1 or 0 -->
+    <arg name="enableLaneChange"      value="false" /> <!-- 1 or 0 -->
+    <arg name="enableRvizInput"       value="true" /> <!-- 1 or 0 -->
+    <arg name="enableReplan"          value="false" /> <!-- 1 or 0 -->  
+    <arg name="velocitySource"        value="1" /> <!-- read velocities from (0- Odometry, 1- autoware current_velocities, 2- car_info) "" -->
+    <arg name="mapSource"             value="0" /> <!-- Autoware=0, Vector Map Folder=1, kml file=2 -->
+    <arg name="mapFileName"           value="" /> <!-- incase of kml map source -->
+    <!-- Borregas Avenue -->
+    <arg name="use_static_goal"       value="true" />
+    <arg name="goal_pose_x"           value="105.8" />
+    <arg name="goal_pose_y"           value="616.3" />
+    <arg name="goal_pose_z"           value="0.0" />
+    <arg name="goal_ori_x"            value="0.0" />
+    <arg name="goal_ori_y"            value="0.0" />
+    <arg name="goal_ori_z"            value="0.99960008408" />
+    <arg name="goal_ori_w"            value="-0.0282784707519" />
+  </include>
+
+  <!-- op_common_params  -->
+ <include file="$(find op_local_planner)/launch/op_common_params_parameter.launch">
+    <!-- Included in app window -->
+    <arg name="horizonDistance"                 default="120"  />     <!-- Horizon -->
+    <arg name="maxLocalPlanDistance"            default="80" />       <!-- Plan Distance-->
+    <arg name="pathDensity"                     default="0.5" />      <!-- Path Density-->
+    <!--arg name="rollOutDensity"                  default="5" /-->      <!-- Horizontal Density -->
+    <!--arg name="rollOutsNumber"                  default="2"    /-->     <!-- Rollouts Number -->
+    <!--arg name="maxVelocity"                     default="10.0" /-->     <!-- Max Velocity -->
+    <!--arg name="maxAcceleration"                 default="5.0" /-->      <!-- Acceleration -->
+    <!--arg name="maxDeceleration"                 default="-15.0" /-->    <!-- Deceleration -->
+    <arg name="enableFollowing"                 default="true" />     <!-- Enable Following -->
+    <arg name="enableSwerving"                  default="true"  />    <!-- Enable Avoidance -->
+    <arg name="minFollowingDistance"            default="30.0"  />    <!-- Follow Distance --> <!-- should be bigger than Distance to follow -->  
+    <arg name="minDistanceToAvoid"              default="20.0" />     <!-- Avoiding Distance --> <!-- should be smaller than minFollowingDistance and larger than maxDistanceToAvoid -->
+    <arg name="maxDistanceToAvoid"              default="0.1"  />     <!-- Avoidnace Limit--> <!-- should be smaller than minDistanceToAvoid -->
+    <arg name="enableStopSignBehavior"          default="false" />    <!-- Enable Stop Sign Stop-->
+    <arg name="enableTrafficLightBehavior"      default="true" />     <!-- Enable Traffic Light -->
+    <arg name="enableLaneChange"                default="false" />    <!-- Enable Lane Change -->
+    <arg name="horizontalSafetyDistance"        default="1"  />       <!-- Lateral Safety --> 
+    <arg name="verticalSafetyDistance"          default="2"  />       <!-- Longitudinal Safet y-->
+    <arg name="velocitySource"                  default="1" />        <!-- read velocities from (0- Odometry, 1- autoware current_velocities, 2- car_info) "" -->   
+    <!-- Vehicle Specification -->
+    <arg name="width"                           default="1.85"  />
+    <arg name="length"                          default="4.2"  />
+    <arg name="wheelBaseLength"                 default="2.7"  />
+    <arg name="turningRadius"                   default="5.2"  />
+    <arg name="maxSteerAngle"                   default="0.45" />
+    <arg name="steeringDelay"                   default="1.2" />
+    <!-- Not included in app window -->
+    <arg name="minPursuiteDistance"             default="3.0"  />
+    <arg name="additionalBrakingDistance"       default="5.0"  />
+    <arg name="giveUpDistance"                  default="-4.0"  />
+    <arg name="mapSource"                       default="0" />        <!-- Autoware=0, Vector Map Folder=1, kml=2 -->
+    <arg name="mapFileName"                     default="" />
+    <arg name="minVelocity"                     default="0.1" />  
+    <arg name="speedProfileFactor"              default="1.2"  />
+    <arg name="smoothingDataWeight"             default="0.45"  />
+    <arg name="smoothingSmoothWeight"           default="0.4"  />  
+  </include>
+
+  <!-- op_trajectory_generator -->
+  <include file="$(find op_local_planner)/launch/op_trajectory_generator.launch">
+    <arg name="samplingTipMargin"               default="4"  />       <!-- Tip Margin -->
+    <arg name="samplingOutMargin"               default="8" />        <!-- Roll In Margin -->
+    <arg name="samplingSpeedFactor"             default="0.25" />    
+    <arg name="enableHeadingSmoothing"          default="false" />
+  </include>
+
+  <!-- op_motion_predictor -->
+  <include file="$(find op_local_planner)/launch/op_motion_predictor.launch">
+    <!-- <arg name="input_object_list"               default="[/detection/fusion_tools/objects_center]" /> -->
+    <arg name="input_object_list"               default="[/detection/image_detector/objects,/detection/object_tracker/objects_center]" />
+    <arg name="object_tf_list"                  default="[camera,velodyne]" />
+    <arg name="enableCurbObstacles"             default="false" />    <!-- Detect curbs from map-->
+    <arg name="enableGenrateBranches"           default="false"/>     <!-- Enable Branching -->
+    <arg name="max_distance_to_lane"            default="2.0"/>       <!-- Distance to closest lane-->
+    <arg name="prediction_distance"             default="25.0"/>      <!-- Prediction distance-->
+    <arg name="enableStepByStepSignal"          default="false" />    <!-- Enable Step by Step Test-->
+    <arg name="enableParticleFilterPrediction"  default="false" />    <!-- Enable Particle Filter prediction -->
+    <!-- Not included in app window -->   
+    <arg name="distanceBetweenCurbs"            default="1.5" />
+    <arg name="visualizationTime"               default="0.25" />
+  </include>
+
+  <!-- op_trajectory_evaluator -->
+  <include file="$(find op_local_planner)/launch/op_trajectory_evaluator.launch">
+    <arg name="enablePrediction"                default="false" />                
+    <arg name="horizontalSafetyDistance"        default="1.2" />
+    <arg name="verticalSafetyDistance"          default="0.8" />
+    <arg name="LateralSkipDistance"             default="5.0" />
+    
+    <arg name="PedestrianRightThreshold" default="4.0" />
+    <arg name="PedestrianLeftThreshold" default="4.0" />
+    <arg name="PedestrianImageDetectionRange" default="0.75" /> <!-- (Ratio If pedestrian's center point is located in this range, our car will be stopped -->               
+    <arg name="PedestrianStopImgHeightThreshold" default="120" /> <!-- Threshold value of detected pedestrian object box's height. If pedestrian object's hegiht is lower than this value, ego will be stoped -->               
+    
+    <arg name="VehicleImageDetectionRange" default="0.3" /> <!-- (Ratio) If vehicle's center point is not located in this range, our car set speed as max velocity --> 
+    <arg name="VehicleImageWidthThreshold" default="0.018" /> <!-- (Ratio) If vehilce's width ratio is lower than this, it will be not detected -->
+
+    <arg name="intersectionFile"                default="crossing_test/crossing_intersection.yaml" />
+  </include>
+
+  <!-- op_behavior_selector -->
+  <include file="$(find op_local_planner)/launch/op_behavior_selector_parameter.launch">
+    <arg name="evidence_tust_number"            default="25"/>
+    <arg name="trafficLightFile"                default="testbed_traffic_light.yaml" />
+    <arg name="stopLineFile"                    default="testbed_stop_line.yaml" />
+  </include>
+</launch>

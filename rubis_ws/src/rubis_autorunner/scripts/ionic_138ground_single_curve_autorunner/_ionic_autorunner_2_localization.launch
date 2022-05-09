@@ -1,0 +1,57 @@
+<launch>
+  <!--TODO: Set LidAR Inital Pose-->
+  <arg name="init_x" value="57.1" />
+  <arg name="init_y" value="1.38" />
+  <arg name="init_z" value="0.48" />
+  <arg name="init_roll" value="0.0" />
+  <arg name="init_pitch" value="0.0" />
+  <arg name="init_yaw" value="1.57" />
+
+  <!-- vel/pose connect -->
+  <arg name="topic_pose_stamped" default="/ndt_pose" />
+  <arg name="topic_twist_stamped" default="/estimate_twist" /> 
+  <!-- <arg name="topic_twist_stamped" default="/odom_twist" /> -->
+
+  <!-- points downsampler -->
+  <include file="$(find points_downsampler)/launch/voxel_grid_filter_params.launch" />
+
+  <!-- ndt matching kalman filter parameters -->
+  <rosparam command="load" file="$(env USER_HOME)/rubis_ws/src/rubis_autorunner/cfg/ionic_autorunner/kalman_filter.yaml" />
+
+  <!-- ndt_matching --><!-- pcl_generic=0, pcl_anh=1, pcl_anh_gpu=2, pcl_openmp=3 -->
+  <include file="$(find lidar_localizer)/launch/ndt_matching_params.launch">
+    <arg name="method_type" value="0" /> 
+    <arg name="get_height" value="true" />
+    <arg name="init_match_threshold" value="8.0" /> 
+    <arg name="failure_score_diff_threshold" value="10.0" /> 
+    <arg name="recovery_score_diff_threshold" value="1.0" /> 
+    <arg name="failure_pose_diff_threshold" value="4.0" /> 
+    <arg name="recovery_pose_diff_threshold" value="1.0" /> 
+  </include>
+
+  <!-- ndt config -->
+  <node pkg="rostopic" type="rostopic" name="config_ndt"
+  args="pub /config/ndt autoware_config_msgs/ConfigNDT
+  '{header: {seq: 8, stamp: {secs: 0, nsecs: 0}, frame_id: ''},
+    init_pos_gnss: 0,
+    x: $(arg init_x),
+    y: $(arg init_y),
+    z: $(arg init_z),
+    roll: $(arg init_roll), 
+    pitch: $(arg init_pitch),
+    yaw: $(arg init_yaw),
+    use_predict_pose: 1,
+    error_threshold: 1.2,
+    resolution: 4.0,
+    step_size: 0.5,
+    trans_epsilon: 0.05,
+    max_iterations: 10}
+  '"/> 
+  
+  <!-- vel_pose_mux -->
+  <include file="$(find rubis_pkg)/launch/vel_pose_connect_params.launch">
+    <arg name="topic_pose_stamped" value="$(arg topic_pose_stamped)" />
+    <arg name="topic_twist_stamped" value="$(arg topic_twist_stamped)" />
+  </include>
+
+</launch>

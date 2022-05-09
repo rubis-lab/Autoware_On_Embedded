@@ -57,9 +57,9 @@
 
   </export>
 <build_depend>message_generation</build_depend>
-<build_depend>rubis_sched</build_depend>
+<build_depend>rubis_lib</build_depend>
 <build_export_depend>message_generation</build_export_depend>
-<build_export_depend>rubis_sched</build_export_depend>
+<build_export_depend>rubis_lib</build_export_depend>
 <exec_depend>message_runtime</exec_depend>
-<exec_depend>rubis_sched</exec_depend>
+<exec_depend>rubis_lib</exec_depend>
 </package>

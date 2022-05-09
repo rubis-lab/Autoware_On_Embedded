@@ -2,7 +2,7 @@
 #include "ndt_gpu/debug.h"
 #include <iostream>
 #include <sys/stat.h>
-#include "rubis_sched/sched.hpp"
+#include "rubis_lib/sched.hpp"
 
 //using namespace rubis::sched;
 

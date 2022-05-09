@@ -49,6 +49,7 @@
   <!-- HJW Added -->
   <arg name="stopLineMargin"       default="10.0" />
   <arg name="stopLineDetectionDistance"       default="20.0" />
+  <arg name="enableSlowDownOnCurve"       default="false" />
 
   <node pkg="op_local_planner" type="op_common_params" name="op_common_params" output="screen">
   
@@ -92,6 +93,8 @@
   <param name="steeringDelay"       value="$(arg steeringDelay)" />
   <param name="minPursuiteDistance"     value="$(arg minPursuiteDistance)"  />  
   <param name="additionalBrakingDistance" value="$(arg additionalBrakingDistance)"  />
+
+  <param name="enableSlowDownOnCurve" value="$(arg enableSlowDownOnCurve)"  />
   
   <param name="giveUpDistance" value="$(arg giveUpDistance)"  />
   

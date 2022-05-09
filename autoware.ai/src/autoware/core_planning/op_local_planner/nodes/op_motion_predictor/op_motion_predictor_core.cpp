@@ -17,7 +17,7 @@
 #include "op_motion_predictor_core.h"
 #include "op_planner/MappingHelpers.h"
 #include "op_ros_helpers/op_ROSHelpers.h"
-#include <rubis_sched/sched.hpp>
+#include <rubis_lib/sched.hpp>
 
 namespace MotionPredictorNS
 {
@@ -252,8 +252,7 @@ void MotionPrediction::callbackGetVehicleStatus(const geometry_msgs::TwistStampe
   UtilityHNS::UtilityH::GetTickCount(m_VehicleStatus.tStamp);
   bVehicleStatus = true;
 
-  if(rubis::sched::is_task_ready_ == TASK_NOT_READY) rubis::sched::init_task();
-  rubis::sched::task_state_ = TASK_STATE_DONE;
+  if(rubis::sched::is_task_ready_ == TASK_NOT_READY) rubis::sched::init_task();  
 }
 
 void MotionPrediction::callbackGetCANInfo(const autoware_can_msgs::CANInfoConstPtr &msg)
@@ -408,6 +407,7 @@ void MotionPrediction::callbackGetTrackedObjects(const autoware_msgs::DetectedOb
     m_PredictedResultsResults.header.frame_id = "velodyne";
     
     pub_predicted_objects_trajectories.publish(m_PredictedResultsResults);
+    rubis::sched::task_state_ = TASK_STATE_DONE;
   }
 }
 
@@ -575,8 +575,9 @@ void MotionPrediction::MainLoop()
 
   while (ros::ok())
   {
+    if(task_profiling_flag) rubis::sched::start_task_profiling();
+
     if(rubis::sched::is_task_ready_ == TASK_READY && rubis::sched::task_state_ == TASK_STATE_READY){
-      if(task_profiling_flag) rubis::sched::start_task_profiling();
       if(task_scheduling_flag) rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline); 
       rubis::sched::task_state_ = TASK_STATE_RUNNING;     
     }
@@ -634,16 +635,9 @@ void MotionPrediction::MainLoop()
       UtilityHNS::UtilityH::GetTickCount(m_VisualizationTimer);
     }
 
-    //For the debugging of prediction
-//    if(UtilityHNS::UtilityH::GetTimeDiffNow(m_SensingTimer) > 5)
-//    {
-//      ROS_INFO("op_motion_prediction sensing timeout, can't receive tracked object data ! Reset .. Reset");
-//      m_PredictedResultsResults.objects.clear();
-//      pub_predicted_objects_trajectories.publish(m_PredictedResultsResults);
-//    }
+    if(task_profiling_flag) rubis::sched::stop_task_profiling(0, rubis::sched::task_state_);
 
     if(rubis::sched::is_task_ready_ == TASK_READY && rubis::sched::task_state_ == TASK_STATE_DONE){
-      if(task_profiling_flag) rubis::sched::stop_task_profiling();
       if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
       rubis::sched::task_state_ = TASK_STATE_READY;
     }

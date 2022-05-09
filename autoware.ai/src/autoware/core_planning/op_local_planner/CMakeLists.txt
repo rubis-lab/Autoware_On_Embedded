@@ -24,7 +24,7 @@ find_package(
     sensor_msgs
     tf
     vector_map_msgs
-    rubis_sched
+    rubis_lib
 )
 
 find_package(PkgConfig REQUIRED)

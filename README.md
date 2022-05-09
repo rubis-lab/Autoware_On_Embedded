@@ -6,7 +6,7 @@ Autoware system for embedded boards
 - Ubuntu 18.04
 - ROS Melodic
 - CUDA 10.x
-- OpenCV 4.x
+- OpenCV 3.x
 
 ## How to install ROS melodic
 ```
@@ -54,11 +54,11 @@ sudo cp /usr/local/share/eigen3/cmake/* /usr/lib/cmake/eigen3
 ```
 cd {$WORKSPACE_DIR}/autoware.ai
 rosdep update
-rosdep install -y --from-paths src --ignore-src --rosdistro $ROS_DISTRO
+rosdep install -y --from-paths src --ignore-src --rosdistro $ROS_DISTRO -r
 ```
 
 ### Resolving OpenCV version issue
-You should change some code to use OpenCV 4.x
+This package uses OpenCv 3.x. If you want to use OpenCV 4.x, follow below lines.
 
 ```
 sudo apt-get install libopencv3.2 -y
@@ -76,13 +76,13 @@ in below three files (`sudo` required)
 ### Autoware Build
 ```
 # If you have CUDA
-AUTOWARE_COMPILE_WITH_CUDA=1 colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release --parallel-workers 6
+AUTOWARE_COMPILE_WITH_CUDA=1 colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release
 
 # Build only some package
 AUTOWARE_COMPILE_WITH_CUDA=1 colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release --packages-select $(pakcage name)
 
 # Build without some package
-AUTOWARE_COMPILE_WITH_CUDA=1 colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release --packages-skip $(pakcage name) --parallel-workers 6
+AUTOWARE_COMPILE_WITH_CUDA=1 colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release --packages-skip $(pakcage name)
 
 # If you don't have CUDA
 colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release

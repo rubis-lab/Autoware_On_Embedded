@@ -1,6 +1,12 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(controller)
 
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release)
+endif()
+
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
 
@@ -38,6 +44,9 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   autoware_msgs
   geometry_msgs
+  can_data_msgs
+  std_msgs
+  nav_msgs
 )
 ##   * add "message_runtime" and every package in MSG_DEP_SET to
 ##     catkin_package(CATKIN_DEPENDS ...)

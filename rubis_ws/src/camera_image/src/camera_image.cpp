@@ -2,7 +2,7 @@
 #include "opencv2/opencv.hpp"
 #include "image_transport/image_transport.h"
 #include "cv_bridge/cv_bridge.h"
-#include "rubis_sched/sched.hpp"
+#include "rubis_lib/sched.hpp"
 
 // argv[0] : camera_id, argv[1] : frequency
 
@@ -96,11 +96,14 @@ int main(int argc, char** argv){
 void CameraImage::sendImage(){
     ros::Rate loop_rate(frequency);
         cv::Mat frame;
-
+        
     while(nh_.ok()){
-        if(task_profiling_flag) rubis::sched::start_task_profiling();
-        if(task_scheduling_flag){        
-            rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline);
+
+        if(task_profiling_flag) rubis::sched::start_task_profiling();   
+
+        if(rubis::sched::task_state_ == TASK_STATE_READY){            
+            if(task_scheduling_flag) rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline);
+            rubis::sched::task_state_ = TASK_STATE_RUNNING;
         }
 
         cap >> frame;
@@ -108,13 +111,18 @@ void CameraImage::sendImage(){
             if(DEBUG) cv::imshow(OPENCV_WINDOW,frame);
 
             msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", frame).toImageMsg();
-            camera_image_pub_.publish(msg);                
+            camera_image_pub_.publish(msg);
+            rubis::sched::is_task_ready_ = TASK_STATE_DONE;            
         }                        
         // int ckey = cv::waitKey(1);
         // if(ckey == 27)break;
 
-        if(task_profiling_flag) rubis::sched::stop_task_profiling();
-        if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
+        if(task_profiling_flag) rubis::sched::stop_task_profiling(0, rubis::sched::task_state_);
+
+        if(rubis::sched::task_state_ == TASK_STATE_DONE){            
+            if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
+            rubis::sched::task_state_ = TASK_STATE_READY;
+        }
         loop_rate.sleep();
     }
 }

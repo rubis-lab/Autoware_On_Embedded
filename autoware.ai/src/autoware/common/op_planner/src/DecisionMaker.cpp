@@ -42,6 +42,7 @@ DecisionMaker::DecisionMaker()
   m_pPedestrianState = 0;
   m_sprintSpeed = -1;
   m_remainObstacleWaitingTime = 0;
+  curveSlowDownCount = 400;
 }
 
 DecisionMaker::~DecisionMaker()
@@ -613,7 +614,6 @@ bool DecisionMaker::SelectSafeTrajectory()
       target_velocity *= 0.5;
       bSlowBecauseChange = true;
     }
-
     
     double e = target_velocity - CurrStatus.speed;
     double desiredVelocity = 0; 
@@ -634,13 +634,58 @@ bool DecisionMaker::SelectSafeTrajectory()
     else if(desiredVelocity < m_params.minSpeed)
       desiredVelocity = 0;
 
-    // for(unsigned int i = 0; i < m_Path.size(); i++)
-    //   m_Path.at(i).v = desiredVelocity;
+    if(m_params.enableSlowDownOnCurve){
+      GPSPoint curr_point = m_Path.at(info.iFront).pos; // current waypoint (p1)
+      GPSPoint near_point = m_Path.at(std::min(info.iFront + 3, int(m_Path.size())-1)).pos; // waypoint after 1.5m (p2)
+      GPSPoint far_point = m_Path.at(std::min(info.iFront + 60, int(m_Path.size())-1)).pos; // waypoint afeter 30m (p3)
+
+      double deg_1 = atan2((near_point.y - curr_point.y), (near_point.x - curr_point.x)) / 3.14 * 180;
+      double deg_2 = atan2((far_point.y - curr_point.y), (far_point.x - curr_point.x)) / 3.14 * 180;
+      double angle_diff = std::abs(deg_1 - deg_2); // angle between p1p2 and p1p3
+      if (angle_diff > 180){
+        angle_diff = 360 - angle_diff;
+      }
+
+      // std::cout << "curvature : " << angle_diff << std::endl;
+
+      if (angle_diff > 7){ // Slow down when angle is large
+        desiredVelocity = m_params.maxSpeed * 40 / (angle_diff + 33);
+        // desiredVelocity = m_params.maxSpeed * 17 / (angle_diff + 10);
+        if(desiredVelocity > previous_velocity){
+          desiredVelocity = previous_velocity;
+        }
+        curveSlowDownCount = 0;
+      }
+      // if (angle_diff > 30){
+      //   desiredVelocity = m_params.maxSpeed * 0.8;
+      //   curveSlowDownCount = 0;
+      //   // desiredVelocity = max_velocity * 100 / (angle_diff + 90);
+      // }
+      // else if(angle_diff > 10){
+      //   desiredVelocity = m_params.maxSpeed * 0.6;
+      //   curveSlowDownCount = 0;
+      // }
+      else if(curveSlowDownCount < 400){ // wait 4 sec when angle become less than 7 // TODO: Check its feasibility when pure pursuit is sufficiently tuned
+        desiredVelocity += (m_params.maxSpeed - previous_velocity) / 100;
+        curveSlowDownCount += 1;
+      }
+      else{
+        desiredVelocity = m_params.maxSpeed;
+      }
+
+      if(desiredVelocity < m_params.maxSpeed * 0.5){ // minimum of target velocity is max_speed / 2
+        desiredVelocity = m_params.maxSpeed * 0.5; 
+      }
+      previous_velocity = desiredVelocity;
+    }
+
     for(auto it = m_Path.begin(); it != m_Path.end(); ++it){
       (*it).v = desiredVelocity;
     }
 
-    std::cout << "Target Velocity: " << target_velocity << ", desired : " << desiredVelocity << ", Change Slowdown: " << bSlowBecauseChange  << std::endl;
+    // std::cout << "desiredVelocity : " << desiredVelocity << std::endl;
+
+    // std::cout << "Target Velocity: " << target_velocity << ", desired : " << desiredVelocity << ", Change Slowdown: " << bSlowBecauseChange  << std::endl;
 
     return desiredVelocity;
   }

@@ -189,8 +189,12 @@ void Yolo3DetectorNode::convert_rect_to_image_obj(std::vector< RectClassScore<fl
             }
             obj.valid = true;
 
-            out_message.objects.push_back(obj);
-
+            obj.pose.orientation.x = 1;
+            obj.pose.orientation.y = 0;
+            obj.pose.orientation.z = 0;
+            obj.pose.orientation.w = 0;
+            
+            out_message.objects.push_back(obj);            
         }
     }
 }
@@ -349,6 +353,9 @@ void Yolo3DetectorNode::Run()
     private_node_handle.param<std::string>("/vision_darknet_detect/gpu_execution_time_filename", gpu_execution_time_filename_str, "~/Documents/gpu_profiling/test_yolo_execution_time.csv");
     private_node_handle.param<std::string>("/vision_darknet_detect/gpu_response_time_filename", gpu_response_time_filename_str, "~/Documents/gpu_profiling/test_yolo_response_time.csv");
     private_node_handle.param<std::string>("/vision_darknet_detect/gpu_deadline_filename", gpu_deadline_filename_str, "~/Documents/gpu_deadline/yolo_gpu_deadline.csv");
+
+    
+
     
     char* task_response_time_filename = strdup(task_response_time_filename_str.c_str());
     char* gpu_execution_time_filename = strdup(gpu_execution_time_filename_str.c_str());
@@ -456,8 +463,8 @@ void Yolo3DetectorNode::Run()
 
         // Executing task
         while(ros::ok()){
+            if(task_profiling_flag) start_task_profiling();          
             if(task_state_ == TASK_STATE_READY){
-                if(task_profiling_flag) start_task_profiling();                
                 if(task_scheduling_flag) request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline); 
                 if(gpu_profiling_flag || gpu_scheduling_flag) start_job();
                 task_state_ = TASK_STATE_RUNNING;     
@@ -465,9 +472,10 @@ void Yolo3DetectorNode::Run()
 
             ros::spinOnce();
 
+            if(task_profiling_flag) stop_task_profiling(0, task_state_);
+
             if(task_state_ == TASK_STATE_DONE){
                 if(gpu_profiling_flag || gpu_scheduling_flag) finish_job();
-                if(task_profiling_flag) stop_task_profiling();
                 if(task_scheduling_flag) yield_task_scheduling();
                 task_state_ = TASK_STATE_READY;
             }

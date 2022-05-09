@@ -16,7 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   roslint
   tf
   vector_map
-  rubis_sched
+  rubis_lib
 )
 
 

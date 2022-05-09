@@ -21,7 +21,7 @@
  */
 
 #include "range_vision_fusion/range_vision_fusion.h"
-#include <rubis_sched/sched.hpp>
+#include <rubis_lib/sched.hpp>
 #define SPIN_PROFILING
 
 int is_topic_ready = 0;
@@ -725,14 +725,6 @@ ROSRangeVisionFusionApp::Run()
   double task_execution_time;
   double task_relative_deadline;
 
-  private_node_handle.param<int>("/range_vision_fusion/task_scheduling_flag", task_scheduling_flag, 0);
-  private_node_handle.param<int>("/range_vision_fusion/task_profiling_flag", task_profiling_flag, 0);
-  private_node_handle.param<std::string>("/range_vision_fusion/task_response_time_filename", task_response_time_filename, "/home/hypark/Documents/profiling/response_time/range_vision_fusion.csv");
-  private_node_handle.param<int>("/range_vision_fusion/rate", rate, 10);
-  private_node_handle.param("/range_vision_fusion/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
-  private_node_handle.param("/range_vision_fusion/task_execution_time", task_execution_time, (double)10);
-  private_node_handle.param("/range_vision_fusion/task_relative_deadline", task_relative_deadline, (double)10);
-
   if(task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
   
   tf::TransformListener transform_listener;
@@ -743,26 +735,7 @@ ROSRangeVisionFusionApp::Run()
 
   ROS_INFO("[%s] Ready. Waiting for data...", __APP_NAME__);
 
-  // SPIN
-  if(!task_scheduling_flag && !task_profiling_flag){
-    ros::spin();
-  }
-  else{
-    ros::Rate r(rate);    
-    while(ros::ok()){
-      if(task_profiling_flag && is_topic_ready) rubis::sched::start_task_profiling();
-      if(task_scheduling_flag && is_topic_ready){        
-        rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline);
-      }
-      ros::spinOnce();
-      if(task_profiling_flag && is_topic_ready) rubis::sched::stop_task_profiling();
-      if(task_scheduling_flag && is_topic_ready) rubis::sched::yield_task_scheduling();
-
-      
-
-      r.sleep();
-    }
-  }
+  ros::spin();
 
   ROS_INFO("[%s] END", __APP_NAME__);
 }

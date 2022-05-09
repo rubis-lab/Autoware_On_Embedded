@@ -16,7 +16,7 @@
 
 #include <vector>
 #include <pure_pursuit/pure_pursuit_core.h>
-#include <rubis_sched/sched.hpp>
+#include <rubis_lib/sched.hpp>
 
 namespace waypoint_follower
 {
@@ -59,6 +59,77 @@ PurePursuitNode::~PurePursuitNode()
 
 void PurePursuitNode::initForROS()
 {
+  // way point velocity setting 
+  private_nh_.param("/vel_setting/use_algorithm", use_algorithm_, false);
+
+  if(use_algorithm_){
+    std::vector<int> curve_line_start, straight_line_start, curve_line_end, straight_line_end;
+    double straight_velocity, curve_velocity;
+    double prev_velocity, next_velocity;
+    int prev_point, next_point;
+    bool is_vel_set;
+
+    private_nh_.param("/vel_setting/straight_velocity", straight_velocity, 5.0);
+    private_nh_.param("/vel_setting/curve_velocity", curve_velocity, 3.0);
+
+    private_nh_.getParam("/vel_setting/straight_line_start", straight_line_start);
+    private_nh_.getParam("/vel_setting/straight_line_end", straight_line_end);
+
+    private_nh_.getParam("/vel_setting/curve_line_start", curve_line_start);
+    private_nh_.getParam("/vel_setting/curve_line_end", curve_line_end);
+  
+    private_nh_.getParam("/vel_setting/way_points_x", way_points_x_);
+    private_nh_.getParam("/vel_setting/way_points_y", way_points_y_);
+
+    for(int i = 1; i <= way_points_x_.size(); i++){
+      is_vel_set = false;
+      prev_point = 0;
+      next_point = way_points_x_.size();
+
+      for(int j = 0; j < straight_line_start.size(); j++){
+        if ((i >= straight_line_start[j]) && (i <= straight_line_end[j])){
+          is_vel_set = true;
+          way_points_velocity_.push_back(straight_velocity);
+        }
+        else if(i < straight_line_start[j]){
+          if(next_point > straight_line_start[j]){
+            next_point = straight_line_start[j];
+            next_velocity = straight_velocity;
+          }
+        }
+        else if(i > straight_line_end[j]){
+          if(prev_point < straight_line_end[j]){
+            prev_point = straight_line_end[j];
+            prev_velocity = straight_velocity;
+          }
+        }
+      }
+
+      for(int j = 0; j < curve_line_start.size(); j++){
+        if ((i >= curve_line_start[j]) && (i <= curve_line_end[j])){
+          is_vel_set = true;
+          way_points_velocity_.push_back(curve_velocity);
+        }
+        else if(i < curve_line_start[j]){
+          if(next_point > curve_line_start[j]){
+            next_point = curve_line_start[j];
+            next_velocity = curve_velocity;
+          }
+        }
+        else if(i > curve_line_end[j]){
+          if(prev_point < curve_line_end[j]){
+            prev_point = curve_line_end[j];
+            prev_velocity = curve_velocity;
+          }
+        }
+      }
+
+      if(!is_vel_set){
+        way_points_velocity_.push_back((prev_velocity * (next_point - i) + next_velocity * (i - prev_point)) / (next_point - prev_point));
+      }
+    }
+  }
+  
   // ros parameter settings
   private_nh_.param("velocity_source", velocity_source_, 0);
   private_nh_.param("is_linear_interpolation", is_linear_interpolation_, true);
@@ -74,6 +145,7 @@ void PurePursuitNode::initForROS()
   nh_.param("vehicle_info/wheel_base", wheel_base_, 2.7);
 
   private_nh_.param("/pure_pursuit/dynamic_params_flag", dynamic_param_flag_, false);
+  private_nh_.param("/pure_pursuit/instance_mode", rubis::instance_mode_, 0);
   
   if(dynamic_param_flag_){
     XmlRpc::XmlRpcValue xml_list;
@@ -100,25 +172,25 @@ void PurePursuitNode::initForROS()
   // setup subscriber
   sub1_ = nh_.subscribe("final_waypoints", 10,
     &PurePursuitNode::callbackFromWayPoints, this);
-  sub2_ = nh_.subscribe("current_pose", 10,
-    &PurePursuitNode::callbackFromCurrentPose, this);
+
+  if(rubis::instance_mode_) rubis_pose_sub_ = nh_.subscribe("rubis_current_pose", 10, &PurePursuitNode::callbackFromRubisCurrentPose, this);
+  else pose_sub_ = nh_.subscribe("current_pose", 10, &PurePursuitNode::callbackFromCurrentPose, this);
+
   sub3_ = nh_.subscribe("config/waypoint_follower", 10,
     &PurePursuitNode::callbackFromConfig, this);
-  sub4_ = nh_.subscribe("current_velocity", 10,
-    &PurePursuitNode::callbackFromCurrentVelocity, this);
   
-  /*  RT Scheduling setup  */
-  // sub1_ = nh_.subscribe("final_waypoints", 1,
-  //   &PurePursuitNode::callbackFromWayPoints, this); // origin 10
-  // sub2_ = nh_.subscribe("current_pose", 1,
-  //   &PurePursuitNode::callbackFromCurrentPose, this); // origin 10
-  // sub3_ = nh_.subscribe("config/waypoint_follower", 1,
-  //   &PurePursuitNode::callbackFromConfig, this); // origin 10
-  // sub4_ = nh_.subscribe("current_velocity", 1,
-  //   &PurePursuitNode::callbackFromCurrentVelocity, this); // origin 10
+  #ifdef SVL
+  velocity_sub_ = nh_.subscribe("current_velocity", 10, &PurePursuitNode::callbackFromCurrentVelocity, this);
+  #endif
+
+  #ifdef IONIC
+  car_ctrl_output_sub = nh_.subscribe("car_ctrl_output", 10, &PurePursuitNode::callbackCtrlOutput, this);
+  #endif
 
   // setup publisher
-  pub1_ = nh_.advertise<geometry_msgs::TwistStamped>("twist_raw", 10);
+  twist_pub_ = nh_.advertise<geometry_msgs::TwistStamped>("twist_raw", 10);
+  if(rubis::instance_mode_) rubis_twist_pub_ = nh_.advertise<rubis_msgs::TwistStamped>("rubis_twist_raw", 10);
+
   pub2_ = nh_.advertise<autoware_msgs::ControlCommandStamped>("ctrl_raw", 10);
   pub11_ = nh_.advertise<visualization_msgs::Marker>("next_waypoint_mark", 0);
   pub12_ = nh_.advertise<visualization_msgs::Marker>("next_target_mark", 0);
@@ -165,8 +237,9 @@ void PurePursuitNode::run()
 
   while (ros::ok())
   {
+    if(task_profiling_flag) rubis::sched::start_task_profiling();
+
     if(rubis::sched::is_task_ready_ == TASK_READY && rubis::sched::task_state_ == TASK_STATE_READY){
-      if(task_profiling_flag) rubis::sched::start_task_profiling();
       if(task_scheduling_flag) rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline); 
       rubis::sched::task_state_ = TASK_STATE_RUNNING;     
     }
@@ -176,8 +249,9 @@ void PurePursuitNode::run()
     {
       // ROS_WARN("Necessary topics are not subscribed yet ... ");
       
+      if(task_profiling_flag) rubis::sched::stop_task_profiling(rubis::instance_, rubis::sched::task_state_);
+
       if(rubis::sched::is_task_ready_ == TASK_READY && rubis::sched::task_state_ == TASK_STATE_DONE){
-        if(task_profiling_flag) rubis::sched::stop_task_profiling();
         if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
         rubis::sched::task_state_ = TASK_STATE_READY;
       }
@@ -222,8 +296,9 @@ void PurePursuitNode::run()
     is_velocity_set_ = false;
     is_waypoint_set_ = false;
 
+    if(task_profiling_flag) rubis::sched::stop_task_profiling(rubis::instance_, rubis::sched::task_state_);
+
     if(rubis::sched::is_task_ready_ == TASK_READY && rubis::sched::task_state_ == TASK_STATE_DONE){
-      if(task_profiling_flag) rubis::sched::stop_task_profiling();
       if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
       rubis::sched::task_state_ = TASK_STATE_READY;
     }
@@ -239,7 +314,17 @@ void PurePursuitNode::publishTwistStamped(
   ts.header.stamp = ros::Time::now();
   ts.twist.linear.x = can_get_curvature ? computeCommandVelocity() : 0;
   ts.twist.angular.z = can_get_curvature ? kappa * ts.twist.linear.x : 0;
-  pub1_.publish(ts);
+  twist_pub_.publish(ts);
+
+  if(rubis::instance_mode_ && rubis::instance_mode_ != RUBIS_NO_INSTANCE){
+    rubis_msgs::TwistStamped rubis_ts;
+    rubis_ts.instance = rubis::instance_;
+    rubis_ts.msg = ts;
+    rubis_twist_pub_.publish(rubis_ts);
+  }
+
+  if(rubis::sched::is_task_ready_ == TASK_NOT_READY) rubis::sched::init_task();
+  rubis::sched::task_state_ = TASK_STATE_DONE;
 }
 
 void PurePursuitNode::publishControlCommandStamped(
@@ -267,11 +352,27 @@ double PurePursuitNode::computeLookaheadDistance() const
     return const_lookahead_distance_;
   }
 
-  double maximum_lookahead_distance = current_linear_velocity_ * 10;
+  // std::cout << "Curve : " << angle_diff_ << std::endl;
+  // if(angle_diff_ < 5) // if curvature is too low, set lookahead distance to 25 statically.
+  //   return 25;
+  
   double ld = current_linear_velocity_ * lookahead_distance_ratio_;
+  if(ld < minimum_lookahead_distance_)
+    return minimum_lookahead_distance_;
+  
+  return ld;
 
-  return ld < minimum_lookahead_distance_ ? minimum_lookahead_distance_ :
-    ld > maximum_lookahead_distance ? maximum_lookahead_distance : ld;
+
+  // Original Autoware Code
+  // double maximum_lookahead_distance = current_linear_velocity_ * 10;
+  // double ld = current_linear_velocity_ * lookahead_distance_ratio_;
+
+  // if(ld < minimum_lookahead_distance_)
+  //   return minimum_lookahead_distance_;
+  // else if(ld > maximum_lookahead_distance)
+  //   return maximum_lookahead_distance;
+  // else
+  //   return ld;
 }
 
 int PurePursuitNode::getSgn() const
@@ -354,28 +455,45 @@ void PurePursuitNode::publishDeviationCurrentPosition(
   pub17_.publish(msg);
 }
 
-void PurePursuitNode::callbackFromCurrentPose(
-  const geometry_msgs::PoseStampedConstPtr& msg)
-{
+inline void PurePursuitNode::updateCurrentPose(const geometry_msgs::PoseStampedConstPtr& msg){
   pp_.setCurrentPose(msg);
   is_pose_set_ = true;
-
-  if(rubis::sched::is_task_ready_ == TASK_NOT_READY) rubis::sched::init_task();
-  rubis::sched::task_state_ = TASK_STATE_DONE;
 }
 
-void PurePursuitNode::callbackFromCurrentVelocity(
-  const geometry_msgs::TwistStampedConstPtr& msg)
+void PurePursuitNode::callbackFromCurrentPose(const geometry_msgs::PoseStampedConstPtr& msg)
+{
+  updateCurrentPose(msg);
+}
+
+void PurePursuitNode::callbackFromRubisCurrentPose(const rubis_msgs::PoseStampedConstPtr& _msg)
+{
+  geometry_msgs::PoseStampedConstPtr msg = boost::make_shared<const geometry_msgs::PoseStamped>(_msg->msg);
+  rubis::instance_ = _msg->instance;
+  updateCurrentPose(msg);
+}
+
+#ifdef SVL
+void PurePursuitNode::callbackFromCurrentVelocity(const geometry_msgs::TwistStampedConstPtr& msg)
 {
   current_linear_velocity_ = msg->twist.linear.x;
   pp_.setCurrentVelocity(current_linear_velocity_);
   is_velocity_set_ = true;
 }
+#endif
+
+#ifdef IONIC
+void PurePursuitNode::callbackCtrlOutput(const can_data_msgs::Car_ctrl_output::ConstPtr &msg)
+{
+  current_linear_velocity_ = kmph2mps(msg->real_speed);
+  pp_.setCurrentVelocity(current_linear_velocity_);
+  is_velocity_set_ = true;
+}
+#endif
 
 void PurePursuitNode::setLookaheadParamsByVel(){
   for(auto it=dynamic_params.begin(); it != dynamic_params.end(); ++it){
     DynamicParams param = *it;
-    if(command_linear_velocity_>param.min_vel && command_linear_velocity_ <= param.max_vel){
+    if(current_linear_velocity_>param.min_vel && current_linear_velocity_ <= param.max_vel){
       lookahead_distance_ratio_ = param.lookahead_ratio;
       minimum_lookahead_distance_ = param.lookahead_distance;
       break;
@@ -385,12 +503,53 @@ void PurePursuitNode::setLookaheadParamsByVel(){
   // std::cout<<"Waypoint Vel:"<<command_linear_velocity_<<"/ ratio"<<lookahead_distance_ratio_<<"/ disdtance"<<minimum_lookahead_distance_<<std::endl;
 }
 
+double PurePursuitNode::findWayPointVelocity(autoware_msgs::Waypoint msg){
+  int len, idx = 0;
+  
+  double x, y;
+  double minDist = 9999.0, tmp_dist;
+
+  x = msg.pose.pose.position.x;
+  y = msg.pose.pose.position.y;
+
+  len = way_points_x_.size();
+  for(int i = 0; i < len; i++){
+    tmp_dist = pow(way_points_x_[i] - x, 2.0) + pow(way_points_y_[i] - y, 2.0);
+    if(tmp_dist < minDist){
+      minDist = tmp_dist;
+      idx = i;
+    }
+  }
+
+  return way_points_velocity_[idx];
+}
+
 void PurePursuitNode::callbackFromWayPoints(
   const autoware_msgs::LaneConstPtr& msg)
 {
-  command_linear_velocity_ =
-    (!msg->waypoints.empty()) ? msg->waypoints.at(0).twist.twist.linear.x : 0;
-  setLookaheadParamsByVel();
+  if(use_algorithm_){
+    command_linear_velocity_ = findWayPointVelocity(msg->waypoints.at(0));
+  }
+  else{
+    command_linear_velocity_ = (!msg->waypoints.empty()) ? msg->waypoints.at(0).twist.twist.linear.x : 0;
+  }
+
+  geometry_msgs::Point curr_point = msg->waypoints.at(0).pose.pose.position;
+  geometry_msgs::Point near_point = msg->waypoints.at(std::min(3, (int)msg->waypoints.size() - 1)).pose.pose.position;
+  geometry_msgs::Point far_point = msg->waypoints.at(std::min(30, (int)msg->waypoints.size() - 1)).pose.pose.position;
+
+  double deg_1 = atan2((near_point.y - curr_point.y), (near_point.x - curr_point.x)) / 3.14 * 180;
+  double deg_2 = atan2((far_point.y - curr_point.y), (far_point.x - curr_point.x)) / 3.14 * 180;
+  double angle_diff = std::abs(deg_1 - deg_2);
+  if (angle_diff > 180){
+    angle_diff = 360 - angle_diff;
+  }
+
+  angle_diff_ = angle_diff;
+
+  if(dynamic_param_flag_){
+    setLookaheadParamsByVel();
+  }
   
   if (add_virtual_end_waypoints_)
   {

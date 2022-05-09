@@ -15,7 +15,7 @@
 
 #include <stdio.h>
 #include <sys/time.h>
-#include "rubis_sched/sched.hpp"
+#include "rubis_lib/sched.hpp"
 
 #include "ndt_gpu/SymmetricEigenSolver.h"
 

@@ -22,6 +22,8 @@
 
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/TwistStamped.h>
+#include <rubis_msgs/PoseStamped.h>
+#include <rubis_msgs/TwistStamped.h>
 
 // C++ includes
 #include <vector>

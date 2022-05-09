@@ -34,7 +34,7 @@
 #include <cstdio>
 #include "topic_tools/shape_shifter.h"
 #include "topic_tools/parse.h"
-#include "rubis_sched/sched.hpp"
+#include "rubis_lib/sched.hpp"
 
 using std::string;
 using std::vector;
@@ -232,16 +232,18 @@ int main(int argc, char **argv)
 
     // Executing task
     while(ros::ok()){
-      if(rubis::sched::task_state_ == TASK_STATE_READY){
-        if(task_profiling_flag) rubis::sched::start_task_profiling();
+      if(task_profiling_flag) rubis::sched::start_task_profiling();
+
+      if(rubis::sched::task_state_ == TASK_STATE_READY){        
         if(task_scheduling_flag) rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline); 
         rubis::sched::task_state_ = TASK_STATE_RUNNING;     
       }
 
       ros::spinOnce();
 
-      if(rubis::sched::task_state_ == TASK_STATE_DONE){
-        if(task_profiling_flag) rubis::sched::stop_task_profiling();
+      if(task_profiling_flag) rubis::sched::stop_task_profiling(RUBIS_NO_INSTANCE, rubis::sched::task_state_);
+
+      if(rubis::sched::task_state_ == TASK_STATE_DONE){        
         if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
         rubis::sched::task_state_ = TASK_STATE_READY;
       }

@@ -926,6 +926,8 @@ public:
   int riskyAreaIdx;
   bool obstacleinRiskyArea;
 
+  bool enableSlowDownOnCurve;
+
   // Added by PHY
   bool pedestrianAppearence;
   bool turnLeft;
@@ -986,6 +988,8 @@ public:
 
     giveUpDistance          = -4;
     nReliableCount          = 2;
+
+    enableSlowDownOnCurve = false;
 
     enableHeadingSmoothing      = false;
     enableSwerving           = false;

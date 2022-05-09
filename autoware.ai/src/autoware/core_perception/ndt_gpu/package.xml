@@ -13,5 +13,5 @@
   <build_depend>libpcl-all-dev</build_depend>
 
   <exec_depend>libpcl-all</exec_depend>
-  <depend>rubis_sched</depend>
+  <depend>rubis_lib</depend>
 </package>

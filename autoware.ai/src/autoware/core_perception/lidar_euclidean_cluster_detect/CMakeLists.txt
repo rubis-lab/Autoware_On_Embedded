@@ -20,7 +20,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   tf
   vector_map_server
-  rubis_sched
+  rubis_lib
 )
 
 find_package(OpenMP)
@@ -36,7 +36,7 @@ catkin_package(
     grid_map_cv
     grid_map_msgs
     jsk_rviz_plugins
-    rubis_sched
+    rubis_lib
 )
 
 # Resolve system dependency on yaml-cpp, which apparently does not

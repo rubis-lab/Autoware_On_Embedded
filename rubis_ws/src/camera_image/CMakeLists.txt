@@ -43,7 +43,7 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
   image_transport
   cv_bridge
-  rubis_sched
+  rubis_lib
 )
 ##   * add "message_runtime" and every package in MSG_DEP_SET to
 ##     catkin_package(CATKIN_DEPENDS ...)
