@@ -51,7 +51,7 @@
   <buildtool_depend>catkin</buildtool_depend>
 
   <depend>nav_msgs</depend>
-  <depend>geometry_masgs</depend>
+  <depend>geometry_msgs</depend>
   <depend>tf</depend>
 
 
