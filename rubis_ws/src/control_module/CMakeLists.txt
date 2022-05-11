@@ -109,7 +109,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES contorl_module
-  CATKIN_DEPENDS roscpp tf geometry_msgs std_msgs visualization_msgs lane_following
+  CATKIN_DEPENDS roscpp tf geometry_msgs std_msgs visualization_msgs
 #  DEPENDS system_lib
 )
 
