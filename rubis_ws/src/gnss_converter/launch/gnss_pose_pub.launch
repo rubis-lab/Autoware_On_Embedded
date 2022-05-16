@@ -9,4 +9,6 @@
         <param name="x_offset" value="$(arg x_offset)"/>
         <param name="y_offset" value="$(arg y_offset)"/>
     </node>
+
+    <node pkg="tf" type="static_transform_publisher" name="gnss_to_base_link_broadcaster" args="1 2 0 0 0 0 gnss base_link 100" />
 </launch>
