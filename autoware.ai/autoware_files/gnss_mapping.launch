@@ -1,0 +1,53 @@
+<!-- -->
+<launch>
+  <arg name="voxel_leaf_size" default="1.0" />
+  <arg name="min_scan_range" default="7.0" />
+  <arg name="max_scan_range" default="200.0" />
+  <arg name="min_height" default="-2.9" />
+  <arg name="min_add_scan_shift" default="2.0" />
+
+  <!-- For NDT -->
+  <arg name="use_ndt" default="false" />
+  <arg name="resolution" default="4.0" />
+  <arg name="step_size" default="0.2" />
+  <arg name="trans_eps" default="0.05" />
+  <arg name="max_iter" default="20" />
+
+  <arg name="use_gnss_ori" default="true" />
+  <arg name="incremental_voxel_update" default="false" />
+  <arg name="output_path" default="$(env HOME)" />
+
+  <!-- TF from gnss to localizer (LiDAR) -->
+  <arg name="tf_x" default="5" />
+  <arg name="tf_y" default="-3" />
+  <arg name="tf_z" default="0.0" />
+  <arg name="tf_roll" default="0.0" />
+  <arg name="tf_pitch" default="0.0" />
+  <arg name="tf_yaw" default="-0.785" />
+
+  <!-- rosrun lidar_localizer ndt_mapping  -->
+  <node pkg="lidar_localizer" type="queue_counter" name="queue_counter" output="screen"/>
+  <node pkg="lidar_localizer" type="gnss_mapping" name="gnss_mapping" output="screen">
+    <param name="voxel_leaf_size" value="$(arg voxel_leaf_size)" />
+    <param name="min_scan_range" value="$(arg min_scan_range)" />
+    <param name="max_scan_range" value="$(arg max_scan_range)" />
+    <param name="use_ndt" value="$(arg use_ndt)" />
+    <param name="use_gnss_ori" value="$(arg use_gnss_ori)" />
+    <param name="min_height" value="$(arg min_height)" />
+    <param name="min_add_scan_shift" value="$(arg min_add_scan_shift)" />
+    <param name="resolution" value="$(arg resolution)" />
+    <param name="step_size" value="$(arg step_size)" />
+    <param name="trans_eps" value="$(arg trans_eps)" />
+    <param name="max_iter" value="$(arg max_iter)" />
+    <param name="incremental_voxel_update" value="$(arg incremental_voxel_update)" />
+    <param name="output_path" value="$(arg output_path)" />
+
+    <param name="tf_x" value="$(arg tf_x)" />
+    <param name="tf_y" value="$(arg tf_y)" />
+    <param name="tf_z" value="$(arg tf_z)" />
+    <param name="tf_roll" value="$(arg tf_roll)" />
+    <param name="tf_pitch" value="$(arg tf_pitch)" />
+    <param name="tf_yaw" value="$(arg tf_yaw)" />
+  </node>
+
+</launch>

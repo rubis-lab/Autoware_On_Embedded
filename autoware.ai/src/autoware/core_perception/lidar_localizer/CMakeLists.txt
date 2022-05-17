@@ -90,6 +90,10 @@ add_executable(ndt_mapping nodes/ndt_mapping/ndt_mapping.cpp)
 target_link_libraries(ndt_mapping ${catkin_LIBRARIES})
 add_dependencies(ndt_mapping ${catkin_EXPORTED_TARGETS})
 
+add_executable(gnss_mapping nodes/gnss_mapping/gnss_mapping.cpp)
+target_link_libraries(gnss_mapping ${catkin_LIBRARIES})
+add_dependencies(gnss_mapping ${catkin_EXPORTED_TARGETS})
+
 if(USE_CUDA)
   target_include_directories(ndt_matching PRIVATE ${CUDA_INCLUDE_DIRS})
   target_include_directories(ndt_mapping PRIVATE ${CUDA_INCLUDE_DIRS})
@@ -145,12 +149,12 @@ install(DIRECTORY cfg/
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/cfg
 )
 
-
 install(
   TARGETS
     approximate_ndt_mapping
     icp_matching
     mapping
+    gnss_mapping
     ndt_mapping
     ndt_mapping_tku
     ndt_matching
