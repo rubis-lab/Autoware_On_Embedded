@@ -21,7 +21,7 @@ typedef sync_policies::ExactTime<inertiallabs_msgs::gps_data, inertiallabs_msgs:
 
 static ros::Publisher gnss_pose_pub_;
 static geometry_msgs::PoseStamped gnss_pose_;
-static double x_offset_, y_offset_, yaw_offset_;
+static double x_offset_, y_offset_, z_offset_, yaw_offset_;
 static double roll_, pitch_, yaw_;
 
 void gnss_pose_pub_cb(const inertiallabs_msgs::gps_data::ConstPtr &msg_gps, const inertiallabs_msgs::ins_data::ConstPtr &msg_ins){
@@ -34,6 +34,7 @@ void gnss_pose_pub_cb(const inertiallabs_msgs::gps_data::ConstPtr &msg_gps, cons
     /* position offset calculation */ 
     gnss_pose_.pose.position.x = gnss_pose_.pose.position.x - x_offset_;
     gnss_pose_.pose.position.y = gnss_pose_.pose.position.y - y_offset_;
+    gnss_pose_.pose.position.z = gnss_pose_.pose.position.z - z_offset_;
 
     /* orientation */ 
     roll_ = msg_ins->YPR.z;
@@ -54,6 +55,7 @@ int main(int argc, char *argv[]){
 
     nh.param("/gnss_pose_pub/x_offset", x_offset_, 0.0);
     nh.param("/gnss_pose_pub/y_offset", y_offset_, 0.0);
+    nh.param("/gnss_pose_pub/z_offset", z_offset_, 0.0);
     nh.param("/ins_twist_generator/yaw_offset", yaw_offset_, 0.0);
 
     gnss_pose_pub_ = nh.advertise<geometry_msgs::PoseStamped>("/ndt_pose", 2);
