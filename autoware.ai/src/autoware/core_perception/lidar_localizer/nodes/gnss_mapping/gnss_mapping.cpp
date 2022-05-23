@@ -120,7 +120,7 @@ static void gnss_callback(const geometry_msgs::PoseStamped::ConstPtr& input)
       tf::Quaternion quat(input->pose.orientation.x, input->pose.orientation.y, input->pose.orientation.z, input->pose.orientation.w);
       // converted to RPY[-pi : pi]
       tf::Matrix3x3(quat).getRPY(r, p, y);
-      initial_yaw = y;
+      initial_yaw = calcDiffForRadian(y, _tf_yaw * -1);
     }
     previous_gnss_pose = current_gnss_pose;
     gnss_pos_ready = true;
@@ -164,6 +164,8 @@ static void gnss_callback(const geometry_msgs::PoseStamped::ConstPtr& input)
   {
     current_gnss_pose.yaw = atan2(y_diff, x_diff);
     previous_gnss_pose = current_gnss_pose;
+
+    std::cout << "Hi " << current_gnss_pose.yaw << std::endl;
   }
 }
 
@@ -355,8 +357,6 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
   localizer_pose.y = t_localizer(1, 3);
   localizer_pose.z = t_localizer(2, 3);
   mat_l.getRPY(localizer_pose.roll, localizer_pose.pitch, localizer_pose.yaw, 1);
-
-  std::cout << localizer_pose.x << " " << localizer_pose.y << std::endl;
 
   // transform.setOrigin(tf::Vector3(current_gnss_pose.x, current_gnss_pose.y, current_gnss_pose.z));
   transform.setOrigin(tf::Vector3(localizer_pose.x, localizer_pose.y, localizer_pose.z));
