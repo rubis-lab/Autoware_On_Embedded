@@ -11,6 +11,7 @@
 #include <velodyne_pointcloud/rawdata.h>
 
 #include <tf/transform_broadcaster.h>
+#include <tf/transform_listener.h>
 #include <tf/transform_datatypes.h>
 
 #include <pcl/io/io.h>
@@ -88,6 +89,8 @@ static double _max_scan_range = 200.0;
 static double _min_add_scan_shift = 1.0;
 static double _min_height = 0.0;
 
+static bool _use_tf_topic = false;
+static std::string localizer_frame, base_link_frame;
 static double _tf_x, _tf_y, _tf_z, _tf_roll, _tf_pitch, _tf_yaw;
 static Eigen::Matrix4f tf_btol, tf_ltob;
 
@@ -489,12 +492,48 @@ int main(int argc, char** argv)
   private_nh.getParam("trans_eps", _trans_eps);
   private_nh.getParam("max_iter", _max_iter);
 
-  private_nh.getParam("tf_x", _tf_x);
-  private_nh.getParam("tf_y", _tf_y);
-  private_nh.getParam("tf_z", _tf_z);
-  private_nh.getParam("tf_roll", _tf_roll);
-  private_nh.getParam("tf_pitch", _tf_pitch);
-  private_nh.getParam("tf_yaw", _tf_yaw);
+  private_nh.getParam("use_tf_topic", _use_tf_topic);
+
+  if(_use_tf_topic){
+    private_nh.getParam("localizer_frame", localizer_frame);
+    private_nh.getParam("base_link_frame", base_link_frame);
+
+    tf::TransformListener listener;
+    tf::StampedTransform transform;
+    while (1)
+    {
+      try
+      {
+        listener.lookupTransform(base_link_frame, localizer_frame, ros::Time(0), transform);
+        break;
+      }
+      catch (tf::TransformException& ex)
+      {
+        ROS_WARN("[gnss_mapping] TF %s-%s are not published yet", base_link_frame, localizer_frame);
+      }
+      ros::Duration(1.0).sleep();
+    }
+
+    double r, p, y;
+    tf::Quaternion quat = transform.getRotation();
+    // converted to RPY[-pi : pi]
+    tf::Matrix3x3(quat).getRPY(r, p, y);
+
+    _tf_x = transform.getOrigin().x();
+    _tf_y = transform.getOrigin().y();
+    _tf_z = transform.getOrigin().z();
+    _tf_roll = 0;
+    _tf_pitch = 0;
+    _tf_yaw = y;
+  }
+  else{
+    private_nh.getParam("tf_x", _tf_x);
+    private_nh.getParam("tf_y", _tf_y);
+    private_nh.getParam("tf_z", _tf_z);
+    private_nh.getParam("tf_roll", _tf_roll);
+    private_nh.getParam("tf_pitch", _tf_pitch);
+    private_nh.getParam("tf_yaw", _tf_yaw);
+  }
 
   std::cout << "voxel_leaf_size: " << _voxel_leaf_size << std::endl;
   std::cout << "min_scan_range: " << _min_scan_range << std::endl;

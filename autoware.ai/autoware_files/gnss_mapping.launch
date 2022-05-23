@@ -13,13 +13,20 @@
   <arg name="trans_eps" default="0.05" />
   <arg name="max_iter" default="20" />
 
-  <arg name="use_gnss_ori" default="true" />
+  <arg name="use_gnss_ori" default="false" />
   <arg name="incremental_voxel_update" default="false" />
   <arg name="output_path" default="$(env HOME)" />
 
   <!-- TF from gnss to localizer (LiDAR) -->
-  <arg name="tf_x" default="5" />
-  <arg name="tf_y" default="-3" />
+  <arg name="use_tf_topic" default="false" />
+  <!-- Only valid when use_tf_topic is true -->
+  <arg name="localizer_frame" default="velodyne" />
+  <arg name="base_link_frame" default="gps" />
+  <node pkg="tf" type="static_transform_publisher" name="gps_velodyne" args="-500.0 -3.0 0.0 0 0 -0.785 gps velodyne 10"/>
+
+  <!-- Only valid when use_tf_topic is false -->
+  <arg name="tf_x" default="5.0" />
+  <arg name="tf_y" default="-3.0" />
   <arg name="tf_z" default="0.0" />
   <arg name="tf_roll" default="0.0" />
   <arg name="tf_pitch" default="0.0" />
@@ -41,6 +48,10 @@
     <param name="max_iter" value="$(arg max_iter)" />
     <param name="incremental_voxel_update" value="$(arg incremental_voxel_update)" />
     <param name="output_path" value="$(arg output_path)" />
+
+    <param name="use_tf_topic" value="$(arg use_tf_topic)" />
+    <param name="localizer_frame" value="$(arg localizer_frame)" />
+    <param name="base_link_frame" value="$(arg base_link_frame)" />
 
     <param name="tf_x" value="$(arg tf_x)" />
     <param name="tf_y" value="$(arg tf_y)" />
