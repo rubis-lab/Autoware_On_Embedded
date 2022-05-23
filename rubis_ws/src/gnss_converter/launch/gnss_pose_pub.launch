@@ -5,10 +5,10 @@
     
     <arg name="x_offset" default="0.0" />
     <arg name="y_offset" default="0.0" />
+    <arg name="z_offset" default="0.0" />
     <node pkg="gnss_converter" type="gnss_pose_pub" name="gnss_pose_pub" output="screen">
         <param name="x_offset" value="$(arg x_offset)"/>
         <param name="y_offset" value="$(arg y_offset)"/>
+        <param name="z_offset" value="$(arg z_offset)"/>
     </node>
-
-    <node pkg="tf" type="static_transform_publisher" name="gnss_to_base_link_broadcaster" args="1 2 0 0 0 0 gnss base_link 100" />
 </launch>

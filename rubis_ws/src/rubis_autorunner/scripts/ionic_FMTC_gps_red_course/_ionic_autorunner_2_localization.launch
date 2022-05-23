@@ -55,8 +55,9 @@
   </include>
 
   <include file="$(find gnss_converter)/launch/gnss_pose_pub.launch">
-    <arg name="x_offset" value="30052.0" />
-    <arg name="y_offset" value="1653.0" />
+    <arg name="x_offset" value="30085.75" /> 
+    <arg name="y_offset" value="1652.88" />
+    <arg name="z_offset" value="-1452.46" />
   </include>
 
 </launch>
