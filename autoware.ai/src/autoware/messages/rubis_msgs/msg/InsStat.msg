@@ -6,4 +6,5 @@ float64 acc_y
 float64 linear_velocity
 float64 linear_acceleration
 float64 angular_velocity
+float64 angular_acceleration
 float64 yaw # degree
