@@ -71,8 +71,6 @@
 
 #define SPIN_PROFILING
 
-#define GPU_CLUSTERING
-
 #ifdef GPU_CLUSTERING
 
 #include "gpu_euclidean_clustering.h"

@@ -54,6 +54,9 @@
 #include <cmath>
 #include <chrono>
 
+#include <rubis_lib/sched.hpp>
+
+
 class Cluster
 {
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr pointcloud_;
