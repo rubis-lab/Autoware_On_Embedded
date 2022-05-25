@@ -34,6 +34,12 @@ namespace sched{
 
     task_profiling_flag_ = 1;
     task_response_time_fp_ = fopen(task_reponse_time_filename.c_str(), "w+");
+    if(task_response_time_fp_ == NULL){
+      std::cout<<"Cannot create/open file: "<<task_reponse_time_filename<<std::endl;
+      perror("Failed: ");
+      exit(0);
+    }
+
     chmod(task_reponse_time_filename.c_str(), strtol("0777", 0, 8));
     fprintf(task_response_time_fp_, "iter,PID,start,end,instance,activation\n");
   }

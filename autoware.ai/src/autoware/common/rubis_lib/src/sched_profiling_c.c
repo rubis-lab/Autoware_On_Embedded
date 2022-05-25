@@ -38,6 +38,12 @@ void init_task_profiling(char* _task_response_time_filename){
 
   task_profiling_flag_ = 1;
   task_response_time_fp_ = fopen(task_response_time_filename, "w+");
+  if(task_response_time_fp_ == NULL){
+      printf("Cannot create/open file: %s\n", task_response_time_filename);
+      perror("Failed: ");
+      exit(0);
+  }
+
   chmod(task_response_time_filename, strtol("0777", 0, 8));
   fprintf(task_response_time_fp_, "iter,PID,start,end,instance,activation\n");
 }
