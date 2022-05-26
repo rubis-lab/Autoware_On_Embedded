@@ -1,23 +1,26 @@
 
 #include "gnss_module.hpp"
+#include <Eigen/Core>
+#include <Eigen/Dense>
 
 #define DEBUG
 
 GnssModule::GnssModule(){
-    gnss_pose_pub_ = nh.advertise<geometry_msgs::PoseStamped>("/gnss_pose", 1);
-    ins_twist_pub_ = nh.advertise<geometry_msgs::TwistStamped>("/ins_twist", 1);
-    ins_stat_pub_ = nh.advertise<rubis_msgs::InsStat>("/ins_stat", 1);
+    gnss_pose_pub_ = nh_.advertise<geometry_msgs::PoseStamped>("/gnss_pose", 1);
+    ins_twist_pub_ = nh_.advertise<geometry_msgs::TwistStamped>("/ins_twist", 1);
+    ins_stat_pub_ = nh_.advertise<rubis_msgs::InsStat>("/ins_stat", 1);
 
     gps_sub_.subscribe(nh_, "/Inertial_Labs/gps_data", 2);
     ins_sub_.subscribe(nh_, "/Inertial_Labs/ins_data", 2);
-    snesor_sub_.subscribe(nh_, "/Inertial_Labs/sensor_data", 2);
-    sync_.reset(new SyncPolicy_(SyncPolicy_(10), gps_sub, ins_sub, snesor_sub));
-    sync_.registerCallback(boost::bind(&GnssModule::observation_cb, this, _1, _2, _3));
+    sensor_sub_.subscribe(nh_, "/Inertial_Labs/sensor_data", 2);
+    sync_.reset(new Sync(SyncPolicy(10), gps_sub_, ins_sub_, sensor_sub_));
+    sync_->registerCallback(boost::bind(&GnssModule::observation_cb, this, _1, _2, _3));
 
     nh_.param("/gnss_module/x_offset", x_offset_, 0.0);
     nh_.param("/gnss_module/y_offset", y_offset_, 0.0);
     nh_.param("/gnss_module/z_offset", z_offset_, 0.0);
-    nh_.param("/gnss_module/observed_yaw_offset", observed_yaw_offset_, 0.0);
+    nh_.param("/gnss_module/yaw_offset", yaw_offset_, 0.0);
+    nh_.param("/gnss_module/debug", debug_, false);
     nh_.param("/gnss_module/use_kalman_filter", use_kalman_filter_, true);
 
     std::vector<float> H_k_vec, Q_k_vec, R_k_vec, P_k_vec;
@@ -38,12 +41,12 @@ GnssModule::GnssModule(){
       exit(1);
     }
     
-    Eigen::Matrix2f H_k = Eigen::Matrix2f(H_k_vec.data());
-    Eigen::Matrix2f Q_k = Eigen::Matrix2f(Q_k_vec.data());
-    Eigen::Matrix2f R_k = Eigen::Matrix2f(R_k_vec.data());
-    Eigen::Matrix2f P_k = Eigen::Matrix2f(P_k_vec.data());
+    Eigen::Matrix6f H_k = Eigen::Matrix6f(H_k_vec.data());
+    Eigen::Matrix6f Q_k = Eigen::Matrix6f(Q_k_vec.data());
+    Eigen::Matrix6f R_k = Eigen::Matrix6f(R_k_vec.data());
+    Eigen::Matrix6f P_k = Eigen::Matrix6f(P_k_vec.data());
 
-    lkf_(H_k, Q_k, R_k, P_k);
+    lkf_ = LKF(H_k, Q_k, R_k, P_k);
 
     /* lookup /gnss to /base_link static transform */ 
     ros::Rate rate(100);
@@ -68,7 +71,7 @@ void GnssModule::observation_cb(const inertiallabs_msgs::gps_data::ConstPtr &gps
     static ros::Time prev_time = cur_time_;
     static double prev_linear_velocity = 0.0;
     static double prev_angular_velocity = 0.0;
-    double roll, pitch, yaw, linear_velocity, linear_acceleration, angular_velocity;
+    double roll, pitch, yaw, linear_velocity, angular_velocity;
 
     cur_time_ = gps_msg->header.stamp;
     gnss_pose_.header = gps_msg->header;
@@ -88,10 +91,10 @@ void GnssModule::observation_cb(const inertiallabs_msgs::gps_data::ConstPtr &gps
 
     /* yaw offset calculation */
     yaw = -1 * (ins_msg->YPR.x) - yaw_offset_;
-    yaw = (observed_yaw > 180.0) ? (observed_yaw - 360) : ((observed_yaw < -180) ? (observed_yaw + 360) : observed_yaw);
+    yaw = (yaw > 180.0) ? (yaw - 360) : ((yaw < -180) ? (yaw + 360) : yaw);
     
     /* unit conversion(deg -> rad) */ 
-    roll = observed_roll * M_PI/180.0; pitch = observed_pitch * M_PI/180.0; yaw = yaw * M_PI/180.0;
+    roll = roll * M_PI/180.0; pitch = pitch * M_PI/180.0; yaw = yaw * M_PI/180.0;
 
     /* set orientation */
     geometry_msgs::Quaternion q;
@@ -104,7 +107,7 @@ void GnssModule::observation_cb(const inertiallabs_msgs::gps_data::ConstPtr &gps
 
     /* acceleration */
     time_diff_ = (cur_time_ - prev_time).toSec();
-    if(time_diff == 0.0) time_diff = 0.000000001; // 1ns
+    if(time_diff_ == 0.0) time_diff_ = 0.000000001; // 1ns
     double linear_acceleration = (linear_velocity - prev_linear_velocity)/time_diff_;
     double angular_acceleration = (angular_velocity - prev_angular_velocity)/time_diff_;
 
@@ -123,7 +126,7 @@ void GnssModule::observation_cb(const inertiallabs_msgs::gps_data::ConstPtr &gps
     ins_stat_.header = gnss_pose_.header;
     ins_stat_.header.frame_id = "/base_link";
 
-    ins_stat_.linear_velociy = linear_velocity;
+    ins_stat_.linear_velocity = linear_velocity;
     ins_stat_.linear_acceleration = linear_acceleration;
     ins_stat_.angular_velocity = angular_velocity;
     ins_stat_.angular_acceleration = angular_acceleration;
@@ -141,15 +144,18 @@ void GnssModule::observation_cb(const inertiallabs_msgs::gps_data::ConstPtr &gps
     return;
 }
 
-void GnssModule::run_kalman_filter(geometry_msgs::PoseStamped& pose, geometry_msgs::TwistSTamped& twist, rubis_msgs::InsStat& ins_stat){
+void GnssModule::run_kalman_filter(geometry_msgs::PoseStamped& pose, geometry_msgs::TwistStamped& twist, rubis_msgs::InsStat& ins_stat){
     Eigen::Vector6f u_k, z_k; // u_k: control vector, z_k: observation_vector
 
-    u_k << ins_stat.linear_velocity, ins_stat.linear_acceleration, ins_stat.angular_acceleration, 0, 0, 0;
-    z_k << pose.position.x, pose.position.y, ins_stat.yaw, ins_stat.vel_x, ins_stat.vel_y, ins_stat.angular_velocity;
+    u_k << ins_stat.acc_x, ins_stat.acc_y, ins_stat.angular_acceleration, ins_stat.acc_x, ins_stat.acc_y, ins_stat.angular_acceleration;
+    z_k << pose.pose.position.x, pose.pose.position.y, ins_stat.yaw, ins_stat.vel_x, ins_stat.vel_y, ins_stat.angular_velocity;
+
+    // u_k << ins_stat.linear_velocity, ins_stat.linear_acceleration, ins_stat.angular_acceleration, 0, 0, 0;
+    // z_k << pose.pose.position.x, pose.pose.position.y, ins_stat.yaw, ins_stat.vel_x, ins_stat.vel_y, ins_stat.angular_velocity;
 
     Eigen::Vector6f x_hat_prime_k = lkf_.run(time_diff_, u_k, z_k); // x_hat_prime_k: filtered result
-    pose.position.x = x_hat_prime_k(0);
-    pose.position.y = x_hat_prime_k(1);
+    pose.pose.position.x = x_hat_prime_k(0);
+    pose.pose.position.y = x_hat_prime_k(1);
     ins_stat.yaw = NormalizeRadian(x_hat_prime_k(2), -1 * M_PI, M_PI);
     ins_stat.vel_x = ins_stat.linear_velocity * cos(ins_stat.yaw);
     ins_stat.vel_y = ins_stat.linear_velocity * sin(ins_stat.yaw);
@@ -157,8 +163,8 @@ void GnssModule::run_kalman_filter(geometry_msgs::PoseStamped& pose, geometry_ms
     ins_stat.acc_x = ins_stat.linear_acceleration * cos(ins_stat.yaw);
     ins_stat.acc_y = ins_stat.linear_acceleration * sin(ins_stat.yaw);
 
-    twist.pose.position.x = sqrt(pow(ins_stat.vel_x, 2) + pow(ins_stat.vel_y, 2));
-    twist.pose.angular.z = ins_stat.angular_velocity;
+    twist.twist.linear.x = sqrt(pow(ins_stat.vel_x, 2) + pow(ins_stat.vel_y, 2));
+    twist.twist.angular.z = ins_stat.angular_velocity;
 }
 
 void GnssModule::run(){
@@ -166,46 +172,128 @@ void GnssModule::run(){
 
     tf::TransformBroadcaster broadcaster;
     tf::StampedTransform transform;
-    tf::Transform tf_map_to_gnss, tf_map_to_base;
+    tf::Transform tf_map_to_gnss, tf_map_to_base, tf_map_to_kalman;
+    tf::Quaternion q;
+
     bool is_kalman_filter_on = false;
+    double roll, pitch, yaw;
     
-    cur_time_ = ros::time::now();
-    while(nh.ok()){
+    cur_time_ = ros::Time::now();
+    while(nh_.ok()){
         ros::spinOnce();
 
-        /* /map to /gnss tf */ 
-        if(use_kalman_filter_){
-            if(!is_kalman_filter_on){
-                is_kalman_filter_on = true;
-                lkf_.set_init_value(gnss_pose_.x, gnss_pose_.y, inst_stat_.yaw, ins_stat_.vel_x, ins_stat_.vel_y, ins_stat_.angular_velocity); 
-            }
-            run_kalman_filter(gnss_pose_, ins_twist_, ins_stat);
-        }       
-        
-        tf_map_to_gnss.setOrigin(tf::Vector3(gnss_pose_.pose.position.x, gnss_pose_.pose.position.y, gnss_pose_.pose.position.z));
-        tf_map_to_gnss.setRotation(gnss_pose_.orientation);
+        if(!use_kalman_filter_){ // No Kalman filtering
+        /* Update TF */
+            tf_map_to_gnss.setOrigin(tf::Vector3(gnss_pose_.pose.position.x, gnss_pose_.pose.position.y, gnss_pose_.pose.position.z));
+            ToEulerAngles(gnss_pose_.pose.orientation, roll, pitch, yaw);
+            q.setRPY(roll, pitch, yaw);
+            tf_map_to_gnss.setRotation(q);
 
-        /* /map to /base tf calculation */ 
-        tf_map_to_base = tf_map_to_gnss * tf_gnss_to_base_;
+            /* /map to /base tf calculation */ 
+            tf_map_to_base = tf_map_to_gnss * tf_gnss_to_base_;
 
-        /* update gnss_pose */  
-        gnss_pose_.pose.position.x = tf_map_to_base.getOrigin().x();
-        gnss_pose_.pose.position.y = tf_map_to_base.getOrigin().y();
-        gnss_pose_.pose.position.z = tf_map_to_base.getOrigin().z();
+            /* update gnss_pose */  
+            gnss_pose_.pose.position.x = tf_map_to_base.getOrigin().x();
+            gnss_pose_.pose.position.y = tf_map_to_base.getOrigin().y();
+            gnss_pose_.pose.position.z = tf_map_to_base.getOrigin().z();
 
-        gnss_pose_.pose.orientation.w = tf_map_to_base.getRotation().w();
-        gnss_pose_.pose.orientation.x = tf_map_to_base.getRotation().x();
-        gnss_pose_.pose.orientation.y = tf_map_to_base.getRotation().y();
-        gnss_pose_.pose.orientation.z = tf_map_to_base.getRotation().z();
+            gnss_pose_.pose.orientation.w = tf_map_to_base.getRotation().w();
+            gnss_pose_.pose.orientation.x = tf_map_to_base.getRotation().x();
+            gnss_pose_.pose.orientation.y = tf_map_to_base.getRotation().y();
+            gnss_pose_.pose.orientation.z = tf_map_to_base.getRotation().z();
 
-        /* broadcast & publish */ 
-        broadcaster.sendTransform(tf::StampedTransform(tf_map_to_base, ros::Time::now(), "/map", "/base_link"));
-        gnss_pose_pub_.publish(gnss_pose_);
-        ins_twist_pub_.publish(ins_twist_);
-        ins_stat_pub_.publish(ins_stat_);
+            /* broadcast & publish */ 
+            broadcaster.sendTransform(tf::StampedTransform(tf_map_to_base, ros::Time::now(), "/map", "/base_link"));
+
+            gnss_pose_pub_.publish(gnss_pose_);
+            ins_twist_pub_.publish(ins_twist_);
+            ins_stat_pub_.publish(ins_stat_);
+        }
+        else if(!debug_){ // Use Kalman filter
+            /* kalman_filtering */ 
+            if(use_kalman_filter_){
+                if(!is_kalman_filter_on){
+                    is_kalman_filter_on = true;
+                    lkf_.set_init_value(gnss_pose_.pose.position.x, gnss_pose_.pose.position.y, ins_stat_.yaw, ins_stat_.vel_x, ins_stat_.vel_y, ins_stat_.angular_velocity); 
+                }
+                run_kalman_filter(gnss_pose_, ins_twist_, ins_stat_);
+            }       
+            
+            /* Update TF */
+            tf_map_to_gnss.setOrigin(tf::Vector3(gnss_pose_.pose.position.x, gnss_pose_.pose.position.y, gnss_pose_.pose.position.z));
+            ToEulerAngles(gnss_pose_.pose.orientation, roll, pitch, yaw);
+            q.setRPY(roll, pitch, yaw);
+            tf_map_to_gnss.setRotation(q);
+    
+            /* /map to /base tf calculation */ 
+            tf_map_to_base = tf_map_to_gnss * tf_gnss_to_base_;
+    
+            /* update gnss_pose */  
+            gnss_pose_.pose.position.x = tf_map_to_base.getOrigin().x();
+            gnss_pose_.pose.position.y = tf_map_to_base.getOrigin().y();
+            gnss_pose_.pose.position.z = tf_map_to_base.getOrigin().z();
+    
+            gnss_pose_.pose.orientation.w = tf_map_to_base.getRotation().w();
+            gnss_pose_.pose.orientation.x = tf_map_to_base.getRotation().x();
+            gnss_pose_.pose.orientation.y = tf_map_to_base.getRotation().y();
+            gnss_pose_.pose.orientation.z = tf_map_to_base.getRotation().z();
+    
+            /* broadcast & publish */ 
+            broadcaster.sendTransform(tf::StampedTransform(tf_map_to_base, ros::Time::now(), "/map", "/base_link"));
+    
+            gnss_pose_pub_.publish(gnss_pose_);
+            ins_twist_pub_.publish(ins_twist_);
+            ins_stat_pub_.publish(ins_stat_);
+        }
+        else{ // Debug mode
+            /* Update TF */
+            tf_map_to_gnss.setOrigin(tf::Vector3(gnss_pose_.pose.position.x, gnss_pose_.pose.position.y, gnss_pose_.pose.position.z));
+            ToEulerAngles(gnss_pose_.pose.orientation, roll, pitch, yaw);
+            q.setRPY(roll, pitch, yaw);
+            tf_map_to_gnss.setRotation(q);
+    
+            /* /map to /base tf calculation */ 
+            tf_map_to_base = tf_map_to_gnss * tf_gnss_to_base_;
+    
+            /* update gnss_pose */  
+            gnss_pose_.pose.position.x = tf_map_to_base.getOrigin().x();
+            gnss_pose_.pose.position.y = tf_map_to_base.getOrigin().y();
+            gnss_pose_.pose.position.z = tf_map_to_base.getOrigin().z();
+    
+            gnss_pose_.pose.orientation.w = tf_map_to_base.getRotation().w();
+            gnss_pose_.pose.orientation.x = tf_map_to_base.getRotation().x();
+            gnss_pose_.pose.orientation.y = tf_map_to_base.getRotation().y();
+            gnss_pose_.pose.orientation.z = tf_map_to_base.getRotation().z();
+
+            /* kalman_filtering */ 
+            if(use_kalman_filter_){
+                if(!is_kalman_filter_on){
+                    is_kalman_filter_on = true;
+                    lkf_.set_init_value(gnss_pose_.pose.position.x, gnss_pose_.pose.position.y, ins_stat_.yaw, ins_stat_.vel_x, ins_stat_.vel_y, ins_stat_.angular_velocity); 
+                }
+                run_kalman_filter(gnss_pose_, ins_twist_, ins_stat_);
+            }       
+            
+            /* Update TF */
+            tf_map_to_kalman.setOrigin(tf::Vector3(gnss_pose_.pose.position.x, gnss_pose_.pose.position.y, gnss_pose_.pose.position.z));
+            ToEulerAngles(gnss_pose_.pose.orientation, roll, pitch, yaw);
+            q.setRPY(roll, pitch, yaw);
+            tf_map_to_kalman.setRotation(q);
+    
+            /* /map to /base tf calculation */ 
+            tf_map_to_kalman = tf_map_to_kalman * tf_gnss_to_base_;
+    
+            /* broadcast & publish */ 
+            broadcaster.sendTransform(tf::StampedTransform(tf_map_to_base, ros::Time::now(), "/map", "/base_link"));
+            broadcaster.sendTransform(tf::StampedTransform(tf_map_to_kalman, ros::Time::now(), "/map", "/kalman"));
+    
+            gnss_pose_pub_.publish(gnss_pose_);
+            ins_twist_pub_.publish(ins_twist_);
+            ins_stat_pub_.publish(ins_stat_);
+        }
 
         rate.sleep();
     }
 
-    return 0;
+    return;
 }

@@ -25,7 +25,6 @@
 #include "LLH2UTM.h"
 #include "LKF.h"
 #include "quaternion_euler.h"
-
 #endif
 
 #define M_PI 3.14159265358979323846
@@ -39,17 +38,18 @@ public:
     void run();
 private:
     void observation_cb(const inertiallabs_msgs::gps_data::ConstPtr &gps_msg, const inertiallabs_msgs::ins_data::ConstPtr &ins_msg, const inertiallabs_msgs::sensor_data::ConstPtr &sensor_msg);
-    void run_kalman_filter(geometry_msgs::PoseStamped& pose, geometry_msgs::TwistSTamped& twist, rubis_msgs::InsStat& ins_stat);
+    void run_kalman_filter(geometry_msgs::PoseStamped& pose, geometry_msgs::TwistStamped& twist, rubis_msgs::InsStat& ins_stat);
 private:
     ros::NodeHandle nh_;
-    ros::Publisher gnss_pose_pub_ins_twist_pub_, ins_stat_pub_;
+    ros::Publisher gnss_pose_pub_, ins_twist_pub_, ins_stat_pub_;
     ros::Time cur_time_;
 
     message_filters::Subscriber<inertiallabs_msgs::gps_data> gps_sub_;
     message_filters::Subscriber<inertiallabs_msgs::ins_data> ins_sub_;
     message_filters::Subscriber<inertiallabs_msgs::sensor_data> sensor_sub_;
-    typedef sync_policies::ExactTime<inertiallabs_msgs::gps_data, inertiallabs_msgs::ins_data, inertiallabs_msgs::ins_data> SyncPolicy_;
-    boost::shared_ptr<SyncPolicy_> sync_;
+    typedef sync_policies::ExactTime<inertiallabs_msgs::gps_data, inertiallabs_msgs::ins_data, inertiallabs_msgs::sensor_data> SyncPolicy;
+    typedef Synchronizer<SyncPolicy> Sync;
+    boost::shared_ptr<Sync> sync_;
 
     tf::Transform tf_gnss_to_base_;
     geometry_msgs::PoseStamped gnss_pose_;
@@ -60,6 +60,7 @@ private:
     double y_offset_;
     double z_offset_;
     double yaw_offset_;
+    bool debug_;
     bool use_kalman_filter_;
     LKF lkf_;
 
