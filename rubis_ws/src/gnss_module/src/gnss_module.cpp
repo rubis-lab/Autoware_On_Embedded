@@ -40,11 +40,16 @@ GnssModule::GnssModule(){
       ROS_ERROR("Failed to get parameter P_k");
       exit(1);
     }
-    
+
     Eigen::Matrix6f H_k = Eigen::Matrix6f(H_k_vec.data());
     Eigen::Matrix6f Q_k = Eigen::Matrix6f(Q_k_vec.data());
     Eigen::Matrix6f R_k = Eigen::Matrix6f(R_k_vec.data());
     Eigen::Matrix6f P_k = Eigen::Matrix6f(P_k_vec.data());
+
+    std::cout<< H_k <<std::endl;
+    std::cout<< Q_k <<std::endl;
+    std::cout<< R_k <<std::endl;
+    std::cout<< P_k <<std::endl;
 
     lkf_ = LKF(H_k, Q_k, R_k, P_k);
 
@@ -141,6 +146,8 @@ void GnssModule::observation_cb(const inertiallabs_msgs::gps_data::ConstPtr &gps
     prev_linear_velocity = linear_velocity;
     prev_angular_velocity = angular_velocity;
 
+    /* Check data is updated */
+    is_updated_ = true;
     return;
 }
 
@@ -164,7 +171,7 @@ void GnssModule::run_kalman_filter(geometry_msgs::PoseStamped& pose, geometry_ms
     ins_stat.acc_y = ins_stat.linear_acceleration * sin(ins_stat.yaw);
 
     twist.twist.linear.x = sqrt(pow(ins_stat.vel_x, 2) + pow(ins_stat.vel_y, 2));
-    twist.twist.angular.z = ins_stat.angular_velocity;
+    twist.twist.angular.z = ins_stat.angular_velocity;        
 }
 
 void GnssModule::run(){
@@ -181,12 +188,16 @@ void GnssModule::run(){
     cur_time_ = ros::Time::now();
     while(nh_.ok()){
         ros::spinOnce();
+        if(!is_updated_){
+            rate.sleep();
+            continue;
+        }
 
         if(!use_kalman_filter_){ // No Kalman filtering
         /* Update TF */
             tf_map_to_gnss.setOrigin(tf::Vector3(gnss_pose_.pose.position.x, gnss_pose_.pose.position.y, gnss_pose_.pose.position.z));
             ToEulerAngles(gnss_pose_.pose.orientation, roll, pitch, yaw);
-            q.setRPY(roll, pitch, yaw);
+            q.setRPY(0, 0, yaw);
             tf_map_to_gnss.setRotation(q);
 
             /* /map to /base tf calculation */ 
@@ -208,6 +219,7 @@ void GnssModule::run(){
             gnss_pose_pub_.publish(gnss_pose_);
             ins_twist_pub_.publish(ins_twist_);
             ins_stat_pub_.publish(ins_stat_);
+
         }
         else if(!debug_){ // Use Kalman filter
             /* kalman_filtering */ 
@@ -222,7 +234,7 @@ void GnssModule::run(){
             /* Update TF */
             tf_map_to_gnss.setOrigin(tf::Vector3(gnss_pose_.pose.position.x, gnss_pose_.pose.position.y, gnss_pose_.pose.position.z));
             ToEulerAngles(gnss_pose_.pose.orientation, roll, pitch, yaw);
-            q.setRPY(roll, pitch, yaw);
+            q.setRPY(0, 0, yaw);
             tf_map_to_gnss.setRotation(q);
     
             /* /map to /base tf calculation */ 
@@ -246,10 +258,12 @@ void GnssModule::run(){
             ins_stat_pub_.publish(ins_stat_);
         }
         else{ // Debug mode
+            geometry_msgs::PoseStamped kalman_pose = gnss_pose_;
+
             /* Update TF */
             tf_map_to_gnss.setOrigin(tf::Vector3(gnss_pose_.pose.position.x, gnss_pose_.pose.position.y, gnss_pose_.pose.position.z));
             ToEulerAngles(gnss_pose_.pose.orientation, roll, pitch, yaw);
-            q.setRPY(roll, pitch, yaw);
+            q.setRPY(0, 0, yaw);
             tf_map_to_gnss.setRotation(q);
     
             /* /map to /base tf calculation */ 
@@ -268,16 +282,16 @@ void GnssModule::run(){
             /* kalman_filtering */ 
             if(use_kalman_filter_){
                 if(!is_kalman_filter_on){
-                    is_kalman_filter_on = true;
-                    lkf_.set_init_value(gnss_pose_.pose.position.x, gnss_pose_.pose.position.y, ins_stat_.yaw, ins_stat_.vel_x, ins_stat_.vel_y, ins_stat_.angular_velocity); 
+                    is_kalman_filter_on = true;                    
+                    lkf_.set_init_value(kalman_pose.pose.position.x, kalman_pose.pose.position.y, ins_stat_.yaw, ins_stat_.vel_x, ins_stat_.vel_y, ins_stat_.angular_velocity);                     
                 }
-                run_kalman_filter(gnss_pose_, ins_twist_, ins_stat_);
+                run_kalman_filter(kalman_pose, ins_twist_, ins_stat_);
             }       
-            
+
             /* Update TF */
-            tf_map_to_kalman.setOrigin(tf::Vector3(gnss_pose_.pose.position.x, gnss_pose_.pose.position.y, gnss_pose_.pose.position.z));
-            ToEulerAngles(gnss_pose_.pose.orientation, roll, pitch, yaw);
-            q.setRPY(roll, pitch, yaw);
+            tf_map_to_kalman.setOrigin(tf::Vector3(kalman_pose.pose.position.x, kalman_pose.pose.position.y, kalman_pose.pose.position.z));
+            ToEulerAngles(kalman_pose.pose.orientation, roll, pitch, yaw);
+            q.setRPY(0, 0, yaw);
             tf_map_to_kalman.setRotation(q);
     
             /* /map to /base tf calculation */ 
@@ -293,6 +307,7 @@ void GnssModule::run(){
         }
 
         rate.sleep();
+        is_updated_ = false;
     }
 
     return;

@@ -65,6 +65,6 @@ private:
     LKF lkf_;
 
     double time_diff_;
-
+    bool is_updated_ = false;
 };
 
