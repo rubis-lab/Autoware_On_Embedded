@@ -256,3 +256,13 @@ target_link_libraries(gnss_pose_pub
   ${EIGEN3_LIBRARIES}
   ${OpenCV_LIBS}
 )
+
+add_executable(ntrip_client
+  src/ntrip_client.cpp
+)
+add_dependencies(ntrip_client ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(ntrip_client
+  ${catkin_LIBRARIES}
+  ${EIGEN3_LIBRARIES}
+  ${OpenCV_LIBS}
+)

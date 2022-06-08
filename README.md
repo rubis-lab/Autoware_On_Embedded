@@ -102,24 +102,24 @@ source ~/autoware.ai/install/setup.bash
 ## How to build package in rubis_ws
 * Install some dependency
 ```
-sudo apt-get install ros-melodic-ackermann-msgs ros-melodic-serial -y
+sudo apt-get install ros-melodic-ackermann-msgs ros-melodic-serial ros-melodic-can-msgs -y
 ```
 
 
 * Initialize ROS workspace
 ```
-cd ${WORKSPACE_DIR}/rubis_ws/src
+cd <WORKSPACE_DIR>/rubis_ws/src
 catkin_init_workspace
 ```
 
 ## Launch script for additional setup
 ```
 # Launch setup script
-cd ${WORKSPACE_DIR}/setup
+cd <WORKSPACE_DIR>/setup
 
 # USER_NAME: directory name of home
-# WORTSPACE_PATH: path for Autoware_On_Embedded
-./setup.sh ${USER_NAME} ${WORKSPACE_PATH}
+# WORTSPACE_PATH: path to Autoware_On_Embedded
+./setup.sh <USER_NAME> <WORKSPACE_PATH>
 ```
 
 <!-- ## Create symoblic links
@@ -130,14 +130,14 @@ ln -s ${WORKSPACE_DIR}/rubis_ws ~/rubis_ws
 
 * Build rubis_ws packages
 ```
-cd ${WORKSPACE_DIR}/rubis_ws
+cd <WORKSPACE_DIR>/rubis_ws
 catkin_make
 ```
 
 ## How to launch LGSVL scripts
 * Setup environments
 ```
-cd ${WORKSPACE_DIR}/autoware.ai/autoware_files/lgsvl_file/scripts
+cd <WORKSPACE_DIR>/autoware.ai/autoware_files/lgsvl_file/scripts
 pip3 install --user .
 ```
 

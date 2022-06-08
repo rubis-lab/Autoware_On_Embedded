@@ -17,9 +17,8 @@ find_package(CUDA)
 find_package(Eigen3 QUIET)
 find_package(autoware_build_flags REQUIRED)
 
-AW_CHECK_CUDA()
-
 if(USE_CUDA)
+  AW_CHECK_CUDA()
   add_definitions(-DCUDA_FOUND)
   list(APPEND PCL_OPENMP_PACKAGES ndt_gpu)
 endif()
