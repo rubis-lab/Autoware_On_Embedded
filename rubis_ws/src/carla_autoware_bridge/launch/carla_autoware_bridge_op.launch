@@ -43,7 +43,7 @@
     # Map loading                #
     ##############################
   -->
-  <include file="$(find carla_points_map_loader)/launch/carla_points_map_loader.launch"/>
+  <!-- <include file="$(find carla_points_map_loader)/launch/carla_points_map_loader.launch"/> -->
 
   <!--
     ##############################

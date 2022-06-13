@@ -28,7 +28,7 @@
     <arg name="objects_definition_file" value='$(find carla_spawn_objects)/config/objects.json'/>
     <arg name='role_name' value='$(arg role_name)'/>
     <arg name="spawn_point_ego_vehicle" value="$(arg spawn_point)"/>
-    <arg name="spawn_sensors_only" value="false"/>
+    <arg name="spawn_sensors_only" value="$(arg spawn_sensors_only)"/>
   </include>
 
 
@@ -44,7 +44,7 @@
     # Map loading                #
     ##############################
   -->
-  <include file="$(find carla_points_map_loader)/launch/carla_points_map_loader.launch"/>
+  <!-- <include file="$(find carla_points_map_loader)/launch/carla_points_map_loader.launch"/> -->
 
   <!--
     ##############################
