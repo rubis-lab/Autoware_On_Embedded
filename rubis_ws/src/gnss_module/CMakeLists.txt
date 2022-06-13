@@ -43,19 +43,22 @@ catkin_package(
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
-  EIGEN3_INCLUDE_DIRS
+  ${EIGEN3_INCLUDE_DIRS}
 )
 
 add_executable(gnss_module
+  include/LLH2UTM.h
+  include/LKF.h
+  include/quaternion_euler.h
   src/gnss_module_node.cpp
   src/gnss_module.cpp
   src/LKF.cpp
   src/LLH2UTM.cpp
-  src/quaternion_euler.cpp
 )
 add_dependencies(gnss_module ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(gnss_module
   ${catkin_LIBRARIES}
+  ${EIGEN3_LIBRARIES}
 )
 
 # install(
