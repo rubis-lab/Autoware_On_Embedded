@@ -44,11 +44,6 @@
   -->
   <node pkg="carla_autoware_bridge" type="odometry_to_posestamped" name="odometry_to_posestamped"/>
 
-  <!-- convert twist to carla ackermann drive-->
-  <!-- <node pkg="carla_autoware_bridge" type="vehiclecmd_to_ackermanndrive" name="vehiclecmd_to_ackermanndrive" output="screen">
-    <param name="wheelbase" value="$(arg wheelbase)"/> 
-  </node> -->
-
   <!-- convert the vehicle status from carla to autoware -->
   <node pkg="carla_autoware_bridge" type="carla_to_autoware_vehicle_status" name="carla_to_autoware_vehicle_status" output="screen"/>
 
@@ -57,9 +52,16 @@
 
   <!-- 
     # ACTUATOR #
-    convert ackermann control to carla vehicle control (with PID controller)
+    convert Autoware's vehicle_cmd to carla's vehicle_control_cmd
   -->
-  <include file="$(find carla_fake_control)/launch/carla_fake_control.launch">
+
+  <!-- convert twist to carla ackermann drive-->
+  <node pkg="carla_autoware_bridge" type="vehiclecmd_to_ackermanndrive" name="vehiclecmd_to_ackermanndrive" output="screen">
+    <param name="wheelbase" value="$(arg wheelbase)"/> 
+  </node>
+
+  <!-- convert ackermann drive to carla vehicle cmd -->
+  <include file="$(find carla_ackermann_control)/launch/carla_ackermann_control.launch">
     <arg name='role_name' value='$(arg role_name)'/>
   </include>
 

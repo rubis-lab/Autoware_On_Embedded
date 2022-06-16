@@ -1,13 +1,14 @@
 from pynput import keyboard
 import threading
 import rospy
-from carla_msgs.msg import CarlaEgoVehicleControl
+from geometry_msgs.msg import TwistStamped
+from autoware_msgs.msg import VehicleCmd
 
-ACC_MIN = -0.5
-ACC_MAX = 0.5
+ACC_MIN = -10
+ACC_MAX = 10
 PI = 3.141592
-STEER_MIN = -PI
-STEER_MAX = PI
+STEER_MIN = -PI / 2
+STEER_MAX = PI / 2
 
 current_pressed = set()
 global current_acc
@@ -63,17 +64,19 @@ if __name__ == '__main__':
     keyboard_thread = threading.Thread(target=keyboard_routine)
     keyboard_thread.start()
 
-    twist_pub = rospy.Publisher('/carla/ego_vehicle/vehicle_control_cmd', CarlaEgoVehicleControl, queue_size=10)
+    twist_pub = rospy.Publisher('vehicle_cmd', VehicleCmd, queue_size=10)
 
     rospy.init_node('keyboard_controller')
     rate = rospy.Rate(100)
 
-    carla_msg = CarlaEgoVehicleControl()
+    twist_msg = TwistStamped()
+    v_msg = VehicleCmd()
     
     while not rospy.is_shutdown():
-        carla_msg.throttle = current_acc
-        carla_msg.steer = -current_steer
+        twist_msg.twist.linear.x = current_acc
+        twist_msg.twist.angular.z = current_steer
+        v_msg.twist_cmd = twist_msg
         
-        twist_pub.publish(carla_msg)
+        twist_pub.publish(v_msg)
 
         rate.sleep()
