@@ -46,7 +46,11 @@ GnssModule::GnssModule(){
     Eigen::Matrix6f R_k = Eigen::Matrix6f(R_k_vec.data());
     Eigen::Matrix6f P_k = Eigen::Matrix6f(P_k_vec.data());
 
+    std::cout<<"!!!"<<std::endl;
+
     lkf_ = LKF(H_k, Q_k, R_k, P_k);
+
+    std::cout<<"!!!"<<std::endl;
 
     /* lookup /gnss to /base_link static transform */ 
     ros::Rate rate(100);

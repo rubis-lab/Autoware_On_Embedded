@@ -1,0 +1,19 @@
+<launch>
+    <rosparam command="load" file="$(env USER_HOME)/rubis_ws/src/gnss_module/cfg/kalman_filter.yaml" />
+
+    <arg name="x_offset" default="0.0" />
+    <arg name="y_offset" default="0.0" />
+    <arg name="z_offset" default="0.0" />
+    <arg name="yaw_offset" default="0.0" />
+    <arg name="debug" default="false" />
+    <arg name="use_kalman_filter" default="false"/>
+
+    <node pkg="gnss_module" type="gnss_module" name="gnss_module" output="screen">
+        <param name="x_offset" value="$(arg x_offset)" />
+        <param name="y_offset" value="$(arg y_offset)" />
+        <param name="z_offset" value="$(arg z_offset)" />
+        <param name="yaw_offset" value="$(arg yaw_offset)" />
+        <param name="debug" value="$(arg debug" />
+        <param name="use_kalman_filter" value="$(arg use_kalman_filter)"/>
+    </node>
+</launch>
