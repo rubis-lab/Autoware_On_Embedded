@@ -18,7 +18,7 @@ LKF::LKF(Eigen::Matrix6f& _H_k, Eigen::Matrix6f& _Q_k, Eigen::Matrix6f& _R_k, Ei
     H_k = Eigen::Matrix6f(_H_k);
     Q_k = Eigen::Matrix6f(_Q_k);
     R_k = Eigen::Matrix6f(_R_k);
-    x_hat_k_prev << 0.0f,    0.0f,      0.0f;
+    x_hat_k_prev << 0.0f,    0.0f,      0.0f,      0.0f,      0.0f,      0.0f;
     P_k_prev = Eigen::Matrix6f(_P_k_prev);
 
     return;
@@ -34,16 +34,17 @@ void LKF::set_init_value(float init_pose_x, float init_pose_y, float init_yaw, f
 }
 
 Eigen::Vector6f LKF::run(float delta_t, Eigen::Vector6f& u_k, Eigen::Vector6f& z_k){ // u_k: control vector, z_k: observation vector
+    // std::cout<<"prev : "<<x_hat_k_prev(0)<<" "<<x_hat_k_prev(1)<<" "<<x_hat_k_prev(2)<<std::endl;
     // Prediction
     Eigen::Matrix6f F_k = Eigen::Matrix6f::Identity(); // Prediction Matrix
     F_k(0,3) = delta_t;
     F_k(1,4) = delta_t;
-    F_k(2,5) = delta_t; 
+    F_k(2,5) = delta_t;     
 
     Eigen::Matrix6f B_k = Eigen::Matrix6f::Identity() * delta_t; // Control Matrix
-    F_k(0,0) = F_k(0,0) * 0.5 * delta_t;
-    F_k(1,1) = F_k(1,1) * 0.5 * delta_t;
-    F_k(2,2) = F_k(2,2) * 0.5 * delta_t;
+    B_k(0,0) = B_k(0,0) * 0.5 * delta_t;
+    B_k(1,1) = B_k(1,1) * 0.5 * delta_t;
+    B_k(2,2) = B_k(2,2) * 0.5 * delta_t;
 
     Eigen::Vector6f x_hat_k; // Predict Result
     x_hat_k = F_k * x_hat_k_prev + B_k * u_k;
@@ -89,6 +90,11 @@ Eigen::Vector6f LKF::run(float delta_t, Eigen::Vector6f& u_k, Eigen::Vector6f& z
 
     x_hat_k_prev = Eigen::Vector6f(x_hat_prime_k);
     P_k_prev = Eigen::Matrix6f(P_prime_k);
+
+    // std::cout<<"prediction : "<<x_hat_k(0)<<" "<<x_hat_k(1)<<" "<<x_hat_k(2)<<std::endl;
+    // std::cout<<"observation : "<<z_k(0)<<" "<<z_k(1)<<" "<<z_k(2)<<std::endl;
+    // std::cout<<"result : "<<x_hat_prime_k(0)<<" "<<x_hat_prime_k(1)<<" "<<x_hat_prime_k(2)<<std::endl;
+    // std::cout<<"####"<<std::endl;
 
     return x_hat_prime_k;
 }
