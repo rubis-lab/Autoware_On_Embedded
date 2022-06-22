@@ -254,7 +254,7 @@ void GnssModule::run(){
     
             /* broadcast & publish */ 
             broadcaster.sendTransform(tf::StampedTransform(tf_map_to_base, ros::Time::now(), "/map", "/base_link"));
-    
+
             gnss_pose_pub_.publish(gnss_pose_);
             ins_twist_pub_.publish(ins_twist_);
             ins_stat_pub_.publish(ins_stat_);

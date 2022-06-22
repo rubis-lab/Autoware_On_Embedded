@@ -2,9 +2,9 @@
     <arg name="x_offset" default="10011.0" />
     <arg name="y_offset" default="12403.0" />
     <arg name="z_offset" default="0.0" />
-    <arg name="yaw_offset" default="0.0" />
-    <arg name="debug" default="true" />
-    <arg name="use_kalman_filter" default="true" />
+    <arg name="yaw_offset" default="50.0" />
+    <arg name="debug" default="false" />
+    <arg name="use_kalman_filter" default="false" />
     <arg name="kalman_filter_cfg" default="$(find gnss_module)/cfg/kalman_filter.yaml" />
 
     <!-- 138ground offset -->
