@@ -1,7 +1,6 @@
 #include <ros/ros.h>
 #include <ros/time.h>
 #include <sensor_msgs/PointCloud2.h>
-#include "rubis_sched/sched.hpp"
 
 static ros::Subscriber sub;
 static ros::Publisher pub;
@@ -51,8 +50,6 @@ int main(int argc, char** argv){
     private_nh.param("/lidar_republisher/task_relative_deadline", task_relative_deadline, (double)10);
 
     /* For Task scheduling */
-    if(task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
-
     if(!task_scheduling_flag && !task_profiling_flag){
         ros::spin();
     }
@@ -60,14 +57,7 @@ int main(int argc, char** argv){
         
         ros::Rate r(rate);    
         while(ros::ok()){
-            if(task_profiling_flag  && is_topic_ready) rubis::sched::start_task_profiling();
-            if(task_scheduling_flag && is_topic_ready){        
-                rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline);
-            }
             ros::spinOnce();
-            if(task_scheduling_flag && is_topic_ready) rubis::sched::yield_task_scheduling();
-            if(task_profiling_flag && is_topic_ready) rubis::sched::stop_task_profiling();
-
             r.sleep();
         }
     }

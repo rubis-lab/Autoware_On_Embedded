@@ -34,7 +34,6 @@
 #include <cstdio>
 #include "topic_tools/shape_shifter.h"
 #include "topic_tools/parse.h"
-#include "rubis_sched/sched.hpp"
 
 using std::string;
 using std::vector;
@@ -214,8 +213,6 @@ int main(int argc, char **argv)
     pnh.param("/pose_relay/task_relative_deadline", task_relative_deadline, (double)100000000);
   }
 
-  if(task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
-
   subscribe();
 
   // SPIN
@@ -225,14 +222,7 @@ int main(int argc, char **argv)
   else{    
     ros::Rate r(rate);
     while(ros::ok()){
-      if(task_profiling_flag && is_topic_ready) rubis::sched::start_task_profiling();
-      if(task_scheduling_flag && is_topic_ready){        
-        rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline);
-      }
       ros::spinOnce();
-      if(task_scheduling_flag && is_topic_ready) rubis::sched::yield_task_scheduling();
-      if(task_profiling_flag && is_topic_ready) rubis::sched::stop_task_profiling();
-
       r.sleep();
     }  
   }

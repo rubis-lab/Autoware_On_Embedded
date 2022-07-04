@@ -35,7 +35,6 @@
 #include "image_transport/image_transport.h"
 #include "image_transport/publisher_plugin.h"
 #include <pluginlib/class_loader.h>
-#include "rubis_sched/sched.hpp"
 
 int main(int argc, char** argv)
 {
@@ -70,8 +69,6 @@ int main(int argc, char** argv)
   pnh.param("/republish/task_execution_time", task_execution_time, (double)100000000);
   pnh.param("/republish/task_relative_deadline", task_relative_deadline, (double)100000000);
   
-  if(task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
-
   if (argc < 3) {
     // Use all available transports for output
     image_transport::Publisher pub = it.advertise(out_topic, 1);
@@ -87,14 +84,7 @@ int main(int argc, char** argv)
     else{    
       ros::Rate r(rate);
       while(ros::ok()){
-        if(task_profiling_flag) rubis::sched::start_task_profiling();
-        if(task_scheduling_flag){        
-          rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline);
-        }
         ros::spinOnce();
-        if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
-        if(task_profiling_flag) rubis::sched::stop_task_profiling();
-
         r.sleep();
       }  
     }
@@ -122,14 +112,7 @@ int main(int argc, char** argv)
     else{    
       ros::Rate r(rate);
       while(ros::ok()){
-        if(task_profiling_flag) rubis::sched::start_task_profiling();
-        if(task_scheduling_flag){        
-          rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline);
-        }
         ros::spinOnce();
-        if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
-        if(task_profiling_flag) rubis::sched::stop_task_profiling();
-
         r.sleep();
       }  
     }
