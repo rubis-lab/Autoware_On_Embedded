@@ -231,7 +231,7 @@ void VescDriver::speedCallback(const std_msgs::Float64::ConstPtr& speed)
 {
   if (driver_mode_ = MODE_OPERATING)
   {
-    const double speed_erpm = speed->data / 2.0 / M_PI * 60.0 * static_cast<double>(num_motor_pole_pairs_);
+    const double speed_erpm = speed->data / 20.0 / M_PI * 60.0 * static_cast<double>(num_motor_pole_pairs_);
     vesc_.setSpeed(speed_limit_.clip(speed_erpm));
   }
 }

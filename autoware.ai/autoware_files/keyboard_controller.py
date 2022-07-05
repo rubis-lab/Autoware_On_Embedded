@@ -3,8 +3,8 @@ import threading
 import rospy
 from geometry_msgs.msg import TwistStamped
 
-ACC_MIN = -0.1
-ACC_MAX = 10.0
+ACC_MIN = -0.4
+ACC_MAX = 0.4
 PI = 3.141592
 STEER_MIN = -PI * 1.5
 STEER_MAX = PI * 1.5
