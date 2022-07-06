@@ -32,6 +32,8 @@
 #include <autoware_msgs/Lane.h>
 #include <libwaypoint_follower/libwaypoint_follower.h>
 
+// #define USE_WAYPOINT_ORIENTATION
+
 namespace waypoint_follower
 {
 class PurePursuit
@@ -57,10 +59,17 @@ public:
   {
     current_waypoints_ = wps;
   }
+#ifndef USE_WAYPOINT_ORIENTATION
   void setCurrentPose(const geometry_msgs::PoseStampedConstPtr& msg)
   {
     current_pose_ = msg->pose;
   }
+#else
+  void setCurrentPose(geometry_msgs::PoseStamped msg)
+  {
+    current_pose_ = msg.pose;
+  }
+#endif
   void setLinearInterpolationParameter(const bool& param)
   {
     is_linear_interpolation_ = param;

@@ -456,7 +456,15 @@ void PurePursuitNode::publishDeviationCurrentPosition(
 }
 
 inline void PurePursuitNode::updateCurrentPose(const geometry_msgs::PoseStampedConstPtr& msg){
+#ifndef USE_WAYPOINT_ORIENTATION
   pp_.setCurrentPose(msg);
+#else
+  geometry_msgs::PoseStamped updated_msg;
+  updated_msg = *msg;
+  updated_msg.pose.orientation = waypoint_pose_.pose.orientation;
+
+  pp_.setCurrentPose(updated_msg);
+#endif
   is_pose_set_ = true;
 }
 
@@ -567,6 +575,10 @@ void PurePursuitNode::callbackFromWayPoints(
     pp_.setCurrentWaypoints(msg->waypoints);
   }
   is_waypoint_set_ = true;
+
+#ifdef USE_WAYPOINT_ORIENTATION
+  waypoint_pose_ = msg->waypoints[0].pose;
+#endif
 }
 
 void PurePursuitNode::connectVirtualLastWaypoints(

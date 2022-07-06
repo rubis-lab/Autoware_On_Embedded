@@ -187,4 +187,8 @@ inline double kmph2mps(double velocity_kmph)
 
 }  // namespace waypoint_follower
 
+#ifdef USE_WAYPOINT_ORIENTATION
+static geometry_msgs::PoseStamped waypoint_pose_;
+#endif
+
 #endif  // PURE_PURSUIT_PURE_PURSUIT_CORE_H
