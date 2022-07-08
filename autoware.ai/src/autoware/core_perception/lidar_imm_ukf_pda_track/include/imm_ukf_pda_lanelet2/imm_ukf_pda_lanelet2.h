@@ -38,11 +38,6 @@
 #include <autoware_lanelet2_msgs/MapBin.h>
 #include <lanelet2_core/LaneletMap.h>
 
-#include <lanelet2_extension/projection/mgrs_projector.h>
-#include <lanelet2_extension/utility/message_conversion.h>
-#include <lanelet2_extension/utility/query.h>
-#include <lanelet2_extension/visualization/visualization.h>
-
 #include <imm_ukf_pda/ukf.h>
 
 struct ImmUkfPdaParam
