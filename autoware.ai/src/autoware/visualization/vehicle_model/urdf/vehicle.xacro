@@ -5,7 +5,6 @@
   <xacro:include filename="$(find vehicle_model)/urdf/steering.xacro" />
   <xacro:include filename="$(find velodyne_description)/urdf/HDL-32E.urdf.xacro"/>
   <xacro:include filename="$(find velodyne_description)/urdf/VLP-16.urdf.xacro"/>
-  <xacro:include filename="$(find gazebo_camera_description)/urdf/monocular_camera.xacro"/>
 
   <xacro:arg name="gpu" default="false"/>
 
