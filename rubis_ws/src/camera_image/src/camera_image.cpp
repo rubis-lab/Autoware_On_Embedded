@@ -2,7 +2,6 @@
 #include "opencv2/opencv.hpp"
 #include "image_transport/image_transport.h"
 #include "cv_bridge/cv_bridge.h"
-#include "rubis_sched/sched.hpp"
 
 // argv[0] : camera_id, argv[1] : frequency
 
@@ -68,8 +67,6 @@ int main(int argc, char** argv){
     pnh.param("/camera_image/task_execution_time", task_execution_time, (double)100000000);
     pnh.param("/camera_image/task_relative_deadline", task_relative_deadline, (double)100000000);
     
-    if(task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
-
     ROS_INFO("camera_id : %d / frequency : %d",camera_id, frequency);
     if(!frequency){
         ROS_INFO("Frequency is number more than 0");
@@ -98,10 +95,6 @@ void CameraImage::sendImage(){
         cv::Mat frame;
 
     while(nh_.ok()){
-        if(task_profiling_flag) rubis::sched::start_task_profiling();
-        if(task_scheduling_flag){        
-            rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline);
-        }
 
         cap >> frame;
         if(!frame.empty()){
@@ -113,8 +106,6 @@ void CameraImage::sendImage(){
         // int ckey = cv::waitKey(1);
         // if(ckey == 27)break;
 
-        if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
-        if(task_profiling_flag) rubis::sched::stop_task_profiling();
         loop_rate.sleep();
     }
 }

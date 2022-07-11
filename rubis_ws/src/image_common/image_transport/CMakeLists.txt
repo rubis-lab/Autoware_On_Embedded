@@ -9,7 +9,6 @@ find_package(catkin REQUIRED
     roscpp
     roslib
     sensor_msgs
-    rubis_sched
 )
 
 find_package(Boost REQUIRED)
