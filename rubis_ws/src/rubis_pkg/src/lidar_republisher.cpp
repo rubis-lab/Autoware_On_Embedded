@@ -20,7 +20,6 @@ void points_cb(const sensor_msgs::PointCloud2ConstPtr& msg){
         rubis_msgs::PointCloud2 rubis_msg_with_intensity;
         rubis_msg_with_intensity.instance = rubis::instance_;
         rubis_msg_with_intensity.msg = msg_with_intensity;
-        rubis::instance_ = rubis::instance_+1;
         pub_rubis.publish(rubis_msg_with_intensity);
     }
 
@@ -99,7 +98,9 @@ int main(int argc, char** argv){
             if(rubis::sched::task_state_ == TASK_STATE_DONE){
                 if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
                 rubis::sched::task_state_ = TASK_STATE_READY;
+                rubis::instance_ = rubis::instance_+1;
             }
+            
         
             r.sleep();
         }
