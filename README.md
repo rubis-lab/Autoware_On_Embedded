@@ -209,7 +209,7 @@ catkin_make
 ### Download **Vision-Lane-Keeping, install dependency**
 
 ```bash
-git clone https://github.com/Spiraline/Vision-Lane-Keeping.git
+git clone https://github.com/rubis-lab/Vision-Lane-Keeping.git
 pip3 install rospkg
 pip3 install scikit-build
 pip3 install --upgrade pip setuptools wheel
