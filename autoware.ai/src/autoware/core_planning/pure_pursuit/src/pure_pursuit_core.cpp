@@ -146,6 +146,7 @@ void PurePursuitNode::initForROS()
 
   private_nh_.param("/pure_pursuit/dynamic_params_flag", dynamic_param_flag_, false);
   private_nh_.param("/pure_pursuit/instance_mode", rubis::instance_mode_, 0);
+  private_nh_.param("/infinite_spin_rate_mode", rubis::infinite_spin_rate_mode_, 0);
   
   if(dynamic_param_flag_){
     XmlRpc::XmlRpcValue xml_list;
@@ -229,15 +230,20 @@ void PurePursuitNode::run()
   private_nh.param("/pure_pursuit/task_execution_time", task_execution_time, (double)10);
   private_nh.param("/pure_pursuit/task_relative_deadline", task_relative_deadline, (double)10);
 
-  ROS_INFO_STREAM("pure pursuit start");
-
   if(task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
 
   ros::Rate loop_rate(LOOP_RATE_);
   if(!task_scheduling_flag && !task_profiling_flag) loop_rate = ros::Rate(rate);
+  if(rubis::infinite_spin_rate_mode_) bool topic_ready_=false;
 
   while (ros::ok())
   {
+    if(rubis::infinite_spin_rate_mode_) {
+      //wait until 'relay' publish
+      while(!topic_ready_){
+        private_nh.getParam("/relay_pub_", topic_ready_);
+      }
+    }
     if(task_profiling_flag) rubis::sched::start_task_profiling();
 
     if(rubis::sched::is_task_ready_ == TASK_READY && rubis::sched::task_state_ == TASK_STATE_READY){
@@ -256,9 +262,14 @@ void PurePursuitNode::run()
         if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
         rubis::sched::task_state_ = TASK_STATE_READY;
       }
-
-      loop_rate.sleep();
+      if(!rubis::infinite_spin_rate_mode_) {
+        loop_rate.sleep();
+      }
       continue;
+    }
+    if(rubis::infinite_spin_rate_mode_) {
+      private_nh.setParam("/relay_pub_", false);
+      topic_ready_=false;
     }
 
     pp_.setLookaheadDistance(computeLookaheadDistance());
@@ -303,8 +314,12 @@ void PurePursuitNode::run()
       if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
       rubis::sched::task_state_ = TASK_STATE_READY;
     }
-
-    loop_rate.sleep();
+    if(rubis::infinite_spin_rate_mode_){
+      private_nh.setParam("/pure_pub_", true);
+    }
+    else{
+      loop_rate.sleep();
+    }
   }
 }
 

@@ -9,6 +9,14 @@
 #rate = hz
 # other time unut = ns
 
+infinite_spin_rate_mode : 1
+lidar_pub_ : False
+voxel_pub_ : False
+ndt_pub_ : False
+relay_pub_ : False
+pure_pub_ : False
+twist_pub_ : False
+
 # Localization
 voxel_grid_filter:
   instance_mode: 1

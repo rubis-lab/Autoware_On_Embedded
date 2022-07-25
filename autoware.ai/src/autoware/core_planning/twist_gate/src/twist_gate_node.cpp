@@ -45,6 +45,7 @@ int main(int argc, char** argv)
   private_nh.param("/twist_gate/task_execution_time", task_execution_time, (double)10);
   private_nh.param("/twist_gate/task_relative_deadline", task_relative_deadline, (double)10);
   private_nh.param<int>("/twist_gate/zero_flag", zero_flag_, 0);
+  private_nh.param<int>("/infinite_spin_rate_mode", rubis::infinite_spin_rate_mode_, 0);
 
   TwistGate twist_gate(nh, private_nh);
 
@@ -62,8 +63,17 @@ int main(int argc, char** argv)
       r.sleep();      
     }
 
+    if(rubis::infinite_spin_rate_mode_) bool topic_ready_=false;
     // Executing task
     while(ros::ok()){
+      if(rubis::infinite_spin_rate_mode_){
+        //wait until 'twist_gate' publish
+        while(!topic_ready_){
+          nh.getParam("/twist_pub_", topic_ready_);
+        }
+        nh.setParam("/twist_pub_", false);
+        topic_ready_=false;
+      }
       if(task_profiling_flag) rubis::sched::start_task_profiling();
 
       if(rubis::sched::task_state_ == TASK_STATE_READY){
@@ -79,8 +89,9 @@ int main(int argc, char** argv)
         if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
         rubis::sched::task_state_ = TASK_STATE_READY;
       }
-      
-      r.sleep();
+      if(!rubis::infinite_spin_rate_mode_){
+        r.sleep();
+      }
     }
   }
 

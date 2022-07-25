@@ -2,6 +2,7 @@
 
 namespace rubis{
   int instance_mode_;
+  int infinite_spin_rate_mode_;
   unsigned long instance_;
 namespace sched{
   int task_profiling_flag_;

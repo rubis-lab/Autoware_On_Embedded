@@ -78,6 +78,7 @@ int main(int argc, char* argv[]){
     nh.param("/relay/task_execution_time", task_execution_time, (double)10);
     nh.param("/relay/task_relative_deadline", task_relative_deadline, (double)10);
     nh.param<int>("/relay/instance_mode", rubis::instance_mode_, 0);
+    nh.param<int>("/infinite_spin_rate_mode", rubis::infinite_spin_rate_mode_, 0);
 
     input_topic_pose_ = "/ndt_pose";
     input_topic_velocity_ = "/estimate_twist";
@@ -112,9 +113,18 @@ int main(int argc, char* argv[]){
             ros::spinOnce();
             r.sleep();      
         }
+        if(rubis::infinite_spin_rate_mode_) bool topic_ready_=false;
 
         // Executing task
         while(ros::ok()){
+            if(rubis::infinite_spin_rate_mode_) {
+                //wait until 'ndt_matching' publish
+                while(!topic_ready_){
+                    nh.getParam("/ndt_pub_", topic_ready_);
+                }
+                nh.setParam("/ndt_pub_", false);
+                topic_ready_=false;
+            }
             if(task_profiling_flag) rubis::sched::start_task_profiling();
 
             if(rubis::sched::task_state_ == TASK_STATE_READY){                
@@ -135,8 +145,12 @@ int main(int argc, char* argv[]){
                 if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
                 rubis::sched::task_state_ = TASK_STATE_READY;
             }
-        
-            r.sleep();
+            if(rubis::infinite_spin_rate_mode_){
+                nh.setParam("/relay_pub_", true);
+            }
+            else{
+                r.sleep();
+            }
         }
     }
 

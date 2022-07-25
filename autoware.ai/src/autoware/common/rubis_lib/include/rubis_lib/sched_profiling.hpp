@@ -13,6 +13,7 @@
 
 namespace rubis {
   extern int instance_mode_;
+  extern int infinite_spin_rate_mode_;
   extern unsigned long instance_;
 
 namespace sched {

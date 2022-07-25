@@ -40,6 +40,7 @@ int main(int argc, char** argv)
   private_nh.param("/twist_filter/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
   private_nh.param("/twist_filter/task_execution_time", task_execution_time, (double)10);
   private_nh.param("/twist_filter/task_relative_deadline", task_relative_deadline, (double)10);
+  private_nh.param<int>("/infinite_spin_rate_mode", rubis::infinite_spin_rate_mode_, 0);
 
   if(task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
   
@@ -54,9 +55,18 @@ int main(int argc, char** argv)
       ros::spinOnce();
       r.sleep();      
     }
+    if(rubis::infinite_spin_rate_mode_) bool topic_ready_=false;
 
     // Executing task
     while(ros::ok()){
+      if(rubis::infinite_spin_rate_mode_) {
+        //wait until 'pure_pursuit' publish
+        while(!topic_ready_){
+          private_nh.getParam("/pure_pub_", topic_ready_);
+        }
+        private_nh.setParam("/pure_pub_", false);
+        topic_ready_=false;
+      }
       if(task_profiling_flag) rubis::sched::start_task_profiling();
 
       if(rubis::sched::task_state_ == TASK_STATE_READY){
@@ -74,8 +84,12 @@ int main(int argc, char** argv)
         if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
         rubis::sched::task_state_ = TASK_STATE_READY;
       }
-      
-      r.sleep();
+      if(rubis::infinite_spin_rate_mode_){
+        private_nh.setParam("/twist_pub_", true);
+      }
+      else{
+        r.sleep();
+      }
     }
   }
   

@@ -40,6 +40,7 @@ int main(int argc, char** argv){
     std::string rubis_output_topic;
 
     nh.param<int>(node_name+"/instance_mode", rubis::instance_mode_, 0);
+    nh.param<int>("/infinite_spin_rate_mode", rubis::infinite_spin_rate_mode_, 0);
     nh.param<std::string>(input_topic_name, input_topic, "/points_raw_origin");
     nh.param<std::string>(output_topic_name, output_topic, "/points_raw");
 
@@ -100,9 +101,13 @@ int main(int argc, char** argv){
                 rubis::sched::task_state_ = TASK_STATE_READY;
                 rubis::instance_ = rubis::instance_+1;
             }
-            
-        
-            r.sleep();
+
+            if(rubis::infinite_spin_rate_mode_){
+                nh.setParam("/lidar_pub_", true);
+            }
+            else{
+                r.sleep();
+            }
         }
     }
     
