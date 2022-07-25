@@ -80,6 +80,7 @@
 #include <rubis_lib/sched.hpp>
 #include <rubis_msgs/PointCloud2.h>
 #include <rubis_msgs/PoseStamped.h>
+#include <rubis_msgs/TwistStamped.h>
 #include <rubis_msgs/InsStat.h>
 
 #define SPIN_PROFILING
@@ -182,6 +183,9 @@ static geometry_msgs::PoseStamped localizer_pose_msg;
 
 static ros::Publisher estimate_twist_pub;
 static geometry_msgs::TwistStamped estimate_twist_msg;
+
+static ros::Publisher rubis_estimate_twist_pub;
+static rubis_msgs::TwistStamped rubis_estimate_twist_msg;
 
 static ros::Duration scan_duration;
 
@@ -1507,7 +1511,6 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
   predict_pose_pub.publish(predict_pose_msg);
   health_checker_ptr_->CHECK_RATE("topic_rate_ndt_pose_slow", 8, 5, 1, "topic ndt_pose publish rate slow.");
   ndt_pose_pub.publish(ndt_pose_msg);
-  rubis::sched::task_state_ = TASK_STATE_DONE;
 
   if(rubis::instance_mode_ && rubis::instance_ != RUBIS_NO_INSTANCE){
     rubis_ndt_pose_msg.instance = rubis::instance_;
@@ -1536,6 +1539,12 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
   estimate_twist_msg.twist.angular.z = angular_velocity;
 
   estimate_twist_pub.publish(estimate_twist_msg);
+  if(rubis::instance_mode_ && rubis::instance_ != RUBIS_NO_INSTANCE){
+    rubis_estimate_twist_msg.instance = rubis::instance_;
+    rubis_estimate_twist_msg.msg = estimate_twist_msg;
+    rubis_estimate_twist_pub.publish(rubis_estimate_twist_msg);
+  }
+  rubis::sched::task_state_ = TASK_STATE_DONE;
 
   geometry_msgs::Vector3Stamped estimate_vel_msg;
   estimate_vel_msg.header.stamp = current_scan_time;
@@ -1973,6 +1982,8 @@ int main(int argc, char** argv)
   // current_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/current_pose", 10);
   localizer_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/localizer_pose", 10);
   estimate_twist_pub = nh.advertise<geometry_msgs::TwistStamped>("/estimate_twist", 10);
+  if(rubis::instance_mode_) rubis_estimate_twist_pub = nh.advertise<rubis_msgs::TwistStamped>("/rubis_estimate_twist",10);
+
   estimated_vel_mps_pub = nh.advertise<std_msgs::Float32>("/estimated_vel_mps", 10);
   estimated_vel_kmph_pub = nh.advertise<std_msgs::Float32>("/estimated_vel_kmph", 10);
   estimated_vel_pub = nh.advertise<geometry_msgs::Vector3Stamped>("/estimated_vel", 10);

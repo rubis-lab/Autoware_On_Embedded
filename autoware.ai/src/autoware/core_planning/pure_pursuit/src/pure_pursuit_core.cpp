@@ -180,7 +180,8 @@ void PurePursuitNode::initForROS()
     &PurePursuitNode::callbackFromConfig, this);
   
   #ifdef SVL
-  velocity_sub_ = nh_.subscribe("current_velocity", 10, &PurePursuitNode::callbackFromCurrentVelocity, this);
+  if(rubis::instance_mode_) rubis_velocity_sub_ = nh_.subscribe("rubis_current_velocity", 10, &PurePursuitNode::callbackFromRubisCurrentVelocity, this);
+  else velocity_sub_ = nh_.subscribe("current_velocity", 10, &PurePursuitNode::callbackFromCurrentVelocity, this);
   #endif
 
   #ifdef IONIC
@@ -483,6 +484,15 @@ void PurePursuitNode::callbackFromRubisCurrentPose(const rubis_msgs::PoseStamped
 #ifdef SVL
 void PurePursuitNode::callbackFromCurrentVelocity(const geometry_msgs::TwistStampedConstPtr& msg)
 {
+  current_linear_velocity_ = msg->twist.linear.x;
+  pp_.setCurrentVelocity(current_linear_velocity_);
+  is_velocity_set_ = true;
+}
+
+void PurePursuitNode::callbackFromRubisCurrentVelocity(const rubis_msgs::TwistStampedConstPtr& _msg)
+{
+  geometry_msgs::TwistStampedConstPtr msg = boost::make_shared<const geometry_msgs::TwistStamped>(_msg->msg);
+  rubis::instance_ = _msg->instance;
   current_linear_velocity_ = msg->twist.linear.x;
   pp_.setCurrentVelocity(current_linear_velocity_);
   is_velocity_set_ = true;

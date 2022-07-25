@@ -101,7 +101,7 @@ private:
     pub11_, pub12_, pub13_, pub14_, pub15_, pub16_, pub17_, pub18_;
 
   // subscriber
-  ros::Subscriber sub1_, pose_sub_, rubis_pose_sub_, sub3_, velocity_sub_, car_ctrl_output_sub;
+  ros::Subscriber sub1_, pose_sub_, rubis_pose_sub_, sub3_, velocity_sub_, rubis_velocity_sub_, car_ctrl_output_sub;
 
   // constant
   const int LOOP_RATE_;  // processing frequency
@@ -139,6 +139,7 @@ private:
 
   #ifdef SVL
   void callbackFromCurrentVelocity(const geometry_msgs::TwistStampedConstPtr& msg);
+  void callbackFromRubisCurrentVelocity(const rubis_msgs::TwistStampedConstPtr& _msg);
   #endif
 
   #ifdef IONIC
