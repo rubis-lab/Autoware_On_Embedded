@@ -55,9 +55,9 @@
       <!-- if "specify_init_pose" is true, pose estimator will be initialized with the following params -->
       <!-- otherwise, you need to input an initial pose with "2D Pose Estimate" on rviz" -->
       <param name="specify_init_pose" value="true" />
-      <param name="init_pos_x" value="0.0" />
-      <param name="init_pos_y" value="0.0" />
-      <param name="init_pos_z" value="0.0" />
+      <param name="init_pos_x" value="57.0" />
+      <param name="init_pos_y" value="9.0" />
+      <param name="init_pos_z" value="2.0" />
       <param name="init_ori_w" value="1.0" />
       <param name="init_ori_x" value="0.0" />
       <param name="init_ori_y" value="0.0" />

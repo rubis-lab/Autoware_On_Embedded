@@ -20,6 +20,7 @@
 #include <nav_msgs/Odometry.h>
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/TwistStamped.h>
 
 #include <pcl/filters/voxel_grid.h>
 
@@ -32,6 +33,16 @@
 #include <hdl_localization/ScanMatchingStatus.h>
 #include <hdl_global_localization/SetGlobalMap.h>
 #include <hdl_global_localization/QueryGlobalLocalization.h>
+
+struct pose
+{
+  double x;
+  double y;
+  double z;
+  double roll;
+  double pitch;
+  double yaw;
+};
 
 namespace hdl_localization {
 
@@ -68,7 +79,8 @@ public:
     gnsspose_sub = nh.subscribe("/gnss_pose", 8, &HdlLocalizationNodelet::gnsspose_callback, this);
 
     // pose_pub = nh.advertise<nav_msgs::Odometry>("/hdl_pose", 5, false);
-    pose_pub = nh.advertise<geometry_msgs::PointStamped>("/hdl_pose", 5, false);
+    pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/ndt_pose", 5, false);
+    twist_pub = nh.advertise<geometry_msgs::TwistStamped>("/estimate_twist", 5, false);
     aligned_pub = nh.advertise<sensor_msgs::PointCloud2>("/aligned_points", 5, false);
     status_pub = nh.advertise<ScanMatchingStatus>("/status", 5, false);
 
@@ -408,10 +420,10 @@ private:
    * @param stamp  timestamp
    * @param pose   odometry pose to be published
    */
-  void publish_odometry(const ros::Time& stamp, const Eigen::Matrix4f& pose) {
+  void publish_odometry(const ros::Time& stamp, const Eigen::Matrix4f& pose_mat4f) {
     // broadcast the transform over tf
     if(tf_buffer.canTransform(robot_odom_frame_id, odom_child_frame_id, ros::Time(0))) {
-      geometry_msgs::TransformStamped map_wrt_frame = tf2::eigenToTransform(Eigen::Isometry3d(pose.inverse().cast<double>()));
+      geometry_msgs::TransformStamped map_wrt_frame = tf2::eigenToTransform(Eigen::Isometry3d(pose_mat4f.inverse().cast<double>()));
       map_wrt_frame.header.stamp = stamp;
       map_wrt_frame.header.frame_id = odom_child_frame_id;
       map_wrt_frame.child_frame_id = "map";
@@ -434,30 +446,67 @@ private:
 
       tf_broadcaster.sendTransform(odom_trans);
     } else {
-      geometry_msgs::TransformStamped odom_trans = tf2::eigenToTransform(Eigen::Isometry3d(pose.cast<double>()));
+      geometry_msgs::TransformStamped odom_trans = tf2::eigenToTransform(Eigen::Isometry3d(pose_mat4f.cast<double>()));
       odom_trans.header.stamp = stamp;
       odom_trans.header.frame_id = "map";
       odom_trans.child_frame_id = odom_child_frame_id;
       tf_broadcaster.sendTransform(odom_trans);
     }
 
-    // publish the transform
-    // nav_msgs::Odometry odom;
-    // odom.header.stamp = stamp;
-    // odom.header.frame_id = "map";
-
-    // tf::poseEigenToMsg(Eigen::Isometry3d(pose.cast<double>()), odom.pose.pose);
-    // odom.child_frame_id = odom_child_frame_id;
-    // odom.twist.twist.linear.x = 0.0;
-    // odom.twist.twist.linear.y = 0.0;
-    // odom.twist.twist.angular.z = 0.0;
-
     geometry_msgs::PoseStamped ndtpose;
+    geometry_msgs::TwistStamped twist;
 
     ndtpose.header.stamp = stamp;
     ndtpose.header.frame_id = "map";
-    tf::poseEigenToMsg(Eigen::Isometry3d(pose.cast<double>()), ndtpose.pose);
+    twist.header.stamp = stamp;
+    twist.header.frame_id = "map";
 
+    tf::poseEigenToMsg(Eigen::Isometry3d(pose_mat4f.cast<double>()), ndtpose.pose);
+
+    tf::Matrix3x3 pose_mat3f;
+    pose_mat3f.setValue(static_cast<double>(pose_mat4f(0, 0)), static_cast<double>(pose_mat4f(0, 1)), static_cast<double>(pose_mat4f(0, 2)),
+                  static_cast<double>(pose_mat4f(1, 0)), static_cast<double>(pose_mat4f(1, 1)), static_cast<double>(pose_mat4f(1, 2)),
+                  static_cast<double>(pose_mat4f(2, 0)), static_cast<double>(pose_mat4f(2, 1)), static_cast<double>(pose_mat4f(2, 2)));
+    pose_mat3f.getRPY(curr_pose.roll, curr_pose.pitch, curr_pose.yaw, 1);
+    curr_pose.x = pose_mat4f(0, 3); 
+    curr_pose.y = pose_mat4f(1, 3);
+    curr_pose.z = pose_mat4f(2, 3);
+
+    ros::Time curr_time = stamp;
+    if(diff_time == -1.0){
+      diff_time = 0.0;
+      previous_time = curr_time;
+
+      prev_pose.x = curr_pose.x;
+      prev_pose.y = curr_pose.y;
+      prev_pose.z = curr_pose.z;
+      prev_pose.roll = curr_pose.roll;
+      prev_pose.pitch = curr_pose.pitch;
+      prev_pose.yaw = curr_pose.yaw;
+
+      return;
+    }
+
+    double diff_x = curr_pose.x - prev_pose.x;
+    double diff_y = curr_pose.y - prev_pose.y;
+    double diff_z = curr_pose.z - prev_pose.z;
+    double diff_yaw = calcDiffForRadian(curr_pose.yaw, prev_pose.yaw);
+    double diff = sqrt(diff_x * diff_x + diff_y * diff_y + diff_z * diff_z);
+
+    if(convertPoseIntoRelativeCoordinate(curr_pose, prev_pose)){
+      diff *= -1;
+    }
+
+    diff_time = (curr_time - previous_time).toSec();
+
+    // TODO: Check if negative velocity
+    twist.twist.linear.x = (diff_time > 0) ? (diff / diff_time) : 0;
+    twist.twist.linear.y = 0.0;
+    twist.twist.linear.z = 0.0;
+    twist.twist.angular.x = 0.0;
+    twist.twist.angular.y = 0.0;
+    twist.twist.angular.z = (diff_time > 0) ? (diff_yaw / diff_time) : 0;
+    
     // Check difference with gnss
     double gnss_hdl_diff = (gnsspose.pose.position.x - ndtpose.pose.position.x) * (gnsspose.pose.position.x - ndtpose.pose.position.x) + \
       (gnsspose.pose.position.y - ndtpose.pose.position.y) * (gnsspose.pose.position.y - ndtpose.pose.position.y);
@@ -475,7 +524,45 @@ private:
     //   );
     // }
 
+    prev_pose = curr_pose;
+    previous_time = curr_time;
+
+    twist_pub.publish(twist);
     pose_pub.publish(ndtpose);
+  }
+
+  bool convertPoseIntoRelativeCoordinate(const pose &target_pose, const pose &reference_pose)
+  {
+      tf::Quaternion target_q;
+      target_q.setRPY(target_pose.roll, target_pose.pitch, target_pose.yaw);
+      tf::Vector3 target_v(target_pose.x, target_pose.y, target_pose.z);
+      tf::Transform target_tf(target_q, target_v);
+
+      tf::Quaternion reference_q;
+      reference_q.setRPY(reference_pose.roll, reference_pose.pitch, reference_pose.yaw);
+      tf::Vector3 reference_v(reference_pose.x, reference_pose.y, reference_pose.z);
+      tf::Transform reference_tf(reference_q, reference_v);
+
+      tf::Transform trans_target_tf = reference_tf.inverse() * target_tf;
+
+      pose trans_target_pose;
+      trans_target_pose.x = trans_target_tf.getOrigin().getX();
+      trans_target_pose.y = trans_target_tf.getOrigin().getY();
+      trans_target_pose.z = trans_target_tf.getOrigin().getZ();
+      tf::Matrix3x3 tmp_m(trans_target_tf.getRotation());
+      tmp_m.getRPY(trans_target_pose.roll, trans_target_pose.pitch, trans_target_pose.yaw);
+
+      return trans_target_pose.x < 0;
+  }
+
+  double calcDiffForRadian(const double lhs_rad, const double rhs_rad)
+  {
+    double diff_rad = lhs_rad - rhs_rad;
+    if (diff_rad >= M_PI)
+      diff_rad = diff_rad - 2 * M_PI;
+    else if (diff_rad < -M_PI)
+      diff_rad = diff_rad + 2 * M_PI;
+    return diff_rad;
   }
 
   /**
@@ -550,10 +637,15 @@ private:
   ros::Publisher pose_pub;
   ros::Publisher aligned_pub;
   ros::Publisher status_pub;
+  ros::Publisher twist_pub;
 
   tf2_ros::Buffer tf_buffer;
   tf2_ros::TransformListener tf_listener;
   tf2_ros::TransformBroadcaster tf_broadcaster;
+
+  struct pose curr_pose, prev_pose;
+  ros::Time previous_time;
+  double diff_time = -1.0;
 
   // imu input buffer
   std::mutex imu_data_mutex;
