@@ -274,11 +274,11 @@ private:
     // correct
     auto aligned = pose_estimator->correct(stamp, filtered);
 
-    if(aligned_pub.getNumSubscribers()) {
-      aligned->header.frame_id = "map";
-      aligned->header.stamp = cloud->header.stamp;
-      aligned_pub.publish(aligned);
-    }
+    // if(aligned_pub.getNumSubscribers()) {
+    //   aligned->header.frame_id = "map";
+    //   aligned->header.stamp = cloud->header.stamp;
+    //   aligned_pub.publish(aligned);
+    // }
 
     if(status_pub.getNumSubscribers()) {
       publish_scan_matching_status(points_msg->header, aligned);
@@ -422,36 +422,11 @@ private:
    */
   void publish_odometry(const ros::Time& stamp, const Eigen::Matrix4f& pose_mat4f) {
     // broadcast the transform over tf
-    if(tf_buffer.canTransform(robot_odom_frame_id, odom_child_frame_id, ros::Time(0))) {
-      geometry_msgs::TransformStamped map_wrt_frame = tf2::eigenToTransform(Eigen::Isometry3d(pose_mat4f.inverse().cast<double>()));
-      map_wrt_frame.header.stamp = stamp;
-      map_wrt_frame.header.frame_id = odom_child_frame_id;
-      map_wrt_frame.child_frame_id = "map";
-
-      geometry_msgs::TransformStamped frame_wrt_odom = tf_buffer.lookupTransform(robot_odom_frame_id, odom_child_frame_id, ros::Time(0), ros::Duration(0.1));
-      Eigen::Matrix4f frame2odom = tf2::transformToEigen(frame_wrt_odom).cast<float>().matrix();
-
-      geometry_msgs::TransformStamped map_wrt_odom;
-      tf2::doTransform(map_wrt_frame, map_wrt_odom, frame_wrt_odom);
-
-      tf2::Transform odom_wrt_map;
-      tf2::fromMsg(map_wrt_odom.transform, odom_wrt_map);
-      odom_wrt_map = odom_wrt_map.inverse();
-
-      geometry_msgs::TransformStamped odom_trans;
-      odom_trans.transform = tf2::toMsg(odom_wrt_map);
-      odom_trans.header.stamp = stamp;
-      odom_trans.header.frame_id = "map";
-      odom_trans.child_frame_id = robot_odom_frame_id;
-
-      tf_broadcaster.sendTransform(odom_trans);
-    } else {
-      geometry_msgs::TransformStamped odom_trans = tf2::eigenToTransform(Eigen::Isometry3d(pose_mat4f.cast<double>()));
-      odom_trans.header.stamp = stamp;
-      odom_trans.header.frame_id = "map";
-      odom_trans.child_frame_id = odom_child_frame_id;
-      tf_broadcaster.sendTransform(odom_trans);
-    }
+    geometry_msgs::TransformStamped trans = tf2::eigenToTransform(Eigen::Isometry3d(pose_mat4f.cast<double>()));
+    trans.header.stamp = stamp;
+    trans.header.frame_id = "map";
+    trans.child_frame_id = odom_child_frame_id;
+    tf_broadcaster.sendTransform(trans);
 
     geometry_msgs::PoseStamped ndtpose;
     geometry_msgs::TwistStamped twist;
@@ -552,7 +527,7 @@ private:
       tf::Matrix3x3 tmp_m(trans_target_tf.getRotation());
       tmp_m.getRPY(trans_target_pose.roll, trans_target_pose.pitch, trans_target_pose.yaw);
 
-      return trans_target_pose.x < 0;
+      return trans_target_pose.x >= 0;
   }
 
   double calcDiffForRadian(const double lhs_rad, const double rhs_rad)

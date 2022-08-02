@@ -4,7 +4,7 @@
   <arg name="points_topic" default="/points_raw" />
   <!-- input clouds are transformed in odom_child_frame, and then localization is performed in that frame -->
   <!-- this is useful to match the LIDAR and IMU coodinate systems -->
-  <arg name="odom_child_frame_id" default="velodyne" />
+  <arg name="odom_child_frame_id" default="base_link" />
 
   <!-- optional arguments -->
   <arg name="use_imu" default="false" />
