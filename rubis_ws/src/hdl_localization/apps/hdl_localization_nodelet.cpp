@@ -206,12 +206,12 @@ private:
   void points_callback(const sensor_msgs::PointCloud2ConstPtr& points_msg) {
     std::lock_guard<std::mutex> estimator_lock(pose_estimator_mutex);
     if(!pose_estimator) {
-      NODELET_ERROR("waiting for initial pose input!!");
+      NODELET_INFO("waiting for initial pose input!!");
       return;
     }
 
     if(!globalmap) {
-      NODELET_ERROR("globalmap has not been received!!");
+      NODELET_INFO("globalmap has not been received!!");
       return;
     }
 
@@ -474,13 +474,12 @@ private:
     double diff_yaw = calcDiffForRadian(curr_pose.yaw, prev_pose.yaw);
     double diff = sqrt(diff_x * diff_x + diff_y * diff_y + diff_z * diff_z);
 
-    if(convertPoseIntoRelativeCoordinate(curr_pose, prev_pose)){
+    if(!convertPoseIntoRelativeCoordinate(curr_pose, prev_pose)){
       diff *= -1;
     }
 
     diff_time = (curr_time - previous_time).toSec();
 
-    // TODO: Check if negative velocity
     twist.twist.linear.x = (diff_time > 0) ? (diff / diff_time) : 0;
     twist.twist.linear.y = 0.0;
     twist.twist.linear.z = 0.0;
