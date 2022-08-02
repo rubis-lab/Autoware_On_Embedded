@@ -65,6 +65,9 @@ public:
     robot_odom_frame_id = private_nh.param<std::string>("robot_odom_frame_id", "robot_odom");
     odom_child_frame_id = private_nh.param<std::string>("odom_child_frame_id", "base_link");
 
+    enable_gnss_backup = private_nh.param<bool>("enable_gnss_backup", false);
+    diff_threshold = private_nh.param<double>("gnss_ndt_diff", 5.0);
+
     use_imu = private_nh.param<bool>("use_imu", true);
     invert_acc = private_nh.param<bool>("invert_acc", false);
     invert_gyro = private_nh.param<bool>("invert_gyro", false);
@@ -104,12 +107,15 @@ private:
     std::string ndt_neighbor_search_method = private_nh.param<std::string>("ndt_neighbor_search_method", "DIRECT7");
     double ndt_neighbor_search_radius = private_nh.param<double>("ndt_neighbor_search_radius", 2.0);
     double ndt_resolution = private_nh.param<double>("ndt_resolution", 1.0);
+    double ndt_step_size = private_nh.param<double>("ndt_step_size", 0.1);
+    double ndt_trans_epsilon = private_nh.param<double>("ndt_trans_epsilon", 0.01);
 
     if(reg_method == "NDT_OMP") {
       NODELET_INFO("NDT_OMP is selected");
       pclomp::NormalDistributionsTransform<PointT, PointT>::Ptr ndt(new pclomp::NormalDistributionsTransform<PointT, PointT>());
-      ndt->setTransformationEpsilon(0.05);
+      ndt->setTransformationEpsilon(ndt_trans_epsilon);
       ndt->setResolution(ndt_resolution);
+      ndt->setStepSize(ndt_step_size);
       if (ndt_neighbor_search_method == "DIRECT1") {
         NODELET_INFO("search_method DIRECT1 is selected");
         ndt->setNeighborhoodSearchMethod(pclomp::DIRECT1);
@@ -483,21 +489,21 @@ private:
     twist.twist.angular.z = (diff_time > 0) ? (diff_yaw / diff_time) : 0;
     
     // Check difference with gnss
-    double gnss_hdl_diff = (gnsspose.pose.position.x - ndtpose.pose.position.x) * (gnsspose.pose.position.x - ndtpose.pose.position.x) + \
+    if(enable_gnss_backup){
+      double gnss_hdl_diff = (gnsspose.pose.position.x - ndtpose.pose.position.x) * (gnsspose.pose.position.x - ndtpose.pose.position.x) + \
       (gnsspose.pose.position.y - ndtpose.pose.position.y) * (gnsspose.pose.position.y - ndtpose.pose.position.y);
 
-    // std::cout << "diff: " << gnss_hdl_diff << std::endl;
-
-    // if(gnss_hdl_diff > 4){
-    //   pose_estimator.reset(
-    //         new hdl_localization::PoseEstimator(
-    //           registration,
-    //           ros::Time::now(),
-    //           Eigen::Vector3f(gnsspose.pose.position.x, gnsspose.pose.position.y, gnsspose.pose.position.z),
-    //           Eigen::Quaternionf(gnsspose.pose.orientation.w, gnsspose.pose.orientation.x, gnsspose.pose.orientation.y, gnsspose.pose.orientation.z),
-    //           1.0)
-    //   );
-    // }
+      if(gnss_hdl_diff > diff_threshold){
+        pose_estimator.reset(
+          new hdl_localization::PoseEstimator(
+            registration,
+            ros::Time::now(),
+            Eigen::Vector3f(gnsspose.pose.position.x, gnsspose.pose.position.y, gnsspose.pose.position.z),
+            Eigen::Quaternionf(gnsspose.pose.orientation.w, gnsspose.pose.orientation.x, gnsspose.pose.orientation.y, gnsspose.pose.orientation.z),
+            1.0)
+        );
+      }
+    }
 
     prev_pose = curr_pose;
     previous_time = curr_time;
@@ -621,6 +627,8 @@ private:
   struct pose curr_pose, prev_pose;
   ros::Time previous_time;
   double diff_time = -1.0;
+  double diff_threshold;
+  bool enable_gnss_backup;
 
   // imu input buffer
   std::mutex imu_data_mutex;
