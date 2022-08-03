@@ -31,7 +31,7 @@ DynamicParams::DynamicParams(){
 PurePursuitNode::PurePursuitNode()
   : private_nh_("~")
   , pp_()
-  , LOOP_RATE_(30)
+  , LOOP_RATE_(50)
   , is_waypoint_set_(false)
   , is_pose_set_(false)
   , is_velocity_set_(false)
@@ -278,7 +278,6 @@ void PurePursuitNode::run()
     double kappa = 0;
     bool can_get_curvature = pp_.canGetCurvature(&kappa);
 
-    publishTwistStamped(can_get_curvature, kappa);
     publishControlCommandStamped(can_get_curvature, kappa);
     health_checker_ptr_->NODE_ACTIVATE();
     health_checker_ptr_->CHECK_RATE("topic_rate_vehicle_cmd_slow", 8, 5, 1,
@@ -304,6 +303,7 @@ void PurePursuitNode::run()
     publishDeviationCurrentPosition(
       pp_.getCurrentPose().position, pp_.getCurrentWaypoints());
 
+    publishTwistStamped(can_get_curvature, kappa);
     is_pose_set_ = false;
     is_velocity_set_ = false;
     is_waypoint_set_ = false;
