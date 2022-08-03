@@ -226,7 +226,7 @@ int main(int argc, char** argv)
       ros::spinOnce();
       r.sleep();      
     }
-    if(rubis::infinite_spin_rate_mode_) bool topic_ready_=false;
+    bool topic_ready_=false;
 
     // Executing task
     while(ros::ok()){

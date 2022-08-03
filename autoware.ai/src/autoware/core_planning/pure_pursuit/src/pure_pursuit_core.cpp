@@ -234,7 +234,7 @@ void PurePursuitNode::run()
 
   ros::Rate loop_rate(LOOP_RATE_);
   if(!task_scheduling_flag && !task_profiling_flag) loop_rate = ros::Rate(rate);
-  if(rubis::infinite_spin_rate_mode_) bool topic_ready_=false;
+  bool topic_ready_=false;
 
   while (ros::ok())
   {
