@@ -5,7 +5,11 @@
   <arg name='town' default='Town04'/>
   <arg name='role_name' default='ego_vehicle'/>
   <!-- For Town04 sim -->
-  <arg name="spawn_point" default="-10,214,0.3,0,0,-90"/>
+  <!-- <arg name="spawn_point" default="-10,214,0.3,0,0,-90"/> -->
+  <!-- A course -->
+  <!-- <arg name="spawn_point" default="202.5, 188.0, 0.3, 0, 0, 90"/> -->
+  <!-- B course -->
+  <arg name="spawn_point" default="258.5, 186.5, 0.3, 0, 0, 90"/>
   <arg name="enable_openplanner_simulation" default="false"/>
   <arg name="enable_object_insert" default="false"/>
   <arg name="spawn_sensors_only" default="false"/>
