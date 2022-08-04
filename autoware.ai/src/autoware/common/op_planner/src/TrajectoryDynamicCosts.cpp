@@ -230,26 +230,26 @@ TrajectoryCost TrajectoryDynamicCosts::DoOneStepStatic(const vector<vector<WayPo
   // }
 
   ////// Change Lane when turn left / right
-  // Calculate Turn Angle
-  double turn_angle = 0;
+  // // Calculate Turn Angle
+  // double turn_angle = 0;
 
-  if(m_PrevSelectedIndex != -1)
-    turn_angle = CalculateTurnAngle(rollOuts.at(m_PrevSelectedIndex), currState, 50);
+  // if(m_PrevSelectedIndex != -1)
+  //   turn_angle = CalculateTurnAngle(rollOuts.at(m_PrevSelectedIndex), currState, 50);
 
-  // std::cout << "b_all_free : " << bAllFree << " , t_a : " << turn_angle << std::endl;
+  // // std::cout << "b_all_free : " << bAllFree << " , t_a : " << turn_angle << std::endl;
 
-  // Keep state when Intersection state
-  if(state == PlannerHNS::INTERSECTION_STATE){
-    smallestIndex = m_PrevSelectedIndex;
-  }
-  // For Left Turn
-  else if(bAllFree && turn_angle > 45){
-    smallestIndex = 0;
-  }
-  // For Right Turn
-  else if(bAllFree && turn_angle < -45 && params.rollOutNumber > 0){
-    smallestIndex = params.rollOutNumber - 1;
-  }
+  // // Keep state when Intersection state
+  // if(state == PlannerHNS::INTERSECTION_STATE){
+  //   smallestIndex = m_PrevSelectedIndex;
+  // }
+  // // For Left Turn
+  // else if(bAllFree && turn_angle > 45){
+  //   smallestIndex = 0;
+  // }
+  // // For Right Turn
+  // else if(bAllFree && turn_angle < -45 && params.rollOutNumber > 0){
+  //   smallestIndex = params.rollOutNumber - 1;
+  // }
 
   if(smallestIndex == -1)
   {

@@ -757,8 +757,11 @@ bool DecisionMaker::SelectSafeTrajectory()
 
   CalculateImportantParameterForDecisionMaking(vehicleState, goalID, bEmergencyStop, trafficLight, tc);
 
-  CheckTurn();
+  // Enable if left turn scenario needed
+  // CheckTurn();
+
   // PrintTurn();
+
   beh = GenerateBehaviorState(vehicleState);
 
   beh.bNewPlan = SelectSafeTrajectory();

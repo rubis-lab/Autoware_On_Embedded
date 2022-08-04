@@ -274,11 +274,11 @@ void TrajectoryEval::callbackGetPredictedObjects(const autoware_msgs::DetectedOb
   PlannerHNS::DetectedObject obj;
   for(unsigned int i = 0 ; i <msg->objects.size(); i++)
   {    
-    // if(msg->objects.at(i).pose.position.y < -20 || msg->objects.at(i).pose.position.y > 20)
-    //   continue;    
+    if(msg->objects.at(i).pose.position.y < -20 || msg->objects.at(i).pose.position.y > 20)
+      continue;    
       
-    // if(msg->objects.at(i).pose.position.z > 1 || msg->objects.at(i).pose.position.z < -1.5)
-    //   continue;
+    if(msg->objects.at(i).pose.position.z > 1 || msg->objects.at(i).pose.position.z < -1.5)
+      continue;
 
     autoware_msgs::DetectedObject msg_obj = msg->objects.at(i);     
 
