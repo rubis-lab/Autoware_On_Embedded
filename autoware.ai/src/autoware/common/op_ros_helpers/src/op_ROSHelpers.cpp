@@ -1321,8 +1321,8 @@ void ROSHelpers::ConvertFromLocalLaneToAutowareLane(const std::vector<PlannerHNS
     wp.twist.twist.linear.x = path.at(i).v;
     wp.lane_id = path.at(i).laneId;
     wp.stop_line_id = path.at(i).stopLineID;
-    wp.left_lane_id = path.at(i).LeftPointId;
-    wp.right_lane_id = path.at(i).RightPointId;
+    wp.left_lane_id = path.at(i).LeftLnId;
+    wp.right_lane_id = path.at(i).RightLnId;
     wp.time_cost = path.at(i).timeCost;
 
     wp.gid = path.at(i).gid;
@@ -1373,8 +1373,8 @@ void ROSHelpers::ConvertFromAutowareLaneToLocalLane(const autoware_msgs::Lane& t
     wp.gid = trajectory.waypoints.at(i).gid;
     wp.laneId = trajectory.waypoints.at(i).lane_id;
     wp.stopLineID = trajectory.waypoints.at(i).stop_line_id;
-    wp.LeftPointId = trajectory.waypoints.at(i).left_lane_id;
-    wp.RightPointId = trajectory.waypoints.at(i).right_lane_id;
+    wp.LeftLnId = trajectory.waypoints.at(i).left_lane_id;
+    wp.RightLnId = trajectory.waypoints.at(i).right_lane_id;
     wp.timeCost = trajectory.waypoints.at(i).time_cost;
 
     if(trajectory.waypoints.at(i).direction == 0)

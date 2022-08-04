@@ -8,7 +8,7 @@
 #include "op_planner/MatrixOperations.h"
 #include "float.h"
 
-// #define DEBUG_ENABLE
+#define DEBUG_ENABLE
 
 namespace PlannerHNS
 {
@@ -24,6 +24,9 @@ TrajectoryDynamicCosts::TrajectoryDynamicCosts()
   m_WeightLat = 1.2;
   m_WeightLaneChange = 0.0;
   m_LateralSkipDistance = 5;
+
+  m_startTrajIdx = 0;
+  m_endTrajIdx = 0;
 
   m_CollisionTimeDiff = 6.0; //seconds
   m_PrevIndex = -1;
@@ -130,14 +133,37 @@ TrajectoryCost TrajectoryDynamicCosts::DoOneStepStatic(const vector<vector<WayPo
   m_WeightLat = params.weightLat;
   m_LateralSkipDistance = params.LateralSkipDistance;
 
-  RelativeInfo obj_info;
-  PlanningHelpers::GetRelativeInfo(totalPaths, currState, obj_info);
-  int currIndex = params.rollOutNumber/2 + floor(obj_info.perp_distance/params.rollOutDensity);
+  RelativeInfo car_info;
+  PlanningHelpers::GetRelativeInfo(totalPaths, currState, car_info);
+
+  if(car_info.perp_point.LeftLnId == 100){
+    m_startTrajIdx = rollOuts.size() / 2;
+    m_endTrajIdx = rollOuts.size() / 2;
+  }
+  else if(car_info.perp_point.LeftLnId > car_info.perp_point.RightLnId){
+    m_endTrajIdx = min(car_info.perp_point.LeftLnId, int(rollOuts.size())-1);
+    m_startTrajIdx = min(car_info.perp_point.RightLnId, int(rollOuts.size())-1);
+  }
+  else{
+    m_startTrajIdx = min(car_info.perp_point.LeftLnId, int(rollOuts.size())-1);
+    m_endTrajIdx = min(car_info.perp_point.RightLnId, int(rollOuts.size())-1);
+  }
+
+  double minDistanceToRollOut = 0;
+  int currIndex = 0;
+
+  for(int i=0; i<rollOuts.size(); i++){
+    const PlannerHNS::WayPoint rollout_start_waypoint = rollOuts.at(i).at(std::min(3, int(rollOuts.at(i).size()))-1);
+
+    double direct_distance = hypot(rollout_start_waypoint.pos.y - currState.pos.y, rollout_start_waypoint.pos.x - currState.pos.x);
+
+    if(minDistanceToRollOut == 0 || minDistanceToRollOut > direct_distance){
+      minDistanceToRollOut = direct_distance;
+      currIndex = i;
+    }
+  }
+  
   //std::cout <<  "Current Index: " << currIndex << std::endl;
-  if(currIndex < 0)
-    currIndex = 0;
-  else if(currIndex > params.rollOutNumber)
-    currIndex = params.rollOutNumber;
 
   // Calculate lane change cost: Scoring the cost by the distance between current path and candidate path
   m_TrajectoryCosts.clear();
@@ -201,7 +227,10 @@ TrajectoryCost TrajectoryDynamicCosts::DoOneStepStatic(const vector<vector<WayPo
 
   bool bAllFree = true;
 
-  for(unsigned int ic = 0; ic < m_TrajectoryCosts.size(); ic++)
+  for(int ic = 0; ic < m_startTrajIdx; ic++) m_TrajectoryCosts.at(ic).bBlocked = true;
+  for(int ic = rollOuts.size() - 1; ic > m_endTrajIdx; ic--) m_TrajectoryCosts.at(ic).bBlocked = true;
+
+  for(unsigned int ic = std::max(currIndex - 1, m_startTrajIdx); ic <= std::min(currIndex + 1, m_endTrajIdx); ic++)
   {
     if(!m_TrajectoryCosts.at(ic).bBlocked && m_TrajectoryCosts.at(ic).cost < smallestCost)
     {
@@ -219,10 +248,6 @@ TrajectoryCost TrajectoryDynamicCosts::DoOneStepStatic(const vector<vector<WayPo
       bAllFree = false;
     }
   }
-
-  #ifdef DEBUG_ENABLE
-    std::cout << "Index : " << smallestIndex << std::endl;
-  #endif
 
   // Enable when needed
   // if(bAllFree && smallestIndex >= 0){
@@ -251,6 +276,36 @@ TrajectoryCost TrajectoryDynamicCosts::DoOneStepStatic(const vector<vector<WayPo
   //   smallestIndex = params.rollOutNumber - 1;
   // }
 
+  if(smallestIndex >= 0 && m_TrajectoryCosts.at(currIndex).bBlocked){
+    int left_block_idx = -1;
+
+    for(int ic = currIndex - 1; ic >= m_startTrajIdx; ic--)
+    {
+      if(m_TrajectoryCosts.at(ic).bBlocked){
+        left_block_idx = ic;
+        break;
+      }
+    }
+
+    if(left_block_idx != -1 && smallestIndex < left_block_idx){
+      smallestIndex = -1;
+    }
+
+    int right_block_idx = -1;
+
+    for(int ic = currIndex + 1; ic <= m_endTrajIdx; ic++)
+    {
+      if(m_TrajectoryCosts.at(ic).bBlocked){
+        right_block_idx = ic;
+        break;
+      }
+    }
+
+    if(right_block_idx != -1 && smallestIndex > right_block_idx){
+      smallestIndex = -1;
+    }
+  }
+
   if(smallestIndex == -1)
   {
     bestTrajectory.bBlocked = true;
@@ -266,6 +321,27 @@ TrajectoryCost TrajectoryDynamicCosts::DoOneStepStatic(const vector<vector<WayPo
   }
 
   m_PrevIndex = currIndex;
+
+  #ifdef DEBUG_ENABLE
+  for(unsigned int ic=0; ic<rollOuts.size(); ic++){
+    std::cout << "Index: " << ic
+           << ", Priority: " << m_TrajectoryCosts.at(ic).priority_cost
+           << ", Transition: " << m_TrajectoryCosts.at(ic).transition_cost
+           << ", Lat: " << m_TrajectoryCosts.at(ic).lateral_cost
+           << ", Long: " << m_TrajectoryCosts.at(ic).longitudinal_cost
+           << ", Change: " << m_TrajectoryCosts.at(ic).lane_change_cost
+           << ", Avg: " << m_TrajectoryCosts.at(ic).cost
+           << ", Blocked : " << m_TrajectoryCosts.at(ic).bBlocked
+           << std::endl;
+  }
+  std::cout << "---------------------------------------" << std::endl;
+  std::cout << "leftLnId : " << car_info.perp_point.LeftLnId << ", RightLnId : " << car_info.perp_point.RightLnId << std::endl;
+  std::cout << "start_idx : " << m_startTrajIdx << ", end_idx : " << m_endTrajIdx << std::endl;
+  std::cout << "current_idx : " << currIndex << ", selected one : " << smallestIndex << std::endl;
+  std::cout << "---------------------------------------" << std::endl;
+
+  #endif
+
   return bestTrajectory;
 }
 

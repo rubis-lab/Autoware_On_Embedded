@@ -217,6 +217,10 @@ public:
 
   static void ConstructIntersection_RUBIS(std::vector<PlannerHNS::Crossing>& crossing, XmlRpc::XmlRpcValue is_list);
 
+  static std::vector<WayPoint*> GetCloseWaypointsFromMap(const WayPoint& pos, RoadNetwork& map, const bool bDirectionBased, int candidate_num, int min_distance);
+  static std::vector<Lane*> GetCloseLanesFromMap(const WayPoint& pos, RoadNetwork& map, const int candidate_num, const double& distance, const bool bDirectionBased = true);
+  static void ConstructLaneInfo_RUBIS(RoadNetwork& map, XmlRpc::XmlRpcValue lane_info_list);
+
   static double m_USING_VER_ZERO;
 
   static int g_max_point_id;
