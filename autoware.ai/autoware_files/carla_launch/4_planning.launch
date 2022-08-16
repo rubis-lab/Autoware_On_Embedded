@@ -1,24 +1,45 @@
 <launch>
   <!-- op_global_planning -->
-  <include file="$(find op_global_planner)/launch/op_global_planner.launch">
-    <arg name="pathDensity"           value="1" /> <!-- distance between each two waypoints-->
-    <arg name="enableSmoothing"       value="false" /> <!-- 1 or 0 -->
-    <arg name="enableLaneChange"      value="false" /> <!-- 1 or 0 -->
-    <arg name="enableRvizInput"       value="true" /> <!-- 1 or 0 -->
-    <arg name="enableReplan"          value="false" /> <!-- 1 or 0 -->  
-    <arg name="velocitySource"        value="1" /> <!-- read velocities from (0- Odometry, 1- autoware current_velocities, 2- car_info) "" -->
-    <arg name="mapSource"             value="0" /> <!-- Autoware=0, Vector Map Folder=1, kml file=2 -->
-    <arg name="mapFileName"           value="" /> <!-- incase of kml map source -->
- 
-    <arg name="use_static_goal"       value="false" />
-    <arg name="goal_pose_x"           value="55.9" />
-    <arg name="goal_pose_y"           value="-18.8" />
-    <arg name="goal_pose_z"           value="0.0" />
-    <arg name="goal_ori_x"            value="0.0" />
-    <arg name="goal_ori_y"            value="0.0" />
-    <arg name="goal_ori_z"            value="0.70" />
-    <arg name="goal_ori_w"            value="0.70" />
-  </include>
+  <arg name="LaneInfoFile"          default="carla/lane_info.yaml" />
+  <arg name="pathDensity"           value="1" /> <!-- distance between each two waypoints-->
+  <arg name="enableSmoothing"       value="false" /> <!-- 1 or 0 -->
+  <arg name="enableLaneChange"      value="false" /> <!-- 1 or 0 -->
+  <arg name="enableRvizInput"       value="true" /> <!-- 1 or 0 -->
+  <arg name="enableReplan"          value="false" /> <!-- 1 or 0 -->  
+  <arg name="velocitySource"        value="1" /> <!-- read velocities from (0- Odometry, 1- autoware current_velocities, 2- car_info) "" -->
+  <arg name="mapSource"             value="0" /> <!-- Autoware=0, Vector Map Folder=1, kml file=2 -->
+  <arg name="mapFileName"           value="" /> <!-- incase of kml map source -->
+  <arg name="enableDynamicMapUpdate"       default="false" />  
+  <!-- Borregas Avenue -->
+  <arg name="use_static_goal"       value="true" />
+  <arg name="goal_pose_x"           value="57.0422019958" />
+  <arg name="goal_pose_y"           value="-5.43001270294" />
+  <arg name="goal_pose_z"           value="0.0" />
+  <arg name="goal_ori_x"            value="0.0" />
+  <arg name="goal_ori_y"            value="0.0" />
+  <arg name="goal_ori_z"            value="0.719615198264" />
+  <arg name="goal_ori_w"            value="0.694373074383" />
+
+  <node pkg="op_global_planner" type="op_global_planner" name="op_global_planner" output="screen">    
+    <rosparam command="load" file="$(find rubis_autorunner)/cfg/$(arg LaneInfoFile)"/>
+    <param name="pathDensity"         value="$(arg pathDensity)" />
+    <param name="enableSmoothing"       value="$(arg enableSmoothing)" />
+    <param name="enableLaneChange"       value="$(arg enableLaneChange)" />
+    <param name="enableRvizInput"       value="$(arg enableRvizInput)" />
+    <param name="enableReplan"         value="$(arg enableReplan)" />        
+    <param name="velocitySource"       value="$(arg velocitySource)" />
+    <param name="mapSource"         value="$(arg mapSource)" />
+    <param name="mapFileName"         value="$(arg mapFileName)" />    
+    <param name="enableDynamicMapUpdate"   value="$(arg enableDynamicMapUpdate)" />    
+    <param name="use_static_goal"       value="$(arg use_static_goal)"/>
+    <param name="goal_pose_x"           value="$(arg goal_pose_x)" />
+    <param name="goal_pose_y"           value="$(arg goal_pose_y)" />
+    <param name="goal_pose_z"           value="$(arg goal_pose_z)" />
+    <param name="goal_ori_x"            value="$(arg goal_ori_x)" />
+    <param name="goal_ori_y"            value="$(arg goal_ori_y)" />
+    <param name="goal_ori_z"            value="$(arg goal_ori_z)" />
+    <param name="goal_ori_w"            value="$(arg goal_ori_w)" />      
+  </node> 
 
   <!-- op_common_params  -->
   <include file="$(find op_local_planner)/launch/op_common_params_parameter.launch">
@@ -68,7 +89,7 @@
   <!-- op_motion_predictor -->
   <include file="$(find op_local_planner)/launch/op_motion_predictor.launch">
     <!-- <arg name="input_object_list"               default="[/detection/fusion_tools/objects_center]" /> -->
-    <arg name="input_object_list"               default="[/detection/fusion_tools/objects_center]" />
+    <arg name="input_object_list"               default="[/detection/image_detector/objects,/detection/object_tracker/objects_center]" />
     <arg name="object_tf_list"                  default="[velodyne]" />
     <arg name="enableCurbObstacles"             default="false" />    <!-- Detect curbs from map-->
     <arg name="enableGenrateBranches"           default="false"/>     <!-- Enable Branching -->
