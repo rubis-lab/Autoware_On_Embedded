@@ -18,6 +18,10 @@ def generate_launch_description():
             default_value=''
         ),
         launch.actions.DeclareLaunchArgument(
+            name='spawn_point_obstacle',
+            default_value=''
+        ),
+        launch.actions.DeclareLaunchArgument(
             name='spawn_sensors_only',
             default_value='False'
         ),
@@ -34,6 +38,9 @@ def generate_launch_description():
                 },
                 {
                     'spawn_point_ego_vehicle': launch.substitutions.LaunchConfiguration('spawn_point_ego_vehicle')
+                },
+                {
+                    'spawn_point_obstacle': launch.substitutions.LaunchConfiguration('spawn_point_obstacle')
                 },
                 {
                     'spawn_sensors_only': launch.substitutions.LaunchConfiguration('spawn_sensors_only')

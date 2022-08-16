@@ -117,6 +117,30 @@
                     "id": "control"
                 }
             ]
+        },
+        {
+            "type": "vehicle.toyota.prius",
+            "id": "obstacle",
+            "sensors": 
+            [
+                {
+                    "type": "sensor.other.collision",
+                    "id": "collision",
+                    "spawn_point": {"x": 0.0, "y": 0.0, "z": 0.0}
+                },
+                {
+                    "type": "sensor.pseudo.tf",
+                    "id": "tf"
+                },
+                {
+                    "type": "sensor.pseudo.objects",
+                    "id": "objects"
+                },
+                {
+                    "type": "sensor.pseudo.odom",
+                    "id": "odometry"
+                }
+            ]
         }
     ]
 }

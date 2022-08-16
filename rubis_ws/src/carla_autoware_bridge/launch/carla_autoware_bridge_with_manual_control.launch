@@ -6,6 +6,11 @@
   <arg name='role_name' default='ego_vehicle'/>
   <!-- use comma separated format "x,y,z,roll,pitch,yaw" -->
   <arg name='spawn_point' default=''/>
+
+
+  <arg name='role_name_obstacle' default='obstacle'/>
+  <arg name="spawn_point_obstacle" default=""/>
+
   <arg name="spawn_sensors_only" default="false"/>
 
   <!-- carla ros manual control -->
@@ -20,6 +25,8 @@
     <arg name='town' value='$(arg town)'/>
     <arg name='role_name' value='$(arg role_name)'/>
     <arg name='spawn_point' value='$(arg spawn_point)'/>
+    <arg name='role_name_obstacle' value='$(arg role_name_obstacle)'/>
+    <arg name='spawn_point_obstacle' value='$(arg spawn_point_obstacle)'/>
     <arg name='spawn_sensors_only' value='$(arg spawn_sensors_only)'/>
   </include>
 
