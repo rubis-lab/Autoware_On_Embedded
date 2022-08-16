@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>carla_fake_control</name>
+  <version>0.0.0</version>
+  <description>The carla_fake_control package</description>
+  <maintainer email="hatem.darweesh@gmail.com">CARLA Simulator Team and Others</maintainer>
+  <license>MIT</license>
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>rospy</build_depend>
+  <build_depend>carla_msgs</build_depend>
+  <build_depend>autoware_msgs</build_depend>
+  <build_export_depend>rospy</build_export_depend>
+  <exec_depend>rospy</exec_depend>  
+  <exec_depend>carla_ros_bridge</exec_depend>
+  <exec_depend>std_msgs</exec_depend>  
+  <exec_depend>carla_msgs</exec_depend>
+  <exec_depend>autoware_msgs</exec_depend>
+  <export>
+  </export>
+</package>

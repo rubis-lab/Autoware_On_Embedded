@@ -1,0 +1,12 @@
+future
+numpy; python_version < '3.0'
+numpy==1.18.4; python_version >= '3.0'
+pygame
+matplotlib
+open3d
+Pillow
+PyYAML
+rospkg
+transforms3d
+opencv-python==4.2.0.32
+simple-pid
