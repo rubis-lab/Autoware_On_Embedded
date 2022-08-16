@@ -524,9 +524,12 @@ void GlobalPlanner::MainLoop()
 
             XmlRpc::XmlRpcValue lane_info_xml;
             // Add Lane Info from yaml file if exist
-            bool enable_lane_info;
-            if(nh.param("/op_global_planner/enable_lane_info", enable_lane_info, false)){
+            try{
               nh.getParam("/op_global_planner/lane_info_list", lane_info_xml);
+            }
+            catch(XmlRpc::XmlRpcException& e){
+              ROS_WARN("No Lane Info yaml file");
+              lane_info_xml.clear();
             }
             PlannerHNS::MappingHelpers::ConstructLaneInfo_RUBIS(m_Map, lane_info_xml);
       }

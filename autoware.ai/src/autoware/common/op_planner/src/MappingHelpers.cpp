@@ -3546,8 +3546,6 @@ void MappingHelpers::ConstructLaneInfo_RUBIS(RoadNetwork& map, XmlRpc::XmlRpcVal
 
   std::cout << "[System] Lane Initialize Success" << std::endl;
 
-  if(!li_list) return;
-
   for(unsigned int i=0; i<li_list.size(); i++){
     WayPoint start_pose;
     start_pose.pos.x = li_list[i]["pose"][0]["x"];

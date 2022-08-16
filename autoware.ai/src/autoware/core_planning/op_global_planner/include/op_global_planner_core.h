@@ -45,6 +45,7 @@
 #include "libwaypoint_follower/libwaypoint_follower.h"
 #include "autoware_can_msgs/CANInfo.h"
 #include <visualization_msgs/MarkerArray.h>
+#include <XmlRpcException.h>
 
 #include "op_planner/PlannerCommonDef.h"
 #include "op_planner/MappingHelpers.h"

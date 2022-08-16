@@ -18,7 +18,10 @@
   <arg name="goal_ori_z"           default="0.0" />
   <arg name="goal_ori_w"           default="0.0" />
 
+  <arg name="LaneInfoFile"          default="cubetown_autorunner/default_lane_info.yaml" />
+
   <node pkg="op_global_planner" type="op_global_planner" name="op_global_planner" output="screen">    
+    <rosparam command="load" file="$(find rubis_autorunner)/cfg/$(arg LaneInfoFile)"/>
     <param name="pathDensity"         value="$(arg pathDensity)" />
     <param name="enableSmoothing"       value="$(arg enableSmoothing)" />
     <param name="enableLaneChange"       value="$(arg enableLaneChange)" />
