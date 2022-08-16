@@ -9,11 +9,11 @@
   <!-- A course -->
   <!-- <arg name="spawn_point" default="202.5, 188.0, 0.3, 0, 0, 90"/> -->
   <!-- B course -->
-  <arg name="spawn_point" default="258.5, 186.5, 0.3, 0, 0, 90"/>
+  <arg name="spawn_point" default="258.5, 208.2, 0.3, 0, 0, 90"/>
 
 
   <arg name='role_name_obstacle' default='obstacle'/>
-  <arg name="spawn_point_obstacle" default="258.5, 196.5, 0.3, 0, 0, 90"/>
+  <arg name="spawn_point_obstacle" default="324.4, 346.1, 0.3, 0, 0, -32"/>
 
   <arg name="enable_openplanner_simulation" default="false"/>
   <arg name="enable_object_insert" default="false"/>

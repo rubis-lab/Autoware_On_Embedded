@@ -3,9 +3,22 @@
   <arg name="role_name" default="ego_vehicle" />
   <arg name="control_loop_rate" default="0.05" />
 
+  <arg name="speed_Kp" default="0.3" />
+  <arg name="speed_Ki" default="0.08" />
+  <arg name="speed_Kd" default="0.001" />
+  <arg name="accel_Kp" default="0.3" />
+  <arg name="accel_Ki" default="0.08" />
+  <arg name="accel_Kd" default="0.001" />
+
   <node pkg="carla_ackermann_control" type="carla_ackermann_control_node.py" name="carla_ackermann_control_$(arg role_name)" output="screen">
     <param name="role_name" value="$(arg role_name)" />
     <param name="control_loop_rate" value="$(arg control_loop_rate)" />
+    <param name="speed_Kp" value="$(arg speed_Kp)" />
+    <param name="speed_Ki" value="$(arg speed_Ki)" />
+    <param name="speed_Kd" value="$(arg speed_Kd)" />
+    <param name="accel_Kp" value="$(arg accel_Kp)" />
+    <param name="accel_Ki" value="$(arg accel_Ki)" />
+    <param name="accel_Kd" value="$(arg accel_Kd)" />
     <rosparam file="$(find carla_ackermann_control)/config/settings.ros1.yaml" command="load" />
   </node>
 </launch>
