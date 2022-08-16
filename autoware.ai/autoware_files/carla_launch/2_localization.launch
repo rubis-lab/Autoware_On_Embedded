@@ -38,10 +38,10 @@
     yaw: $(arg init_yaw),
     use_predict_pose: 1,
     error_threshold: 0.01,
-    resolution: 2.0,
-    step_size: 0.5,
+    resolution: 4.0,
+    step_size: 0.3,
     trans_epsilon: 0.01,
-    max_iterations: 30}
+    max_iterations: 10}
   '"/>
 
   <!-- vel_pose_mux -->

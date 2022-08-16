@@ -16,7 +16,7 @@
   <!-- Point Map Loader -->
 	<include file="$(find map_file)/launch/points_map_loader.launch">
     <arg name="scene_num" value="noupdate" />
-    <arg name="path_pcd" value="$(env USER_HOME)/autoware.ai/autoware_files/carla_points_map/Town04.pcd"/>
+    <arg name="path_pcd" value="$(env USER_HOME)/autoware.ai/autoware_files/points_map/Town04_sunho.pcd"/>
   </include>
 
   <!-- Re-publishing simulator/camera_node/image/compressed topic to /image_raw as expected by Autoware -->
