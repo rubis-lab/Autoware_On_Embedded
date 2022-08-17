@@ -927,6 +927,7 @@ public:
   bool obstacleinRiskyArea;
 
   bool enableSlowDownOnCurve;
+  double curveVelocityRatio;
 
   // Added by PHY
   bool pedestrianAppearence;
@@ -990,6 +991,7 @@ public:
     nReliableCount          = 2;
 
     enableSlowDownOnCurve = false;
+    curveVelocityRatio = 0.5;
 
     enableHeadingSmoothing      = false;
     enableSwerving           = false;

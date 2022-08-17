@@ -179,6 +179,7 @@ void BehaviorGen::UpdatePlanningParams(ros::NodeHandle& _nh)
   nh.getParam("/op_common_params/additionalBrakingDistance", m_PlanningParams.additionalBrakingDistance );
   nh.getParam("/op_common_params/giveUpDistance", m_PlanningParams.giveUpDistance );
   nh.getParam("/op_common_params/enableSlowDownOnCurve", m_PlanningParams.enableSlowDownOnCurve );
+  nh.getParam("/op_common_params/curveVelocityRatio", m_PlanningParams.curveVelocityRatio );
 
   int iSource = 0;
   _nh.getParam("/op_common_params/mapSource" , iSource);

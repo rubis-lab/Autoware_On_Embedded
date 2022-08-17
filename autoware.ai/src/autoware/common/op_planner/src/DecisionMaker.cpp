@@ -673,8 +673,8 @@ bool DecisionMaker::SelectSafeTrajectory()
         desiredVelocity = m_params.maxSpeed;
       }
 
-      if(desiredVelocity < m_params.maxSpeed * 0.5){ // minimum of target velocity is max_speed / 2
-        desiredVelocity = m_params.maxSpeed * 0.5; 
+      if(desiredVelocity < m_params.maxSpeed * m_params.curveVelocityRatio){ // minimum of target velocity is max_speed / 2
+        desiredVelocity = m_params.maxSpeed * m_params.curveVelocityRatio; 
       }
       previous_velocity = desiredVelocity;
     }

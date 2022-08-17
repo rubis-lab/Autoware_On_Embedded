@@ -39,7 +39,8 @@
   <arg name="minPursuiteDistance"   default="3.0"  />
   <arg name="additionalBrakingDistance" default="5.0"  />
   <arg name="enableSlowDownOnCurve"       default="false" />
-  
+  <arg name="curveVelocityRatio"       default="0.5" />
+
   <arg name="giveUpDistance"       default="-4.0"  />
   
   <!-- <arg name="maxAcceleration"       default="3.0" />
@@ -95,6 +96,7 @@
   <param name="additionalBrakingDistance" value="$(arg additionalBrakingDistance)"  />
 
   <param name="enableSlowDownOnCurve" value="$(arg enableSlowDownOnCurve)"  />
+  <param name="curveVelocityRatio" value="$(arg curveVelocityRatio)"  />
   
   <param name="giveUpDistance" value="$(arg giveUpDistance)"  />
   
