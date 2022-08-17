@@ -50,6 +50,7 @@
   <arg name="stopLineMargin"       default="10.0" />
   <arg name="stopLineDetectionDistance"       default="20.0" />
   <arg name="enableSlowDownOnCurve"       default="false" />
+  <arg name="curveVelocityRatio"       default="0.5" />  
 
   <node pkg="op_local_planner" type="op_common_params" name="op_common_params" output="screen">
   
@@ -95,6 +96,7 @@
   <param name="additionalBrakingDistance" value="$(arg additionalBrakingDistance)"  />
 
   <param name="enableSlowDownOnCurve" value="$(arg enableSlowDownOnCurve)"  />
+  <param name="curveVelocityRatio" value="$(arg curveVelocityRatio)"  />
   
   <param name="giveUpDistance" value="$(arg giveUpDistance)"  />
   

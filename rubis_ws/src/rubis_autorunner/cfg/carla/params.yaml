@@ -14,7 +14,7 @@ ray_ground_filter:
   task_scheduling_flag: 0
   task_profiling_flag: 0
   task_response_time_filename: "~/Documents/profiling/response_time/ray_ground_filter.csv"
-  rate: 10 
+  rate: 1000 
   task_minimum_inter_release_time: 100000000
   task_execution_time: 100000000
   task_relative_deadline: 100000000
@@ -24,7 +24,7 @@ voxel_grid_filter:
   task_scheduling_flag: 0
   task_profiling_flag: 0
   task_response_time_filename: "~/Documents/profiling/response_time/voxel_grid_filter.csv"
-  rate: 10 
+  rate: 100 
   task_minimum_inter_release_time: 100000000
   task_execution_time: 100000000
   task_relative_deadline: 100000000
@@ -35,10 +35,10 @@ ndt_matching:
   task_scheduling_flag: 0
   task_profiling_flag: 0
   task_response_time_filename: "~/Documents/profiling/response_time/ndt_matching.csv"
-  rate: 10
+  rate: 100
   task_minimum_inter_release_time: 100000000
   task_execution_time: 70000000
-  task_relative_deadline: 100000000
+  task_relative_deadline: 100000000 
   gpu_scheduling_flag: 0
   gpu_profiling_flag: 0
   gpu_execution_time_filename: "~/Documents/gpu_profiling/test_ndt_matching_execution_time.csv"
@@ -53,7 +53,7 @@ lidar_euclidean_cluster_detect:
   task_scheduling_flag: 0
   task_profiling_flag: 0
   task_response_time_filename: "~/Documents/profiling/response_time/lidar_euclidean_cluster_detect.csv"
-  rate: 10 
+  rate: 100 
   task_minimum_inter_release_time: 100000000
   task_execution_time: 100000000
   task_relative_deadline: 100000000
@@ -67,7 +67,7 @@ vision_darknet_detect:
   task_scheduling_flag: 0
   task_profiling_flag: 0
   task_response_time_filename: "~/Documents/profiling/response_time/vision_darknet_detect.csv"
-  rate: 10 
+  rate: 100 
   task_minimum_inter_release_time: 100000000
   task_execution_time: 100000000
   task_relative_deadline: 100000000
@@ -83,7 +83,7 @@ imm_ukf_pda_track:
   task_scheduling_flag: 0
   task_profiling_flag: 0
   task_response_time_filename: "~/Documents/profiling/response_time/imm_ukf_pda_track.csv"
-  rate: 10 
+  rate: 100 
   task_minimum_inter_release_time: 100000000
   task_execution_time: 100000000
   task_relative_deadline: 100000000
@@ -92,7 +92,7 @@ range_vision_fusion:
   task_scheduling_flag: 0
   task_profiling_flag: 0
   task_response_time_filename: "~/Documents/profiling/response_time/range_vision_fusion.csv"
-  rate: 10 
+  rate: 100 
   task_minimum_inter_release_time: 100000000
   task_execution_time: 100000000
   task_relative_deadline: 100000000
@@ -168,7 +168,7 @@ pure_pursuit:
   task_scheduling_flag: 0
   task_profiling_flag: 0
   task_response_time_filename: "~/Documents/profiling/response_time/pure_pursuit.csv"
-  rate: 30 #30
+  rate: 100 #30
   task_minimum_inter_release_time: 33333333
   task_execution_time: 33333333
   task_relative_deadline: 33333333
@@ -179,7 +179,7 @@ twist_filter:
   task_scheduling_flag: 0
   task_profiling_flag: 0
   task_response_time_filename: "~/Documents/profiling/response_time/twist_filter.csv"
-  rate: 10
+  rate: 100
   task_minimum_inter_release_time: 100000000
   task_execution_time: 100000000
   task_relative_deadline: 100000000
@@ -188,7 +188,7 @@ twist_gate:
   task_scheduling_flag: 0
   task_profiling_flag: 0
   task_response_time_filename: "~/Documents/profiling/response_time/twist_gate.csv"
-  rate: 10
+  rate: 100
   task_minimum_inter_release_time: 100000000
   task_execution_time: 100000000
   task_relative_deadline: 100000000

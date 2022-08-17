@@ -9,7 +9,7 @@
 
   <!-- vel/pose connect -->
   <arg name="topic_pose_stamped" default="/ndt_pose" />
-  <arg name="topic_twist_stamped" default="/estimate_twist" />
+  <arg name="topic_twist_stamped" default="/carla_current_velocity" />
 
   <!-- points downsampler -->
   <include file="$(find points_downsampler)/launch/points_downsample.launch" />
@@ -38,9 +38,9 @@
     yaw: $(arg init_yaw),
     use_predict_pose: 1,
     error_threshold: 0.01,
-    resolution: 4.0,
+    resolution: 3.0,
     step_size: 0.3,
-    trans_epsilon: 0.1,
+    trans_epsilon: 0.08,
     max_iterations: 10}
   '"/>
 
