@@ -3,9 +3,10 @@
   <arg name="role_name" default="ego_vehicle" />
   <arg name="control_loop_rate" default="0.05" />
 
-  <arg name="speed_Kp" default="0.3" />
-  <arg name="speed_Ki" default="0.08" />
+  <arg name="speed_Kp" default="0.04" />
+  <arg name="speed_Ki" default="0.00" />
   <arg name="speed_Kd" default="0.001" />
+
   <arg name="accel_Kp" default="0.3" />
   <arg name="accel_Ki" default="0.08" />
   <arg name="accel_Kd" default="0.001" />
@@ -21,4 +22,6 @@
     <param name="accel_Kd" value="$(arg accel_Kd)" />
     <rosparam file="$(find carla_ackermann_control)/config/settings.ros1.yaml" command="load" />
   </node>
+
+  <node pkg="carla_ros_bridge" type="carla_current_velocity_publisher.py" name="carla_current_velocity_publisher" output="screen" />
 </launch>

@@ -303,7 +303,8 @@ class CarlaAckermannControl(CompatibleNode):
         """
         set target sterring angle
         """
-        self.info.target.steering_angle = -target_steering_angle
+        # hardcoding
+        self.info.target.steering_angle = -1.15*target_steering_angle
         if abs(self.info.target.steering_angle) > self.info.restrictions.max_steering_angle:
             self.logerr("Max steering angle reached, clipping value")
             self.info.target.steering_angle = numpy.clip(
@@ -364,8 +365,9 @@ class CarlaAckermannControl(CompatibleNode):
         """
         Basic steering control
         """
-        self.info.output.steer = self.info.target.steering_angle / \
-            self.info.restrictions.max_steering_angle
+        self.info.output.steer = self.info.target.steering_angle 
+        #/ \
+         #   self.info.restrictions.max_steering_angle
 
     def control_stop_and_reverse(self):
         """
@@ -516,7 +518,7 @@ class CarlaAckermannControl(CompatibleNode):
         else:
             self.info.status.status = "braking"
             # braking required
-            self.info.output.brake = (
+            self.info.output.brake = 1.0*(
                 (self.info.status.brake_upper_border -
                  self.info.status.accel_control_pedal_target) /
                 abs(self.info.restrictions.max_pedal))
@@ -524,6 +526,7 @@ class CarlaAckermannControl(CompatibleNode):
 
         # finally clip the final control output (should actually never happen)
         self.info.output.brake = numpy.clip(
+            ###hardcoding
             self.info.output.brake, 0., 1.)
         self.info.output.throttle = numpy.clip(
             self.info.output.throttle, 0., 1.)
