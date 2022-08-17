@@ -3,8 +3,8 @@
     <arg name="input_point_topic" value="/points_raw" />  <!-- input_point_topic, ground filtering will be performed over the pointcloud in this topic. -->
     <arg name="base_frame" value="base_link" />  <!-- Coordinate system to perform transform (default base_link) -->
     <arg name="max_clipping_height" value="10" />  <!-- Remove Points above this height value (default 2.0 meters) -->
-    <arg name="min_clipping_height" value="1.0" />  <!-- Remove Points below this height value (default -0.5 meters) -->
-    <arg name="min_point_distance" value="3.5" />  <!-- Removes Points closer than this distance from the sensor origin (default 1.85 meters) -->
+    <arg name="min_clipping_height" value="-1.5" />  <!-- Remove Points below this height value (default -0.5 meters) -->
+    <arg name="min_point_distance" value="1.5" />  <!-- Removes Points closer than this distance from the sensor origin (default 1.85 meters) -->
     <arg name="radial_divider_angle" value="0.08" />  <!-- Angle of each Radial division on the XY Plane (default 0.08 degrees)-->
     <arg name="concentric_divider_distance" value="0.0" />  <!-- Distance of each concentric division on the XY Plane (default 0.0 meters) -->
     <arg name="local_max_slope" value="8" />  <!-- Max Slope of the ground between Points (default 8 degrees) -->
@@ -26,7 +26,7 @@
     <arg name="sync" value="false" />
     <arg name="use_diffnormals" value="false" />
     <arg name="pose_estimation" value="false" />
-    <arg name="clip_min_height" value="1.0" />
+    <arg name="clip_min_height" value="-1.5" />
     <arg name="clip_max_height" value="10" />
     <arg name="keep_lanes" value="false" />
     <arg name="keep_lane_left_distance" value="5" />
