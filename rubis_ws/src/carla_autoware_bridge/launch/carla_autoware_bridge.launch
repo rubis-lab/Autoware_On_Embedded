@@ -12,6 +12,7 @@
 
   <arg name='role_name_obstacle' default='obstacle'/>
   <arg name="spawn_point_obstacle" default=""/>
+  <arg name="spawn_point_walker" default=""/>
   <!--
     #################
     # CARLA Clients #
@@ -32,7 +33,17 @@
     <arg name="spawn_point_ego_vehicle" value="$(arg spawn_point)"/>
     <arg name='role_name_obstacle' value='$(arg role_name_obstacle)'/>
     <arg name='spawn_point_obstacle' value='$(arg spawn_point_obstacle)'/>
+    <arg name="spawn_point_walker" value="$(arg spawn_point_walker)"/>    
     <arg name="spawn_sensors_only" value="$(arg spawn_sensors_only)"/>
+  </include>
+
+  <include file="$(find carla_walker_agent)/launch/carla_walker_agent.launch">
+    <arg name="role_name" value="walker"/>
+    <arg name="target_speed" value="5"/>
+    <arg name="fisrt_waypoint_x" value="205.4"/>
+    <arg name="fisrt_waypoint_y" value="311.1"/>
+    <arg name="second_waypoint_x" value="190.4"/>
+    <arg name="second_waypoint_y" value="311.1"/>
   </include>
 
   <!-- mission planning -->

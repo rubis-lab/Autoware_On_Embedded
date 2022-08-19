@@ -10,6 +10,7 @@
 
   <arg name='role_name_obstacle' default='obstacle'/>
   <arg name='spawn_point_obstacle' default=''/>
+  <arg name="spawn_point_walker" default=""/>
   <arg name="spawn_sensors_only" default="false"/>
 
   <arg name="control_id" default="control"/>
@@ -18,6 +19,7 @@
     <arg name="objects_definition_file" value='$(arg objects_definition_file)'/>
     <arg name="spawn_point_ego_vehicle" value="$(arg spawn_point_ego_vehicle)"/>
     <arg name='spawn_point_obstacle' value='$(arg spawn_point_obstacle)'/>
+    <arg name="spawn_point_walker" value="$(arg spawn_point_walker)"/>    
     <arg name="spawn_sensors_only" value="$(arg spawn_sensors_only)" />
   </include>
 

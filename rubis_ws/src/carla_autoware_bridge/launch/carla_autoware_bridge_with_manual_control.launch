@@ -10,6 +10,7 @@
 
   <arg name='role_name_obstacle' default='obstacle'/>
   <arg name="spawn_point_obstacle" default=""/>
+  <arg name="spawn_point_walker" default=""/>
 
   <arg name="spawn_sensors_only" default="false"/>
 
@@ -27,6 +28,7 @@
     <arg name='spawn_point' value='$(arg spawn_point)'/>
     <arg name='role_name_obstacle' value='$(arg role_name_obstacle)'/>
     <arg name='spawn_point_obstacle' value='$(arg spawn_point_obstacle)'/>
+    <arg name="spawn_point_walker" value="$(arg spawn_point_walker)"/>    
     <arg name='spawn_sensors_only' value='$(arg spawn_sensors_only)'/>
   </include>
 

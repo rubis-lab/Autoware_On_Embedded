@@ -1,13 +1,23 @@
 <!-- -->
 <launch>
   <arg name="role_name" default="walker"/>
-  <arg name="target_speed" default="2"/>
+  <arg name="target_speed" default="0"/>
   <arg name="mode" default="vehicle"/>
+  <arg name="fisrt_waypoint_x" default="205.4"/>
+  <arg name="fisrt_waypoint_y" default="311.1"/>
+  <arg name="second_waypoint_x" default="204.4"/>
+  <arg name="second_waypoint_y" default="311.1"/>
+  <arg name="third_waypoint_x" default="190.4"/>
+  <arg name="third_waypoint_y" default="311.1"/>
 
   <node pkg="carla_walker_agent" type="carla_walker_agent.py" name="carla_walker_agent_$(arg role_name)" output="screen">
     <param name="target_speed" value="$(arg target_speed)" />
     <param name="role_name" value="$(arg role_name)" />
     <param name="mode" value="$(arg mode)" />
+    <param name="fisrt_waypoint_x" value="$(arg fisrt_waypoint_x)" />
+    <param name="fisrt_waypoint_y" value="$(arg fisrt_waypoint_y)" />
+    <param name="second_waypoint_x" value="$(arg second_waypoint_x)" />
+    <param name="second_waypoint_y" value="$(arg second_waypoint_y)" />
   </node>
 </launch>
 

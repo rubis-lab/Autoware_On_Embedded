@@ -17,9 +17,10 @@ from ros_compatibility.node import CompatibleNode
 from ros_compatibility.qos import QoSProfile, DurabilityPolicy
 
 from carla_msgs.msg import CarlaWalkerControl
-from geometry_msgs.msg import Pose, Vector3
+from geometry_msgs.msg import Pose, Vector3, PoseStamped
 from nav_msgs.msg import Path, Odometry
 from std_msgs.msg import Float64
+import rospy
 
 
 class CarlaWalkerAgent(CompatibleNode):
@@ -28,7 +29,7 @@ class CarlaWalkerAgent(CompatibleNode):
     """
     # minimum distance to target waypoint before switching to next
     MIN_DISTANCE = 0.5
-
+    walker_moved=False
     def __init__(self):
         """
         Constructor
@@ -37,10 +38,17 @@ class CarlaWalkerAgent(CompatibleNode):
 
         role_name = self.get_param("role_name", "ego_vehicle")
         self._target_speed = self.get_param("target_speed", 2.0)
+        self._fisrt_waypoint_x = self.get_param("fisrt_waypoint_x", 205.4)
+        self._fisrt_waypoint_y = self.get_param("fisrt_waypoint_y", 311.1)
+        self._second_waypoint_x = self.get_param("second_waypoint_x", 190.4)
+        self._second_waypoint_y = self.get_param("second_waypoint_y", 311.1)
+        self._third_waypoint_x = self.get_param("third_waypoint_x", 190.4)
+        self._third_waypoint_y = self.get_param("third_waypoint_y", 311.1)
 
         self._route_assigned = False
         self._waypoints = []
         self._current_pose = Pose()
+        self._ego_current_pose = Pose()
 
         # wait for ros bridge to create relevant topics
         try:
@@ -53,6 +61,12 @@ class CarlaWalkerAgent(CompatibleNode):
             Odometry,
             "/carla/{}/odometry".format(role_name),
             self.odometry_updated,
+            qos_profile=10)
+
+        self._ego_odometry_subscriber = self.new_subscription(
+            Odometry,
+            "/carla/{}/odometry".format("ego_vehicle"),
+            self.ego_odometry_updated,
             qos_profile=10)
 
         self.control_publisher = self.new_publisher(
@@ -103,19 +117,52 @@ class CarlaWalkerAgent(CompatibleNode):
         """
         self._current_pose = odo.pose.pose
 
+    def ego_odometry_updated(self, odo):
+        """
+        callback on new odometry
+        """
+        self._ego_current_pose = odo.pose.pose
+
     def run_step(self):
+        dist=math.sqrt((self._ego_current_pose.position.x-self._current_pose.position.x)**2+(self._ego_current_pose.position.y-self._current_pose.position.y)**2)
+        if 30<dist<40 and self.walker_moved==False:
+            waypoint=Path()
+            pose1=PoseStamped()
+            pose1.pose=self._current_pose
+            pose2=PoseStamped()
+            pose2.pose=self._current_pose
+            pose3=PoseStamped()
+            pose3.pose=self._current_pose
+            pose1.pose.position.x=self._fisrt_waypoint_x
+            pose1.pose.position.y=self._fisrt_waypoint_y
+            pose2.pose.position.x=self._second_waypoint_x
+            pose2.pose.position.y=self._second_waypoint_y
+            pose3.pose.position.x=self._third_waypoint_x
+            pose3.pose.position.y=self._third_waypoint_y
+            waypoint.poses.append(pose1)
+            waypoint.poses.append(pose2)
+            waypoint.poses.append(pose3)
+            self.path_updated(waypoint)
+            self.walker_moved=True
+
         if self._waypoints:
             control = CarlaWalkerControl()
             direction = Vector3()
             direction.x = self._waypoints[0].position.x - self._current_pose.position.x
             direction.y = self._waypoints[0].position.y - self._current_pose.position.y
             direction_norm = math.sqrt(direction.x**2 + direction.y**2)
+            rospy.logwarn(len(self._waypoints))
             if direction_norm > CarlaWalkerAgent.MIN_DISTANCE:
                 control.speed = self._target_speed
                 control.direction.x = direction.x / direction_norm
                 control.direction.y = direction.y / direction_norm
             else:
                 self._waypoints = self._waypoints[1:]
+                
+                if len(self._waypoints)==2:
+                    self._target_speed=0.1
+                else:
+                    self._target_speed=5.0
                 if self._waypoints:
                     self.loginfo("next waypoint: {} {}".format(
                         self._waypoints[0].position.x, self._waypoints[0].position.y))

@@ -14,6 +14,7 @@
 
   <arg name='role_name_obstacle' default='obstacle'/>
   <arg name="spawn_point_obstacle" default="324.4, 346.1, 0.3, 0, 0, -32"/>
+  <arg name="spawn_point_walker" default="218.7, 311.2, 0.3, 0, 0, -32"/>
 
   <arg name="enable_openplanner_simulation" default="false"/>
   <arg name="enable_object_insert" default="false"/>
@@ -27,6 +28,7 @@
     <arg name="spawn_point" value="$(arg spawn_point)"/>
     <arg name='role_name_obstacle' value='$(arg role_name_obstacle)'/>
     <arg name="spawn_point_obstacle" value="$(arg spawn_point_obstacle)"/>    
+    <arg name="spawn_point_walker" value="$(arg spawn_point_walker)"/>    
     <arg name='spawn_sensors_only' value='$(arg spawn_sensors_only)'/>
   </include>
 </launch>
