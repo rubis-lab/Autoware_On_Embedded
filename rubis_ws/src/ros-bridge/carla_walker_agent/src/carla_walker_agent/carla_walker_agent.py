@@ -15,6 +15,7 @@ import ros_compatibility as roscomp
 from ros_compatibility.exceptions import ROSInterruptException
 from ros_compatibility.node import CompatibleNode
 from ros_compatibility.qos import QoSProfile, DurabilityPolicy
+from transforms3d.euler import euler2quat
 
 from carla_msgs.msg import CarlaWalkerControl
 from geometry_msgs.msg import Pose, Vector3, PoseStamped
@@ -29,24 +30,38 @@ class CarlaWalkerAgent(CompatibleNode):
     """
     # minimum distance to target waypoint before switching to next
     MIN_DISTANCE = 0.5
-    walker_moved=False
+    walker_waypoint_ready=False
     def __init__(self):
         """
         Constructor
         """
         super(CarlaWalkerAgent, self).__init__('carla_walker_agent')
 
-        role_name = self.get_param("role_name", "ego_vehicle")
-        self._target_speed = self.get_param("target_speed", 2.0)
-        self._fisrt_waypoint_x = self.get_param("fisrt_waypoint_x", 205.4)
-        self._fisrt_waypoint_y = self.get_param("fisrt_waypoint_y", 311.1)
-        self._second_waypoint_x = self.get_param("second_waypoint_x", 190.4)
-        self._second_waypoint_y = self.get_param("second_waypoint_y", 311.1)
-        self._third_waypoint_x = self.get_param("third_waypoint_x", 190.4)
-        self._third_waypoint_y = self.get_param("third_waypoint_y", 311.1)
-
-        self._route_assigned = False
+        role_name = self.get_param("role_name", "walker")
+        self._walker_target_speed = float(self.get_param("walker_target_speed", 2.0))
+        # self._fisrt_waypoint_x = self.get_param("fisrt_waypoint_x", 205.4)
+        # self._fisrt_waypoint_y = self.get_param("fisrt_waypoint_y", 311.1)
+        # self._second_waypoint_x = self.get_param("second_waypoint_x", 190.4)
+        # self._second_waypoint_y = self.get_param("second_waypoint_y", 311.1)
+        # self._third_waypoint_x = self.get_param("third_waypoint_x", 190.4)
+        # self._third_waypoint_y = self.get_param("third_waypoint_y", 311.1)
+        self._waypoint_params = []
         self._waypoints = []
+        
+        waypoint_iter=1
+        while waypoint_iter is not 0:
+            waypoint_param=self.get_param("walker_point"+str(waypoint_iter))
+            if waypoint_param:
+                self._waypoint_params.append(waypoint_param)
+                waypoint_iter += 1
+            else:
+                waypoint_iter = 0
+
+        
+        rospy.logwarn(self._waypoint_params)
+        
+        #spawn_point_param = self.get_param("spawn_point_" + vehicle["id"], None)
+        self._route_assigned = False
         self._current_pose = Pose()
         self._ego_current_pose = Pose()
 
@@ -122,28 +137,68 @@ class CarlaWalkerAgent(CompatibleNode):
         callback on new odometry
         """
         self._ego_current_pose = odo.pose.pose
+    
+    def create_waypoint(self, x, y, z, roll, pitch, yaw):
+        waypoint = Pose()
+        waypoint.position.x = x
+        waypoint.position.y = y
+        waypoint.position.z = z
+        quat = euler2quat(math.radians(roll), math.radians(pitch), math.radians(yaw))
+
+        waypoint.orientation.w = quat[0]
+        waypoint.orientation.x = quat[1]
+        waypoint.orientation.y = quat[2]
+        waypoint.orientation.z = quat[3]
+        return waypoint
+    
+    def check_waypoint_param(self, waypoint_parameter):
+        components = waypoint_parameter.split(',')
+        if len(components) != 6:
+            self.logwarn("Invalid spawnpoint '{}'".format(waypoint_parameter))
+            return None
+        waypoint = self.create_waypoint(
+            float(components[0]),
+            float(components[1]),
+            float(components[2]),
+            float(components[3]),
+            float(components[4]),
+            float(components[5])
+        )
+        return waypoint
+
+    def set_waypoints(self):
+        for _waypoint_param in self._waypoint_params:
+            self._waypoints.append(self.check_waypoint_param(_waypoint_param))
+        self.walker_waypoint_ready=True
+        # rospy.logwarn(self._waypoints)
 
     def run_step(self):
         dist=math.sqrt((self._ego_current_pose.position.x-self._current_pose.position.x)**2+(self._ego_current_pose.position.y-self._current_pose.position.y)**2)
-        if 30<dist<40 and self.walker_moved==False:
-            waypoint=Path()
-            pose1=PoseStamped()
-            pose1.pose=self._current_pose
-            pose2=PoseStamped()
-            pose2.pose=self._current_pose
-            pose3=PoseStamped()
-            pose3.pose=self._current_pose
-            pose1.pose.position.x=self._fisrt_waypoint_x
-            pose1.pose.position.y=self._fisrt_waypoint_y
-            pose2.pose.position.x=self._second_waypoint_x
-            pose2.pose.position.y=self._second_waypoint_y
-            pose3.pose.position.x=self._third_waypoint_x
-            pose3.pose.position.y=self._third_waypoint_y
-            waypoint.poses.append(pose1)
-            waypoint.poses.append(pose2)
-            waypoint.poses.append(pose3)
-            self.path_updated(waypoint)
-            self.walker_moved=True
+        # rospy.logwarn('dist: '+str(dist))
+        if 30<dist<40 and self.walker_waypoint_ready==False:
+            self.set_waypoints()
+            # rospy.logwarn('dist: '+str(dist))
+            # waypoints = Path()
+            # for waypoint in self._waypoints:
+            #     waypoints.append(waypoint)
+            # rospy.logwarn(waypoints)
+            # waypoint=Path()
+            # pose1=PoseStamped()
+            # pose1.pose=self._current_pose
+            # pose2=PoseStamped()
+            # pose2.pose=self._current_pose
+            # pose3=PoseStamped()
+            # pose3.pose=self._current_pose
+            # pose1.pose.position.x=self._fisrt_waypoint_x
+            # pose1.pose.position.y=self._fisrt_waypoint_y
+            # pose2.pose.position.x=self._second_waypoint_x
+            # pose2.pose.position.y=self._second_waypoint_y
+            # pose3.pose.position.x=self._third_waypoint_x
+            # pose3.pose.position.y=self._third_waypoint_y
+            # waypoint.poses.append(pose1)
+            # waypoint.poses.append(pose2)
+            # waypoint.poses.append(pose3)
+            # self.path_updated(waypoint)
 
         if self._waypoints:
             control = CarlaWalkerControl()
@@ -151,23 +206,24 @@ class CarlaWalkerAgent(CompatibleNode):
             direction.x = self._waypoints[0].position.x - self._current_pose.position.x
             direction.y = self._waypoints[0].position.y - self._current_pose.position.y
             direction_norm = math.sqrt(direction.x**2 + direction.y**2)
-            rospy.logwarn(len(self._waypoints))
+            walker_target_speed = self._walker_target_speed
+            if len(self._waypoints)==2:
+                walker_target_speed = self._walker_target_speed/5
+            # self.loginfo("next waypoint: {} {}".format(
+            #             self._waypoints[0].position.x, self._waypoints[0].position.y))
             if direction_norm > CarlaWalkerAgent.MIN_DISTANCE:
-                control.speed = self._target_speed
+                control.speed = walker_target_speed
                 control.direction.x = direction.x / direction_norm
                 control.direction.y = direction.y / direction_norm
             else:
                 self._waypoints = self._waypoints[1:]
-                
-                if len(self._waypoints)==2:
-                    self._target_speed=0.1
-                else:
-                    self._target_speed=5.0
+                # rospy.logwarn('pass waypoint')
                 if self._waypoints:
                     self.loginfo("next waypoint: {} {}".format(
                         self._waypoints[0].position.x, self._waypoints[0].position.y))
                 else:
                     self.loginfo("Route finished.")
+                    self.walker_waypoint_ready=True
             self.control_publisher.publish(control)
 
 
@@ -183,7 +239,6 @@ def main(args=None):
 
     try:
         controller = CarlaWalkerAgent()
-
         roscomp.on_shutdown(controller._on_shutdown)
 
         update_timer = controller.new_timer(

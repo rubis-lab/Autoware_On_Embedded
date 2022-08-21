@@ -1,23 +1,20 @@
 <!-- -->
 <launch>
   <arg name="role_name" default="walker"/>
-  <arg name="target_speed" default="0"/>
   <arg name="mode" default="vehicle"/>
-  <arg name="fisrt_waypoint_x" default="205.4"/>
-  <arg name="fisrt_waypoint_y" default="311.1"/>
-  <arg name="second_waypoint_x" default="204.4"/>
-  <arg name="second_waypoint_y" default="311.1"/>
-  <arg name="third_waypoint_x" default="190.4"/>
-  <arg name="third_waypoint_y" default="311.1"/>
+  <arg name="walker_point1" default=""/>
+  <arg name="walker_point2" default=""/>
+  <arg name="walker_point3" default=""/>
+  <arg name="walker_target_speed" default=""/>
+
 
   <node pkg="carla_walker_agent" type="carla_walker_agent.py" name="carla_walker_agent_$(arg role_name)" output="screen">
-    <param name="target_speed" value="$(arg target_speed)" />
     <param name="role_name" value="$(arg role_name)" />
     <param name="mode" value="$(arg mode)" />
-    <param name="fisrt_waypoint_x" value="$(arg fisrt_waypoint_x)" />
-    <param name="fisrt_waypoint_y" value="$(arg fisrt_waypoint_y)" />
-    <param name="second_waypoint_x" value="$(arg second_waypoint_x)" />
-    <param name="second_waypoint_y" value="$(arg second_waypoint_y)" />
+    <param name="walker_point1" value="$(arg walker_point1)"/>
+    <param name="walker_point2" value="$(arg walker_point2)"/>
+    <param name="walker_point3" value="$(arg walker_point3)"/>
+    <param name="walker_target_speed" value="$(arg walker_target_speed)"/>
   </node>
 </launch>
 
