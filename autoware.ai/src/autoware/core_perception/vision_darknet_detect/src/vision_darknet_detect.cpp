@@ -36,7 +36,7 @@
 
 namespace darknet
 {
-    uint32_t Yolo3Detector::get_network_height()
+    uint32_t Yolo3Detector::get_network_height() 
     {
         return darknet_network_->h;
     }
