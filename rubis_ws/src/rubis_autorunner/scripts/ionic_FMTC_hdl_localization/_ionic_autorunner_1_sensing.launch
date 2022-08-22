@@ -9,11 +9,10 @@
   
   <!-- Vector Map Loader -->
 	<node pkg="map_file" type="vector_map_loader" name="vector_map_loader" args="
-	    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/220203_fmtc_red/dtlane.csv 
-	    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/220203_fmtc_red/idx.csv 
-	    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/220203_fmtc_red/lane.csv 
-	    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/220203_fmtc_red/node.csv 
-	    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/220203_fmtc_red/point.csv"/>
+	    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/220805_FMTC_v2/dtlane.csv
+	    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/220805_FMTC_v2/lane.csv 
+	    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/220805_FMTC_v2/node.csv 
+	    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/220805_FMTC_v2/point.csv"/>
 
   <!-- Point Map Loader -->
 	<include file="$(find map_file)/launch/points_map_loader.launch">
