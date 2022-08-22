@@ -35,6 +35,13 @@ Panels:
     SyncSource: Points Map
   - Class: autoware_rviz_debug/DecisionMakerPanel
     Name: DecisionMakerPanel
+  - Class: integrated_viewer/ImageViewerPlugin
+    Image topic: /image_raw
+    Lane topic: -----
+    Name: ImageViewerPlugin
+    Point size: 3
+    Point topic: -----
+    Rect topic: /detection/image_detector/objects
 Preferences:
   PromptSaveOnExit: true
 Toolbars:

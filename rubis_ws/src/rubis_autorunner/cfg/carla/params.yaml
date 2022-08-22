@@ -140,6 +140,7 @@ op_trajectory_evaluator:
   ImageWidth: 1920
   ImageHeight: 1080
   SprintDecisionTime: 9999999.0
+  PedstrianStopImgHeightThreshold: 40
 
 op_behavior_selector:
   task_scheduling_flag: 0
