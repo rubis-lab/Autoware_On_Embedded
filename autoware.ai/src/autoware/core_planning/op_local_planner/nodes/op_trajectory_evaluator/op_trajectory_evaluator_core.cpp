@@ -141,7 +141,7 @@ void TrajectoryEval::UpdatePlanningParams(ros::NodeHandle& _nh)
   _nh.param("/op_trajectory_evaluator/PedestrianRightThreshold", m_PedestrianRightThreshold, 7.0);
   _nh.param("/op_trajectory_evaluator/PedestrianLeftThreshold", m_PedestrianLeftThreshold, 2.0);
   _nh.param("/op_trajectory_evaluator/PedestrianImageDetectionRange", m_PedestrianImageDetectionRange, 0.7);
-  _nh.param("/op_trajectory_evaluator/PedstrianStopImgHeightThreshold", m_pedestrian_stop_img_height_threshold, 120);
+  _nh.param("/op_trajectory_evaluator/PedestrianStopImgHeightThreshold", m_pedestrian_stop_img_height_threshold, 120);
   _nh.param("/op_trajectory_evaluator/ImageWidth", m_ImageWidth, 1920);
   _nh.param("/op_trajectory_evaluator/ImageHeight", m_ImageHeight, 1080);
   _nh.param("/op_trajectory_evaluator/VehicleImageDetectionRange", m_VehicleImageDetectionRange, 0.3);
@@ -390,7 +390,7 @@ void TrajectoryEval::callbackGetPredictedObjects(const autoware_msgs::DetectedOb
       
       // TO ERASE
       // ROS_WARN("object height:%d // thr: %d\n", msg_obj.height, m_pedestrian_stop_img_height_threshold);
-
+      printf("center_x %d \n left: %d \n right %d\n\n\n", image_obj_center_x, image_person_detection_range_left, image_person_detection_range_right);
       if(image_obj_center_x >= image_person_detection_range_left && image_obj_center_x <= image_person_detection_range_right){ 
         double temp_x_distance = 1000;
         if(msg_obj.height >= m_pedestrian_stop_img_height_threshold) temp_x_distance = 10;

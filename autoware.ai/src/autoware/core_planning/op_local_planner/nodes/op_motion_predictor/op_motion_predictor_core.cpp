@@ -353,7 +353,6 @@ void MotionPrediction::callbackGetTrackedObjects(const autoware_msgs::DetectedOb
       m_TrackedObjects.push_back(obj);
     // }
   }
-
   if(bMap)
   {
     if(m_PredictBeh.m_bStepByStep && m_bGoNextStep)
@@ -392,7 +391,9 @@ void MotionPrediction::callbackGetTrackedObjects(const autoware_msgs::DetectedOb
     }
 
     m_PredictedResultsResults.objects.clear();
+
     for(auto it1 = object_msg_list_.begin(); it1 != object_msg_list_.end(); ++it1){
+  
       auto object_msg_entry = *it1;
       for(auto it2 = object_msg_entry.objects.begin(); it2 != object_msg_entry.objects.end(); ++it2){
         auto object_entry = *it2;
