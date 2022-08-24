@@ -86,7 +86,7 @@
 
 #define PREDICT_POSE_THRESHOLD 0.5
 
-#define USING_GPS_THRESHOLD 10
+#define USING_GPS_THRESHOLD 50
 
 #define Wa 0.4
 #define Wb 0.3

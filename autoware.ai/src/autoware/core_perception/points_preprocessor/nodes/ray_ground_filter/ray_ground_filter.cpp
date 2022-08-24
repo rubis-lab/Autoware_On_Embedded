@@ -314,8 +314,9 @@ void RayGroundFilter::RemovePointsUpTo(const pcl::PointCloud<pcl::PointXYZI>::Pt
 #pragma omp for
   for (size_t i = 0; i < in_cloud_ptr->points.size(); i++)
   {
-    if (sqrt(in_cloud_ptr->points[i].x * in_cloud_ptr->points[i].x +
-             in_cloud_ptr->points[i].y * in_cloud_ptr->points[i].y) < in_min_distance)
+    double dis = sqrt(in_cloud_ptr->points[i].x * in_cloud_ptr->points[i].x +
+             in_cloud_ptr->points[i].y * in_cloud_ptr->points[i].y);
+    if (dis < in_min_distance || dis > 35)
     {
       indices.indices.push_back(i);
     }

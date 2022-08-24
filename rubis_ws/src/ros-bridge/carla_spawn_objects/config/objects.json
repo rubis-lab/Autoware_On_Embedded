@@ -39,8 +39,8 @@
                     "type": "sensor.camera.rgb",
                     "id": "rgb_view",
                     "spawn_point": {"x": -4.5, "y": 0.0, "z": 2.8, "roll": 0.0, "pitch": 20.0, "yaw": 0.0},
-                    "image_size_x": 800,
-                    "image_size_y": 600,
+                    "image_size_x": 400,
+                    "image_size_y": 400,
                     "fov": 90.0,
                     "sensor_tick": 0.1,
                     "attached_objects":
@@ -63,15 +63,6 @@
                     "rotation_frequency": 20,
                     "noise_stddev": 0.0,
                     "sensor_tick": 0.1
-                },
-                {
-                    "type": "sensor.other.radar",
-                    "id": "radar_front",
-                    "spawn_point": {"x": 3.0, "y": 0.0, "z": 0.7, "roll": 0.0, "pitch": 0.0, "yaw": 0.0},
-                    "horizontal_fov": 20.0,
-                    "vertical_fov": 10.0,
-                    "points_per_second": 1500,
-                    "range": 100.0
                 },
                 {
                     "type": "sensor.other.gnss",
