@@ -155,9 +155,9 @@ BehaviorStateMachine* ForwardState::GetNextState()
 
   else
   {
-    if(pCParams->iCurrSafeTrajectory == pCParams->iCentralTrajectory
-        && pCParams->iPrevSafeTrajectory != pCParams->iCurrSafeTrajectory)
+    if(pCParams->iCurrSafeTrajectory == pCParams->iCentralTrajectory && pCParams->iPrevSafeTrajectory != pCParams->iCurrSafeTrajectory){
       pCParams->bRePlan = true;
+    }
 
     return FindBehaviorState(this->m_Behavior); // return and reset
   }
@@ -368,8 +368,8 @@ BehaviorStateMachine* ForwardStateII::GetNextState()
       && pCParams->currentStopSignID != pCParams->prevStopSignID)
     return FindBehaviorState(STOP_SIGN_STOP_STATE);
 
-  else if(m_pParams->enableFollowing && pCParams->bFullyBlock)
-    return FindBehaviorState(FOLLOW_STATE);
+  // else if(m_pParams->enableFollowing && pCParams->bFullyBlock)
+  //   return FindBehaviorState(FOLLOW_STATE);
 
   else if(m_pParams->enableSwerving
       && pCParams->distanceToNext <= m_pParams->minDistanceToAvoid

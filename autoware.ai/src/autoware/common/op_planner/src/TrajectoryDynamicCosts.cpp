@@ -230,10 +230,14 @@ TrajectoryCost TrajectoryDynamicCosts::DoOneStepStatic(const vector<vector<WayPo
   for(int ic = 0; ic < m_startTrajIdx; ic++) m_TrajectoryCosts.at(ic).bBlocked = true;
   for(int ic = rollOuts.size() - 1; ic > m_endTrajIdx; ic--) m_TrajectoryCosts.at(ic).bBlocked = true;
 
-  for(unsigned int ic = std::max(currIndex - 1, m_startTrajIdx); ic <= std::min(currIndex + 1, m_endTrajIdx); ic++)
+  // for(unsigned int ic = std::max(currIndex - 1, m_startTrajIdx); ic <= std::min(currIndex + 1, m_endTrajIdx); ic++)
+  for(unsigned int ic = m_startTrajIdx; ic <= m_endTrajIdx; ic++)
   {
     if(!m_TrajectoryCosts.at(ic).bBlocked && m_TrajectoryCosts.at(ic).cost < smallestCost)
     {
+      #ifdef DEBUG_ENABLE
+      std::cout << "smallestIndex is Updated" << std::endl;
+      #endif
       smallestCost = m_TrajectoryCosts.at(ic).cost;
       smallestIndex = ic;
     }
@@ -276,35 +280,36 @@ TrajectoryCost TrajectoryDynamicCosts::DoOneStepStatic(const vector<vector<WayPo
   //   smallestIndex = params.rollOutNumber - 1;
   // }
 
-  if(smallestIndex >= 0 && m_TrajectoryCosts.at(currIndex).bBlocked){
-    int left_block_idx = -1;
+  // if(smallestIndex >= 0 && m_TrajectoryCosts.at(currIndex).bBlocked){
+  //   int left_block_idx = -1;
 
-    for(int ic = currIndex - 1; ic >= m_startTrajIdx; ic--)
-    {
-      if(m_TrajectoryCosts.at(ic).bBlocked){
-        left_block_idx = ic;
-        break;
-      }
-    }
+  //   for(int ic = currIndex - 1; ic >= m_startTrajIdx; ic--)
+  //   {
+  //     if(m_TrajectoryCosts.at(ic).bBlocked){
+  //       left_block_idx = ic;
+  //       break;
+  //     }
+  //   }
 
-    if(left_block_idx != -1 && smallestIndex < left_block_idx){
-      smallestIndex = -1;
-    }
+  //   if(left_block_idx != -1 && smallestIndex < left_block_idx){
+  //     smallestIndex = -1;
+  //   }
 
-    int right_block_idx = -1;
+  //   int right_block_idx = -1;
 
-    for(int ic = currIndex + 1; ic <= m_endTrajIdx; ic++)
-    {
-      if(m_TrajectoryCosts.at(ic).bBlocked){
-        right_block_idx = ic;
-        break;
-      }
-    }
+  //   for(int ic = currIndex + 1; ic <= m_endTrajIdx; ic++)
+  //   {
+  //     if(m_TrajectoryCosts.at(ic).bBlocked){
+  //       right_block_idx = ic;
+  //       break;
+  //     }
+  //   }
 
-    if(right_block_idx != -1 && smallestIndex > right_block_idx){
-      smallestIndex = -1;
-    }
-  }
+  //   if(right_block_idx != -1 && smallestIndex > right_block_idx){
+  //     smallestIndex = -1;
+  //   }
+  // }
+  // Hyundai challenge legacy
 
   if(smallestIndex == -1)
   {

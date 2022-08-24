@@ -1,0 +1,16 @@
+lane_info_list:
+  -
+    id : 1
+    start_idx : 1
+    end_idx : 2
+    left_turn : 0
+    right_turn : 0
+    pose :
+      -
+        x : 124.84
+        y : 146.35
+        z : 0.0
+      -
+        x : 194.32
+        y : 168.26
+        z : 0.0
