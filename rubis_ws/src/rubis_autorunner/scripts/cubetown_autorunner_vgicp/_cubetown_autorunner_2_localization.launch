@@ -28,6 +28,7 @@
     <param name="init_pitch" value="$(arg init_pitch)" />
     <param name="init_yaw" value="$(arg init_yaw)" />
 
+    <param name="base_frame" value="$(arg base_frame)" />
     <param name="resolution" value="$(arg resolution)" />
     <param name="numthreads" value="$(arg numthreads)" />
     <param name="leafsize" value="$(arg leafsize)" />
