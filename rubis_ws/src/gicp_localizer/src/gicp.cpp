@@ -13,11 +13,8 @@ GicpLocalizer::GicpLocalizer(ros::NodeHandle &nh, ros::NodeHandle &private_nh)
     exe_time_pub_ = nh_.advertise<std_msgs::Float32>("exe_time_ms", 10);
     diagnostics_pub_ = nh_.advertise<diagnostic_msgs::DiagnosticArray>("diagnostics", 10);
 
-    // 订阅初始化位姿
     initial_pose_sub_ = nh_.subscribe("initialpose", 100, &GicpLocalizer::callback_init_pose, this);
-    // 订阅点云地图
     map_points_sub_ = nh_.subscribe("points_map", 1, &GicpLocalizer::callback_pointsmap, this);
-    // 订阅lidar点云
     sensor_points_sub_ = nh_.subscribe("filtered_points", 1, &GicpLocalizer::callback_pointcloud, this);
 
     diagnostic_thread_ = std::thread(&GicpLocalizer::timer_diagnostic, this);
@@ -29,12 +26,10 @@ GicpLocalizer::~GicpLocalizer() = default;
 void GicpLocalizer::timer_diagnostic(){
     ros::Rate rate(100);
     while(ros::ok()){
-        // 定义一个diag消息
         diagnostic_msgs::DiagnosticStatus diag_status_msg;
         diag_status_msg.name = "gicp_scan_matcher";
         diag_status_msg.hardware_id = "";
 
-        // 将所有的诊断消息推入状态集合中
         for (const auto & key_value : key_value_stdmap_) {
             diagnostic_msgs::KeyValue key_value_msg;
             key_value_msg.key = key_value.first;
@@ -42,23 +37,19 @@ void GicpLocalizer::timer_diagnostic(){
             diag_status_msg.values.push_back(key_value_msg);
         }
 
-        // 初始化时状态为OK
         diag_status_msg.level = diagnostic_msgs::DiagnosticStatus::OK;
         diag_status_msg.message = "";
         if (key_value_stdmap_.count("state") && key_value_stdmap_["state"] == "Initializing") {
-            // 如果处在初始化阶段的话为警告（WARN），同时记录消息初始化状态
             diag_status_msg.level = diagnostic_msgs::DiagnosticStatus::WARN;
             diag_status_msg.message += "Initializing State. ";
         }
         if (key_value_stdmap_.count("skipping_publish_num") &&
             std::stoi(key_value_stdmap_["skipping_publish_num"]) > 1) {
-            // 如果有跳过发布大于1时，则记为警告
             diag_status_msg.level = diagnostic_msgs::DiagnosticStatus::WARN;
             diag_status_msg.message += "skipping_publish_num > 1. ";
         }
         if (key_value_stdmap_.count("skipping_publish_num") &&
             std::stoi(key_value_stdmap_["skipping_publish_num"]) >= 5) {
-            // 如果跳过的条数大于5（阈值）, 则报错
             diag_status_msg.level = diagnostic_msgs::DiagnosticStatus::ERROR;
             diag_status_msg.message += "skipping_publish_num exceed limit. ";
         }
@@ -66,7 +57,6 @@ void GicpLocalizer::timer_diagnostic(){
         diagnostic_msgs::DiagnosticArray diag_msg;
         diag_msg.header.stamp = ros::Time::now();
         diag_msg.status.push_back(diag_status_msg);
-        // 发布
         diagnostics_pub_.publish(diag_msg);
         rate.sleep();
     }
@@ -122,7 +112,6 @@ void GicpLocalizer::callback_pointcloud(
     // add map mutex
     std::lock_guard<std::mutex> lock(gicp_map_mtx_);
 
-    // 记录该frame的id和timestamp
     const std::string sensor_frame = sensor_points_sensorTF_msg_ptr->header.frame_id;
     const auto sensor_ros_time = sensor_points_sensorTF_msg_ptr->header.stamp;
 
@@ -136,7 +125,6 @@ void GicpLocalizer::callback_pointcloud(
 
     const Eigen::Affine3d base_to_sensor_affine = tf2::transformToEigen(*TF_base_to_sensor_ptr);
     const Eigen::Matrix4f base_to_sensor_matrix = base_to_sensor_affine.matrix().cast<float>();
-    // 将得到的该帧点云转换到当前的tf关系下
     boost::shared_ptr<pcl::PointCloud<pcl::PointXYZ>> sensor_points_baselinkTF_ptr(
             new pcl::PointCloud<pcl::PointXYZ>);
     pcl::transformPointCloud(
@@ -182,12 +170,10 @@ void GicpLocalizer::callback_pointcloud(
     // calculate the delta tf from pre_trans to current_trans
     delta_trans = pre_trans.inverse() * result_pose_matrix;
 
-    // 显示出平移的距离
     Eigen::Vector3f delta_translation = delta_trans.block<3, 1>(0, 3);
     std::cout<<"delta x: "<<delta_translation(0) << " y: "<<delta_translation(1)<<
              " z: "<<delta_translation(2)<<std::endl;
 
-    // 显示出旋转的角度
     Eigen::Matrix3f delta_rotation_matrix = delta_trans.block<3, 3>(0, 0);
     Eigen::Vector3f delta_euler = delta_rotation_matrix.eulerAngles(2,1,0);
     std::cout<<"delta yaw: "<<delta_euler(0) << " pitch: "<<delta_euler(1)<<

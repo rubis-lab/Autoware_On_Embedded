@@ -52,7 +52,6 @@ private:
     ros::Publisher iteration_num_pub_;
     ros::Publisher diagnostics_pub_;
 
-    // 待修改
     // pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ> gicp_;
     fast_gicp::FastGICPSingleThread<pcl::PointXYZ, pcl::PointXYZ> fgicp_st_;
     fast_gicp::FastGICP<pcl::PointXYZ, pcl::PointXYZ> fgicp_mt_;
@@ -73,10 +72,8 @@ private:
     // init guess for gicp
     geometry_msgs::PoseWithCovarianceStamped initial_pose_cov_msg_;
 
-    // 锁 用于匹配时不可被写入
     std::mutex gicp_map_mtx_;
 
-    // vgicp 参数
     double resolution_{};
     float leafsize_{};
     int numThreads_{};
