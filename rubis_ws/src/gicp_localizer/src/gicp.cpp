@@ -82,7 +82,7 @@ void GicpLocalizer::callback_init_pose(
         initial_pose_cov_msg_ = *mapTF_initial_pose_msg_ptr;
     }
 
-    init_pose = false;
+    pose_initialized = false;
 }
 
 void GicpLocalizer::callback_pointsmap(
@@ -141,14 +141,24 @@ void GicpLocalizer::callback_pointcloud(
     }
     // align
     Eigen::Matrix4f initial_pose_matrix;
-    if (!init_pose){
+    if (!pose_initialized){
         Eigen::Affine3d initial_pose_affine;
         tf2::fromMsg(initial_pose_cov_msg_.pose.pose, initial_pose_affine);
         initial_pose_matrix = initial_pose_affine.matrix().cast<float>();
         // for the first time, we don't know the pre_trans, so just use the init_trans,
         // which means, the delta trans for the second time is 0
+
+        if(init_pose.x != 0.0){
+            Eigen::Translation3f init_translation(init_pose.x, init_pose.y, init_pose.z);
+            Eigen::AngleAxisf init_rotation_x(init_pose.roll, Eigen::Vector3f::UnitX());
+            Eigen::AngleAxisf init_rotation_y(init_pose.pitch, Eigen::Vector3f::UnitY());
+            Eigen::AngleAxisf init_rotation_z(init_pose.yaw, Eigen::Vector3f::UnitZ());
+            initial_pose_matrix = (init_translation * init_rotation_z * init_rotation_y * init_rotation_x).matrix();
+            init_pose.x = 0.0;
+        }
+
         pre_trans = initial_pose_matrix;
-        init_pose = true;
+        pose_initialized = true;
     }else
     {
         // use predicted pose as init guess (currently we only impl linear model)
@@ -193,7 +203,7 @@ void GicpLocalizer::callback_pointcloud(
     gicp_pose_pub_.publish(result_pose_stamped_msg);
 
     // publish twist
-    if(!pose_initialized){
+    if(!pose_published){
         previous_ts = sensor_ros_time;
         previous_pose.x = result_pose_msg.position.x;
         previous_pose.y = result_pose_msg.position.y;
@@ -204,7 +214,7 @@ void GicpLocalizer::callback_pointcloud(
         // converted to RPY[-pi : pi]
         tf::Matrix3x3(quat).getRPY(previous_pose.roll, previous_pose.pitch, previous_pose.yaw);
 
-        pose_initialized = true;
+        pose_published = true;
     }
     else{
         struct pose current_pose;
@@ -322,6 +332,13 @@ void GicpLocalizer::init_params(){
     private_nh_.getParam("resolution", resolution_);
     private_nh_.getParam("numthreads", numThreads_);
     private_nh_.getParam("leafsize", leafsize_);
+
+    private_nh_.param("init_x", init_pose.x, 0.0);
+    private_nh_.param("init_y", init_pose.y, 0.0);
+    private_nh_.param("init_z", init_pose.z, 0.0);
+    private_nh_.param("init_roll", init_pose.roll, 0.0);
+    private_nh_.param("init_pitch", init_pose.pitch, 0.0);
+    private_nh_.param("init_yaw", init_pose.yaw, 0.0);
 
     voxelgrid_.setLeafSize(leafsize_, leafsize_, leafsize_);
     vgicp_.setResolution(resolution_);

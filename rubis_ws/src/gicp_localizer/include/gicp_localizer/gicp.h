@@ -75,7 +75,7 @@ private:
 
     Eigen::Matrix4f base_to_sensor_matrix_;
     Eigen::Matrix4f pre_trans, delta_trans;
-    bool init_pose = false;
+    bool pose_initialized = false;
 
     std::string base_frame_;
     std::string map_frame_;
@@ -97,8 +97,9 @@ private:
     std::map<std::string, std::string> key_value_stdmap_;
 
     // for twist
-    bool pose_initialized;
+    bool pose_published = false;
     ros::Time previous_ts;
+    struct pose init_pose;
     struct pose previous_pose;
 
     // function
