@@ -32,7 +32,12 @@ public:
     { 
         createTopicName();  
         if(DEBUG) std::cout<<"topic_name : "<<topic_name<<std::endl;
-        camera_image_pub_ = it_.advertise(topic_name,1);
+
+        /* Dynamic topic name */
+        // camera_image_pub_ = it_.advertise(topic_name,1);
+
+        /* Static topic name */
+        camera_image_pub_ = it_.advertise("/image_raw", 1); 
         cap.open(camera_id);
     }
 
