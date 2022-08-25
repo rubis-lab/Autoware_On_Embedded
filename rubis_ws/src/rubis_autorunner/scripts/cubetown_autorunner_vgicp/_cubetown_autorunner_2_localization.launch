@@ -8,40 +8,24 @@
   <arg name="init_yaw" value="1.57" />
 
   <!-- vel/pose connect -->
-  <arg name="topic_pose_stamped" default="/ndt_pose" />
-  <arg name="topic_twist_stamped" default="/estimate_twist" /> 
+  <arg name="topic_pose_stamped" default="/gicp_pose" />
+  <arg name="topic_twist_stamped" default="/gicp_vel" /> 
   <!-- <arg name="topic_twist_stamped" default="/odom_twist" /> -->
 
   <!-- points downsampler -->
   <include file="$(find points_downsampler)/launch/voxel_grid_filter_params.launch" />
 
-  <!-- ndt matching kalman filter parameters -->
-  <rosparam command="load" file="$(env USER_HOME)/rubis_ws/src/rubis_autorunner/cfg/cubetown_autorunner/kalman_filter.yaml" />
+  <arg name="base_frame" default="base_link" doc="Vehicle reference frame" />
+  <arg name="resolution" default="2.0" doc="The ND voxel grid resolution" />
+  <arg name="numthreads" default="4" doc="vgicp threads num" />
+  <arg name="leafsize" default="0.05" doc="point map downsample leafsize" />
 
-  <!-- ndt_matching --><!-- pcl_generic=0, pcl_anh=1, pcl_anh_gpu=2, pcl_openmp=3 -->
-  <include file="$(find lidar_localizer)/launch/ndt_matching_params.launch">
-    <arg name="method_type" value="0" /> 
-    <arg name="get_height" value="true" /> 
-  </include>
-
-  <!-- ndt config -->
-  <node pkg="rostopic" type="rostopic" name="config_ndt"
-  args="pub /config/ndt autoware_config_msgs/ConfigNDT
-  '{header: {seq: 8, stamp: {secs: 0, nsecs: 0}, frame_id: ''},
-    init_pos_gnss: 0,
-    x: $(arg init_x),
-    y: $(arg init_y),
-    z: $(arg init_z),
-    roll: $(arg init_roll), 
-    pitch: $(arg init_pitch),
-    yaw: $(arg init_yaw),
-    use_predict_pose: 1,
-    error_threshold: 0.01,
-    resolution: 3.0,
-    step_size: 0.5,
-    trans_epsilon: 0.01,
-    max_iterations: 1}
-  '"/>
+  <node pkg="gicp_localizer" type="gicp_localizer_node" name="gicp_localizer_node">
+    <param name="base_frame" value="$(arg base_frame)" />
+    <param name="resolution" value="$(arg resolution)" />
+    <param name="numthreads" value="$(arg numthreads)" />
+    <param name="leafsize" value="$(arg leafsize)" />
+  </node>
 
   <!-- vel_pose_mux -->
   <include file="$(find rubis_pkg)/launch/vel_pose_connect_params.launch">

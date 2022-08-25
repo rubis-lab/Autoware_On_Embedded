@@ -32,6 +32,16 @@
 #include <fast_gicp/gicp/fast_gicp_st.hpp>
 #include <fast_gicp/gicp/fast_vgicp.hpp>
 
+struct pose
+{
+    double x;
+    double y;
+    double z;
+    double roll;
+    double pitch;
+    double yaw;
+};
+
 class GicpLocalizer{
 public:
 
@@ -47,6 +57,7 @@ private:
 
     ros::Publisher sensor_aligned_pose_pub_;
     ros::Publisher gicp_pose_pub_;
+    ros::Publisher gicp_vel_pub_;
     ros::Publisher exe_time_pub_;
     ros::Publisher transform_probability_pub_;
     ros::Publisher iteration_num_pub_;
@@ -85,6 +96,11 @@ private:
     std::thread diagnostic_thread_;
     std::map<std::string, std::string> key_value_stdmap_;
 
+    // for twist
+    bool pose_initialized;
+    ros::Time previous_ts;
+    struct pose previous_pose;
+
     // function
     void init_params();
     void timer_diagnostic();
@@ -101,5 +117,8 @@ private:
     void callback_pointsmap(const sensor_msgs::PointCloud2::ConstPtr & pointcloud2_msg_ptr);
     void callback_init_pose(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr & pose_conv_msg_ptr);
     void callback_pointcloud(const sensor_msgs::PointCloud2::ConstPtr & pointcloud2_msg_ptr);
+
+    double calcDiffForRadian(const double, const double);
+    bool convertPoseIntoRelativeCoordinate(const struct pose target_pose, const struct pose reference_pose);
 
 };// GicpLocalizer Core

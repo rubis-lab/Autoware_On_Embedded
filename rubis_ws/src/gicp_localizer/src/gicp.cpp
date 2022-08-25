@@ -10,12 +10,15 @@ GicpLocalizer::GicpLocalizer(ros::NodeHandle &nh, ros::NodeHandle &private_nh)
 
     sensor_aligned_pose_pub_ = nh_.advertise<sensor_msgs::PointCloud2>("points_aligned", 10);
     gicp_pose_pub_ = nh_.advertise<geometry_msgs::PoseStamped>("gicp_pose", 10);
+    gicp_vel_pub_ = nh_.advertise<geometry_msgs::TwistStamped>("gicp_vel", 10);
     exe_time_pub_ = nh_.advertise<std_msgs::Float32>("exe_time_ms", 10);
     diagnostics_pub_ = nh_.advertise<diagnostic_msgs::DiagnosticArray>("diagnostics", 10);
 
     initial_pose_sub_ = nh_.subscribe("initialpose", 100, &GicpLocalizer::callback_init_pose, this);
     map_points_sub_ = nh_.subscribe("points_map", 1, &GicpLocalizer::callback_pointsmap, this);
     sensor_points_sub_ = nh_.subscribe("filtered_points", 1, &GicpLocalizer::callback_pointcloud, this);
+
+    pose_initialized = false;
 
     diagnostic_thread_ = std::thread(&GicpLocalizer::timer_diagnostic, this);
     diagnostic_thread_.detach();
@@ -180,13 +183,76 @@ void GicpLocalizer::callback_pointcloud(
              " roll: "<<delta_euler(2)<<std::endl;
 
     pre_trans = result_pose_matrix;
-    // publish
+
+    // publish pose
     geometry_msgs::PoseStamped result_pose_stamped_msg;
     result_pose_stamped_msg.header.stamp = sensor_ros_time;
     result_pose_stamped_msg.header.frame_id = map_frame_;
     result_pose_stamped_msg.pose = result_pose_msg;
 
     gicp_pose_pub_.publish(result_pose_stamped_msg);
+
+    // publish twist
+    if(!pose_initialized){
+        previous_ts = sensor_ros_time;
+        previous_pose.x = result_pose_msg.position.x;
+        previous_pose.y = result_pose_msg.position.y;
+        previous_pose.z = result_pose_msg.position.z;
+
+        // get Quaternion
+        tf::Quaternion quat(result_pose_msg.orientation.x, result_pose_msg.orientation.y, result_pose_msg.orientation.z, result_pose_msg.orientation.w);
+        // converted to RPY[-pi : pi]
+        tf::Matrix3x3(quat).getRPY(previous_pose.roll, previous_pose.pitch, previous_pose.yaw);
+
+        pose_initialized = true;
+    }
+    else{
+        struct pose current_pose;
+        geometry_msgs::TwistStamped twist_stamped_msg;
+        result_pose_stamped_msg.header.stamp = sensor_ros_time;
+        result_pose_stamped_msg.header.frame_id = map_frame_;
+
+        current_pose.x = result_pose_msg.position.x;
+        current_pose.y = result_pose_msg.position.y;
+        current_pose.z = result_pose_msg.position.z;
+
+        // get Quaternion
+        tf::Quaternion quat(result_pose_msg.orientation.x, result_pose_msg.orientation.y, result_pose_msg.orientation.z, result_pose_msg.orientation.w);
+        // converted to RPY[-pi : pi]
+        tf::Matrix3x3(quat).getRPY(current_pose.roll, current_pose.pitch, current_pose.yaw);
+
+        double diff_time = (sensor_ros_time - previous_ts).toSec();
+
+        double diff_x = current_pose.x - previous_pose.x;
+        double diff_y = current_pose.y - previous_pose.y;
+        double diff_z = current_pose.z - previous_pose.z;
+
+        double diff_yaw = calcDiffForRadian(current_pose.yaw, previous_pose.yaw);
+        double diff = sqrt(diff_x * diff_x + diff_y * diff_y + diff_z * diff_z);
+
+        if(!convertPoseIntoRelativeCoordinate(current_pose, previous_pose)){
+            diff *= -1;
+        }
+
+        double current_velocity = (diff_time > 0) ? (diff / diff_time) : 0;
+        double angular_velocity = (diff_time > 0) ? (diff_yaw / diff_time) : 0;
+
+        twist_stamped_msg.twist.linear.x = current_velocity;
+        twist_stamped_msg.twist.linear.y = 0.0;
+        twist_stamped_msg.twist.linear.z = 0.0;
+        twist_stamped_msg.twist.angular.x = 0.0;
+        twist_stamped_msg.twist.angular.y = 0.0;
+        twist_stamped_msg.twist.angular.z = angular_velocity;
+
+        previous_pose.x = current_pose.x;
+        previous_pose.y = current_pose.y;
+        previous_pose.z = current_pose.z;
+        previous_pose.roll = current_pose.roll;
+        previous_pose.pitch = current_pose.pitch;
+        previous_pose.yaw = current_pose.yaw;
+
+        gicp_vel_pub_.publish(twist_stamped_msg);
+    }
 
     // publish tf(map frame to base frame)
     publish_tf(map_frame_, base_frame_, result_pose_stamped_msg);
@@ -209,6 +275,40 @@ void GicpLocalizer::callback_pointcloud(
     std::cout << "------------------------------------------------" << std::endl;
     std::cout << "align_time: " << align_time << "ms" << std::endl;
     std::cout << "exe_time: " << exe_time << "ms" << std::endl;
+}
+
+double GicpLocalizer::calcDiffForRadian(const double lhs_rad, const double rhs_rad)
+{
+  double diff_rad = lhs_rad - rhs_rad;
+  if (diff_rad >= M_PI)
+    diff_rad = diff_rad - 2 * M_PI;
+  else if (diff_rad < -M_PI)
+    diff_rad = diff_rad + 2 * M_PI;
+  return diff_rad;
+}
+
+bool GicpLocalizer::convertPoseIntoRelativeCoordinate(const struct pose target_pose, const struct pose reference_pose)
+{
+    tf::Quaternion target_q;
+    target_q.setRPY(target_pose.roll, target_pose.pitch, target_pose.yaw);
+    tf::Vector3 target_v(target_pose.x, target_pose.y, target_pose.z);
+    tf::Transform target_tf(target_q, target_v);
+
+    tf::Quaternion reference_q;
+    reference_q.setRPY(reference_pose.roll, reference_pose.pitch, reference_pose.yaw);
+    tf::Vector3 reference_v(reference_pose.x, reference_pose.y, reference_pose.z);
+    tf::Transform reference_tf(reference_q, reference_v);
+
+    tf::Transform trans_target_tf = reference_tf.inverse() * target_tf;
+
+    pose trans_target_pose;
+    trans_target_pose.x = trans_target_tf.getOrigin().getX();
+    trans_target_pose.y = trans_target_tf.getOrigin().getY();
+    trans_target_pose.z = trans_target_tf.getOrigin().getZ();
+    tf::Matrix3x3 tmp_m(trans_target_tf.getRotation());
+    tmp_m.getRPY(trans_target_pose.roll, trans_target_pose.pitch, trans_target_pose.yaw);
+
+    return trans_target_pose.x >= 0;
 }
 
 void GicpLocalizer::init_params(){
