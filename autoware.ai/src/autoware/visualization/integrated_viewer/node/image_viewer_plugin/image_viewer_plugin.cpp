@@ -1,10 +1,7 @@
 #include <ros/ros.h>
-#include <opencv/cv.h>
-#include <opencv/highgui.h>
-
-#if (CV_MAJOR_VERSION == 3)
+#include <opencv2/opencv.hpp>
+#include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgcodecs/imgcodecs.hpp>
-#endif
 
 #include <QString>
 #include <QImage>
