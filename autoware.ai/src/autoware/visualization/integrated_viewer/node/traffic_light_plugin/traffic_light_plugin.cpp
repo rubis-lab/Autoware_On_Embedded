@@ -83,7 +83,7 @@ namespace integrated_viewer
                cv::Point(DEFAULT_WINDOW_SIZE/2, DEFAULT_WINDOW_SIZE/2),
                DEFAULT_RADIUS,
                info.view_color,
-               CV_FILLED);      // draw circle
+               cv::FILLED);      // draw circle
 
     viewed_image_ = convert_image::CvMatToQPixmap(circle_mat);
 

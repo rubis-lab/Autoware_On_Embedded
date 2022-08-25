@@ -65,7 +65,7 @@ namespace integrated_viewer
                       cv::Point(x - minus_offset, y - minus_offset),
                       cv::Point(x + plus_offset, y + plus_offset),
                       CV_RGB(red, green, blue),
-                      CV_FILLED);
+                      cv::FILLED);
       }
     }
 

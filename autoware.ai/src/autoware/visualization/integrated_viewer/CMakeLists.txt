@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8.7)
 project(integrated_viewer)
 
+find_package(OpenCV REQUIRED)
+
 find_package(autoware_build_flags REQUIRED)
 find_package(catkin REQUIRED COMPONENTS
   autoware_msgs
@@ -103,6 +105,7 @@ set_target_properties(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
   ${QT_LIBRARIES}
   ${catkin_LIBRARIES}
+  ${OpenCV_LIBS}
 )
 
 add_dependencies(${PROJECT_NAME}
