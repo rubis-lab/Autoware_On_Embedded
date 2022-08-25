@@ -4,15 +4,17 @@
   <!-- <param name="/use_sim_time" value="true" /> -->
 
   <arg name="input_sensor_points_topic" default="/filtered_points" doc="Sensor points topic"/>
-  <arg name="input_initial_pose_topic" default="/ekf_pose_with_covariance" doc="Initial position topic to align" />
+  <arg name="input_initial_pose_topic" default="/initialpose" doc="Initial position topic to align" />
   <arg name="input_map_points_topic" default="/points_map" doc="Map points topic" />
   <arg name="output_pose_topic" default="gicp_pose" doc="Estimated self position" />
   <arg name="output_pose_with_covariance_topic" default="gicp_pose_with_covariance" doc="Estimated self position with covariance" />
   <arg name="output_diagnostics_topic" default="diagnostics" doc="Diagnostic topic" />
 
-  <include file="$(find gicp_localizer)/launch/static_tf.launch" />
-  <include file="$(find gicp_localizer)/launch/map_loader.launch" />
-  <include file="$(find gicp_localizer)/launch/points_downsample.launch" />
+  <!-- <include file="$(find gicp_localizer)/launch/static_tf.launch" /> -->
+  <!-- <include file="$(find gicp_localizer)/launch/map_loader.launch" /> -->
+  <!-- <include file="$(find gicp_localizer)/launch/points_downsample.launch" /> -->
+
+  <include file="$(find points_downsampler)/launch/voxel_grid_filter_params.launch" />
 
   <!-- tf -->
   <arg name="base_frame" default="base_link" doc="Vehicle reference frame" />
@@ -31,7 +33,5 @@
     <param name="numthreads" value="$(arg numthreads)" />
     <param name="leafsize" value="$(arg leafsize)" />
   </node>
-
-  <include file="$(find gicp_localizer)/launch/lexus.launch" />
 
 </launch>

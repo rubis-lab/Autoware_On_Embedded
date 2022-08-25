@@ -9,23 +9,10 @@
     <arg name="y" default="0.0" />
     <arg name="z" default="0.0" />
 
-
-    <!-- <arg name="roll" default="1.570795" />
-    <arg name="pitch" default="0.0" />
-    <arg name="yaw" default="1.570795" />
-    <arg name="x" default="0.0" />
-    <arg name="y" default="0.0" />
-    <arg name="z" default="0.0" /> -->
-
-    <!--- Run Rviz-->
-    <node pkg="rviz" type="rviz" name="rviz" args="-d $(find gicp_localizer)/cfgs/rock-auto.rviz" />
-
     <!--- MapLoader -->    
     <arg name="pcd_path"  default="$(find gicp_localizer)/map/siat.pcd"/>
-    <!-- <arg name="pcd_path"  default="/media/rdcas/dataset/map_result/kaist02.pcd"/> -->
     
     <arg name="map_topic" default="/points_map"/>
-
 
     <node pkg="gicp_localizer" type="map_loader"    name="map_loader"    output="screen">
         <param name="pcd_path" value="$(arg pcd_path)"/>
