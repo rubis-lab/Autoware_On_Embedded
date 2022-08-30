@@ -34,10 +34,10 @@
   <node pkg="tf" type="static_transform_publisher" name="lidar_to_camera" args="0.029 -0.574 -1.820 4.712 0.009 -1.883 velodyne camera 10" />
 
   <!-- gnss localizer -->
-  <!-- <arg name="plane" default="0"/>
+  <arg name="plane" default="0"/>
   <node pkg="rubis_pkg" type="gnss_localizer" name="gnss_localizer" output="screen">
     <param name="plane" value="$(arg plane)"/>
-  </node> -->
+  </node>
 
 </launch>
 

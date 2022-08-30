@@ -15,18 +15,22 @@
   <!-- points downsampler -->
   <include file="$(find points_downsampler)/launch/voxel_grid_filter_params.launch" />
 
+  <arg name="enable_gnss_backup" default="true" /> 
+
   <arg name="base_frame" default="base_link" doc="Vehicle reference frame" />
   <arg name="resolution" default="2.0" doc="The ND voxel grid resolution" />
   <arg name="numthreads" default="4" doc="vgicp threads num" />
   <arg name="leafsize" default="0.05" doc="point map downsample leafsize" />
 
-  <node pkg="gicp_localizer" type="gicp_localizer_node" name="gicp_localizer_node">
+  <node pkg="gicp_localizer" type="gicp_localizer_node" name="gicp_localizer_node" output="screen">
     <param name="init_x" value="$(arg init_x)" />
     <param name="init_y" value="$(arg init_y)" />
     <param name="init_z" value="$(arg init_z)" />
     <param name="init_roll" value="$(arg init_roll)" />
     <param name="init_pitch" value="$(arg init_pitch)" />
     <param name="init_yaw" value="$(arg init_yaw)" />
+
+    <param name="enable_gnss_backup" value="$(arg enable_gnss_backup)" />
 
     <param name="base_frame" value="$(arg base_frame)" />
     <param name="resolution" value="$(arg resolution)" />

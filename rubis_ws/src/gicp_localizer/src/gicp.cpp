@@ -18,6 +18,8 @@ GicpLocalizer::GicpLocalizer(ros::NodeHandle &nh, ros::NodeHandle &private_nh)
     map_points_sub_ = nh_.subscribe("points_map", 1, &GicpLocalizer::callback_pointsmap, this);
     sensor_points_sub_ = nh_.subscribe("filtered_points", 1, &GicpLocalizer::callback_pointcloud, this);
 
+    gnss_pose_sub_ = nh.subscribe("/gnss_pose", 8, &GicpLocalizer::callback_gnss_pose, this);
+
     pose_initialized = false;
 
     diagnostic_thread_ = std::thread(&GicpLocalizer::timer_diagnostic, this);
@@ -63,6 +65,20 @@ void GicpLocalizer::timer_diagnostic(){
         diagnostics_pub_.publish(diag_msg);
         rate.sleep();
     }
+}
+
+void GicpLocalizer::callback_gnss_pose(const geometry_msgs::PoseStamped::ConstPtr & gnss_pose_msg_ptr){
+    gnss_pose.x = gnss_pose_msg_ptr->pose.position.x;
+    gnss_pose.y = gnss_pose_msg_ptr->pose.position.y;
+    gnss_pose.z = gnss_pose_msg_ptr->pose.position.z;
+
+    // Use orientation info not from IMU, but previous success pose
+
+    // tf::Quaternion quat(gnss_pose_msg_ptr->pose.orientation.x,
+    //     gnss_pose_msg_ptr->pose.orientation.y,
+    //     gnss_pose_msg_ptr->pose.orientation.z,
+    //     gnss_pose_msg_ptr->pose.orientation.w);
+    // tf::Matrix3x3(quat).getRPY(gnss_pose.roll, gnss_pose.pitch, gnss_pose.yaw);
 }
 
 void GicpLocalizer::callback_init_pose(
@@ -160,7 +176,19 @@ void GicpLocalizer::callback_pointcloud(
 
         pre_trans = initial_pose_matrix;
         pose_initialized = true;
-    }else
+    }
+    else if(should_backup){
+        std::cout << "Backup by gnss" << std::endl;
+        Eigen::Translation3f init_translation(gnss_pose.x, gnss_pose.y, gnss_pose.z);
+        Eigen::AngleAxisf init_rotation_x(gnss_pose.roll, Eigen::Vector3f::UnitX());
+        Eigen::AngleAxisf init_rotation_y(gnss_pose.pitch, Eigen::Vector3f::UnitY());
+        Eigen::AngleAxisf init_rotation_z(gnss_pose.yaw, Eigen::Vector3f::UnitZ());
+        initial_pose_matrix = (init_translation * init_rotation_z * init_rotation_y * init_rotation_x).matrix();
+
+        pre_trans = initial_pose_matrix;
+        should_backup = false;
+    }
+    else
     {
         // use predicted pose as init guess (currently we only impl linear model)
         initial_pose_matrix = pre_trans * delta_trans;
@@ -210,9 +238,7 @@ void GicpLocalizer::callback_pointcloud(
         previous_pose.y = result_pose_msg.position.y;
         previous_pose.z = result_pose_msg.position.z;
 
-        // get Quaternion
         tf::Quaternion quat(result_pose_msg.orientation.x, result_pose_msg.orientation.y, result_pose_msg.orientation.z, result_pose_msg.orientation.w);
-        // converted to RPY[-pi : pi]
         tf::Matrix3x3(quat).getRPY(previous_pose.roll, previous_pose.pitch, previous_pose.yaw);
 
         pose_published = true;
@@ -255,12 +281,27 @@ void GicpLocalizer::callback_pointcloud(
         twist_stamped_msg.twist.angular.y = 0.0;
         twist_stamped_msg.twist.angular.z = angular_velocity;
 
-        previous_pose.x = current_pose.x;
-        previous_pose.y = current_pose.y;
-        previous_pose.z = current_pose.z;
-        previous_pose.roll = current_pose.roll;
-        previous_pose.pitch = current_pose.pitch;
-        previous_pose.yaw = current_pose.yaw;
+        // Save previous angular info for backup
+        double gnss_gicp_diff = (current_pose.x - gnss_pose.x) * (current_pose.x - gnss_pose.x) + (current_pose.y - gnss_pose.y) * (current_pose.y - gnss_pose.y);
+
+        if(enable_gnss_backup_ && gnss_gicp_diff > 5.0){
+            previous_pose.x = gnss_pose.x;
+            previous_pose.y = gnss_pose.y;
+            previous_pose.z = gnss_pose.z;
+            should_backup = true;
+        }
+        else{
+            previous_pose.x = current_pose.x;
+            previous_pose.y = current_pose.y;
+            previous_pose.z = current_pose.z;
+            previous_pose.roll = current_pose.roll;
+            previous_pose.pitch = current_pose.pitch;
+            previous_pose.yaw = current_pose.yaw;
+
+            gnss_pose.roll = current_pose.roll;
+            gnss_pose.pitch = current_pose.pitch;
+            gnss_pose.yaw = current_pose.yaw;
+        }
 
         gicp_vel_pub_.publish(twist_stamped_msg);
     }
@@ -341,6 +382,8 @@ void GicpLocalizer::init_params(){
     private_nh_.param("init_roll", init_pose.roll, 0.0);
     private_nh_.param("init_pitch", init_pose.pitch, 0.0);
     private_nh_.param("init_yaw", init_pose.yaw, 0.0);
+
+    private_nh_.param("enable_gnss_backup", enable_gnss_backup_, false);
 
     voxelgrid_.setLeafSize(leafsize_, leafsize_, leafsize_);
     vgicp_.setResolution(resolution_);
