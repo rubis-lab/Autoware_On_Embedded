@@ -10,6 +10,7 @@
 
 #include <diagnostic_msgs/DiagnosticArray.h>
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
+#include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/TwistStamped.h>
 #include <nav_msgs/Odometry.h>
 #include <sensor_msgs/PointCloud2.h>
@@ -31,6 +32,8 @@
 #include <fast_gicp/gicp/fast_gicp.hpp>
 #include <fast_gicp/gicp/fast_gicp_st.hpp>
 #include <fast_gicp/gicp/fast_vgicp.hpp>
+
+// #define DEBUG_ENABLE
 
 struct pose
 {
@@ -54,6 +57,7 @@ private:
     ros::Subscriber initial_pose_sub_;
     ros::Subscriber map_points_sub_;
     ros::Subscriber sensor_points_sub_;
+    ros::Subscriber gnss_pose_sub_;
 
     ros::Publisher sensor_aligned_pose_pub_;
     ros::Publisher gicp_pose_pub_;
@@ -79,6 +83,8 @@ private:
 
     std::string base_frame_;
     std::string map_frame_;
+    std::string sensor_frame_;
+    bool enable_gnss_backup_ = false;
 
     // init guess for gicp
     geometry_msgs::PoseWithCovarianceStamped initial_pose_cov_msg_;
@@ -98,9 +104,11 @@ private:
 
     // for twist
     bool pose_published = false;
+    bool should_backup = false;
     ros::Time previous_ts;
     struct pose init_pose;
     struct pose previous_pose;
+    struct pose gnss_pose;
 
     // function
     void init_params();
@@ -118,6 +126,7 @@ private:
     void callback_pointsmap(const sensor_msgs::PointCloud2::ConstPtr & pointcloud2_msg_ptr);
     void callback_init_pose(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr & pose_conv_msg_ptr);
     void callback_pointcloud(const sensor_msgs::PointCloud2::ConstPtr & pointcloud2_msg_ptr);
+    void callback_gnss_pose(const geometry_msgs::PoseStamped::ConstPtr & gnss_pose_msg_ptr);
 
     double calcDiffForRadian(const double, const double);
     bool convertPoseIntoRelativeCoordinate(const struct pose target_pose, const struct pose reference_pose);

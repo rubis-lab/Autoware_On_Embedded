@@ -5,15 +5,14 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Global Options1
-        - /Grid1
-        - /Map1
+        - /System1/TF1
+        - /System1/TF1/Frames1
         - /Map1/Points Map1
         - /Sensing1/Points Raw1/Status1
         - /Perception1
         - /Perception1/Tracked Objects1
-        - /Planning1
       Splitter Ratio: 0.4564755856990814
-    Tree Height: 1163
+    Tree Height: 548
   - Class: rviz/Selection
     Name: Selection
   - Class: rviz/Tool Properties
@@ -73,20 +72,22 @@ Visualization Manager:
           Enabled: true
           Frame Timeout: 15
           Frames:
-            All Enabled: true
+            All Enabled: false
             base_link:
               Value: true
             camera:
               Value: true
             ego_vehicle:
               Value: true
+            ego_vehicle/collision:
+              Value: true
             ego_vehicle/gnss:
               Value: true
             ego_vehicle/imu:
               Value: true
-            ego_vehicle/lidar:
+            ego_vehicle/lane_invasion:
               Value: true
-            ego_vehicle/radar_front:
+            ego_vehicle/lidar:
               Value: true
             ego_vehicle/rgb_front:
               Value: true
@@ -100,7 +101,13 @@ Visualization Manager:
               Value: true
             obstacle:
               Value: true
+            obstacle/collision:
+              Value: true
             velodyne:
+              Value: true
+            walker:
+              Value: true
+            walker/collision:
               Value: true
             world:
               Value: true
@@ -112,19 +119,21 @@ Visualization Manager:
           Tree:
             world:
               map:
-                base_link:
-                  {}
                 ego_vehicle:
+                  base_link:
+                    {}
+                  ego_vehicle/collision:
+                    {}
                   ego_vehicle/gnss:
                     gps:
                       {}
                   ego_vehicle/imu:
                     {}
+                  ego_vehicle/lane_invasion:
+                    {}
                   ego_vehicle/lidar:
                     velodyne:
                       {}
-                  ego_vehicle/radar_front:
-                    {}
                   ego_vehicle/rgb_front:
                     camera:
                       {}
@@ -134,6 +143,9 @@ Visualization Manager:
                   {}
                 obstacle:
                   {}
+                walker:
+                  walker/collision:
+                    {}
           Update Interval: 0
           Value: true
         - Alpha: 1
@@ -355,7 +367,9 @@ Visualization Manager:
           Enabled: true
           Invert Rainbow: false
           Max Color: 255; 255; 255
+          Max Intensity: 4096
           Min Color: 0; 0; 0
+          Min Intensity: 0
           Name: Points Map
           Position Transformer: XYZ
           Queue Size: 10
@@ -392,10 +406,12 @@ Visualization Manager:
           Color: 255; 255; 255
           Color Transformer: Intensity
           Decay Time: 0
-          Enabled: true
+          Enabled: false
           Invert Rainbow: false
           Max Color: 255; 255; 255
+          Max Intensity: 0.9782063364982605
           Min Color: 0; 0; 0
+          Min Intensity: 0.5498073101043701
           Name: Points Raw
           Position Transformer: XYZ
           Queue Size: 10
@@ -407,7 +423,7 @@ Visualization Manager:
           Unreliable: false
           Use Fixed Frame: true
           Use rainbow: true
-          Value: true
+          Value: false
         - Alpha: 0.5
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
@@ -420,10 +436,12 @@ Visualization Manager:
           Color: 255; 0; 0
           Color Transformer: FlatColor
           Decay Time: 0
-          Enabled: true
+          Enabled: false
           Invert Rainbow: false
           Max Color: 255; 255; 255
+          Max Intensity: 4096
           Min Color: 0; 0; 0
+          Min Intensity: 0
           Name: Points No Ground
           Position Transformer: XYZ
           Queue Size: 10
@@ -432,6 +450,36 @@ Visualization Manager:
           Size (m): 0.009999999776482582
           Style: Points
           Topic: /points_no_ground
+          Unreliable: false
+          Use Fixed Frame: true
+          Use rainbow: true
+          Value: false
+        - Alpha: 1
+          Autocompute Intensity Bounds: true
+          Autocompute Value Bounds:
+            Max Value: 10
+            Min Value: -10
+            Value: true
+          Axis: Z
+          Channel Name: intensity
+          Class: rviz/PointCloud2
+          Color: 255; 255; 255
+          Color Transformer: Intensity
+          Decay Time: 0
+          Enabled: true
+          Invert Rainbow: false
+          Max Color: 255; 255; 255
+          Max Intensity: 4096
+          Min Color: 0; 0; 0
+          Min Intensity: 0
+          Name: Aligned Point
+          Position Transformer: XYZ
+          Queue Size: 10
+          Selectable: true
+          Size (Pixels): 3
+          Size (m): 0.5
+          Style: Points
+          Topic: /points_aligned
           Unreliable: false
           Use Fixed Frame: true
           Use rainbow: true
@@ -504,7 +552,9 @@ Visualization Manager:
           Enabled: true
           Invert Rainbow: false
           Max Color: 255; 255; 255
+          Max Intensity: 4096
           Min Color: 0; 0; 0
+          Min Intensity: 0
           Name: Clustered Points
           Position Transformer: XYZ
           Queue Size: 10
@@ -629,7 +679,7 @@ Visualization Manager:
           Marker Topic: /trajectory_circle_mark
           Name: Pure Pursuit Trajectory
           Namespaces:
-            {}
+            trajectory_circle_marker: true
           Queue Size: 100
           Value: true
         - Class: rviz/Marker
@@ -637,7 +687,7 @@ Visualization Manager:
           Marker Topic: /next_target_mark
           Name: Pure Pursuit Target
           Namespaces:
-            {}
+            next_target_marker: true
           Queue Size: 100
           Value: true
         - Class: rviz/Marker
@@ -695,21 +745,23 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 12.042444229125977
+      Scale: 6.501771926879883
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz)
-      X: 261.1754455566406
-      Y: 213.26614379882812
+      X: 260.38592529296875
+      Y: 191.08261108398438
     Saved: ~
 Window Geometry:
   DecisionMakerPanel:
     collapsed: false
   Displays:
-    collapsed: true
+    collapsed: false
   Height: 1412
-  Hide Left Dock: true
+  Hide Left Dock: false
   Hide Right Dock: true
-  QMainWindow State: 000000ff00000000fd0000000400000000000001f0000004c8fc020000000ffb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afc0000003d000004c80000000000fffffffa000000000100000003fb0000000a0049006d0061006700650000000000ffffffff0000000000000000fb0000000c00430061006d0065007200610000000000ffffffff0000000000000000fb000000100044006900730070006c0061007900730000000000000001360000015600fffffffb0000000a0049006d006100670065010000028e000000d20000000000000000fb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb000000120049006d006100670065005f0072006100770000000000ffffffff0000000000000000fb0000000c00430061006d006500720061000000024e000001710000000000000000fb000000120049006d00610067006500200052006100770100000421000000160000000000000000fb0000000a0049006d00610067006501000002f4000000cb0000000000000000fb0000000a0049006d006100670065010000056c0000026c0000000000000000fb00000024004400650063006900730069006f006e004d0061006b0065007200500061006e0065006c00000002110000018f0000018a00ffffff0000000100000125000004c8fc0200000003fb0000000a00560069006500770073000000003d000004c8000000a400fffffffb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000001200530065006c0065006300740069006f006e010000025a000000b20000000000000000000000020000073f000000a8fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000005000000005cfc0100000002fb0000000800540069006d0065010000000000000500000002eb00fffffffb0000000800540069006d0065010000000000000450000000000000000000000500000004c800000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  ImageViewerPlugin:
+    collapsed: false
+  QMainWindow State: 000000ff00000000fd0000000400000000000002bc000004c8fc0200000010fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afc0000003d00000261000000c900fffffffa000000020100000003fb0000000a0049006d0061006700650000000000ffffffff0000000000000000fb0000000c00430061006d0065007200610000000000ffffffff0000000000000000fb000000100044006900730070006c0061007900730100000000000001360000015600fffffffb0000000a0049006d006100670065010000028e000000d20000000000000000fb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb000000120049006d006100670065005f0072006100770000000000ffffffff0000000000000000fb0000000c00430061006d006500720061000000024e000001710000000000000000fb000000120049006d00610067006500200052006100770100000421000000160000000000000000fb0000000a0049006d00610067006501000002f4000000cb0000000000000000fb0000000a0049006d006100670065010000056c0000026c0000000000000000fb00000024004400650063006900730069006f006e004d0061006b0065007200500061006e0065006c00000002110000018f0000006e00fffffffb000000220049006d0061006700650056006900650077006500720050006c007500670069006e01000002a4000002610000008400ffffff0000000100000125000004c8fc0200000003fb0000000a00560069006500770073000000003d000004c8000000a400fffffffb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000001200530065006c0065006300740069006f006e010000025a000000b20000000000000000000000020000073f000000a8fc0100000001fb0000000a00560069006500770073030000004e00000080000002e1000001970000000300000a000000005cfc0100000002fb0000000800540069006d0065010000000000000a00000002eb00fffffffb0000000800540069006d006501000000000000045000000000000000000000073e000004c800000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Time:
@@ -718,6 +770,6 @@ Window Geometry:
     collapsed: false
   Views:
     collapsed: true
-  Width: 1280
-  X: 3840
+  Width: 2560
+  X: 2560
   Y: 0

@@ -1,5 +1,5 @@
 <launch>
-  <!-- cubetown -->
+  <!--TODO: Set LidAR Inital Pose-->
   <arg name="init_x" value="57.1" />
   <arg name="init_y" value="1.38" />
   <arg name="init_z" value="0.48" />
@@ -37,7 +37,7 @@
     <param name="numthreads" value="$(arg numthreads)" />
     <param name="leafsize" value="$(arg leafsize)" />
   </node>
-
+  
   <!-- vel_pose_mux -->
   <include file="$(find rubis_pkg)/launch/vel_pose_connect_params.launch">
     <arg name="topic_pose_stamped" value="$(arg topic_pose_stamped)" />
