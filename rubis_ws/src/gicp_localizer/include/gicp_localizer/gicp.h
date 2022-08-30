@@ -79,6 +79,7 @@ private:
 
     std::string base_frame_;
     std::string map_frame_;
+    std::string sensor_frame_;
 
     // init guess for gicp
     geometry_msgs::PoseWithCovarianceStamped initial_pose_cov_msg_;

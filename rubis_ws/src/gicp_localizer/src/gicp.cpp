@@ -115,7 +115,7 @@ void GicpLocalizer::callback_pointcloud(
     // add map mutex
     std::lock_guard<std::mutex> lock(gicp_map_mtx_);
 
-    const std::string sensor_frame = sensor_points_sensorTF_msg_ptr->header.frame_id;
+    // const std::string sensor_frame = sensor_points_sensorTF_msg_ptr->header.frame_id;
     const auto sensor_ros_time = sensor_points_sensorTF_msg_ptr->header.stamp;
 
     boost::shared_ptr<pcl::PointCloud<pcl::PointXYZ>> sensor_points_sensorTF_ptr(
@@ -124,7 +124,8 @@ void GicpLocalizer::callback_pointcloud(
     pcl::fromROSMsg(*sensor_points_sensorTF_msg_ptr, *sensor_points_sensorTF_ptr);
     // get TF base to sensor
     geometry_msgs::TransformStamped::Ptr TF_base_to_sensor_ptr(new geometry_msgs::TransformStamped);
-    get_transform(base_frame_, sensor_frame, TF_base_to_sensor_ptr);
+    // get_transform(base_frame_, sensor_frame, TF_base_to_sensor_ptr);
+    get_transform(base_frame_, sensor_frame_, TF_base_to_sensor_ptr);
 
     const Eigen::Affine3d base_to_sensor_affine = tf2::transformToEigen(*TF_base_to_sensor_ptr);
     const Eigen::Matrix4f base_to_sensor_matrix = base_to_sensor_affine.matrix().cast<float>();
@@ -322,7 +323,8 @@ bool GicpLocalizer::convertPoseIntoRelativeCoordinate(const struct pose target_p
 }
 
 void GicpLocalizer::init_params(){
-    private_nh_.getParam("base_frame", base_frame_);
+    private_nh_.param("base_frame", base_frame_, std::string("base_link"));
+    private_nh_.param("sensor_frame", sensor_frame_, std::string("velodyne"));
     ROS_INFO("base_frame_id: %s", base_frame_.c_str());
 
     leafsize_ = 0.1;
