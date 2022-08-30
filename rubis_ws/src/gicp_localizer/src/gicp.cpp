@@ -178,7 +178,7 @@ void GicpLocalizer::callback_pointcloud(
         pose_initialized = true;
     }
     else if(should_backup){
-        std::cout << "Backup by gnss" << std::endl;
+        std::cout << "[GICP Localizer]Backup by gnss" << std::endl;
         Eigen::Translation3f init_translation(gnss_pose.x, gnss_pose.y, gnss_pose.z);
         Eigen::AngleAxisf init_rotation_x(gnss_pose.roll, Eigen::Vector3f::UnitX());
         Eigen::AngleAxisf init_rotation_y(gnss_pose.pitch, Eigen::Vector3f::UnitY());
@@ -213,13 +213,17 @@ void GicpLocalizer::callback_pointcloud(
     delta_trans = pre_trans.inverse() * result_pose_matrix;
 
     Eigen::Vector3f delta_translation = delta_trans.block<3, 1>(0, 3);
+
+    #ifdef DEBUG_ENABLE
     std::cout<<"delta x: "<<delta_translation(0) << " y: "<<delta_translation(1)<<
              " z: "<<delta_translation(2)<<std::endl;
+    
+    std::cout<<"delta yaw: "<<delta_euler(0) << " pitch: "<<delta_euler(1)<<
+             " roll: "<<delta_euler(2)<<std::endl;
+    #endif
 
     Eigen::Matrix3f delta_rotation_matrix = delta_trans.block<3, 3>(0, 0);
     Eigen::Vector3f delta_euler = delta_rotation_matrix.eulerAngles(2,1,0);
-    std::cout<<"delta yaw: "<<delta_euler(0) << " pitch: "<<delta_euler(1)<<
-             " roll: "<<delta_euler(2)<<std::endl;
 
     pre_trans = result_pose_matrix;
 
@@ -240,6 +244,10 @@ void GicpLocalizer::callback_pointcloud(
 
         tf::Quaternion quat(result_pose_msg.orientation.x, result_pose_msg.orientation.y, result_pose_msg.orientation.z, result_pose_msg.orientation.w);
         tf::Matrix3x3(quat).getRPY(previous_pose.roll, previous_pose.pitch, previous_pose.yaw);
+
+        gnss_pose.roll = previous_pose.roll;
+        gnss_pose.pitch = previous_pose.pitch;
+        gnss_pose.yaw = previous_pose.yaw;
 
         pose_published = true;
     }
@@ -324,9 +332,11 @@ void GicpLocalizer::callback_pointcloud(
     exe_time_pub_.publish(exe_time_msg);
 
     key_value_stdmap_["seq"] = std::to_string(sensor_points_sensorTF_msg_ptr->header.seq);
+    #ifdef DEBUG_ENABLE
     std::cout << "------------------------------------------------" << std::endl;
     std::cout << "align_time: " << align_time << "ms" << std::endl;
     std::cout << "exe_time: " << exe_time << "ms" << std::endl;
+    #endif
 }
 
 double GicpLocalizer::calcDiffForRadian(const double lhs_rad, const double rhs_rad)

@@ -33,7 +33,7 @@
 #include <fast_gicp/gicp/fast_gicp_st.hpp>
 #include <fast_gicp/gicp/fast_vgicp.hpp>
 
-#define DEBUG_ENABLE
+// #define DEBUG_ENABLE
 
 struct pose
 {
