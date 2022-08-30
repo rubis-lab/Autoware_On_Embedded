@@ -499,6 +499,7 @@ void GicpLocalizer::publish_tf(
 
     tf2::Quaternion tf_quaternion;
     tf2::fromMsg(pose_msg.pose.orientation, tf_quaternion);
+    tf_quaternion.normalize();
     transform_stamped.transform.rotation.x = tf_quaternion.x();
     transform_stamped.transform.rotation.y = tf_quaternion.y();
     transform_stamped.transform.rotation.z = tf_quaternion.z();
