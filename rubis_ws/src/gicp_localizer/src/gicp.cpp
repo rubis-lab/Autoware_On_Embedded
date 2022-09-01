@@ -267,6 +267,7 @@ void GicpLocalizer::callback_pointcloud(
         tf::Matrix3x3(quat).getRPY(current_pose.roll, current_pose.pitch, current_pose.yaw);
 
         double diff_time = (sensor_ros_time - previous_ts).toSec();
+        previous_ts = sensor_ros_time;
 
         double diff_x = current_pose.x - previous_pose.x;
         double diff_y = current_pose.y - previous_pose.y;
