@@ -9,12 +9,17 @@
 #rate = hz
 # other time unut = ns
 
+# Vision
+camera_image:
+  camera_id: 0
+  frequency: 10
+
 # Localization
 voxel_grid_filter:
   instance_mode: 0
 
   task_scheduling_flag: 0
-  task_profiling_flag: 0
+  task_profiling_flag: 1
   task_response_time_filename: "~/Documents/profiling/response_time/voxel_grid_filter.csv"
   rate: 10
   task_minimum_inter_release_time: 100_000_000
@@ -34,7 +39,7 @@ ndt_matching:
   localizer: "velodyne"
 
   task_scheduling_flag: 0
-  task_profiling_flag: 0
+  task_profiling_flag: 1
   task_response_time_filename: "~/Documents/profiling/response_time/ndt_matching.csv"
   rate: 10
   task_minimum_inter_release_time: 100_000_000
@@ -51,7 +56,7 @@ ndt_matching:
 # Detection
 ray_ground_filter_center:
   task_scheduling_flag: 0
-  task_profiling_flag: 0
+  task_profiling_flag: 1
   task_response_time_filename: "~/Documents/profiling/response_time/ray_ground_filter.csv"
   rate: 10 
   task_minimum_inter_release_time: 100_000_000
@@ -61,7 +66,7 @@ ray_ground_filter_center:
 
 lidar_euclidean_cluster_detect:
   task_scheduling_flag: 0
-  task_profiling_flag: 0
+  task_profiling_flag: 1
   task_response_time_filename: "~/Documents/profiling/response_time/lidar_euclidean_cluster_detect.csv"
   rate: 10
   task_minimum_inter_release_time: 200_000_000
@@ -75,7 +80,7 @@ lidar_euclidean_cluster_detect:
 
 vision_darknet_detect:
   task_scheduling_flag: 0
-  task_profiling_flag: 0
+  task_profiling_flag: 1
   task_response_time_filename: "~/Documents/profiling/response_time/vision_darknet_detect.csv"
   rate: 10
   task_minimum_inter_release_time: 100_000_000
@@ -91,7 +96,7 @@ vision_darknet_detect:
 
 imm_ukf_pda_track:
   task_scheduling_flag: 0
-  task_profiling_flag: 0
+  task_profiling_flag: 1
   task_response_time_filename: "~/Documents/profiling/response_time/imm_ukf_pda_track.csv"
   rate: 10
   task_minimum_inter_release_time: 200_000_000
@@ -101,7 +106,7 @@ imm_ukf_pda_track:
 # Planning
 op_global_planner:
   task_scheduling_flag: 0
-  task_profiling_flag: 0
+  task_profiling_flag: 1
   task_response_time_filename: "~/Documents/profiling/response_time/op_global_planner.csv"
   rate: 25 #25
   task_minimum_inter_release_time: 100_000_000
@@ -112,13 +117,13 @@ op_global_planner:
 op_common_params:
   rollOutDensity: 3.5
   rollOutsNumber: 2
-  maxVelocity: 5.0
+  maxVelocity: 8.0
   maxAcceleration: 10.0
   maxDeceleration: -10.0
 
 op_trajectory_generator:
   task_scheduling_flag: 0
-  task_profiling_flag: 0
+  task_profiling_flag: 1
   task_response_time_filename: "~/Documents/profiling/response_time/op_trajectory_generator.csv"
   rate: 100 #100
   task_minimum_inter_release_time: 100_000_000
@@ -127,7 +132,7 @@ op_trajectory_generator:
 
 op_trajectory_evaluator:
   task_scheduling_flag: 0
-  task_profiling_flag: 0
+  task_profiling_flag: 1
   task_response_time_filename: "~/Documents/profiling/response_time/op_trajectory_evaluator.csv"
   rate: 100 #100
   task_minimum_inter_release_time: 100_000_000
@@ -137,13 +142,15 @@ op_trajectory_evaluator:
   weightTransition: 5
   weightLong: 4
   weightLat: 4
-  ImageWidth: 1920
-  ImageHeight: 1080
+  ImageWidth: 1280
+  ImageHeight: 720
   SprintDecisionTime: 9999999.0
+  PedestrianStopImgHeightThreshold: 80
+  PedestrianImageDetectionRange: 0.3
 
 op_behavior_selector:
   task_scheduling_flag: 0
-  task_profiling_flag: 0
+  task_profiling_flag: 1
   task_response_time_filename: "~/Documents/profiling/response_time/op_behavior_selector.csv"
   rate: 100 #100
   task_minimum_inter_release_time: 100_000_000
@@ -156,7 +163,7 @@ op_behavior_selector:
 
 op_motion_predictor:
   task_scheduling_flag: 0
-  task_profiling_flag: 0
+  task_profiling_flag: 1
   task_response_time_filename: "~/Documents/profiling/response_time/op_motion_predictor.csv"
   rate: 25 #25
   task_minimum_inter_release_time: 100_000_000
@@ -167,7 +174,7 @@ op_motion_predictor:
 pure_pursuit:
   instance_mode: 0
   task_scheduling_flag: 0
-  task_profiling_flag: 0
+  task_profiling_flag: 1
   task_response_time_filename: "~/Documents/profiling/response_time/pure_pursuit.csv"
   rate: 30 #30
   task_minimum_inter_release_time: 100_000_000
@@ -179,7 +186,7 @@ pure_pursuit:
 twist_filter:
   instance_mode: 0
   task_scheduling_flag: 0
-  task_profiling_flag: 0
+  task_profiling_flag: 1
   task_response_time_filename: "~/Documents/profiling/response_time/twist_filter.csv"
   rate: 10
   task_minimum_inter_release_time: 100_000_000
@@ -189,7 +196,7 @@ twist_filter:
 twist_gate:
   instance_mode: 0
   task_scheduling_flag: 0
-  task_profiling_flag: 0
+  task_profiling_flag: 1
   task_response_time_filename: "~/Documents/profiling/response_time/twist_gate.csv"
   rate: 10
   task_minimum_inter_release_time: 100_000_000
@@ -201,7 +208,7 @@ twist_gate:
 lidar_republisher:
   instance_mode: 0
   task_scheduling_flag: 0
-  task_profiling_flag: 0
+  task_profiling_flag: 1
   task_response_time_filename: "~/Documents/profiling/response_time/lidar_republisher.csv"
   rate: 10
   task_minimum_inter_release_time: 100_000_000
@@ -210,7 +217,7 @@ lidar_republisher:
 
 vel_relay:
   task_scheduling_flag: 0
-  task_profiling_flag: 0
+  task_profiling_flag: 1
   task_response_time_filename: "~/Documents/profiling/response_time/vel_relay.csv"
   rate: 10
   task_minimum_inter_release_time: 100_000_000
@@ -220,7 +227,7 @@ vel_relay:
 pose_relay:
   instance_mode: 0
   task_scheduling_flag: 0
-  task_profiling_flag: 0
+  task_profiling_flag: 1
   task_response_time_filename: "~/Documents/profiling/response_time/pose_relay.csv"
   rate: 10
   task_minimum_inter_release_time: 100_000_000
@@ -229,7 +236,7 @@ pose_relay:
 
 republish:
   task_scheduling_flag: 0
-  task_profiling_flag: 0
+  task_profiling_flag: 1
   task_response_time_filename: "~/Documents/profiling/response_time/republish.csv"
   rate: 10
   task_minimum_inter_release_time: 100_000_000

@@ -53,7 +53,7 @@ inline void calculate_linear_acceleration()
     else if (output_ < min_acc_)
         output_ = min_acc_;
 
-    // ROS_INFO("set_point_ = %f, process_variable_ = %f, output_ = %f\n", set_point_, process_variable_, output_);
+    ROS_INFO("set_point_ = %f, process_variable_ = %f, output_ = %f\n", set_point_, process_variable_, output_);
 
     return;
 }

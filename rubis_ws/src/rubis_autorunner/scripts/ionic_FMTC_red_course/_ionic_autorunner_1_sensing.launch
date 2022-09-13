@@ -21,17 +21,12 @@
     <arg name="path_pcd" value="$(env USER_HOME)/autoware.ai/autoware_files/points_map/FMTC_merged.pcd"/>
   </include>  
 
-  <!-- Re-publishing simulator/camera_node/image/compressed topic to /image_raw as expected by Autoware -->
-  <!-- <node name="republish" type="republish" pkg="image_transport" output="screen" args="compressed in:=/simulator/camera_node/image raw out:=/image_raw"  /> -->
+  <!-- Vision Sensor -->
+  <include file="$(find camera_image)/launch/camera_image.launch"/>
 
 <!-- Lidar Launch File -->
   <include file="$(find runtime_manager)/launch_files/velodyne_vlp16_hires.launch" />
   
-  <!-- <include file="$(find rubis_pkg)/launch/lidar_republisher_params.launch">
-    <arg name="input_topic" value="$(arg lidar_input_topic)" />
-    <arg name="output_topic" value="$(arg lidar_output_topic)" />
-  </include> -->
-
 <!-- TF -->
   <!-- right LiDAR -->
   <node pkg="tf" type="static_transform_publisher" name="base_link_to_velodyne" args="3.3 -0.8 0.09 -0.68 0 0 base_link velodyne 10"/>
@@ -42,6 +37,8 @@
   <!-- <node pkg="tf" type="static_transform_publisher" name="gps_to_base_link" args="0 0 0 0 0 0 gps base_link 10"/> -->
   <!-- <node pkg="tf" type="static_transform_publisher" name="lidar_to_camera" args="0.029 -0.574 -1.820 4.712 0.009 -1.883 velodyne camera 10" /> -->
 
+  <node pkg="tf" type="static_transform_publisher" name="base_link_to_camera" args="0 0 0 0 0 0 base_link camera 10"/>
+   
   <!-- gnss localizer -->
   <!-- <arg name="plane" default="0"/>
   <node pkg="rubis_pkg" type="gnss_localizer" name="gnss_localizer" output="screen">
@@ -63,6 +60,9 @@
     <arg name="yaw_offset" value="-72.7014" />
     <arg name="yaw_diff_threshold" value="2.0" />
   </include> -->
+
+  <!-- Camera Image Module -->
+	<include file="$(find camera_image)/launch/camera_image.launch" />
 
 </launch>
 

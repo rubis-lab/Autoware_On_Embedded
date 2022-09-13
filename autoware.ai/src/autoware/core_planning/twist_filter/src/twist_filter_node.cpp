@@ -123,7 +123,7 @@ inline void TwistFilterNode::publishTwist(const geometry_msgs::TwistStampedConst
     out_msg.twist.angular.z = twist_out.az;
   }
   else{
-    out_msg.twist.linear.x = 0;
+    out_msg.twist.linear.x = -1000;
     out_msg.twist.angular.z = 0;
   }
   twist_pub_.publish(out_msg);
@@ -216,6 +216,9 @@ void TwistFilterNode::ctrlCmdCallback(const autoware_msgs::ControlCommandStamped
   autoware_msgs::ControlCommandStamped out_msg = *msg;
   out_msg.cmd.linear_velocity = ctrl_out.lv;
   out_msg.cmd.steering_angle = ctrl_out.sa;
+
+  if(emergency_stop_) out_msg.cmd.linear_velocity = -1000;
+
   ctrl_pub_.publish(out_msg);
 
   // Publish lateral accel and jerk after smoothing
