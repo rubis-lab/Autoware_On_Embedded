@@ -94,6 +94,7 @@ private:
     double resolution_{};
     float leafsize_{};
     int numThreads_{};
+    std::string neighborSearchMethod_;
 
     // downsampling
     pcl::ApproximateVoxelGrid<pcl::PointXYZ> voxelgrid_;

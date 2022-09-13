@@ -108,6 +108,13 @@ void GicpLocalizer::callback_pointsmap(
     vgicp_new.setResolution(resolution_);
     vgicp_new.setNumThreads(numThreads_);
 
+    if(neighborSearchMethod_ == "DIRECT7"){
+        vgicp_new.setNeighborSearchMethod(fast_gicp::NeighborSearchMethod::DIRECT7);
+    }
+    else if(neighborSearchMethod_ == "DIRECT27"){
+        vgicp_new.setNeighborSearchMethod(fast_gicp::NeighborSearchMethod::DIRECT27);
+    }
+
     pcl::PointCloud<pcl::PointXYZ>::Ptr map_points_ptr(new pcl::PointCloud<pcl::PointXYZ>);
     pcl::fromROSMsg(*map_points_msg_ptr, *map_points_ptr);
 //    vgicp_new.setInputTarget(map_points_ptr);
@@ -386,6 +393,8 @@ void GicpLocalizer::init_params(){
     private_nh_.getParam("resolution", resolution_);
     private_nh_.getParam("numthreads", numThreads_);
     private_nh_.getParam("leafsize", leafsize_);
+
+    private_nh_.param("neighborSearchMethod", neighborSearchMethod_, std::string("DIRECT1"));
 
     private_nh_.param("init_x", init_pose.x, 0.0);
     private_nh_.param("init_y", init_pose.y, 0.0);
