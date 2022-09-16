@@ -1,4 +1,4 @@
-#include "rubis_logger/rubis_logger.h"
+#include "rubis_logger/logger_topic.h"
 // #define DEBUG
 
 using std::getenv;
@@ -206,7 +206,7 @@ void sub_rubis_log_handler(const rubis_logger_msgs::rubis_log_handler::ConstPtr&
 }
 
 int main(int argc, char* argv[]){
-    ros::init(argc, argv, "rubis_logger");
+    ros::init(argc, argv, "logger_topic");
     ros::NodeHandle nh;
 
     nh.param("target_topics", target_topics_, vector<string>());
