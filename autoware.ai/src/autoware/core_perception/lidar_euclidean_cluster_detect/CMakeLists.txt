@@ -63,8 +63,9 @@ add_executable(lidar_euclidean_cluster_detect
 find_package(CUDA)
 find_package(Eigen3 QUIET)
 
+AW_CHECK_CUDA()
 if(USE_CUDA)
-  AW_CHECK_CUDA()
+  
   add_definitions(-DGPU_CLUSTERING)
 
   message("-- USING ACCELERATED CLUSTERING --")
