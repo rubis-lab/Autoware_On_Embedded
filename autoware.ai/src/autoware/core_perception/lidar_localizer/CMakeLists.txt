@@ -93,8 +93,7 @@ add_executable(gnss_mapping nodes/gnss_mapping/gnss_mapping.cpp)
 target_link_libraries(gnss_mapping ${catkin_LIBRARIES})
 add_dependencies(gnss_mapping ${catkin_EXPORTED_TARGETS})
 
-add_executable(modular_ndt_matching   nodes/modular_ndt_matching/modular_ndt_matching.cpp
-                              lib/LKF.cpp)
+add_executable(modular_ndt_matching   nodes/modular_ndt_matching/modular_ndt_matching.cpp)
 target_link_libraries(modular_ndt_matching ${catkin_LIBRARIES})
 add_dependencies(modular_ndt_matching ${catkin_EXPORTED_TARGETS})
 
