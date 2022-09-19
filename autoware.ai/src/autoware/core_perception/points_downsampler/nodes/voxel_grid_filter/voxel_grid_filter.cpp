@@ -51,7 +51,8 @@ static bool _output_log = false;
 static std::ofstream ofs;
 static std::string filename;
 
-static std::string POINTS_TOPIC;
+static std::string input_topic_name_;
+static std::string output_topic_name_;
 static double measurement_range = MAX_MEASUREMENT_RANGE;
 
 static void config_callback(const autoware_config_msgs::ConfigVoxelGridFilter::ConstPtr& input)
@@ -170,7 +171,8 @@ int main(int argc, char** argv)
   double task_execution_time;
   double task_relative_deadline; 
 
-  private_nh.getParam("points_topic", POINTS_TOPIC);
+  private_nh.param<std::string>("input_topic_name", input_topic_name_, std::string("points_raw"));
+  private_nh.param<std::string>("output_topic_name", output_topic_name_, std::string("filtered_points"));
   private_nh.getParam("output_log", _output_log);
   if(_output_log == true){
     char buffer[80];
@@ -181,6 +183,7 @@ int main(int argc, char** argv)
     ofs.open(filename.c_str(), std::ios::app);
   }
   private_nh.param<double>("measurement_range", measurement_range, MAX_MEASUREMENT_RANGE);
+  private_nh.param<double>("leaf_size", voxel_leaf_size, 0.1);
 
   std::string node_name = ros::this_node::getName();
   private_nh.param<int>(node_name+"/task_scheduling_flag", task_scheduling_flag, 0);
@@ -194,25 +197,24 @@ int main(int argc, char** argv)
 
   /* For Task scheduling */
   if(task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
-  
 
   // Publishers
-  filtered_points_pub = nh.advertise<sensor_msgs::PointCloud2>("/filtered_points", 10);
+  filtered_points_pub = nh.advertise<sensor_msgs::PointCloud2>(output_topic_name_, 10);
   if(rubis::instance_mode_)
-    rubis_filtered_points_pub = nh.advertise<rubis_msgs::PointCloud2>("/rubis_filtered_points", 10);
+    rubis_filtered_points_pub = nh.advertise<rubis_msgs::PointCloud2>("/rubis_" + output_topic_name_, 10);
   points_downsampler_info_pub = nh.advertise<points_downsampler::PointsDownsamplerInfo>("/points_downsampler_info", 1000);
 
   // Subscribers
   ros::Subscriber config_sub = nh.subscribe("config/voxel_grid_filter", 10, config_callback);
-  // ros::Subscriber scan_sub = nh.subscribe(POINTS_TOPIC, 10, scan_callback);
+  // ros::Subscriber scan_sub = nh.subscribe(input_topic_name_, 10, scan_callback);
   ros::Subscriber scan_sub;
   
-  if(rubis::instance_mode_) scan_sub = nh.subscribe("/rubis_"+POINTS_TOPIC, 10, rubis_scan_callback);
-  else scan_sub = nh.subscribe(POINTS_TOPIC, 10, scan_callback);
+  if(rubis::instance_mode_) scan_sub = nh.subscribe("/rubis_"+input_topic_name_, 10, rubis_scan_callback);
+  else scan_sub = nh.subscribe(input_topic_name_, 10, scan_callback);
 
   /*  RT Scheduling setup  */
   // ros::Subscriber config_sub = nh.subscribe("config/voxel_grid_filter", 1, config_callback); // origin 10
-  // ros::Subscriber scan_sub = nh.subscribe(POINTS_TOPIC, 1, scan_callback); // origin 10
+  // ros::Subscriber scan_sub = nh.subscribe(input_topic_name_, 1, scan_callback); // origin 10
 
   if(!task_scheduling_flag && !task_profiling_flag){
     ros::spin();
