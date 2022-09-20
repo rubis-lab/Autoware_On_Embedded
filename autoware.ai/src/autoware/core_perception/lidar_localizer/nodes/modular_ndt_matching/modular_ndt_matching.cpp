@@ -110,18 +110,30 @@ static pcl_omp::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ> omp_n
 #endif
 
 // Configurable Parameters
-static int max_iter_ = 30;
-static float ndt_res_ = 1.0;
-static double step_size_ = 0.1;
-static double trans_eps_ = 0.01;
+static int _max_iter = 30;
+static float _ndt_res = 1.0;
+static double _step_size = 0.1;
+static double _trans_eps = 0.01;
 
-static int _use_gnss;
 static int _use_init_pose;
+static int _use_gnss;
+static std::string _offset = "linear";  // linear, zero, quadratic
+static int _queue_size = 1000;
+static bool _get_height = false;
+
+static std::string _baselink_frame = "base_link";
+static std::string _localizer_frame = "velodyne";
+
+// TF base_link <-> localizer
+static double _tf_x = 1.2;
+static double _tf_y = 0.0;
+static double _tf_z = 2.0;
+static double _tf_roll = 0.0;
+static double _tf_pitch = 0.0;
+static double _tf_yaw = 0.0;
+static Eigen::Matrix4f tf_btol;
 
 // Publisher
-static ros::Publisher predict_pose_pub;
-static geometry_msgs::PoseStamped predict_pose_msg;
-
 static ros::Publisher ndt_pose_pub;
 static geometry_msgs::PoseStamped ndt_pose_msg;
 
@@ -133,6 +145,15 @@ static geometry_msgs::PoseStamped localizer_pose_msg;
 
 static ros::Publisher estimate_twist_pub;
 static geometry_msgs::TwistStamped estimate_twist_msg;
+
+static ros::Publisher time_ndt_matching_pub;
+static std_msgs::Float32 time_ndt_matching;
+
+static ros::Publisher ndt_stat_pub;
+static autoware_msgs::NDTStat ndt_stat_msg;
+
+static ros::Publisher ndt_reliability_pub;
+static std_msgs::Float32 ndt_reliability;
 
 static ros::Duration scan_duration;
 
@@ -182,34 +203,7 @@ static bool _is_matching_failed = false;
 
 static std::chrono::time_point<std::chrono::system_clock> matching_start, matching_end;
 
-static ros::Publisher time_ndt_matching_pub;
-static std_msgs::Float32 time_ndt_matching;
-
-static int _queue_size = 1000;
-
-static ros::Publisher ndt_stat_pub;
-static autoware_msgs::NDTStat ndt_stat_msg;
-
 static double predict_pose_error = 0.0;
-
-static double _tf_x = 1.2;
-static double _tf_y = 0.0;
-static double _tf_z = 2.0;
-static double _tf_roll = 0.0;
-static double _tf_pitch = 0.0;
-static double _tf_yaw = 0.0;
-static Eigen::Matrix4f tf_btol;
-
-static std::string _localizer = "velodyne";
-static std::string _offset = "linear";  // linear, zero, quadratic
-
-static ros::Publisher ndt_reliability_pub;
-static std_msgs::Float32 ndt_reliability;
-
-static bool _get_height = false;
-
-// static tf::TransformListener local_transform_listener;
-static tf::StampedTransform local_transform;
 
 static unsigned int points_map_num = 0;
 
@@ -231,10 +225,10 @@ static void init_params()
   private_nh.param<int>("method_type", method_type_tmp, 0);
   _method_type = static_cast<MethodType>(method_type_tmp);
 
-  private_nh.param<int>("max_iter", max_iter_, 30);
-  private_nh.param<float>("resolution", ndt_res_, 1.0);
-  private_nh.param<double>("step_size", step_size_, 0.1);
-  private_nh.param<double>("trans_epsilon", trans_eps_, 0.01);
+  private_nh.param<int>("max_iter", _max_iter, 30);
+  private_nh.param<float>("resolution", _ndt_res, 1.0);
+  private_nh.param<double>("step_size", _step_size, 0.1);
+  private_nh.param<double>("trans_epsilon", _trans_eps, 0.01);
 
   private_nh.param<int>("use_init_pose", _use_init_pose, 1);
 
@@ -245,7 +239,17 @@ static void init_params()
     private_nh.param<double>("init_roll", initial_pose.roll, 0.0);
     private_nh.param<double>("init_pitch", initial_pose.pitch, 0.0);
     private_nh.param<double>("init_yaw", initial_pose.yaw, 0.0);
+
+    init_pos_set = 1;
   }
+
+  private_nh.param<int>("use_gnss", _use_gnss, 0);
+  private_nh.param<int>("queue_size", _queue_size, 1);
+  private_nh.param<std::string>("offset", _offset, std::string("linear"));
+  private_nh.param<bool>("get_height", _get_height, false);
+
+  private_nh.param<std::string>("baselink_frame", _baselink_frame, std::string("base_link"));
+  private_nh.param<std::string>("localizer_frame", _localizer_frame, std::string("velodyne"));
 
   localizer_pose.x = initial_pose.x;
   localizer_pose.y = initial_pose.y;
@@ -273,8 +277,6 @@ static void init_params()
   current_velocity_y = 0;
   current_velocity_z = 0;
   angular_velocity = 0;
-
-  init_pos_set = 1;
 }
 
 static pose convertPoseIntoRelativeCoordinate(const pose &target_pose, const pose &reference_pose)
@@ -303,7 +305,6 @@ static pose convertPoseIntoRelativeCoordinate(const pose &target_pose, const pos
 
 static void map_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
 {
-  // if (map_loaded == 0)
   if (points_map_num != input->width)
   {
     std::cout << "Update points_map." << std::endl;
@@ -320,12 +321,12 @@ static void map_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
     { 
       pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ> new_ndt;
       pcl::PointCloud<pcl::PointXYZ>::Ptr output_cloud(new pcl::PointCloud<pcl::PointXYZ>);
-      new_ndt.setResolution(ndt_res_);
+      new_ndt.setResolution(_ndt_res);
       
       new_ndt.setInputTarget(map_ptr);
-      new_ndt.setMaximumIterations(max_iter_);
-      new_ndt.setStepSize(step_size_);
-      new_ndt.setTransformationEpsilon(trans_eps_);
+      new_ndt.setMaximumIterations(_max_iter);
+      new_ndt.setStepSize(_step_size);
+      new_ndt.setTransformationEpsilon(_trans_eps);
 
       new_ndt.align(*output_cloud, Eigen::Matrix4f::Identity());
 
@@ -336,11 +337,11 @@ static void map_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
     else if (_method_type == MethodType::PCL_ANH)
     {
       cpu::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ> new_anh_ndt;
-      new_anh_ndt.setResolution(ndt_res_);
+      new_anh_ndt.setResolution(_ndt_res);
       new_anh_ndt.setInputTarget(map_ptr);
-      new_anh_ndt.setMaximumIterations(max_iter_);
-      new_anh_ndt.setStepSize(step_size_);
-      new_anh_ndt.setTransformationEpsilon(trans_eps_);
+      new_anh_ndt.setMaximumIterations(_max_iter);
+      new_anh_ndt.setStepSize(_step_size);
+      new_anh_ndt.setTransformationEpsilon(_trans_eps);
 
       pcl::PointCloud<pcl::PointXYZ>::Ptr dummy_scan_ptr(new pcl::PointCloud<pcl::PointXYZ>());
       pcl::PointXYZ dummy_point;
@@ -359,11 +360,11 @@ static void map_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
       std::shared_ptr<gpu::GNormalDistributionsTransform> new_anh_gpu_ndt_ptr =
           std::make_shared<gpu::GNormalDistributionsTransform>();
 
-      new_anh_gpu_ndt_ptr->setResolution(ndt_res_);
+      new_anh_gpu_ndt_ptr->setResolution(_ndt_res);
       new_anh_gpu_ndt_ptr->setInputTarget(map_ptr);
-      new_anh_gpu_ndt_ptr->setMaximumIterations(max_iter_);
-      new_anh_gpu_ndt_ptr->setStepSize(step_size_);
-      new_anh_gpu_ndt_ptr->setTransformationEpsilon(trans_eps_);
+      new_anh_gpu_ndt_ptr->setMaximumIterations(_max_iter);
+      new_anh_gpu_ndt_ptr->setStepSize(_step_size);
+      new_anh_gpu_ndt_ptr->setTransformationEpsilon(_trans_eps);
 
       pcl::PointCloud<pcl::PointXYZ>::Ptr dummy_scan_ptr(new pcl::PointCloud<pcl::PointXYZ>());
 
@@ -383,11 +384,11 @@ static void map_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
     {
       pcl_omp::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ> new_omp_ndt;
       pcl::PointCloud<pcl::PointXYZ>::Ptr output_cloud(new pcl::PointCloud<pcl::PointXYZ>);
-      new_omp_ndt.setResolution(ndt_res_);
+      new_omp_ndt.setResolution(_ndt_res);
       new_omp_ndt.setInputTarget(map_ptr);
-      new_omp_ndt.setMaximumIterations(max_iter_);
-      new_omp_ndt.setStepSize(step_size_);
-      new_omp_ndt.setTransformationEpsilon(trans_eps_);
+      new_omp_ndt.setMaximumIterations(_max_iter);
+      new_omp_ndt.setStepSize(_step_size);
+      new_omp_ndt.setTransformationEpsilon(_trans_eps);
 
       new_omp_ndt.align(*output_cloud, Eigen::Matrix4f::Identity());
 
@@ -435,7 +436,6 @@ static void gnss_callback(const geometry_msgs::PoseStamped::ConstPtr& input)
   }
 
   previous_gnss_pose = current_gnss_pose;
-
 }
 
 static void initialpose_callback(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& input)
@@ -624,8 +624,6 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
   predict_pose.pitch = previous_pose.pitch;
   predict_pose.yaw = previous_pose.yaw + offset_yaw;
 
-
-
   pose predict_pose_for_ndt;
   predict_pose_for_ndt = predict_pose;
 
@@ -805,16 +803,6 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
   // Set values for publishing pose
   predict_q.setRPY(predict_pose.roll, predict_pose.pitch, predict_pose.yaw);
 
-  predict_pose_msg.header.frame_id = "/map";
-  predict_pose_msg.header.stamp = current_scan_time;
-  predict_pose_msg.pose.position.x = predict_pose.x;
-  predict_pose_msg.pose.position.y = predict_pose.y;
-  predict_pose_msg.pose.position.z = predict_pose.z;
-  predict_pose_msg.pose.orientation.x = predict_q.x();
-  predict_pose_msg.pose.orientation.y = predict_q.y();
-  predict_pose_msg.pose.orientation.z = predict_q.z();
-  predict_pose_msg.pose.orientation.w = predict_q.w();
-
   ndt_q.setRPY(ndt_pose.roll, ndt_pose.pitch, ndt_pose.yaw);
   
   ndt_pose_msg.header.frame_id = "/map";
@@ -841,7 +829,6 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
   localizer_pose_msg.pose.orientation.z = localizer_q.z();
   localizer_pose_msg.pose.orientation.w = localizer_q.w();
 
-  predict_pose_pub.publish(predict_pose_msg);
   health_checker_ptr_->CHECK_RATE("topic_rate_ndt_pose_slow", 8, 5, 1, "topic ndt_pose publish rate slow.");
   ndt_pose_pub.publish(ndt_pose_msg);
   rubis::sched::task_state_ = TASK_STATE_DONE;
@@ -862,7 +849,7 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
 
   // Set values for /estimate_twist
   estimate_twist_msg.header.stamp = current_scan_time;
-  estimate_twist_msg.header.frame_id = "/base_link";
+  estimate_twist_msg.header.frame_id = _baselink_frame;
   estimate_twist_msg.twist.linear.x = current_velocity;
   estimate_twist_msg.twist.linear.y = 0.0;
   estimate_twist_msg.twist.linear.z = 0.0;
@@ -923,11 +910,11 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
     transform.setOrigin(tf::Vector3(current_pose.x, current_pose.y, current_pose.z));
     transform.setRotation(current_q);
     
-    br.sendTransform(tf::StampedTransform(transform, current_scan_time, "/map", "/base_link"));
+    br.sendTransform(tf::StampedTransform(transform, current_scan_time, "/map", _baselink_frame));
   }
   else{ // When matching is failed
     transform.setRotation(current_q);
-    br.sendTransform(tf::StampedTransform(transform, current_scan_time, "/map", "/base_link"));
+    br.sendTransform(tf::StampedTransform(transform, current_scan_time, "/map", _baselink_frame));
   }
 
   // Update previous
@@ -1008,14 +995,8 @@ int main(int argc, char** argv)
   // Geting parameters
   init_params();
 
-  private_nh.getParam("use_gnss", _use_gnss);
-  private_nh.getParam("queue_size", _queue_size);
-  private_nh.getParam("offset", _offset);
-  private_nh.getParam("get_height", _get_height);
   private_nh.param<double>("gnss_reinit_fitness", _gnss_reinit_fitness, 500.0);
   private_nh.param<float>("init_match_threshold", _init_match_threshold, 8.0);
-  
-  private_nh.param<std::string>("localizer_frame", _localizer, "velodyne");
 
   nh.param<float>("/ndt_matching/failure_score_diff_threshold", _failure_score_diff_threshold, 10.0);  
   nh.param<float>("/ndt_matching/recovery_score_diff_threshold", _recovery_score_diff_threshold, 1.0);  
@@ -1026,8 +1007,8 @@ int main(int argc, char** argv)
   {
     tf::TransformListener base_localizer_listener;
     tf::StampedTransform  m_base_to_localizer;
-    base_localizer_listener.waitForTransform("/base_link", _localizer, ros::Time(0), ros::Duration(1.0));
-    base_localizer_listener.lookupTransform("/base_link", _localizer, ros::Time(0), m_base_to_localizer);
+    base_localizer_listener.waitForTransform(_baselink_frame, _localizer_frame, ros::Time(0), ros::Duration(1.0));
+    base_localizer_listener.lookupTransform(_baselink_frame, _localizer_frame, ros::Time(0), m_base_to_localizer);
 
     _tf_x = m_base_to_localizer.getOrigin().x();
     _tf_y = m_base_to_localizer.getOrigin().y();
@@ -1054,7 +1035,7 @@ int main(int argc, char** argv)
   std::cout << "queue_size: " << _queue_size << std::endl;
   std::cout << "offset: " << _offset << std::endl;
   std::cout << "get_height: " << _get_height << std::endl;
-  std::cout << "localizer: " << _localizer << std::endl;
+  std::cout << "localizer_frame: " << _localizer_frame << std::endl;
   std::cout << "gnss_reinit_fitness: " << _gnss_reinit_fitness << std::endl;
   std::cout << "(tf_x,tf_y,tf_z,tf_roll,tf_pitch,tf_yaw): (" << _tf_x << ", " << _tf_y << ", " << _tf_z << ", "
             << _tf_roll << ", " << _tf_pitch << ", " << _tf_yaw << ")" << std::endl;
@@ -1126,17 +1107,7 @@ int main(int argc, char** argv)
   Eigen::AngleAxisf rot_z_btol(_tf_yaw, Eigen::Vector3f::UnitZ());
   tf_btol = (tl_btol * rot_z_btol * rot_y_btol * rot_x_btol).matrix();
 
-  // Updated in initialpose_callback or gnss_callback
-  initial_pose.x = 0.0;
-  initial_pose.y = 0.0;
-  initial_pose.z = 0.0;
-  initial_pose.roll = 0.0;
-  initial_pose.pitch = 0.0;
-  initial_pose.yaw = 0.0;
-
   // Publishers
-  predict_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/predict_pose", 10); 
-
   ndt_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/ndt_pose", 10);
   if(rubis::instance_mode_) rubis_ndt_pose_pub = nh.advertise<rubis_msgs::PoseStamped>("/rubis_ndt_pose",10);
 
@@ -1147,7 +1118,9 @@ int main(int argc, char** argv)
   ndt_reliability_pub = nh.advertise<std_msgs::Float32>("/ndt_reliability", 10);
 
   // Subscribers
-  ros::Subscriber gnss_sub = nh.subscribe("gnss_pose", 10, gnss_callback); 
+  if(_use_gnss)
+    ros::Subscriber gnss_sub = nh.subscribe("gnss_pose", 10, gnss_callback); 
+
   ros::Subscriber map_sub = nh.subscribe("points_map", 1, map_callback);
   ros::Subscriber initialpose_sub = nh.subscribe("initialpose", 10, initialpose_callback); 
 

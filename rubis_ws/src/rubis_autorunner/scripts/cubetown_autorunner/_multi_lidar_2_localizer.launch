@@ -48,6 +48,9 @@
     <param name="queue_size" value="1" />
     <param name="offset" value="linear" />
     <param name="get_height" value="false" />
+
+    <param name="baselink_frame" value="base_link" />
+    <param name="localizer_frame" value="velodyne_FR" />
   </node>
 
   <!-- vel_pose_mux -->
