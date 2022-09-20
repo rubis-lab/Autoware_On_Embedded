@@ -207,7 +207,6 @@ static ros::Publisher ndt_reliability_pub;
 static std_msgs::Float32 ndt_reliability;
 
 static bool _get_height = false;
-static bool _use_local_transform = false;
 
 // static tf::TransformListener local_transform_listener;
 static tf::StampedTransform local_transform;
@@ -313,23 +312,6 @@ static void map_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
 
     // Convert the data type(from sensor_msgs to pcl).
     pcl::fromROSMsg(*input, map);
-
-    if (_use_local_transform == true)
-    {
-      tf::TransformListener local_transform_listener;
-      try
-      {
-        ros::Time now = ros::Time(0);
-        local_transform_listener.waitForTransform("/map", "/world", now, ros::Duration(10.0));
-        local_transform_listener.lookupTransform("/map", "world", now, local_transform);
-      }
-      catch (tf::TransformException& ex)
-      {
-        ROS_ERROR("%s", ex.what());
-      }
-
-      pcl_ros::transformPointCloud(map, map, local_transform.inverse());
-    }
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr map_ptr(new pcl::PointCloud<pcl::PointXYZ>(map));
 
@@ -475,18 +457,10 @@ static void initialpose_callback(const geometry_msgs::PoseWithCovarianceStamped:
                    input->pose.pose.orientation.w);
   tf::Matrix3x3 m(q);
 
-  if (_use_local_transform == true)
-  {
-    current_pose.x = input->pose.pose.position.x;
-    current_pose.y = input->pose.pose.position.y;
-    current_pose.z = input->pose.pose.position.z;
-  }
-  else
-  {
-    current_pose.x = input->pose.pose.position.x + transform.getOrigin().x();
-    current_pose.y = input->pose.pose.position.y + transform.getOrigin().y();
-    current_pose.z = input->pose.pose.position.z + transform.getOrigin().z();
-  }
+  current_pose.x = input->pose.pose.position.x + transform.getOrigin().x();
+  current_pose.y = input->pose.pose.position.y + transform.getOrigin().y();
+  current_pose.z = input->pose.pose.position.z + transform.getOrigin().z();
+
   m.getRPY(current_pose.roll, current_pose.pitch, current_pose.yaw);
 
   if (_get_height == true && map_loaded == 1)
@@ -830,91 +804,42 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
 
   // Set values for publishing pose
   predict_q.setRPY(predict_pose.roll, predict_pose.pitch, predict_pose.yaw);
-  if (_use_local_transform == true)
-  {
-    tf::Vector3 v(predict_pose.x, predict_pose.y, predict_pose.z);
-    tf::Transform transform(predict_q, v);
-    predict_pose_msg.header.frame_id = "/map";
-    predict_pose_msg.header.stamp = current_scan_time;
-    predict_pose_msg.pose.position.x = (local_transform * transform).getOrigin().getX();
-    predict_pose_msg.pose.position.y = (local_transform * transform).getOrigin().getY();
-    predict_pose_msg.pose.position.z = (local_transform * transform).getOrigin().getZ();
-    predict_pose_msg.pose.orientation.x = (local_transform * transform).getRotation().x();
-    predict_pose_msg.pose.orientation.y = (local_transform * transform).getRotation().y();
-    predict_pose_msg.pose.orientation.z = (local_transform * transform).getRotation().z();
-    predict_pose_msg.pose.orientation.w = (local_transform * transform).getRotation().w();
-  }
-  else
-  {
-    predict_pose_msg.header.frame_id = "/map";
-    predict_pose_msg.header.stamp = current_scan_time;
-    predict_pose_msg.pose.position.x = predict_pose.x;
-    predict_pose_msg.pose.position.y = predict_pose.y;
-    predict_pose_msg.pose.position.z = predict_pose.z;
-    predict_pose_msg.pose.orientation.x = predict_q.x();
-    predict_pose_msg.pose.orientation.y = predict_q.y();
-    predict_pose_msg.pose.orientation.z = predict_q.z();
-    predict_pose_msg.pose.orientation.w = predict_q.w();
-  }
+
+  predict_pose_msg.header.frame_id = "/map";
+  predict_pose_msg.header.stamp = current_scan_time;
+  predict_pose_msg.pose.position.x = predict_pose.x;
+  predict_pose_msg.pose.position.y = predict_pose.y;
+  predict_pose_msg.pose.position.z = predict_pose.z;
+  predict_pose_msg.pose.orientation.x = predict_q.x();
+  predict_pose_msg.pose.orientation.y = predict_q.y();
+  predict_pose_msg.pose.orientation.z = predict_q.z();
+  predict_pose_msg.pose.orientation.w = predict_q.w();
 
   ndt_q.setRPY(ndt_pose.roll, ndt_pose.pitch, ndt_pose.yaw);
   
-  if (_use_local_transform == true){
-    tf::Vector3 v(ndt_pose.x, ndt_pose.y, ndt_pose.z);
-    tf::Transform transform(ndt_q, v);
-    ndt_pose_msg.header.frame_id = "/map";
-    ndt_pose_msg.header.stamp = current_scan_time;
-    ndt_pose_msg.pose.position.x = (local_transform * transform).getOrigin().getX();
-    ndt_pose_msg.pose.position.y = (local_transform * transform).getOrigin().getY();
-    ndt_pose_msg.pose.position.z = (local_transform * transform).getOrigin().getZ();
-    ndt_pose_msg.pose.orientation.x = (local_transform * transform).getRotation().x();
-    ndt_pose_msg.pose.orientation.y = (local_transform * transform).getRotation().y();
-    ndt_pose_msg.pose.orientation.z = (local_transform * transform).getRotation().z();
-    ndt_pose_msg.pose.orientation.w = (local_transform * transform).getRotation().w();
-  }
-  else{
-    ndt_pose_msg.header.frame_id = "/map";
-    ndt_pose_msg.header.stamp = current_scan_time;
-    ndt_pose_msg.pose.position.x = ndt_pose.x;
-    ndt_pose_msg.pose.position.y = ndt_pose.y;
-    ndt_pose_msg.pose.position.z = ndt_pose.z;
-    ndt_pose_msg.pose.orientation.x = ndt_q.x();
-    ndt_pose_msg.pose.orientation.y = ndt_q.y();
-    ndt_pose_msg.pose.orientation.z = ndt_q.z();
-    ndt_pose_msg.pose.orientation.w = ndt_q.w();    
-  }
-
+  ndt_pose_msg.header.frame_id = "/map";
+  ndt_pose_msg.header.stamp = current_scan_time;
+  ndt_pose_msg.pose.position.x = ndt_pose.x;
+  ndt_pose_msg.pose.position.y = ndt_pose.y;
+  ndt_pose_msg.pose.position.z = ndt_pose.z;
+  ndt_pose_msg.pose.orientation.x = ndt_q.x();
+  ndt_pose_msg.pose.orientation.y = ndt_q.y();
+  ndt_pose_msg.pose.orientation.z = ndt_q.z();
+  ndt_pose_msg.pose.orientation.w = ndt_q.w();    
 
   current_q.setRPY(current_pose.roll, current_pose.pitch, current_pose.yaw);
 
   localizer_q.setRPY(localizer_pose.roll, localizer_pose.pitch, localizer_pose.yaw);
   
-  if (_use_local_transform == true)
-  {
-    tf::Vector3 v(localizer_pose.x, localizer_pose.y, localizer_pose.z);
-    tf::Transform transform(localizer_q, v);
-    localizer_pose_msg.header.frame_id = "/map";
-    localizer_pose_msg.header.stamp = current_scan_time;
-    localizer_pose_msg.pose.position.x = (local_transform * transform).getOrigin().getX();
-    localizer_pose_msg.pose.position.y = (local_transform * transform).getOrigin().getY();
-    localizer_pose_msg.pose.position.z = (local_transform * transform).getOrigin().getZ();
-    localizer_pose_msg.pose.orientation.x = (local_transform * transform).getRotation().x();
-    localizer_pose_msg.pose.orientation.y = (local_transform * transform).getRotation().y();
-    localizer_pose_msg.pose.orientation.z = (local_transform * transform).getRotation().z();
-    localizer_pose_msg.pose.orientation.w = (local_transform * transform).getRotation().w();
-  }
-  else
-  {
-    localizer_pose_msg.header.frame_id = "/map";
-    localizer_pose_msg.header.stamp = current_scan_time;
-    localizer_pose_msg.pose.position.x = localizer_pose.x;
-    localizer_pose_msg.pose.position.y = localizer_pose.y;
-    localizer_pose_msg.pose.position.z = localizer_pose.z;
-    localizer_pose_msg.pose.orientation.x = localizer_q.x();
-    localizer_pose_msg.pose.orientation.y = localizer_q.y();
-    localizer_pose_msg.pose.orientation.z = localizer_q.z();
-    localizer_pose_msg.pose.orientation.w = localizer_q.w();
-  }
+  localizer_pose_msg.header.frame_id = "/map";
+  localizer_pose_msg.header.stamp = current_scan_time;
+  localizer_pose_msg.pose.position.x = localizer_pose.x;
+  localizer_pose_msg.pose.position.y = localizer_pose.y;
+  localizer_pose_msg.pose.position.z = localizer_pose.z;
+  localizer_pose_msg.pose.orientation.x = localizer_q.x();
+  localizer_pose_msg.pose.orientation.y = localizer_q.y();
+  localizer_pose_msg.pose.orientation.z = localizer_q.z();
+  localizer_pose_msg.pose.orientation.w = localizer_q.w();
 
   predict_pose_pub.publish(predict_pose_msg);
   health_checker_ptr_->CHECK_RATE("topic_rate_ndt_pose_slow", 8, 5, 1, "topic ndt_pose publish rate slow.");
@@ -997,15 +922,8 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
   if(!_is_matching_failed){
     transform.setOrigin(tf::Vector3(current_pose.x, current_pose.y, current_pose.z));
     transform.setRotation(current_q);
-    //    br.sendTransform(tf::StampedTransform(transform, current_scan_time, "/map", "/base_link"));
-    if (_use_local_transform == true)
-    {
-      br.sendTransform(tf::StampedTransform(local_transform * transform, current_scan_time, "/map", "/base_link"));
-    }
-    else
-    {
-      br.sendTransform(tf::StampedTransform(transform, current_scan_time, "/map", "/base_link"));
-    }
+    
+    br.sendTransform(tf::StampedTransform(transform, current_scan_time, "/map", "/base_link"));
   }
   else{ // When matching is failed
     transform.setRotation(current_q);
@@ -1094,7 +1012,6 @@ int main(int argc, char** argv)
   private_nh.getParam("queue_size", _queue_size);
   private_nh.getParam("offset", _offset);
   private_nh.getParam("get_height", _get_height);
-  private_nh.getParam("use_local_transform", _use_local_transform);
   private_nh.param<double>("gnss_reinit_fitness", _gnss_reinit_fitness, 500.0);
   private_nh.param<float>("init_match_threshold", _init_match_threshold, 8.0);
   
@@ -1137,7 +1054,6 @@ int main(int argc, char** argv)
   std::cout << "queue_size: " << _queue_size << std::endl;
   std::cout << "offset: " << _offset << std::endl;
   std::cout << "get_height: " << _get_height << std::endl;
-  std::cout << "use_local_transform: " << _use_local_transform << std::endl;
   std::cout << "localizer: " << _localizer << std::endl;
   std::cout << "gnss_reinit_fitness: " << _gnss_reinit_fitness << std::endl;
   std::cout << "(tf_x,tf_y,tf_z,tf_roll,tf_pitch,tf_yaw): (" << _tf_x << ", " << _tf_y << ", " << _tf_z << ", "
