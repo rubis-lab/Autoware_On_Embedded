@@ -158,9 +158,6 @@ static std_msgs::Float32 time_ndt_matching;
 static ros::Publisher ndt_stat_pub;
 static autoware_msgs::NDTStat ndt_stat_msg;
 
-static ros::Publisher ndt_reliability_pub;
-static std_msgs::Float32 ndt_reliability;
-
 static ros::Duration scan_duration;
 
 static double exe_time = 0.0;
@@ -890,24 +887,18 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
   ndt_stat_msg.use_predict_pose = 0;
 
   ndt_stat_pub.publish(ndt_stat_msg);
-
-  /* Compute NDT_Reliability */
-  ndt_reliability.data = Wa * (exe_time / 100.0) * 100.0 + Wb * (iteration / 10.0) * 100.0 +
-                          Wc * ((2.0 - trans_probability) / 2.0) * 100.0;
-  ndt_reliability_pub.publish(ndt_reliability);
   
   // std::cout << "-----------------------------------------------------------------" << std::endl;
   // std::cout << "Sequence: " << input->header.seq << std::endl;
   // std::cout << "Timestamp: " << input->header.stamp << std::endl;
   // std::cout << "Frame ID: " << input->header.frame_id << std::endl;
-  // //    std::cout << "Number of Scan Points: " << scan_ptr->size() << " points." << std::endl;
+  // std::cout << "Number of Scan Points: " << scan_ptr->size() << " points." << std::endl;
   // std::cout << "Number of Filtered Scan Points: " << scan_points_num << " points." << std::endl;
   // std::cout << "NDT has converged: " << has_converged << std::endl;
   // std::cout << "Fitness Score: " << fitness_score << std::endl;
   // std::cout << "Transformation Probability: " << trans_probability << std::endl;
   // std::cout << "Execution Time: " << exe_time << " ms." << std::endl;
   // std::cout << "Number of Iterations: " << iteration << std::endl;
-  // std::cout << "NDT Reliability: " << ndt_reliability.data << std::endl;
   // std::cout << "(x,y,z,roll,pitch,yaw): " << std::endl;
   // std::cout << "(" << current_pose.x << ", " << current_pose.y << ", " << current_pose.z << ", " << current_pose.roll
   //           << ", " << current_pose.pitch << ", " << current_pose.yaw << ")" << std::endl;
@@ -1127,7 +1118,6 @@ int main(int argc, char** argv)
   estimate_twist_pub = nh.advertise<geometry_msgs::TwistStamped>(_twist_topic, 10);
   time_ndt_matching_pub = nh.advertise<std_msgs::Float32>(_ndt_time_topic, 10);
   ndt_stat_pub = nh.advertise<autoware_msgs::NDTStat>(_ndt_stat_topic, 10);
-  // ndt_reliability_pub = nh.advertise<std_msgs::Float32>("/ndt_reliability", 10);
 
   // Subscribers
   if(_use_gnss)

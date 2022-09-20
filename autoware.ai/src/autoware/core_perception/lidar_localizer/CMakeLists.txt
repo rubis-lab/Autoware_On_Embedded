@@ -97,6 +97,10 @@ add_executable(modular_ndt_matching   nodes/modular_ndt_matching/modular_ndt_mat
 target_link_libraries(modular_ndt_matching ${catkin_LIBRARIES})
 add_dependencies(modular_ndt_matching ${catkin_EXPORTED_TARGETS})
 
+add_executable(multi_ndt_combiner nodes/modular_ndt_matching/multi_ndt_combiner.cpp)
+target_link_libraries(multi_ndt_combiner ${catkin_LIBRARIES})
+add_dependencies(multi_ndt_combiner ${catkin_EXPORTED_TARGETS})
+
 if(USE_CUDA)
   target_include_directories(ndt_matching PRIVATE ${CUDA_INCLUDE_DIRS})
   target_include_directories(modular_ndt_matching PRIVATE ${CUDA_INCLUDE_DIRS})
@@ -164,6 +168,7 @@ install(
     ndt_mapping_tku
     ndt_matching
     modular_ndt_matching
+    multi_ndt_combiner
     ndt_matching_monitor
     ndt_matching_monitor_lib
     queue_counter

@@ -59,6 +59,12 @@
     <param name="ndt_time_topic" value="ndt_time_FR" />
   </node>
 
+  <node pkg="lidar_localizer" type="multi_ndt_combiner" name="multi_ndt_combiner">
+    <rosparam param="pose_topics">["ndt_pose_FL", "ndt_pose_FR"]</rosparam>
+    <rosparam param="stat_topics">["ndt_stat_FL", "ndt_stat_FR"]</rosparam>
+    <param name="baselink_frame" value="base_link" />
+  </node>
+
   <!-- vel_pose_mux -->
   <include file="$(find rubis_pkg)/launch/vel_pose_connect_params.launch">
     <arg name="topic_pose_stamped" value="$(arg topic_pose_stamped)" />
