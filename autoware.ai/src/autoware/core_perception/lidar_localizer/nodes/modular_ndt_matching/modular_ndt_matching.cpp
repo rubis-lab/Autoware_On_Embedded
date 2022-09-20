@@ -6,8 +6,6 @@
 #include <sstream>
 #include <string>
 
-#include <boost/filesystem.hpp>
-
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <std_msgs/Bool.h>
@@ -57,9 +55,7 @@
 #include <rubis_msgs/InsStat.h>
 
 #define SPIN_PROFILING
-
 #define PREDICT_POSE_THRESHOLD 0.5
-
 #define USING_GPS_THRESHOLD 50
 
 #define Wa 0.4
@@ -190,10 +186,6 @@ static double _previous_ins_stat_linear_velocity = 0.0, _previous_ins_stat_linea
 static double _previous_success_score;
 static bool _is_matching_failed = false;
 
-
-static ros::Publisher estimated_vel_mps_pub, estimated_vel_kmph_pub, estimated_vel_pub;
-static std_msgs::Float32 estimated_vel_mps, estimated_vel_kmph, previous_estimated_vel_kmph;
-
 static std::chrono::time_point<std::chrono::system_clock> matching_start, matching_end;
 
 static ros::Publisher time_ndt_matching_pub;
@@ -222,7 +214,6 @@ static std_msgs::Float32 ndt_reliability;
 
 static bool _get_height = false;
 static bool _use_local_transform = false;
-static bool _output_log_data = false;
 
 static std::ofstream ofs;
 static std::string filename;
@@ -943,12 +934,6 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
   current_accel_y = (diff_time > 0) ? ((current_velocity_y - previous_velocity_y) / diff_time) : 0;
   current_accel_z = (diff_time > 0) ? ((current_velocity_z - previous_velocity_z) / diff_time) : 0;
 
-  estimated_vel_mps.data = current_velocity;
-  estimated_vel_kmph.data = current_velocity * 3.6;
-
-  estimated_vel_mps_pub.publish(estimated_vel_mps);
-  estimated_vel_kmph_pub.publish(estimated_vel_kmph);
-
   // Set values for publishing pose
   predict_q.setRPY(predict_pose.roll, predict_pose.pitch, predict_pose.yaw);
   if (_use_local_transform == true)
@@ -1087,14 +1072,13 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
   estimate_vel_msg.vector.x = current_velocity;
   health_checker_ptr_->CHECK_MAX_VALUE("estimate_twist_linear", current_velocity, 5, 10, 15, "value linear estimated twist is too high.");
   health_checker_ptr_->CHECK_MAX_VALUE("estimate_twist_angular", angular_velocity, 5, 10, 15, "value linear angular twist is too high.");
-  estimated_vel_pub.publish(estimate_vel_msg);
 
   previous_score = fitness_score;
   if(!_is_matching_failed) _previous_success_score = previous_score;
 
   // Set values for /ndt_stat
   ndt_stat_msg.header.stamp = current_scan_time;
-  ndt_stat_msg.exe_time = time_ndt_matching.data;
+  ndt_stat_msg.exe_time = exe_time;
   ndt_stat_msg.iteration = iteration;
   ndt_stat_msg.score = fitness_score;
   ndt_stat_msg.velocity = current_velocity;
@@ -1107,30 +1091,6 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
   ndt_reliability.data = Wa * (exe_time / 100.0) * 100.0 + Wb * (iteration / 10.0) * 100.0 +
                           Wc * ((2.0 - trans_probability) / 2.0) * 100.0;
   ndt_reliability_pub.publish(ndt_reliability);
-
-  // Write log
-  if(_output_log_data)
-  {
-    if (!ofs)
-    {
-      std::cerr << "Could not open " << filename << "." << std::endl;
-    }
-    else
-    {
-      ofs << input->header.seq << "," << scan_points_num << "," << step_size << "," << trans_eps << "," << std::fixed
-          << std::setprecision(5) << current_pose.x << "," << std::fixed << std::setprecision(5) << current_pose.y << ","
-          << std::fixed << std::setprecision(5) << current_pose.z << "," << current_pose.roll << "," << current_pose.pitch
-          << "," << current_pose.yaw << "," << predict_pose.x << "," << predict_pose.y << "," << predict_pose.z << ","
-          << predict_pose.roll << "," << predict_pose.pitch << "," << predict_pose.yaw << ","
-          << current_pose.x - predict_pose.x << "," << current_pose.y - predict_pose.y << ","
-          << current_pose.z - predict_pose.z << "," << current_pose.roll - predict_pose.roll << ","
-          << current_pose.pitch - predict_pose.pitch << "," << current_pose.yaw - predict_pose.yaw << ","
-          << predict_pose_error << "," << iteration << "," << fitness_score << "," << trans_probability << ","
-          << ndt_reliability.data << "," << current_velocity << "," << current_velocity_smooth << "," << current_accel
-          << "," << angular_velocity << "," << time_ndt_matching.data << "," << align_time << "," << getFitnessScore_time
-          << std::endl;
-    }
-  }
   
   // std::cout << "-----------------------------------------------------------------" << std::endl;
   // std::cout << "Sequence: " << input->header.seq << std::endl;
@@ -1188,8 +1148,6 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
   previous_velocity_y = current_velocity_y;
   previous_velocity_z = current_velocity_z;
   previous_accel = current_accel;
-
-  previous_estimated_vel_kmph.data = estimated_vel_kmph.data;    
   
   if(rubis::sched::is_task_ready_ == TASK_NOT_READY){
     rubis::sched::init_task();
@@ -1249,20 +1207,6 @@ int main(int argc, char** argv)
   health_checker_ptr_->ENABLE();
   health_checker_ptr_->NODE_ACTIVATE();
 
-  // Set log file name.
-  private_nh.getParam("output_log_data", _output_log_data);
-  if(_output_log_data)
-  {
-    char buffer[80];
-    std::time_t now = std::time(NULL);
-    std::tm* pnow = std::localtime(&now);
-    std::strftime(buffer, 80, "%Y%m%d_%H%M%S", pnow);
-    std::string directory_name = "/tmp/Autoware/log/ndt_matching";
-    filename = directory_name + "/" + std::string(buffer) + ".csv";
-    boost::filesystem::create_directories(boost::filesystem::path(directory_name));
-    ofs.open(filename.c_str(), std::ios::app);
-  }
-
   // Geting parameters
   int method_type_tmp = 0;
   private_nh.getParam("method_type", method_type_tmp);
@@ -1275,9 +1219,7 @@ int main(int argc, char** argv)
   private_nh.param<double>("gnss_reinit_fitness", _gnss_reinit_fitness, 500.0);
   private_nh.param<float>("init_match_threshold", _init_match_threshold, 8.0);
   
-  
-
-  nh.param<std::string>("/ndt_matching/localizer", _localizer, "velodyne");  
+  private_nh.param<std::string>("localizer_frame", _localizer, "velodyne");
 
   nh.param<float>("/ndt_matching/failure_score_diff_threshold", _failure_score_diff_threshold, 10.0);  
   nh.param<float>("/ndt_matching/recovery_score_diff_threshold", _recovery_score_diff_threshold, 1.0);  
@@ -1407,9 +1349,6 @@ int main(int argc, char** argv)
   // current_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/current_pose", 10);
   localizer_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/localizer_pose", 10);
   estimate_twist_pub = nh.advertise<geometry_msgs::TwistStamped>("/estimate_twist", 10);
-  estimated_vel_mps_pub = nh.advertise<std_msgs::Float32>("/estimated_vel_mps", 10);
-  estimated_vel_kmph_pub = nh.advertise<std_msgs::Float32>("/estimated_vel_kmph", 10);
-  estimated_vel_pub = nh.advertise<geometry_msgs::Vector3Stamped>("/estimated_vel", 10);
   time_ndt_matching_pub = nh.advertise<std_msgs::Float32>("/time_ndt_matching", 10);
   ndt_stat_pub = nh.advertise<autoware_msgs::NDTStat>("/ndt_stat", 10);
   ndt_reliability_pub = nh.advertise<std_msgs::Float32>("/ndt_reliability", 10);
