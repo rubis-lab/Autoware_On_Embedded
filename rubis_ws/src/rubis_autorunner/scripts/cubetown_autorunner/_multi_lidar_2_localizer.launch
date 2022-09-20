@@ -19,14 +19,14 @@
 
   <node pkg="points_downsampler" name="voxel_grid_filter" type="voxel_grid_filter">
     <param name="input_topic_name" value="points_raw_FR_repub" />
-    <param name="output_topic_name" value="filtered_points" />
+    <param name="output_topic_name" value="filtered_points_FR" />
     <param name="leaf_size" value="$(arg leaf_size)" />
     <param name="measurement_range" value="$(arg measurement_range)" />
     <param name="output_log" value="$(arg output_log)" />
     <param name="instance_mode" value="$(arg instance_mode)" />
   </node>
 
-  <node pkg="lidar_localizer" type="modular_ndt_matching" name="modular_ndt_matching">
+  <node pkg="lidar_localizer" type="modular_ndt_matching" name="modular_ndt_matching_FR">
     <!-- pcl_generic=0, pcl_anh=1, pcl_anh_gpu=2, pcl_openmp=3 -->
     <param name="method_type" value="1" />
 
@@ -51,6 +51,12 @@
 
     <param name="baselink_frame" value="base_link" />
     <param name="localizer_frame" value="velodyne_FR" />
+    
+    <param name="input_topic" value="filtered_points_FR" />
+    <param name="output_pose_topic" value="ndt_pose_FR" />
+    <param name="ndt_stat_topic" value="ndt_stat_FR" />
+    <param name="twist_topic" value="ndt_vel_FR" />
+    <param name="ndt_time_topic" value="ndt_time_FR" />
   </node>
 
   <!-- vel_pose_mux -->

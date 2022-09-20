@@ -124,6 +124,12 @@ static bool _get_height = false;
 static std::string _baselink_frame = "base_link";
 static std::string _localizer_frame = "velodyne";
 
+static std::string _input_topic = "filtered_points";
+static std::string _output_pose_topic = "ndt_pose";
+static std::string _ndt_stat_topic = "ndt_stat";
+static std::string _twist_topic = "estimated_twist";
+static std::string _ndt_time_topic = "time_ndt_matching";
+
 // TF base_link <-> localizer
 static double _tf_x = 1.2;
 static double _tf_y = 0.0;
@@ -250,6 +256,12 @@ static void init_params()
 
   private_nh.param<std::string>("baselink_frame", _baselink_frame, std::string("base_link"));
   private_nh.param<std::string>("localizer_frame", _localizer_frame, std::string("velodyne"));
+
+  private_nh.param<std::string>("input_topic", _input_topic, std::string("filtered_points"));
+  private_nh.param<std::string>("output_pose_topic", _output_pose_topic, std::string("ndt_pose"));
+  private_nh.param<std::string>("ndt_stat_topic", _ndt_stat_topic, std::string("ndt_stat"));
+  private_nh.param<std::string>("twist_topic", _twist_topic, std::string("estimated_twist"));
+  private_nh.param<std::string>("ndt_time_topic", _ndt_time_topic, std::string("time_ndt_matching"));
 
   localizer_pose.x = initial_pose.x;
   localizer_pose.y = initial_pose.y;
@@ -1108,14 +1120,14 @@ int main(int argc, char** argv)
   tf_btol = (tl_btol * rot_z_btol * rot_y_btol * rot_x_btol).matrix();
 
   // Publishers
-  ndt_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/ndt_pose", 10);
-  if(rubis::instance_mode_) rubis_ndt_pose_pub = nh.advertise<rubis_msgs::PoseStamped>("/rubis_ndt_pose",10);
+  ndt_pose_pub = nh.advertise<geometry_msgs::PoseStamped>(_output_pose_topic, 10);
+  if(rubis::instance_mode_) rubis_ndt_pose_pub = nh.advertise<rubis_msgs::PoseStamped>("/rubis_" + _output_pose_topic,10);
 
-  localizer_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/localizer_pose", 10);
-  estimate_twist_pub = nh.advertise<geometry_msgs::TwistStamped>("/estimate_twist", 10);
-  time_ndt_matching_pub = nh.advertise<std_msgs::Float32>("/time_ndt_matching", 10);
-  ndt_stat_pub = nh.advertise<autoware_msgs::NDTStat>("/ndt_stat", 10);
-  ndt_reliability_pub = nh.advertise<std_msgs::Float32>("/ndt_reliability", 10);
+  // localizer_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/localizer_pose", 10);
+  estimate_twist_pub = nh.advertise<geometry_msgs::TwistStamped>(_twist_topic, 10);
+  time_ndt_matching_pub = nh.advertise<std_msgs::Float32>(_ndt_time_topic, 10);
+  ndt_stat_pub = nh.advertise<autoware_msgs::NDTStat>(_ndt_stat_topic, 10);
+  // ndt_reliability_pub = nh.advertise<std_msgs::Float32>("/ndt_reliability", 10);
 
   // Subscribers
   if(_use_gnss)
@@ -1125,8 +1137,8 @@ int main(int argc, char** argv)
   ros::Subscriber initialpose_sub = nh.subscribe("initialpose", 10, initialpose_callback); 
 
   ros::Subscriber points_sub;
-  if(rubis::instance_mode_) points_sub = nh.subscribe("rubis_filtered_points", _queue_size, rubis_points_callback); // _queue_size = 1000
-  else points_sub = nh.subscribe("filtered_points", _queue_size, points_callback); // _queue_size = 1000
+  if(rubis::instance_mode_) points_sub = nh.subscribe("rubis_" + _input_topic, _queue_size, rubis_points_callback);
+  else points_sub = nh.subscribe(_input_topic, _queue_size, points_callback);
 
   ros::Subscriber ins_stat_sub = nh.subscribe("/ins_stat", 1, ins_stat_callback);
   
