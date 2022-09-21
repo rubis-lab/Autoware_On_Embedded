@@ -17,10 +17,11 @@
   <arg name="measurement_range" default="200" />
   <arg name="instance_mode" default="0"/>
 
+  <arg name="method_type" default="0"/>
   <arg name="max_iter" default="10"/>
-  <arg name="resolution" default="2.0"/>
+  <arg name="resolution" default="3.0"/>
   <arg name="step_size" default="0.3"/>
-  <arg name="trans_epsilon" default="0.01"/>
+  <arg name="trans_epsilon" default="0.1"/>
 
   <arg name="use_gnss" default="true"/>
   <arg name="gnss_pose_diff_threshold" default="5.0"/>
@@ -37,7 +38,7 @@
 
   <node pkg="lidar_localizer" type="modular_ndt_matching" name="modular_ndt_matching_FL">
     <!-- pcl_generic=0, pcl_anh=1, pcl_anh_gpu=2, pcl_openmp=3 -->
-    <param name="method_type" value="1" />
+    <param name="method_type" value="$(arg method_type)" />
 
     <!-- NDT config -->
     <param name="max_iter" value="$(arg max_iter)" />
@@ -82,7 +83,7 @@
 
   <node pkg="lidar_localizer" type="modular_ndt_matching" name="modular_ndt_matching_FR" output="screen">
     <!-- pcl_generic=0, pcl_anh=1, pcl_anh_gpu=2, pcl_openmp=3 -->
-    <param name="method_type" value="1" />
+    <param name="method_type" value="$(arg method_type)" />
 
     <!-- NDT config -->
     <param name="max_iter" value="$(arg max_iter)" />
@@ -127,7 +128,7 @@
 
   <node pkg="lidar_localizer" type="modular_ndt_matching" name="modular_ndt_matching_B">
     <!-- pcl_generic=0, pcl_anh=1, pcl_anh_gpu=2, pcl_openmp=3 -->
-    <param name="method_type" value="1" />
+    <param name="method_type" value="$(arg method_type)" />
 
     <!-- NDT config -->
     <param name="max_iter" value="$(arg max_iter)" />

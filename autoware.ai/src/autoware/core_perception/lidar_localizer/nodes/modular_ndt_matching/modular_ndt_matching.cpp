@@ -216,11 +216,6 @@ pthread_mutex_t mutex;
 
 static bool _is_init_match_finished = false;
 static float _init_match_threshold = 8.0;
-// Failure detection and recovery parpameters
-static float _failure_score_diff_threshold = 10.0;
-static float _recovery_score_diff_threshold = 1.0;
-static float _failure_pose_diff_threshold = 4.0;
-static float _recovery_pose_diff_threshold = 1.0;
 
 static void init_params()
 {
@@ -1004,8 +999,6 @@ int main(int argc, char** argv)
   // Geting parameters
   init_params();
 
-  private_nh.param<double>("gnss_reinit_fitness", _gnss_reinit_fitness, 500.0);
-  private_nh.param<float>("init_match_threshold", _init_match_threshold, 8.0);
   try
   {
     tf::TransformListener base_localizer_listener;
