@@ -120,6 +120,7 @@ static int _use_gnss;
 static std::string _offset = "linear";  // linear, zero, quadratic
 static int _queue_size = 1000;
 static bool _get_height = false;
+static bool _publish_tf = true;
 
 static std::string _baselink_frame = "base_link";
 static std::string _localizer_frame = "velodyne";
@@ -250,6 +251,7 @@ static void init_params()
   private_nh.param<int>("queue_size", _queue_size, 1);
   private_nh.param<std::string>("offset", _offset, std::string("linear"));
   private_nh.param<bool>("get_height", _get_height, false);
+  private_nh.param<bool>("publish_tf", _publish_tf, true);
 
   private_nh.param<std::string>("baselink_frame", _baselink_frame, std::string("base_link"));
   private_nh.param<std::string>("localizer_frame", _localizer_frame, std::string("velodyne"));
@@ -908,16 +910,18 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
   // std::cout << "Get fitness score time: " << getFitnessScore_time << std::endl;
   // std::cout << "-----------------------------------------------------------------" << std::endl;
 
-  // Send TF "/base_link" to "/map"
-  if(!_is_matching_failed){
-    transform.setOrigin(tf::Vector3(current_pose.x, current_pose.y, current_pose.z));
-    transform.setRotation(current_q);
-    
-    br.sendTransform(tf::StampedTransform(transform, current_scan_time, "/map", _baselink_frame));
-  }
-  else{ // When matching is failed
-    transform.setRotation(current_q);
-    br.sendTransform(tf::StampedTransform(transform, current_scan_time, "/map", _baselink_frame));
+  if(_publish_tf){
+    // Send TF "/base_link" to "/map"
+    if(!_is_matching_failed){
+      transform.setOrigin(tf::Vector3(current_pose.x, current_pose.y, current_pose.z));
+      transform.setRotation(current_q);
+      
+      br.sendTransform(tf::StampedTransform(transform, current_scan_time, "/map", _baselink_frame));
+    }
+    else{ // When matching is failed
+      transform.setRotation(current_q);
+      br.sendTransform(tf::StampedTransform(transform, current_scan_time, "/map", _baselink_frame));
+    }
   }
 
   // Update previous
@@ -1000,12 +1004,6 @@ int main(int argc, char** argv)
 
   private_nh.param<double>("gnss_reinit_fitness", _gnss_reinit_fitness, 500.0);
   private_nh.param<float>("init_match_threshold", _init_match_threshold, 8.0);
-
-  nh.param<float>("/ndt_matching/failure_score_diff_threshold", _failure_score_diff_threshold, 10.0);  
-  nh.param<float>("/ndt_matching/recovery_score_diff_threshold", _recovery_score_diff_threshold, 1.0);  
-  nh.param<float>("/ndt_matching/failure_pose_diff_threshold", _failure_pose_diff_threshold, 4.0);
-  nh.param<float>("/ndt_matching/recovery_pose_diff_threshold", _recovery_pose_diff_threshold, 1.0);
-
   try
   {
     tf::TransformListener base_localizer_listener;

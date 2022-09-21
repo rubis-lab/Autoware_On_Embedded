@@ -47,13 +47,20 @@ void subscriber_init(ros::NodeHandle nh)
     }
 }
 
-void publishTransform(void){
+void publishTransform(tf::TransformBroadcaster br){
     // TODO: select pose number
-    // static tf::TransformBroadcaster br;
-    // tf::Transform transform;
-    // transform.setOrigin(tf::Vector3(current_pose.x, current_pose.y, current_pose.z));
-    // transform.setRotation(current_q);
-    // br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "/map", _baselink_frame));
+    int selected_pose_idx = 1;
+
+    tf::Quaternion ori_q(pose_list.at(selected_pose_idx).orientation.x,
+                        pose_list.at(selected_pose_idx).orientation.y,
+                        pose_list.at(selected_pose_idx).orientation.z,
+                        pose_list.at(selected_pose_idx).orientation.w);
+    tf::Transform transform;
+    transform.setOrigin(tf::Vector3(pose_list.at(selected_pose_idx).position.x,
+                                pose_list.at(selected_pose_idx).position.y,
+                                pose_list.at(selected_pose_idx).position.z));
+    transform.setRotation(ori_q);
+    br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "/map", _baselink_frame));
 }
 
 int main(int argc, char** argv)
@@ -62,6 +69,8 @@ int main(int argc, char** argv)
 
     ros::NodeHandle nh;
     ros::NodeHandle private_nh("~");
+
+    tf::TransformBroadcaster br;
 
     private_nh.getParam("pose_topics", pose_topic_list);
     private_nh.getParam("stat_topics", stat_topic_list);
@@ -73,6 +82,7 @@ int main(int argc, char** argv)
     ros::Rate ros_rate(10);
     while(ros::ok()){
         ros::spinOnce();
+        publishTransform(br);
         ros_rate.sleep();
     }
 }
