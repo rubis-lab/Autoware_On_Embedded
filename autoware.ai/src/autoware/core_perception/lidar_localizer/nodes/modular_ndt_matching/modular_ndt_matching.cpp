@@ -54,7 +54,6 @@
 
 #define SPIN_PROFILING
 #define PREDICT_POSE_THRESHOLD 0.5
-#define USING_GPS_THRESHOLD 50
 
 #define Wa 0.4
 #define Wb 0.3
@@ -116,11 +115,12 @@ static double _step_size = 0.1;
 static double _trans_eps = 0.01;
 
 static int _use_init_pose;
-static int _use_gnss;
+static bool _use_gnss;
 static std::string _offset = "linear";  // linear, zero, quadratic
 static int _queue_size = 1000;
 static bool _get_height = false;
 static bool _publish_tf = true;
+static double _gnss_pose_diff_thr = 3.0;
 
 static std::string _baselink_frame = "base_link";
 static std::string _localizer_frame = "velodyne";
@@ -166,6 +166,7 @@ static bool has_converged;
 static int iteration = 0;
 static double fitness_score = 0.0;
 static double trans_probability = 0.0;
+static int matching_fail_cnt = 0;
 
 // reference for comparing fitness_score, default value set to 500.0
 static double _gnss_reinit_fitness = 500.0;
@@ -247,7 +248,9 @@ static void init_params()
     init_pos_set = 1;
   }
 
-  private_nh.param<int>("use_gnss", _use_gnss, 0);
+  private_nh.param<bool>("use_gnss", _use_gnss, false);
+  private_nh.param<double>("gnss_pose_diff_threshold", _gnss_pose_diff_thr, 3.0);
+
   private_nh.param<int>("queue_size", _queue_size, 1);
   private_nh.param<std::string>("offset", _offset, std::string("linear"));
   private_nh.param<bool>("get_height", _get_height, false);
@@ -414,36 +417,35 @@ static void map_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
 
 static void gnss_callback(const geometry_msgs::PoseStamped::ConstPtr& input)
 {
+  if(!_use_gnss || !_is_init_match_finished) return;
+  current_gnss_pose.x = input->pose.position.x;
+  current_gnss_pose.y = input->pose.position.y;
+  current_gnss_pose.z = input->pose.position.z;
+
   tf::Quaternion gnss_q(input->pose.orientation.x, input->pose.orientation.y, input->pose.orientation.z,
                         input->pose.orientation.w);
   tf::Matrix3x3 gnss_m(gnss_q);
 
-  current_gnss_pose.x = input->pose.position.x;
-  current_gnss_pose.y = input->pose.position.y;
-  current_gnss_pose.z = input->pose.position.z;
   gnss_m.getRPY(current_gnss_pose.roll, current_gnss_pose.pitch, current_gnss_pose.yaw);
 
-  static int matching_fail_cnt = 0;
+  double ndt_gnss_diff = hypot(current_gnss_pose.x - current_pose.x, current_gnss_pose.y - current_pose.y);
 
-  if(previous_score <= USING_GPS_THRESHOLD)
-    matching_fail_cnt = 0;
-  else
+  #ifdef DEBUG
+  std::cout << ndt_gnss_diff << " " << _gnss_pose_diff_thr << std::endl;
+  #endif
+
+  if(ndt_gnss_diff > _gnss_pose_diff_thr){
     matching_fail_cnt++;
-
-  if( previous_score == 0.0){
-    previous_score = 0.0;
-    current_pose = current_gnss_pose;
-    previous_pose = previous_gnss_pose;
   }
-  else if( previous_score > USING_GPS_THRESHOLD && _is_init_match_finished == true){
-    previous_score = 0.0;
-    current_pose = current_gnss_pose;
-    previous_pose = previous_gnss_pose;
+  else{
+    matching_fail_cnt = 0;
   }
-  else if(matching_fail_cnt > 30){
+  
+  if(matching_fail_cnt > 10 && _is_init_match_finished){
     previous_score = 0.0;
     current_pose = current_gnss_pose;
-    previous_pose = previous_gnss_pose;
+    previous_pose = current_gnss_pose;
+    matching_fail_cnt = 0;
   }
 
   previous_gnss_pose = current_gnss_pose;
@@ -1118,8 +1120,7 @@ int main(int argc, char** argv)
   ndt_stat_pub = nh.advertise<autoware_msgs::NDTStat>(_ndt_stat_topic, 10);
 
   // Subscribers
-  if(_use_gnss)
-    ros::Subscriber gnss_sub = nh.subscribe("gnss_pose", 10, gnss_callback); 
+  ros::Subscriber gnss_sub = nh.subscribe("gnss_pose", 10, gnss_callback); 
 
   ros::Subscriber map_sub = nh.subscribe("points_map", 1, map_callback);
   ros::Subscriber initialpose_sub = nh.subscribe("initialpose", 10, initialpose_callback); 

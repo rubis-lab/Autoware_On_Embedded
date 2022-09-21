@@ -17,12 +17,13 @@
   <arg name="measurement_range" default="200" />
   <arg name="instance_mode" default="0"/>
 
-  <arg name="max_iter" default="20"/>
-  <arg name="resolution" default="3.0"/>
-  <arg name="step_size" default="0.5"/>
+  <arg name="max_iter" default="10"/>
+  <arg name="resolution" default="2.0"/>
+  <arg name="step_size" default="0.3"/>
   <arg name="trans_epsilon" default="0.01"/>
 
-  <arg name="use_gnss" default="false"/>
+  <arg name="use_gnss" default="true"/>
+  <arg name="gnss_pose_diff_threshold" default="5.0"/>
 
   <!-- FL LiDAR -->
   <node pkg="points_downsampler" name="voxel_grid_filter_FL" type="voxel_grid_filter">
@@ -53,6 +54,7 @@
     <param name="init_yaw" value="$(arg init_yaw)" />
 
     <param name="use_gnss" value="$(arg use_gnss)" />
+    <param name="gnss_pose_diff_threshold" value="$(arg gnss_pose_diff_threshold)" />
     <param name="queue_size" value="100" />
     <param name="offset" value="linear" />
     <param name="get_height" value="false" />
@@ -78,7 +80,7 @@
     <param name="instance_mode" value="$(arg instance_mode)" />
   </node>
 
-  <node pkg="lidar_localizer" type="modular_ndt_matching" name="modular_ndt_matching_FR">
+  <node pkg="lidar_localizer" type="modular_ndt_matching" name="modular_ndt_matching_FR" output="screen">
     <!-- pcl_generic=0, pcl_anh=1, pcl_anh_gpu=2, pcl_openmp=3 -->
     <param name="method_type" value="1" />
 
@@ -97,6 +99,7 @@
     <param name="init_yaw" value="$(arg init_yaw)" />
 
     <param name="use_gnss" value="$(arg use_gnss)" />
+    <param name="gnss_pose_diff_threshold" value="$(arg gnss_pose_diff_threshold)" />
     <param name="queue_size" value="100" />
     <param name="offset" value="linear" />
     <param name="get_height" value="false" />
@@ -141,6 +144,7 @@
     <param name="init_yaw" value="$(arg init_yaw)" />
 
     <param name="use_gnss" value="$(arg use_gnss)" />
+    <param name="gnss_pose_diff_threshold" value="$(arg gnss_pose_diff_threshold)" />
     <param name="queue_size" value="100" />
     <param name="offset" value="linear" />
     <param name="get_height" value="false" />
@@ -157,8 +161,8 @@
   </node>
 
   <node pkg="lidar_localizer" type="multi_ndt_combiner" name="multi_ndt_combiner" output="screen">
-    <rosparam param="pose_topics">["ndt_pose_FL", "ndt_pose_B", "ndt_pose_FR"]</rosparam>
-    <rosparam param="stat_topics">["ndt_stat_FL", "ndt_stat_B", "ndt_stat_FR"]</rosparam>
+    <rosparam param="pose_topics">["ndt_pose_FL", "ndt_pose_FR", "ndt_pose_B"]</rosparam>
+    <rosparam param="stat_topics">["ndt_stat_FL", "ndt_stat_FR", "ndt_stat_B"]</rosparam>
     <param name="baselink_frame" value="base_link" />
   </node>
 
