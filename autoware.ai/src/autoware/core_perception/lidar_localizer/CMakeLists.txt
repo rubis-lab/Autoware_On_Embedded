@@ -93,14 +93,24 @@ add_executable(gnss_mapping nodes/gnss_mapping/gnss_mapping.cpp)
 target_link_libraries(gnss_mapping ${catkin_LIBRARIES})
 add_dependencies(gnss_mapping ${catkin_EXPORTED_TARGETS})
 
+add_executable(modular_ndt_matching   nodes/modular_ndt_matching/modular_ndt_matching.cpp)
+target_link_libraries(modular_ndt_matching ${catkin_LIBRARIES})
+add_dependencies(modular_ndt_matching ${catkin_EXPORTED_TARGETS})
+
+add_executable(multi_ndt_combiner nodes/modular_ndt_matching/multi_ndt_combiner.cpp)
+target_link_libraries(multi_ndt_combiner ${catkin_LIBRARIES})
+add_dependencies(multi_ndt_combiner ${catkin_EXPORTED_TARGETS})
+
 if(USE_CUDA)
   target_include_directories(ndt_matching PRIVATE ${CUDA_INCLUDE_DIRS})
+  target_include_directories(modular_ndt_matching PRIVATE ${CUDA_INCLUDE_DIRS})
   target_include_directories(ndt_mapping PRIVATE ${CUDA_INCLUDE_DIRS})
 endif()
 
 
 if(NOT (PCL_VERSION VERSION_LESS "1.7.2"))
   set_target_properties(ndt_matching PROPERTIES COMPILE_DEFINITIONS "USE_PCL_OPENMP")
+  set_target_properties(modular_ndt_matching PROPERTIES COMPILE_DEFINITIONS "USE_PCL_OPENMP")
   set_target_properties(ndt_mapping PROPERTIES COMPILE_DEFINITIONS "USE_PCL_OPENMP")
 endif()
 
@@ -157,6 +167,8 @@ install(
     ndt_mapping
     ndt_mapping_tku
     ndt_matching
+    modular_ndt_matching
+    multi_ndt_combiner
     ndt_matching_monitor
     ndt_matching_monitor_lib
     queue_counter
@@ -169,16 +181,3 @@ install(DIRECTORY launch/
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
   PATTERN ".svn" EXCLUDE
 )
-
-if(CATKIN_ENABLE_TESTING)
-  find_package(rostest REQUIRED)
-
-  add_rostest_gtest(test_launch_ndt_matching
-    test/test_launch_ndt_matching.test
-    test/src/test_launch_ndt_matching.cpp
-  )
-
-  target_link_libraries(test_launch_ndt_matching
-    ${catkin_LIBRARIES}
-  )
-endif()

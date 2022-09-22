@@ -47,6 +47,12 @@ void Nmea2TFPoseNode::initForROS()
 {
   // ros parameter settings
   private_nh_.getParam("plane", plane_number_);
+  private_nh_.param<bool>("enable_noise", enable_noise_, false);
+
+  if(enable_noise_){
+    std::srand((unsigned int)time(NULL));
+    private_nh_.param<double>("max_noise", max_noise_, 2.0);
+  }
 
   // setup subscriber
   sub1_ = nh_.subscribe("nmea_sentence", 100, &Nmea2TFPoseNode::callbackFromNmeaSentence, this);
@@ -70,6 +76,14 @@ void Nmea2TFPoseNode::publishPoseStamped()
   cur_pose_.pose.position.y = geo_.x();
   cur_pose_.pose.position.z = geo_.z();
 
+  if(enable_noise_){
+    int noise_100 = (int)(max_noise_ * 100);
+    double x_noise = (double)(rand() % (int)(noise_100 * 2) - noise_100) / 100;
+    double y_noise = (double)(rand() % (int)(noise_100 * 2) - noise_100) / 100;
+    cur_pose_.pose.position.x += x_noise;
+    cur_pose_.pose.position.y += y_noise;
+  }
+
   // TransformPose(cur_pose_, cur_pose_, transform_);
   cur_pose_.header.frame_id = MAP_FRAME_;
   cur_pose_.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(roll_, pitch_, yaw_);
@@ -80,7 +94,7 @@ void Nmea2TFPoseNode::publishPoseStamped()
 void Nmea2TFPoseNode::publishTF()
 {
   tf::Transform transform;
-  transform.setOrigin(tf::Vector3(geo_.y(), geo_.x(), geo_.z()));
+  transform.setOrigin(tf::Vector3(cur_pose_data_.x, cur_pose_data_.y, cur_pose_data_.z));
   tf::Quaternion quaternion;
   quaternion.setRPY(roll_, pitch_, yaw_);
   transform.setRotation(quaternion);

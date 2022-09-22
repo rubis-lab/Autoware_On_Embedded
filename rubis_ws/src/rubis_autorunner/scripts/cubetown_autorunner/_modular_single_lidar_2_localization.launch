@@ -1,0 +1,79 @@
+<launch>
+  <!-- cubetown -->
+  <arg name="init_x" value="57.1" />
+  <arg name="init_y" value="1.38" />
+  <arg name="init_z" value="0.48" />
+  <arg name="init_roll" value="0.0" />
+  <arg name="init_pitch" value="0.0" />
+  <arg name="init_yaw" value="1.57" />
+
+  <!-- vel/pose connect -->
+  <arg name="topic_pose_stamped" default="/ndt_pose" />
+  <arg name="topic_twist_stamped" default="/estimate_twist" /> 
+
+  <!-- points downsampler -->
+  <arg name="output_log" default="false" />
+  <arg name="leaf_size" default="0.1" />
+  <arg name="measurement_range" default="200" />
+  <arg name="instance_mode" default="0"/>
+
+  <arg name="method_type" default="0"/>
+  <arg name="max_iter" default="10"/>
+  <arg name="resolution" default="2.0"/>
+  <arg name="step_size" default="0.1"/>
+  <arg name="trans_epsilon" default="0.1"/>
+
+  <arg name="use_gnss" default="true"/>
+  <arg name="gnss_pose_diff_threshold" default="5.0"/>
+
+  <node pkg="points_downsampler" name="voxel_grid_filter" type="voxel_grid_filter">
+    <param name="input_topic_name" value="points_raw" />
+    <param name="output_topic_name" value="filtered_points" />
+    <param name="leaf_size" value="$(arg leaf_size)" />
+    <param name="measurement_range" value="$(arg measurement_range)" />
+    <param name="output_log" value="$(arg output_log)" />
+    <param name="instance_mode" value="$(arg instance_mode)" />
+  </node>
+
+  <node pkg="lidar_localizer" type="modular_ndt_matching" name="modular_ndt_matching_FL">
+    <!-- pcl_generic=0, pcl_anh=1, pcl_anh_gpu=2, pcl_openmp=3 -->
+    <param name="method_type" value="$(arg method_type)" />
+
+    <!-- NDT config -->
+    <param name="max_iter" value="$(arg max_iter)" />
+    <param name="resolution" value="$(arg resolution)" />
+    <param name="step_size" value="$(arg step_size)" />
+    <param name="trans_epsilon" value="$(arg trans_epsilon)" />
+
+    <param name="use_init_pose" value="true" />
+    <param name="init_x" value="$(arg init_x)" />
+    <param name="init_y" value="$(arg init_y)" />
+    <param name="init_z" value="$(arg init_z)" />
+    <param name="init_roll" value="$(arg init_x)" />
+    <param name="init_pitch" value="$(arg init_pitch)" />
+    <param name="init_yaw" value="$(arg init_yaw)" />
+
+    <param name="use_gnss" value="$(arg use_gnss)" />
+    <param name="gnss_pose_diff_threshold" value="$(arg gnss_pose_diff_threshold)" />
+    <param name="queue_size" value="100" />
+    <param name="offset" value="linear" />
+    <param name="get_height" value="false" />
+    <param name="publish_tf" value="true" />
+
+    <param name="baselink_frame" value="base_link" />
+    <param name="localizer_frame" value="velodyne" />
+    
+    <param name="input_topic" value="filtered_points" />
+    <param name="output_pose_topic" value="ndt_pose" />
+    <param name="ndt_stat_topic" value="ndt_stat" />
+    <param name="twist_topic" value="ndt_vel" />
+    <param name="ndt_time_topic" value="ndt_time" />
+  </node>
+
+  <!-- vel_pose_mux -->
+  <include file="$(find rubis_pkg)/launch/vel_pose_connect_params.launch">
+    <arg name="topic_pose_stamped" value="$(arg topic_pose_stamped)" />
+    <arg name="topic_twist_stamped" value="$(arg topic_twist_stamped)" />
+  </include>
+
+</launch>
