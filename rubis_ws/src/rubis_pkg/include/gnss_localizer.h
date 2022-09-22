@@ -4,6 +4,8 @@
 // C++ includes
 #include <string>
 #include <memory>
+#include <cstdlib>
+#include <ctime>
 
 // ROS includes
 #include <ros/ros.h>
@@ -67,6 +69,10 @@ private:
   Pose cur_pose_data_, prev_pose_data_;
   tf::TransformListener listener_;
   tf::StampedTransform transform_;
+
+  // about noise
+  bool enable_noise_;
+  double max_noise_;
 
   // callbacks
   void callbackFromNmeaSentence(const nmea_msgs::Sentence::ConstPtr &msg);

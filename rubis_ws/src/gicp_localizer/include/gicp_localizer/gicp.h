@@ -85,6 +85,7 @@ private:
     std::string map_frame_;
     std::string sensor_frame_;
     bool enable_gnss_backup_ = false;
+    double gnss_backup_thr_;
 
     // init guess for gicp
     geometry_msgs::PoseWithCovarianceStamped initial_pose_cov_msg_;
