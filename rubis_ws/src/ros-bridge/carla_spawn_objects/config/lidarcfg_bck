@@ -1,0 +1,9 @@
+"spawn_point": {"x": 0.0, "y": 0.0, "z": 2.4, "roll": 0.0, "pitch": 0.0, "yaw": 0.0},
+"spawn_point": {"x": 3.3, "y": -0.8, "z": 0.09, "roll": 0.0, "pitch": 0.0, "yaw": -45.0},
+
+yaw+ counter clockwise(degree)
+horizontal_fov(degree)
+
+degree -> radian
+    carla_spawn_objects.py
+    line 285
