@@ -300,7 +300,7 @@ void GicpLocalizer::callback_pointcloud(
         // Save previous angular info for backup
         double gnss_gicp_diff = (current_pose.x - gnss_pose.x) * (current_pose.x - gnss_pose.x) + (current_pose.y - gnss_pose.y) * (current_pose.y - gnss_pose.y);
 
-        if(enable_gnss_backup_ && gnss_gicp_diff > 5.0){
+        if(enable_gnss_backup_ && gnss_gicp_diff > gnss_backup_thr_ * gnss_backup_thr_){
             previous_pose.x = gnss_pose.x;
             previous_pose.y = gnss_pose.y;
             previous_pose.z = gnss_pose.z;
@@ -404,6 +404,7 @@ void GicpLocalizer::init_params(){
     private_nh_.param("init_yaw", init_pose.yaw, 0.0);
 
     private_nh_.param("enable_gnss_backup", enable_gnss_backup_, false);
+    private_nh_.param("gnss_backup_threshold", gnss_backup_thr_, 10.0);
 
     voxelgrid_.setLeafSize(leafsize_, leafsize_, leafsize_);
     vgicp_.setResolution(resolution_);
