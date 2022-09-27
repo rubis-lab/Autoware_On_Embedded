@@ -8,7 +8,9 @@ Panels:
         - /System1/TF1
         - /System1/TF1/Frames1
         - /Map1/Points Map1
-        - /Sensing1/Points Raw1/Status1
+        - /Sensing1
+        - /Sensing1/Points Raw1
+        - /Sensing1/Filtered Point1
         - /Perception1
         - /Perception1/Tracked Objects1
       Splitter Ratio: 0.4564755856990814
@@ -31,7 +33,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: Points Map
+    SyncSource: Points Raw
   - Class: autoware_rviz_debug/DecisionMakerPanel
     Name: DecisionMakerPanel
   - Class: integrated_viewer/ImageViewerPlugin
@@ -79,8 +81,6 @@ Visualization Manager:
               Value: true
             ego_vehicle:
               Value: true
-            ego_vehicle/collision:
-              Value: true
             ego_vehicle/gnss:
               Value: true
             ego_vehicle/imu:
@@ -101,13 +101,9 @@ Visualization Manager:
               Value: true
             obstacle:
               Value: true
-            obstacle/collision:
-              Value: true
             velodyne:
               Value: true
             walker:
-              Value: true
-            walker/collision:
               Value: true
             world:
               Value: true
@@ -119,11 +115,9 @@ Visualization Manager:
           Tree:
             world:
               map:
+                base_link:
+                  {}
                 ego_vehicle:
-                  base_link:
-                    {}
-                  ego_vehicle/collision:
-                    {}
                   ego_vehicle/gnss:
                     gps:
                       {}
@@ -144,8 +138,7 @@ Visualization Manager:
                 obstacle:
                   {}
                 walker:
-                  walker/collision:
-                    {}
+                  {}
           Update Interval: 0
           Value: true
         - Alpha: 1
@@ -367,9 +360,7 @@ Visualization Manager:
           Enabled: true
           Invert Rainbow: false
           Max Color: 255; 255; 255
-          Max Intensity: 4096
           Min Color: 0; 0; 0
-          Min Intensity: 0
           Name: Points Map
           Position Transformer: XYZ
           Queue Size: 10
@@ -387,7 +378,7 @@ Visualization Manager:
           Marker Topic: /vector_map_center_lines_rviz
           Name: Vector Map
           Namespaces:
-            road_network_vector_map: true
+            {}
           Queue Size: 100
           Value: true
       Enabled: true
@@ -409,14 +400,12 @@ Visualization Manager:
           Enabled: false
           Invert Rainbow: false
           Max Color: 255; 255; 255
-          Max Intensity: 0.9782063364982605
           Min Color: 0; 0; 0
-          Min Intensity: 0.5498073101043701
           Name: Points Raw
           Position Transformer: XYZ
           Queue Size: 10
           Selectable: true
-          Size (Pixels): 2
+          Size (Pixels): 5
           Size (m): 0.009999999776482582
           Style: Points
           Topic: /points_raw
@@ -439,9 +428,7 @@ Visualization Manager:
           Enabled: false
           Invert Rainbow: false
           Max Color: 255; 255; 255
-          Max Intensity: 4096
           Min Color: 0; 0; 0
-          Min Intensity: 0
           Name: Points No Ground
           Position Transformer: XYZ
           Queue Size: 10
@@ -469,9 +456,35 @@ Visualization Manager:
           Enabled: true
           Invert Rainbow: false
           Max Color: 255; 255; 255
-          Max Intensity: 4096
           Min Color: 0; 0; 0
-          Min Intensity: 0
+          Name: Filtered Point
+          Position Transformer: XYZ
+          Queue Size: 10
+          Selectable: true
+          Size (Pixels): 3
+          Size (m): 1
+          Style: Spheres
+          Topic: /filtered_points
+          Unreliable: false
+          Use Fixed Frame: true
+          Use rainbow: true
+          Value: true
+        - Alpha: 1
+          Autocompute Intensity Bounds: true
+          Autocompute Value Bounds:
+            Max Value: 10
+            Min Value: -10
+            Value: true
+          Axis: Z
+          Channel Name: intensity
+          Class: rviz/PointCloud2
+          Color: 255; 255; 255
+          Color Transformer: Intensity
+          Decay Time: 0
+          Enabled: false
+          Invert Rainbow: false
+          Max Color: 255; 255; 255
+          Min Color: 0; 0; 0
           Name: Aligned Point
           Position Transformer: XYZ
           Queue Size: 10
@@ -483,7 +496,7 @@ Visualization Manager:
           Unreliable: false
           Use Fixed Frame: true
           Use rainbow: true
-          Value: true
+          Value: false
       Enabled: true
       Name: Sensing
     - Class: rviz/Group
@@ -552,9 +565,7 @@ Visualization Manager:
           Enabled: true
           Invert Rainbow: false
           Max Color: 255; 255; 255
-          Max Intensity: 4096
           Min Color: 0; 0; 0
-          Min Intensity: 0
           Name: Clustered Points
           Position Transformer: XYZ
           Queue Size: 10
@@ -572,9 +583,7 @@ Visualization Manager:
           Marker Topic: /detection/lidar_detector/objects_markers_center
           Name: Tracked Objects
           Namespaces:
-            /detection/lidar_detector/centroid_markers2: true
-            /detection/lidar_detector/hull_markers2: true
-            /detection/lidar_detector/label_markers2: true
+            {}
           Queue Size: 100
           Value: true
       Enabled: true
@@ -604,7 +613,7 @@ Visualization Manager:
               Marker Topic: /safety_border
               Name: Safety Box
               Namespaces:
-                global_lane_array_marker: true
+                {}
               Queue Size: 100
               Value: true
             - Class: jsk_rviz_plugin/BoundingBoxArray
@@ -648,8 +657,7 @@ Visualization Manager:
               Marker Topic: /global_waypoints_rviz
               Name: Global Path
               Namespaces:
-                global_lane_array_marker: true
-                global_lane_waypoint_orientation_marker: true
+                {}
               Queue Size: 100
               Value: true
           Enabled: true
@@ -659,7 +667,7 @@ Visualization Manager:
           Marker Topic: /local_trajectories_eval_rviz
           Name: Local Traj
           Namespaces:
-            local_lane_array_marker_colored: true
+            {}
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
@@ -667,7 +675,7 @@ Visualization Manager:
           Marker Topic: /behavior_state
           Name: Behavior State
           Namespaces:
-            beh_state: true
+            {}
           Queue Size: 100
           Value: true
       Enabled: true
@@ -679,7 +687,7 @@ Visualization Manager:
           Marker Topic: /trajectory_circle_mark
           Name: Pure Pursuit Trajectory
           Namespaces:
-            trajectory_circle_marker: true
+            {}
           Queue Size: 100
           Value: true
         - Class: rviz/Marker
@@ -687,7 +695,7 @@ Visualization Manager:
           Marker Topic: /next_target_mark
           Name: Pure Pursuit Target
           Namespaces:
-            next_target_marker: true
+            {}
           Queue Size: 100
           Value: true
         - Class: rviz/Marker
@@ -745,11 +753,11 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 6.501771926879883
+      Scale: 8.801525115966797
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz)
-      X: 260.38592529296875
-      Y: 191.08261108398438
+      X: 267.5365295410156
+      Y: 223.4163818359375
     Saved: ~
 Window Geometry:
   DecisionMakerPanel:

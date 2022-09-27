@@ -13,9 +13,12 @@
   
   <arg name="spawn_point" default="258.5, 208.2, 0.3, 0, 0, 90"/>
   <arg name='role_name_obstacle' default='obstacle'/>
-  <arg name="spawn_point_obstacle" default="324.4, 346.1, 0.3, 0, 0, -32"/>
+  <!-- <arg name="spawn_point_obstacle" default="324.4, 346.1, 0.3, 0, 0, -32"/> -->
+  <arg name="spawn_point_obstacle" default="-10, 214, 0.3, 0, 0, -90"/>
 
-  <arg name="spawn_point_walker" default="212.0, 297.0, 0.3, 0, 0, 180"/>
+
+  <!-- <arg name="spawn_point_walker" default="212.0, 297.0, 0.3, 0, 0, 180"/> -->
+  <arg name="spawn_point_walker" default="-10, 214, 5, 0, 0, -90"/>
   <arg name="walker_point1" default="206.0, 297.0, 0.3, 0, 0, 180"/>
   <arg name="walker_point2" default="204.0, 297.0, 0.3, 0, 0, 180"/>
   <arg name="walker_point3" default="198.0, 297.0, 0.3, 0, 0, 180"/>

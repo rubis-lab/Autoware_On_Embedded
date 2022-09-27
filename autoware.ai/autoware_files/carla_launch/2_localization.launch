@@ -12,7 +12,8 @@
   <arg name="topic_twist_stamped" default="/carla_current_velocity" />
 
   <!-- points downsampler -->
-  <include file="$(find points_downsampler)/launch/points_downsample.launch" />
+  <!-- <include file="$(find points_downsampler)/launch/points_downsample.launch" /> -->
+  <!-- <include file="$(find points_downsampler)/launch/voxel_grid_filter_params.launch" /> -->
 
   <!-- nmea2tfpose -->
   <!-- <include file="$(find gnss_localizer)/launch/nmea2tfpose.launch">
@@ -21,8 +22,8 @@
 
   <!-- ndt_matching --><!-- pcl_generic=0, pcl_anh=1, pcl_anh_gpu=2, pcl_openmp=3 -->
   <include file="$(find lidar_localizer)/launch/ndt_matching.launch">
-    <arg name="method_type" value="0" /> 
-    <arg name="get_height" value="true" /> 
+    <arg name="method_type" value="1" /> 
+    <arg name="get_height" value="false" /> 
   </include>
 
   <!-- ndt config -->
@@ -37,10 +38,10 @@
     pitch: $(arg init_pitch),
     yaw: $(arg init_yaw),
     use_predict_pose: 1,
-    error_threshold: 0.01,
-    resolution: 3.0,
-    step_size: 0.3,
-    trans_epsilon: 0.03,
+    error_threshold: 1.0,
+    resolution: 1.0,
+    step_size: 0.5,
+    trans_epsilon: 0.1,
     max_iterations: 10}
   '"/>
 

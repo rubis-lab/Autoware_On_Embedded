@@ -18,7 +18,8 @@
 
   <!-- gicp_localizer -->
   <arg name="base_frame" default="base_link" doc="Vehicle reference frame" />
-  <arg name="sensor_frame" default="velodyne" doc="Vehicle reference frame" />
+  <!-- <arg name="sensor_frame" default="velodyne" doc="Vehicle reference frame" /> -->
+  <arg name="sensor_frame" default="ego_vehicle/lidar" doc="Vehicle reference frame" />
   <arg name="resolution" default="2.0" doc="The ND voxel grid resolution" />
   <arg name="numthreads" default="4" doc="vgicp threads num" />
   <arg name="leafsize" default="0.05" doc="point map downsample leafsize" />
