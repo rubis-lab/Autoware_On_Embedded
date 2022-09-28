@@ -412,7 +412,7 @@ static void map_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
 
 static void gnss_callback(const geometry_msgs::PoseStamped::ConstPtr& input)
 {
-  if(!_use_gnss || !_is_init_match_finished) return;
+  if(!_use_gnss) return;
   current_gnss_pose.x = input->pose.position.x;
   current_gnss_pose.y = input->pose.position.y;
   current_gnss_pose.z = input->pose.position.z;
@@ -436,10 +436,17 @@ static void gnss_callback(const geometry_msgs::PoseStamped::ConstPtr& input)
     matching_fail_cnt = 0;
   }
   
-  if(matching_fail_cnt > 10 && _is_init_match_finished){
+  if(matching_fail_cnt > 10){
     previous_score = 0.0;
     current_pose = current_gnss_pose;
     previous_pose = current_gnss_pose;
+    
+    current_velocity = 0.0;
+    current_velocity_x = 0.0;
+    current_velocity_y = 0.0;
+    current_velocity_z = 0.0;
+    angular_velocity = 0.0;
+
     matching_fail_cnt = 0;
   }
 
