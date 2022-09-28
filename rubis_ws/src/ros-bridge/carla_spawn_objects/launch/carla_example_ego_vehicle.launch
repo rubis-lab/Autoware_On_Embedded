@@ -24,8 +24,8 @@
   </include>
 
   <!-- This nodes allows to respawn the vehicle <role_name> by publishing on topic /initialpose -->
-  <include file="$(find carla_spawn_objects)/launch/set_initial_pose.launch">
+  <!-- <include file="$(find carla_spawn_objects)/launch/set_initial_pose.launch">
     <arg name="role_name" value="$(arg role_name)"/>
     <arg name="control_id" value="$(arg control_id)"/>
-  </include>
+  </include> -->
 </launch>
