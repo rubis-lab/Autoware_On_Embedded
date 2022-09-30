@@ -15,7 +15,7 @@
   <include file="$(find points_downsampler)/launch/points_downsample.launch" />
 
   <!-- gicp_localizer -->
-  <arg name="enable_gnss_backup" default="true" /> 
+  <arg name="enable_gnss_backup" default="false" /> 
   <arg name="base_frame" default="base_link" doc="Vehicle reference frame" />
   <!-- <arg name="sensor_frame" default="velodyne" doc="Vehicle reference frame" /> -->
   <arg name="sensor_frame" default="ego_vehicle/lidar" doc="Vehicle reference frame" />

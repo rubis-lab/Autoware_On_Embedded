@@ -58,7 +58,7 @@ int main(int argc, char *argv[]){
     nh.param("/gnss_pose_pub/z_offset", z_offset_, 0.0);
     nh.param("/ins_twist_generator/yaw_offset", yaw_offset_, 0.0);
 
-    gnss_pose_pub_ = nh.advertise<geometry_msgs::PoseStamped>("/ndt_pose", 2);
+    gnss_pose_pub_ = nh.advertise<geometry_msgs::PoseStamped>("/gnss_pose", 2);
 
     message_filters::Subscriber<inertiallabs_msgs::gps_data> gps_sub(nh, "/Inertial_Labs/gps_data", 2);
     message_filters::Subscriber<inertiallabs_msgs::ins_data> ins_sub(nh, "/Inertial_Labs/ins_data", 2);

@@ -1,11 +1,11 @@
 <launch>
   <!-- cubetown -->
-  <arg name="init_x" value="57.1" />
-  <arg name="init_y" value="1.38" />
+  <arg name="init_x" value="162.6" />
+  <arg name="init_y" value="157.6" />
   <arg name="init_z" value="0.48" />
   <arg name="init_roll" value="0.0" />
   <arg name="init_pitch" value="0.0" />
-  <arg name="init_yaw" value="1.57" />
+  <arg name="init_yaw" value="0.0" />
 
   <!-- vel/pose connect -->
   <arg name="topic_pose_stamped" default="/gicp_pose" />
@@ -15,7 +15,7 @@
   <!-- points downsampler -->
   <include file="$(find points_downsampler)/launch/voxel_grid_filter_params.launch" />
 
-  <arg name="enable_gnss_backup" default="true" /> 
+  <arg name="enable_gnss_backup" default="false" /> 
 
   <arg name="base_frame" default="base_link" doc="Vehicle reference frame" />
   <arg name="resolution" default="2.0" doc="The ND voxel grid resolution" />

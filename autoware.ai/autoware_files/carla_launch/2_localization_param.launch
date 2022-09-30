@@ -1,11 +1,11 @@
 <launch>
   <!-- Town04 -->
-  <arg name="init_x" value="57.1" />
-  <arg name="init_y" value="1.38" />
-  <arg name="init_z" value="0.48" />
+  <arg name="init_x" value="258.4" />
+  <arg name="init_y" value="206.5" />
+  <arg name="init_z" value="0.0" />
   <arg name="init_roll" value="0.0" />
   <arg name="init_pitch" value="0.0" />
-  <arg name="init_yaw" value="1.57" />
+  <arg name="init_yaw" value="1.54" />
 
   <!-- vel/pose connect -->
   <arg name="topic_pose_stamped" default="/ndt_pose" />
@@ -31,7 +31,7 @@
   <arg name="step_size" default="0.05"/>
   <arg name="trans_epsilon" default="0.03"/>
 
-  <arg name="use_gnss" default="true"/>
+  <arg name="use_gnss" default="false"/>
   <arg name="gnss_pose_diff_threshold" default="5.0"/>
 
   <!-- ndt_matching -->
@@ -66,7 +66,7 @@
     <param name="output_pose_topic" value="ndt_pose" />
     <param name="ndt_stat_topic" value="ndt_stat" />
     <param name="twist_topic" value="estimated_twist" />
-    <param name="ndt_time_topic" value="ndt_time" />
+    <param name="ndt_time_topic" value="time_ndt_matching" />
   </node>
 
   <!-- vel_pose_mux -->
