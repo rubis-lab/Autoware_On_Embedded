@@ -2,7 +2,6 @@
   <arg name="output_log" default="false" />
   <arg name="leaf_size" default="0.1" />
   <arg name="measurement_range" default="200" />
-  <arg name="instance_mode" default="0"/>
   <arg name="input_topic_name" default="points_raw" />
   <arg name="output_topic_name" default="filtered_points"/>
   
@@ -12,6 +11,5 @@
     <param name="leaf_size" value="$(arg leaf_size)" />
     <param name="measurement_range" value="$(arg measurement_range)" />
     <param name="output_log" value="$(arg output_log)" />
-    <param name="instance_mode" value="$(arg instance_mode)" />
   </node>
 </launch>
