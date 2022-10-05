@@ -25,6 +25,7 @@
 #include "LLH2UTM.h"
 #include "LKF.h"
 #include "quaternion_euler.h"
+#include <eigen3/Eigen/Eigen>
 #endif
 
 #define M_PI 3.14159265358979323846
@@ -43,6 +44,7 @@ private:
     void gps_data_cb(const inertiallabs_msgs::gps_data::ConstPtr &gps_msg);
     void ins_data_cb(const inertiallabs_msgs::ins_data::ConstPtr &ins_msg);
     void sensor_data_cb(const inertiallabs_msgs::sensor_data::ConstPtr &sensor_msg);
+    void createTransformationMatrix(std::vector<double>& transformation_vec);
 
 private:
     ros::NodeHandle nh_;
@@ -71,6 +73,8 @@ private:
     bool use_gnss_tf_;
     bool use_sync_;
     LKF lkf_;
+
+    Eigen::Matrix<double, 3, 3> T_;
 
     double time_diff_;
     bool is_updated_ = false;

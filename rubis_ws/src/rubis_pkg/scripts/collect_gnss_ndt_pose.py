@@ -6,6 +6,8 @@ import keyboard
 
 ### TODO ###
 file_name='2022-10-05_pose_info_w_theta+noise_2m'
+gnss_pose_topic_name='gnss_test_pose'
+ndt_pose_topic_name='ndt_pose'
 ############
 
 class Position:
@@ -46,8 +48,8 @@ def ndt_pose_cb(msg):
 def main():
     rospy.init_node('transform_generator', anonymous=True)
     rate = rospy.Rate(100)
-    rospy.Subscriber('ndt_pose', PoseStamped, ndt_pose_cb)
-    rospy.Subscriber('gnss_offset_pose', PoseStamped, gnss_pose_cb)
+    rospy.Subscriber(ndt_pose_topic_name, PoseStamped, ndt_pose_cb)
+    rospy.Subscriber(gnss_pose_topic_name, PoseStamped, gnss_pose_cb)
 
 
     pose_file = open('./data/'+file_name+'.scv', 'w')

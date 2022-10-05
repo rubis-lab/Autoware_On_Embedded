@@ -6,6 +6,8 @@
 #define DEBUG
 
 GnssModule::GnssModule(){
+    std::string pose_topic_name;
+    nh_.param("/gnss_module/pose_topic_name", pose_topic_name, std::string("/gnss_pose"));
     nh_.param("/gnss_module/x_offset", x_offset_, 0.0);
     nh_.param("/gnss_module/y_offset", y_offset_, 0.0);
     nh_.param("/gnss_module/z_offset", z_offset_, 0.0);
@@ -14,8 +16,14 @@ GnssModule::GnssModule(){
     nh_.param("/gnss_module/use_kalman_filter", use_kalman_filter_, true);
     nh_.param("/gnss_module/use_gnss_tf", use_gnss_tf_, false);
     nh_.param("/gnss_module/use_sync", use_sync_, false);
+    
+    std::vector<double> transformation_vec;
+    if( !nh_.getParam("gnss_transformation",transformation_vec)){
+      ROS_ERROR("Cannot load gnss_transformation");      
+    }
+    createTransformationMatrix(transformation_vec);
 
-    gnss_pose_pub_ = nh_.advertise<geometry_msgs::PoseStamped>("/gnss_pose", 1);
+    gnss_pose_pub_ = nh_.advertise<geometry_msgs::PoseStamped>(pose_topic_name.c_str(), 1);
     ins_twist_pub_ = nh_.advertise<geometry_msgs::TwistStamped>("/ins_twist", 1);
     ins_stat_pub_ = nh_.advertise<rubis_msgs::InsStat>("/ins_stat", 1);
 
@@ -81,6 +89,13 @@ GnssModule::GnssModule(){
     return;
 }
 
+void GnssModule::createTransformationMatrix(std::vector<double>& transformation_vec){
+    T_ << transformation_vec[0], transformation_vec[1], transformation_vec[2],
+        transformation_vec[3], transformation_vec[4], transformation_vec[5],
+        transformation_vec[6], transformation_vec[7], transformation_vec[8];
+    return;
+}
+
 void GnssModule::gps_data_cb(const inertiallabs_msgs::gps_data::ConstPtr &gps_msg){
     static ros::Time prev_time = cur_time_;
     static double prev_linear_velocity = 0.0;
@@ -97,6 +112,13 @@ void GnssModule::gps_data_cb(const inertiallabs_msgs::gps_data::ConstPtr &gps_ms
     gnss_pose_.pose.position.x = gnss_pose_.pose.position.x - x_offset_;
     gnss_pose_.pose.position.y = gnss_pose_.pose.position.y - y_offset_;
     gnss_pose_.pose.position.z = gnss_pose_.pose.position.z - z_offset_;
+
+    /* pose transform */
+    Eigen::Matrix<double, 3, 1> pos, transposed_pose;
+    pos(0) = gnss_pose_.pose.position.x; pos(1) = gnss_pose_.pose.position.y; pos(2) = 1;
+    transposed_pose = T_ * pos;
+    gnss_pose_.pose.position.x = transposed_pose(0);
+    gnss_pose_.pose.position.y = transposed_pose(1);
 
     /* velocity */
     linear_velocity = gps_msg->HorSpeed; // m/s
@@ -131,8 +153,6 @@ void GnssModule::gps_data_cb(const inertiallabs_msgs::gps_data::ConstPtr &gps_ms
 
     /* Check data is updated */
     is_updated_ = true;
-
-    std::cout<<"In callback"<<std::endl;
 
     return;
 }

@@ -1,22 +1,26 @@
 <launch>
-    <arg name="x_offset" default="29966.0" />
-    <arg name="y_offset" default="1483.0" />
-    <arg name="z_offset" default="-1456.0" />
-    <arg name="yaw_offset" default="180.0" />    
+    <arg name="x_offset" default="0.0" />
+    <arg name="y_offset" default="0.0" />
+    <arg name="z_offset" default="0.0" />
+    <arg name="yaw_offset" default="0.0" />    
     <arg name="use_gnss_tf" default="false" />
     <arg name="use_sync" default="false" />
     <arg name="use_kalman_filter" default="false" />
-    <arg name="kalman_filter_cfg" default="$(find gnss_module)/cfg/kalman_filter.yaml" />
+    <arg name="kalman_filter_params" default="$(find gnss_module)/cfg/kalman_filter.yaml" />
+    <arg name="transformation_params" default="$(env USER_HOME)/autoware.ai/autoware_files/transformation/none.yaml" />
     <arg name="debug" default="false" />
+    <arg name="pose_topic_name" default="/gnss_pose" />
 
     <!-- 138ground offset -->
     <!-- <arg name="x_offset" default="10011.0" />
     <arg name="y_offset" default="12403.0" /> -->
 
 
-     <rosparam command="load" file="$(arg kalman_filter_cfg)" />
+    <rosparam command="load" file="$(arg kalman_filter_params)" />
+    <rosparam command="load" file="$(arg transformation_params)" />
 
     <node pkg="gnss_module" type="gnss_module" name="gnss_module" output="screen">
+        <param name="pose_topic_name" value="$(arg pose_topic_name)"/>
         <param name="x_offset" value="$(arg x_offset)"/>
         <param name="y_offset" value="$(arg y_offset)"/>
         <param name="z_offset" value="$(arg z_offset)"/>
@@ -24,6 +28,6 @@
         <param name="debug" value="$(arg debug)"/>
         <param name="use_kalman_filter" value="$(arg use_kalman_filter)"/>
         <param name="use_gnss_tf" value="$(arg use_gnss_tf)"/>
-        <param name="use_sync" value="$(arg use_sync)" />
+        <param name="use_sync" value="$(arg use_sync)" /> <!-- When use_sync is false, use gps data only -->
     </node>
 </launch>

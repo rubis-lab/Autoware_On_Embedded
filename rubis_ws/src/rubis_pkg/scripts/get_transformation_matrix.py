@@ -58,21 +58,12 @@ def main():
     # P: Gnss pose / P_prime: Lidar pose
     P_mod_list = []
     P_prime_list = []
-    cumulated_distance = 1000
-    distance_threshold = 1
+    
     for data in raw_data:
         P_mod_list.append([data[GNSS_X], data[GNSS_Y], 1, 0,            0,            0])
         P_mod_list.append([0,            0,            0, data[GNSS_X], data[GNSS_Y], 1])
         P_prime_list.append(data[NDT_X])
         P_prime_list.append(data[NDT_Y])
-        # if cumulated_distance > distance_threshold:                        
-        #     P_mod_list.append([data[GNSS_X], data[GNSS_Y], 1, 0,            0,            0])
-        #     P_mod_list.append([0,            0,            0, data[GNSS_X], data[GNSS_Y], 1])
-        #     P_prime_list.append(data[NDT_X])
-        #     P_prime_list.append(data[NDT_Y])
-        #     cumulated_distance = 0
-        # else:
-        #     cumulated_distance = cumulated_distance + math.sqrt(pow(data[GNSS_X],2) + pow(data[GNSS_Y], 2))
         
     
     P_mod = np.array(P_mod_list)
