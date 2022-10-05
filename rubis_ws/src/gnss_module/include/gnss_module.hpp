@@ -36,17 +36,23 @@ class GnssModule{
 public:
     GnssModule();
     void run();
+
 private:
     void observation_cb(const inertiallabs_msgs::gps_data::ConstPtr &gps_msg, const inertiallabs_msgs::ins_data::ConstPtr &ins_msg, const inertiallabs_msgs::sensor_data::ConstPtr &sensor_msg);
     void run_kalman_filter(geometry_msgs::PoseStamped& pose, geometry_msgs::TwistStamped& twist, rubis_msgs::InsStat& ins_stat);
+    void gps_data_cb(const inertiallabs_msgs::gps_data::ConstPtr &gps_msg);
+    void ins_data_cb(const inertiallabs_msgs::ins_data::ConstPtr &ins_msg);
+    void sensor_data_cb(const inertiallabs_msgs::sensor_data::ConstPtr &sensor_msg);
+
 private:
     ros::NodeHandle nh_;
     ros::Publisher gnss_pose_pub_, ins_twist_pub_, ins_stat_pub_;
+    ros::Subscriber gps_data_sub_, ins_data_sub_, sensor_data_sub_;
     ros::Time cur_time_;
 
-    message_filters::Subscriber<inertiallabs_msgs::gps_data> gps_sub_;
-    message_filters::Subscriber<inertiallabs_msgs::ins_data> ins_sub_;
-    message_filters::Subscriber<inertiallabs_msgs::sensor_data> sensor_sub_;
+    message_filters::Subscriber<inertiallabs_msgs::gps_data> gps_sync_sub_;
+    message_filters::Subscriber<inertiallabs_msgs::ins_data> ins_sync_sub_;
+    message_filters::Subscriber<inertiallabs_msgs::sensor_data> sensor_sync_sub_;
     typedef sync_policies::ExactTime<inertiallabs_msgs::gps_data, inertiallabs_msgs::ins_data, inertiallabs_msgs::sensor_data> SyncPolicy;
     typedef Synchronizer<SyncPolicy> Sync;
     boost::shared_ptr<Sync> sync_;
@@ -62,6 +68,8 @@ private:
     double yaw_offset_;
     bool debug_;
     bool use_kalman_filter_;
+    bool use_gnss_tf_;
+    bool use_sync_;
     LKF lkf_;
 
     double time_diff_;

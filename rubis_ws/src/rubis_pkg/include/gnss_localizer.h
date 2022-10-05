@@ -6,6 +6,7 @@
 #include <memory>
 #include <cstdlib>
 #include <ctime>
+#include <cmath>
 
 // ROS includes
 #include <ros/ros.h>
@@ -17,6 +18,7 @@
 #include <geometry_msgs/TwistStamped.h>
 #include <tf/tf.h>
 #include <tf/transform_listener.h>
+#include <eigen3/Eigen/Eigen>
 
 namespace gnss_localizer
 {
@@ -44,7 +46,7 @@ private:
   ros::NodeHandle private_nh_;
 
   // publisher
-  ros::Publisher pub1_;
+  ros::Publisher pub1_, pub2_;
   ros::Publisher vel_pub_;
 
   // subscriber
@@ -74,6 +76,13 @@ private:
   bool enable_noise_;
   double max_noise_;
 
+  // custom offset
+  bool enable_offset_;
+  double offset_bx_, offset_by_, offset_theta_;
+  Eigen::Matrix<double, 3, 3> T_offset_;
+  Eigen::Matrix<double, 3, 3> T_offset_inv_;
+  Eigen::Matrix<double, 3, 3> T_;
+
   // callbacks
   void callbackFromNmeaSentence(const nmea_msgs::Sentence::ConstPtr &msg);
   void callbackFromIMU(const sensor_msgs::Imu& msg);
@@ -89,6 +98,8 @@ private:
   void createOrientation();
   void convert(std::vector<std::string> nmea, ros::Time current_stamp);
   void TransformPose(const geometry_msgs::PoseStamped &in_pose, geometry_msgs::PoseStamped& out_pose, const tf::StampedTransform &in_transform);
+  void createTransformationOffsetMatrix();
+  void createTransformationMatrix(std::vector<double>& transformation_vec);
 };
 
 std::vector<std::string> split(const std::string &string);

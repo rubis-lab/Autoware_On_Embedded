@@ -22,7 +22,7 @@ namespace gnss_localizer
 Nmea2TFPoseNode::Nmea2TFPoseNode()
   : private_nh_("~")
   , MAP_FRAME_("map")
-  , GPS_FRAME_("gps")
+  , GPS_FRAME_("gnss")
   , roll_(0)
   , pitch_(0)
   , yaw_(0)
@@ -49,6 +49,21 @@ void Nmea2TFPoseNode::initForROS()
   private_nh_.getParam("plane", plane_number_);
   private_nh_.param<bool>("enable_noise", enable_noise_, false);
 
+  private_nh_.param<bool>("enable_offset", enable_offset_, false);
+  if(enable_offset_){
+    private_nh_.param<double>("offset_bx", offset_bx_, 0);
+    private_nh_.param<double>("offset_by", offset_by_, 0);
+    private_nh_.param<double>("offset_theta", offset_theta_, 0);    
+
+    std::vector<double> transformation_vec;
+    if( !nh_.getParam("gnss_transformation",transformation_vec)){
+      ROS_ERROR("Cannot load gnss_transformation");
+    }
+
+    createTransformationOffsetMatrix();
+    createTransformationMatrix(transformation_vec);
+  }
+
   if(enable_noise_){
     std::srand((unsigned int)time(NULL));
     private_nh_.param<double>("max_noise", max_noise_, 2.0);
@@ -59,13 +74,33 @@ void Nmea2TFPoseNode::initForROS()
   sub2_ = nh_.subscribe("imu_raw", 100, &Nmea2TFPoseNode::callbackFromIMU, this);
 
   // setup publisher
-  pub1_ = nh_.advertise<geometry_msgs::PoseStamped>("gnss_pose", 10);
+  if(enable_offset_){
+    pub1_ = nh_.advertise<geometry_msgs::PoseStamped>("gnss_offset_pose", 10);
+    pub2_ = nh_.advertise<geometry_msgs::PoseStamped>("gnss_transformed_pose", 10);
+  }
+  else
+    pub1_ = nh_.advertise<geometry_msgs::PoseStamped>("gnss_pose", 10);
   vel_pub_ = nh_.advertise<geometry_msgs::TwistStamped>("gnss_vel", 10);
 }
 
 void Nmea2TFPoseNode::run()
 {
   ros::spin();
+}
+
+void Nmea2TFPoseNode::createTransformationOffsetMatrix(){
+  double offset_theta_radian = offset_theta_ * M_PI / 180.0;
+  T_offset_ <<  cos(offset_theta_radian), -1 * sin(offset_theta_radian),  offset_bx_,
+                sin(offset_theta_radian), cos(offset_theta_radian),       offset_by_,
+                0,                        0,                              1; 
+
+  T_offset_inv_ = T_offset_.inverse();
+}
+
+void Nmea2TFPoseNode::createTransformationMatrix(std::vector<double>& transformation_vec){
+  T_ << transformation_vec[0], transformation_vec[1], transformation_vec[2],
+        transformation_vec[3], transformation_vec[4], transformation_vec[5],
+        transformation_vec[6], transformation_vec[7], transformation_vec[8];
 }
 
 void Nmea2TFPoseNode::publishPoseStamped()
@@ -84,11 +119,28 @@ void Nmea2TFPoseNode::publishPoseStamped()
     cur_pose_.pose.position.y += y_noise;
   }
 
+  if(enable_offset_){    
+    Eigen::Matrix<double, 3, 1> pos_offset, transposed_pose_offset;
+    pos_offset(0) = cur_pose_.pose.position.x; pos_offset(1) = cur_pose_.pose.position.y; pos_offset(2) = 1;
+    transposed_pose_offset = T_offset_ * pos_offset;
+    cur_pose_.pose.position.x = transposed_pose_offset(0);
+    cur_pose_.pose.position.y = transposed_pose_offset(1);
+  }
+
   // TransformPose(cur_pose_, cur_pose_, transform_);
   cur_pose_.header.frame_id = MAP_FRAME_;
   cur_pose_.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(roll_, pitch_, yaw_);
 
   pub1_.publish(cur_pose_);
+  if(enable_offset_){
+    Eigen::Matrix<double, 3, 1> pos, transposed_pose;
+    pos(0) = cur_pose_.pose.position.x; pos(1) = cur_pose_.pose.position.y; pos(2) = 1;
+    transposed_pose = T_ * pos;
+    cur_pose_.pose.position.x = transposed_pose(0);
+    cur_pose_.pose.position.y = transposed_pose(1);
+
+    pub2_.publish(cur_pose_);
+  }
 }
 
 void Nmea2TFPoseNode::publishTF()
@@ -326,8 +378,8 @@ void Nmea2TFPoseNode::TransformPose(const geometry_msgs::PoseStamped &in_pose, g
 void Nmea2TFPoseNode::InitTF(){
   while(1){
       try{
-      listener_.waitForTransform("base_link", "gps", ros::Time(0), ros::Duration(0.001));
-      listener_.lookupTransform("base_link", "gps", ros::Time(0), transform_);
+      listener_.waitForTransform("base_link", "gnss", ros::Time(0), ros::Duration(0.001));
+      listener_.lookupTransform("base_link", "gnss", ros::Time(0), transform_);
       break;
       }
       catch(tf::TransformException& ex)

@@ -6,22 +6,31 @@
 #define DEBUG
 
 GnssModule::GnssModule(){
-    gnss_pose_pub_ = nh_.advertise<geometry_msgs::PoseStamped>("/gnss_pose", 1);
-    ins_twist_pub_ = nh_.advertise<geometry_msgs::TwistStamped>("/ins_twist", 1);
-    ins_stat_pub_ = nh_.advertise<rubis_msgs::InsStat>("/ins_stat", 1);
-
-    gps_sub_.subscribe(nh_, "/Inertial_Labs/gps_data", 2);
-    ins_sub_.subscribe(nh_, "/Inertial_Labs/ins_data", 2);
-    sensor_sub_.subscribe(nh_, "/Inertial_Labs/sensor_data", 2);
-    sync_.reset(new Sync(SyncPolicy(10), gps_sub_, ins_sub_, sensor_sub_));
-    sync_->registerCallback(boost::bind(&GnssModule::observation_cb, this, _1, _2, _3));
-
     nh_.param("/gnss_module/x_offset", x_offset_, 0.0);
     nh_.param("/gnss_module/y_offset", y_offset_, 0.0);
     nh_.param("/gnss_module/z_offset", z_offset_, 0.0);
     nh_.param("/gnss_module/yaw_offset", yaw_offset_, 0.0);
     nh_.param("/gnss_module/debug", debug_, false);
     nh_.param("/gnss_module/use_kalman_filter", use_kalman_filter_, true);
+    nh_.param("/gnss_module/use_gnss_tf", use_gnss_tf_, false);
+    nh_.param("/gnss_module/use_sync", use_sync_, false);
+
+    gnss_pose_pub_ = nh_.advertise<geometry_msgs::PoseStamped>("/gnss_pose", 1);
+    ins_twist_pub_ = nh_.advertise<geometry_msgs::TwistStamped>("/ins_twist", 1);
+    ins_stat_pub_ = nh_.advertise<rubis_msgs::InsStat>("/ins_stat", 1);
+
+    if(use_sync_){
+        gps_sync_sub_.subscribe(nh_, "/Inertial_Labs/gps_data", 2);
+        ins_sync_sub_.subscribe(nh_, "/Inertial_Labs/ins_data", 2);
+        sensor_sync_sub_.subscribe(nh_, "/Inertial_Labs/sensor_data", 2);
+        sync_.reset(new Sync(SyncPolicy(10), gps_sync_sub_, ins_sync_sub_, sensor_sync_sub_));
+        sync_->registerCallback(boost::bind(&GnssModule::observation_cb, this, _1, _2, _3));
+    }
+    else{
+        gps_data_sub_ = nh_.subscribe("/Inertial_Labs/gps_data", 1, &GnssModule::gps_data_cb, this);
+        ins_data_sub_ = nh_.subscribe("/Inertial_Labs/ins_data", 1, &GnssModule::ins_data_cb, this);
+        sensor_data_sub_ = nh_.subscribe("/Inertial_Labs/sensor_data", 1, &GnssModule::sensor_data_cb, this);
+    }
 
     std::vector<float> H_k_vec, Q_k_vec, R_k_vec, P_k_vec;
     if(!nh_.getParam("/gnss_module/H_k", H_k_vec)){
@@ -53,8 +62,6 @@ GnssModule::GnssModule(){
 
     lkf_ = LKF(H_k, Q_k, R_k, P_k);
 
-    std::cout<<"!!!"<<std::endl;
-
     /* lookup /gnss to /base_link static transform */ 
     ros::Rate rate(100);
     tf::TransformListener listener;
@@ -72,6 +79,70 @@ GnssModule::GnssModule(){
     }
 
     return;
+}
+
+void GnssModule::gps_data_cb(const inertiallabs_msgs::gps_data::ConstPtr &gps_msg){
+    static ros::Time prev_time = cur_time_;
+    static double prev_linear_velocity = 0.0;
+    double roll, pitch, yaw, linear_velocity, angular_velocity;
+
+    cur_time_ = gps_msg->header.stamp;
+    gnss_pose_.header = gps_msg->header;
+    gnss_pose_.header.frame_id = "/map";
+
+    /* coordinate transform (LLH2 to UTM) */ 
+    LLH2UTM(gps_msg->LLH.x, gps_msg->LLH.y, gps_msg->LLH.z, gnss_pose_);
+
+    /* position offset calculation */ 
+    gnss_pose_.pose.position.x = gnss_pose_.pose.position.x - x_offset_;
+    gnss_pose_.pose.position.y = gnss_pose_.pose.position.y - y_offset_;
+    gnss_pose_.pose.position.z = gnss_pose_.pose.position.z - z_offset_;
+
+    /* velocity */
+    linear_velocity = gps_msg->HorSpeed; // m/s
+
+    /* acceleration */
+    time_diff_ = (cur_time_ - prev_time).toSec();
+    if(time_diff_ == 0.0) time_diff_ = 0.000000001; // 1ns
+    double linear_acceleration = (linear_velocity - prev_linear_velocity)/time_diff_;
+
+    /* ins_twist */
+    ins_twist_.header = gnss_pose_.header;
+    ins_twist_.header.frame_id = "/base_link";
+    
+    ins_twist_.twist.linear.x = linear_velocity;
+    ins_twist_.twist.linear.y = 0.0;
+    ins_twist_.twist.linear.z = 0.0;
+    ins_twist_.twist.angular.x = 0.0;
+    ins_twist_.twist.angular.y = 0.0;
+
+    /* ins_stat */
+    ins_stat_.header = gnss_pose_.header;
+    ins_stat_.header.frame_id = "/base_link";
+
+    ins_stat_.linear_velocity = linear_velocity;
+    ins_stat_.linear_acceleration = linear_acceleration;
+    ins_stat_.angular_velocity = angular_velocity;
+    ins_stat_.yaw = yaw;
+
+    /* previous value */
+    prev_time = cur_time_;
+    prev_linear_velocity = linear_velocity;
+
+    /* Check data is updated */
+    is_updated_ = true;
+
+    std::cout<<"In callback"<<std::endl;
+
+    return;
+}
+
+void GnssModule::ins_data_cb(const inertiallabs_msgs::ins_data::ConstPtr &ins_msg){
+
+}
+
+void GnssModule::sensor_data_cb(const inertiallabs_msgs::sensor_data::ConstPtr &sensor_msg){
+
 }
 
 void GnssModule::observation_cb(const inertiallabs_msgs::gps_data::ConstPtr &gps_msg, const inertiallabs_msgs::ins_data::ConstPtr &ins_msg, const inertiallabs_msgs::sensor_data::ConstPtr &sensor_msg){
@@ -216,7 +287,8 @@ void GnssModule::run(){
             gnss_pose_.pose.orientation.z = tf_map_to_base.getRotation().z();
 
             /* broadcast & publish */ 
-            broadcaster.sendTransform(tf::StampedTransform(tf_map_to_base, ros::Time::now(), "/map", "/base_link"));
+            if(use_gnss_tf_) broadcaster.sendTransform(tf::StampedTransform(tf_map_to_base, ros::Time::now(), "/map", "/base_link"));
+            broadcaster.sendTransform(tf::StampedTransform(tf_map_to_base, ros::Time::now(), "/map", "/gnss_pose"));
 
             gnss_pose_pub_.publish(gnss_pose_);
             ins_twist_pub_.publish(ins_twist_);
@@ -253,7 +325,7 @@ void GnssModule::run(){
             gnss_pose_.pose.orientation.z = tf_map_to_base.getRotation().z();
     
             /* broadcast & publish */ 
-            broadcaster.sendTransform(tf::StampedTransform(tf_map_to_base, ros::Time::now(), "/map", "/base_link"));
+            if(use_gnss_tf_) broadcaster.sendTransform(tf::StampedTransform(tf_map_to_base, ros::Time::now(), "/map", "/base_link"));
 
             gnss_pose_pub_.publish(gnss_pose_);
             ins_twist_pub_.publish(ins_twist_);
@@ -298,9 +370,9 @@ void GnssModule::run(){
     
             /* /map to /base tf calculation */ 
             tf_map_to_kalman = tf_map_to_kalman * tf_gnss_to_base_;
-    
+        
             /* broadcast & publish */ 
-            broadcaster.sendTransform(tf::StampedTransform(tf_map_to_base, ros::Time::now(), "/map", "/base_link"));
+            if(use_gnss_tf_) broadcaster.sendTransform(tf::StampedTransform(tf_map_to_base, ros::Time::now(), "/map", "/base_link"));
             broadcaster.sendTransform(tf::StampedTransform(tf_map_to_kalman, ros::Time::now(), "/map", "/kalman"));
     
             gnss_pose_pub_.publish(gnss_pose_);

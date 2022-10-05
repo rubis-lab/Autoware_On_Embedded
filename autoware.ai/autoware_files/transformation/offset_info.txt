@@ -1,0 +1,17 @@
+
+Offset group 1:
+    target:
+	2022-10-05_pose_info_w_noise_2m.yaml
+	cubetown_without_noise.yaml
+    bias_x:  10032.7
+    bias_y:  -21925.6
+    theta:   0
+
+Offset group 2:
+    target:
+	2022-10-05_pose_info_w_theta+noise_2m.yaml
+    bias_x:  10032.7
+    bias_y:  -21925.6
+    theta:   37.2
+
+

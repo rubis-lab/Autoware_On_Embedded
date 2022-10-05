@@ -1,11 +1,13 @@
 <launch>
-    <arg name="x_offset" default="10011.0" />
-    <arg name="y_offset" default="12403.0" />
-    <arg name="z_offset" default="0.0" />
-    <arg name="yaw_offset" default="50.0" />
-    <arg name="debug" default="false" />
+    <arg name="x_offset" default="29966.0" />
+    <arg name="y_offset" default="1483.0" />
+    <arg name="z_offset" default="-1456.0" />
+    <arg name="yaw_offset" default="180.0" />    
+    <arg name="use_gnss_tf" default="false" />
+    <arg name="use_sync" default="false" />
     <arg name="use_kalman_filter" default="false" />
     <arg name="kalman_filter_cfg" default="$(find gnss_module)/cfg/kalman_filter.yaml" />
+    <arg name="debug" default="false" />
 
     <!-- 138ground offset -->
     <!-- <arg name="x_offset" default="10011.0" />
@@ -21,5 +23,7 @@
         <param name="yaw_offset" value="$(arg yaw_offset)"/>
         <param name="debug" value="$(arg debug)"/>
         <param name="use_kalman_filter" value="$(arg use_kalman_filter)"/>
+        <param name="use_gnss_tf" value="$(arg use_gnss_tf)"/>
+        <param name="use_sync" value="$(arg use_sync)" />
     </node>
 </launch>
