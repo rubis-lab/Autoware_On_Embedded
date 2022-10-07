@@ -52,7 +52,7 @@ def main():
     rospy.Subscriber(gnss_pose_topic_name, PoseStamped, gnss_pose_cb)
 
 
-    pose_file = open('./data/'+file_name+'.scv', 'w')
+    pose_file = open('./data/'+file_name+'.csv', 'w')
     writer = csv.writer(pose_file)
     writer.writerow(['gnss_x','gnss_y','ndt_x','ndt_y'])
 
