@@ -13,13 +13,13 @@
 
   <!-- points downsampler -->
   <arg name="output_log" default="false" />
-  <arg name="leaf_size" default="0.1" />
+  <arg name="leaf_size" default="1.0" />
   <arg name="measurement_range" default="200" />
   <arg name="instance_mode" default="0"/>
 
   <arg name="method_type" default="0"/>
   <arg name="max_iter" default="10"/>
-  <arg name="resolution" default="2.0"/>
+  <arg name="resolution" default="3.0"/>
   <arg name="step_size" default="0.1"/>
   <arg name="trans_epsilon" default="0.1"/>
 
@@ -66,8 +66,8 @@
     <param name="input_topic" value="filtered_points" />
     <param name="output_pose_topic" value="ndt_pose" />
     <param name="ndt_stat_topic" value="ndt_stat" />
-    <param name="twist_topic" value="ndt_vel" />
-    <param name="ndt_time_topic" value="ndt_time" />
+    <param name="twist_topic" value="estimate_twist" />
+    <param name="ndt_time_topic" value="time_ndt_matching" />
   </node>
 
   <!-- vel_pose_mux -->
