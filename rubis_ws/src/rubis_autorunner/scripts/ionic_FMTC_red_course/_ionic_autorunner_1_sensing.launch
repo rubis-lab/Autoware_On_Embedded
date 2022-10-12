@@ -38,12 +38,6 @@
   <!-- <node pkg="tf" type="static_transform_publisher" name="lidar_to_camera" args="0.029 -0.574 -1.820 4.712 0.009 -1.883 velodyne camera 10" /> -->
 
   <node pkg="tf" type="static_transform_publisher" name="base_link_to_camera" args="0 0 0 0 0 0 base_link camera 10"/>
-   
-  <!-- gnss localizer -->
-  <!-- <arg name="plane" default="0"/>
-  <node pkg="rubis_pkg" type="gnss_localizer" name="gnss_localizer" output="screen">
-    <param name="plane" value="$(arg plane)"/>
-  </node> -->
 
   <!-- CAN Interface -->
   <include file="$(find can_translate)/launch/can_translate.launch" />
@@ -60,9 +54,6 @@
     <arg name="yaw_offset" value="-72.7014" />
     <arg name="yaw_diff_threshold" value="2.0" />
   </include> -->
-
-  <!-- Camera Image Module -->
-	<include file="$(find camera_image)/launch/camera_image.launch" />
 
 </launch>
 
