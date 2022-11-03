@@ -13,14 +13,28 @@
   <!-- <arg name="topic_twist_stamped" default="/odom_twist" /> -->
 
   <!-- points downsampler -->
-  <include file="$(find points_downsampler)/launch/voxel_grid_filter_params.launch" />
+  <arg name="output_log" default="false" />
+  <arg name="leaf_size" default="1.0" />
+  <arg name="measurement_range" default="200" />
+  <arg name="instance_mode" default="0"/>
 
-  <arg name="enable_gnss_backup" default="true" /> 
+  <node pkg="points_downsampler" name="voxel_grid_filter" type="voxel_grid_filter">
+    <param name="input_topic_name" value="points_raw" />
+    <param name="output_topic_name" value="filtered_points" />
+    <param name="leaf_size" value="$(arg leaf_size)" />
+    <param name="measurement_range" value="$(arg measurement_range)" />
+    <param name="output_log" value="$(arg output_log)" />
+    <param name="instance_mode" value="$(arg instance_mode)" />
+  </node>
+
+  <arg name="enable_gnss_backup" default="false" /> 
 
   <arg name="base_frame" default="base_link" doc="Vehicle reference frame" />
-  <arg name="resolution" default="2.0" doc="The ND voxel grid resolution" />
+  <arg name="resolution" default="4.0" doc="The ND voxel grid resolution" />
+  <arg name="neighborSearchMethod" default="DIRECT7"/>
+
   <arg name="numthreads" default="4" doc="vgicp threads num" />
-  <arg name="leafsize" default="0.05" doc="point map downsample leafsize" />
+  <arg name="leafsize" default="1.0" doc="point map downsample leafsize" />
 
   <node pkg="gicp_localizer" type="gicp_localizer_node" name="gicp_localizer_node" output="screen">
     <param name="init_x" value="$(arg init_x)" />
@@ -31,9 +45,11 @@
     <param name="init_yaw" value="$(arg init_yaw)" />
 
     <param name="enable_gnss_backup" value="$(arg enable_gnss_backup)" />
+    <param name="gnss_backup_threshold" value="7.0" />
 
     <param name="base_frame" value="$(arg base_frame)" />
     <param name="resolution" value="$(arg resolution)" />
+    <param name="neighborSearchMethod" value="$(arg neighborSearchMethod)" />
     <param name="numthreads" value="$(arg numthreads)" />
     <param name="leafsize" value="$(arg leafsize)" />
   </node>

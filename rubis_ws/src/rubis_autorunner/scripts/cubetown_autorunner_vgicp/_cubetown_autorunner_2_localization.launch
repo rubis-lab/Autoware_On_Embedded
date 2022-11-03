@@ -22,7 +22,7 @@
   <arg name="neighborSearchMethod" default="DIRECT7"/>
 
   <arg name="numthreads" default="4" doc="vgicp threads num" />
-  <arg name="leafsize" default="0.01" doc="point map downsample leafsize" />
+  <arg name="leafsize" default="0.1" doc="point map downsample leafsize" />
 
   <node pkg="gicp_localizer" type="gicp_localizer_node" name="gicp_localizer_node" output="screen">
     <param name="init_x" value="$(arg init_x)" />

@@ -13,17 +13,17 @@
 
   <!-- points downsampler -->
   <arg name="output_log" default="false" />
-  <arg name="leaf_size" default="1.0" />
-  <arg name="measurement_range" default="200" />
+  <arg name="leaf_size" default="0.2" />
+  <arg name="measurement_range" default="100" />
   <arg name="instance_mode" default="0"/>
 
   <arg name="method_type" default="0"/>
   <arg name="max_iter" default="10"/>
-  <arg name="resolution" default="2.0"/>
-  <arg name="step_size" default="0.1"/>
-  <arg name="trans_epsilon" default="0.1"/>
+  <arg name="resolution" default="4.0"/>
+  <arg name="step_size" default="0.5"/>
+  <arg name="trans_epsilon" default="0.05"/>
 
-  <arg name="use_gnss" default="true"/>
+  <arg name="use_gnss" default="false"/>
   <arg name="gnss_pose_diff_threshold" default="5.0"/>
 
   <node pkg="points_downsampler" name="voxel_grid_filter" type="voxel_grid_filter">
@@ -45,7 +45,7 @@
     <param name="step_size" value="$(arg step_size)" />
     <param name="trans_epsilon" value="$(arg trans_epsilon)" />
 
-    <param name="use_init_pose" value="true" />
+    <param name="use_init_pose" value="false" />
     <param name="init_x" value="$(arg init_x)" />
     <param name="init_y" value="$(arg init_y)" />
     <param name="init_z" value="$(arg init_z)" />
