@@ -12,7 +12,7 @@
   <arg name="topic_twist_stamped" default="/carla_current_velocity" />
 
   <!-- points downsampler -->
-  <!-- <include file="$(find points_downsampler)/launch/points_downsample.launch" /> -->
+  <include file="$(find points_downsampler)/launch/points_downsample.launch" />
   <!-- <include file="$(find points_downsampler)/launch/voxel_grid_filter_params.launch" /> -->
 
   <!-- nmea2tfpose -->

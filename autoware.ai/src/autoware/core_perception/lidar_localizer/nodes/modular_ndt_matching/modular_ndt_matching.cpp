@@ -1112,7 +1112,12 @@ int main(int argc, char** argv)
 
   // Publishers
   ndt_pose_pub = nh.advertise<geometry_msgs::PoseStamped>(_output_pose_topic, 10);
-  if(rubis::instance_mode_) rubis_ndt_pose_pub = nh.advertise<rubis_msgs::PoseStamped>("/rubis_" + _output_pose_topic,10);
+
+  // if(rubis::instance_mode_) rubis_ndt_pose_pub = nh.advertise<rubis_msgs::PoseStamped>("/rubis_" + _output_pose_topic,10);
+
+  //debug
+  std::string _output_pose_topic_rubis = "/rubis_" + _output_pose_topic;
+  if(rubis::instance_mode_) rubis_ndt_pose_pub = nh.advertise<rubis_msgs::PoseStamped>(_output_pose_topic_rubis,10);
 
   // localizer_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/localizer_pose", 10);
   estimate_twist_pub = nh.advertise<geometry_msgs::TwistStamped>(_twist_topic, 10);
@@ -1126,7 +1131,12 @@ int main(int argc, char** argv)
   ros::Subscriber initialpose_sub = nh.subscribe("initialpose", 10, initialpose_callback); 
 
   ros::Subscriber points_sub;
-  if(rubis::instance_mode_) points_sub = nh.subscribe("rubis_" + _input_topic, _queue_size, rubis_points_callback);
+  // if(rubis::instance_mode_) points_sub = nh.subscribe("rubis_" + _input_topic, _queue_size, rubis_points_callback);
+  // else points_sub = nh.subscribe(_input_topic, _queue_size, points_callback);
+
+  //debug
+  std::string _input_pose_topic_rubis = "/rubis_" + _input_pose_topic;
+  if(rubis::instance_mode_) points_sub = nh.subscribe(_input_pose_topic_rubis, _queue_size, rubis_points_callback);
   else points_sub = nh.subscribe(_input_topic, _queue_size, points_callback);
 
   ros::Subscriber ins_stat_sub = nh.subscribe("/ins_stat", 1, ins_stat_callback);
@@ -1134,6 +1144,13 @@ int main(int argc, char** argv)
   pthread_t thread;
   pthread_create(&thread, NULL, thread_func, NULL);
 
+
+  //debug
+  std::cout<<"----------------modular_ndt_matching_debug start------------------- "<< std::endl;
+  std::cout<<"output pose topic:         " << _output_pose_topic << std::endl;
+  std::cout<<"output pose topic rubis:         " << _output_pose_topic_rubis << std::endl;
+  std::cout<<"instance_mode param:          " <<  << std::endl;
+  std::cout<<"----------------modular_ndt_matching_debug end--------------------- "<< std::endl;
   // SPIN  
   if(!task_scheduling_flag && !task_profiling_flag){
     ros::spin();
