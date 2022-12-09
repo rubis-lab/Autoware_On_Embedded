@@ -1135,8 +1135,8 @@ int main(int argc, char** argv)
   // else points_sub = nh.subscribe(_input_topic, _queue_size, points_callback);
 
   //debug
-  std::string _input_pose_topic_rubis = "/rubis_" + _input_pose_topic;
-  if(rubis::instance_mode_) points_sub = nh.subscribe(_input_pose_topic_rubis, _queue_size, rubis_points_callback);
+  std::string _input_topic_rubis = "/rubis_" + _input_topic;
+  if(rubis::instance_mode_) points_sub = nh.subscribe(_input_topic_rubis, _queue_size, rubis_points_callback);
   else points_sub = nh.subscribe(_input_topic, _queue_size, points_callback);
 
   ros::Subscriber ins_stat_sub = nh.subscribe("/ins_stat", 1, ins_stat_callback);
