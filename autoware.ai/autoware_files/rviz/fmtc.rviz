@@ -4,9 +4,10 @@ Panels:
     Name: Displays
     Property Tree Widget:
       Expanded:
+        - /Global Options1
         - /Status1
-        - /Grid1
         - /Map1
+        - /Map1/Points Map1
         - /System1/TF1
         - /System1/TF1/Frames1
         - /Perception1/Tracked Objects1
@@ -80,7 +81,7 @@ Visualization Manager:
       Value: true
     - Class: rviz/Group
       Displays:
-        - Alpha: 0.05000000074505806
+        - Alpha: 0.009999999776482582
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
             Max Value: 10
@@ -127,6 +128,12 @@ Visualization Manager:
             All Enabled: false
             base_link:
               Value: true
+            camera:
+              Value: true
+            gnss:
+              Value: true
+            gnss_pose:
+              Value: true
             map:
               Value: true
             mobility:
@@ -143,6 +150,15 @@ Visualization Manager:
           Tree:
             world:
               map:
+                base_link:
+                  camera:
+                    {}
+                  gnss:
+                    {}
+                  velodyne:
+                    {}
+                gnss_pose:
+                  {}
                 mobility:
                   {}
           Update Interval: 0
@@ -681,7 +697,7 @@ Visualization Manager:
     Background Color: 48; 48; 48
     Default Light: true
     Fixed Frame: world
-    Frame Rate: 30
+    Frame Rate: 10
   Name: root
   Tools:
     - Class: rviz/Interact
@@ -716,8 +732,8 @@ Visualization Manager:
       Scale: 3.14768648147583
       Target Frame: map
       Value: TopDownOrtho (rviz)
-      X: 142.3694610595703
-      Y: 152.05909729003906
+      X: 25.1543025970459
+      Y: 37.5711784362793
     Saved: ~
 Window Geometry:
   DecisionMakerPanel:

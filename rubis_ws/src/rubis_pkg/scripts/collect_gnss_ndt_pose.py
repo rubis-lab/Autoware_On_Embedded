@@ -5,8 +5,8 @@ import csv
 import keyboard
 
 ### TODO ###
-file_name='2022-10-05_pose_info_w_theta+noise_2m'
-gnss_pose_topic_name='gnss_test_pose'
+file_name='2022-11-04_FMTC'
+gnss_pose_topic_name='gnss_pose'
 ndt_pose_topic_name='ndt_pose'
 ############
 

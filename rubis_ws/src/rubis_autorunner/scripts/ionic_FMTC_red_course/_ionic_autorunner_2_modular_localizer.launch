@@ -1,11 +1,10 @@
 <launch>
-  <!--TODO: Set LidAR Inital Pose-->
-  <arg name="init_x" value="57.1" />
-  <arg name="init_y" value="1.38" />
-  <arg name="init_z" value="0.48" />
+  <arg name="init_x" value="-30.4" />
+  <arg name="init_y" value="24.69" />
+  <arg name="init_z" value="8.53" />
   <arg name="init_roll" value="0.0" />
   <arg name="init_pitch" value="0.0" />
-  <arg name="init_yaw" value="1.57" />
+  <arg name="init_yaw" value="2.4" />
 
   <!-- vel/pose connect -->
   <arg name="topic_pose_stamped" default="/ndt_pose" />
@@ -13,14 +12,14 @@
 
   <!-- points downsampler -->
   <arg name="output_log" default="false" />
-  <arg name="leaf_size" default="0.2" />
-  <arg name="measurement_range" default="100" />
+  <arg name="leaf_size" default="0.5" />
+  <arg name="measurement_range" default="200" />
   <arg name="instance_mode" default="0"/>
 
   <arg name="method_type" default="0"/>
   <arg name="max_iter" default="10"/>
-  <arg name="resolution" default="4.0"/>
-  <arg name="step_size" default="0.5"/>
+  <arg name="resolution" default="5.0"/>
+  <arg name="step_size" default="0.3"/>
   <arg name="trans_epsilon" default="0.05"/>
 
   <arg name="use_gnss" default="false"/>
@@ -45,7 +44,7 @@
     <param name="step_size" value="$(arg step_size)" />
     <param name="trans_epsilon" value="$(arg trans_epsilon)" />
 
-    <param name="use_init_pose" value="false" />
+    <param name="use_init_pose" value="true" />
     <param name="init_x" value="$(arg init_x)" />
     <param name="init_y" value="$(arg init_y)" />
     <param name="init_z" value="$(arg init_z)" />

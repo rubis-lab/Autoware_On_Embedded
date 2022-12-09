@@ -12,13 +12,13 @@
   <arg name="enableDynamicMapUpdate"       default="false" />  
   <!-- Borregas Avenue -->
   <arg name="use_static_goal"       value="true" />
-  <arg name="goal_pose_x"           value="111.01" />
-  <arg name="goal_pose_y"           value="114.79" />
+  <arg name="goal_pose_x"           value="16.35" />
+  <arg name="goal_pose_y"           value="41.93" />
   <arg name="goal_pose_z"           value="0.0" />
   <arg name="goal_ori_x"            value="0.0" />
   <arg name="goal_ori_y"            value="0.0" />
-  <arg name="goal_ori_z"            value="0.846" />
-  <arg name="goal_ori_w"            value="0.533" />
+  <arg name="goal_ori_z"            value="0.885" />
+  <arg name="goal_ori_w"            value="-0.464" />
 
   <node pkg="op_global_planner" type="op_global_planner" name="op_global_planner" output="screen">    
     <rosparam command="load" file="$(find rubis_autorunner)/cfg/$(arg LaneInfoFile)"/>

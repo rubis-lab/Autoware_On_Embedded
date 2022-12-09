@@ -1,11 +1,10 @@
 <launch>
-  <!--TODO: Set LidAR Inital Pose-->
-  <arg name="init_x" value="57.1" />
-  <arg name="init_y" value="1.38" />
-  <arg name="init_z" value="0.48" />
+  <arg name="init_x" value="-30.4" />
+  <arg name="init_y" value="24.69" />
+  <arg name="init_z" value="8.53" />
   <arg name="init_roll" value="0.0" />
   <arg name="init_pitch" value="0.0" />
-  <arg name="init_yaw" value="1.57" />
+  <arg name="init_yaw" value="2.4" />
 
   <!-- vel/pose connect -->
   <arg name="topic_pose_stamped" default="/gicp_pose" />
@@ -14,7 +13,7 @@
 
   <!-- points downsampler -->
   <arg name="output_log" default="false" />
-  <arg name="leaf_size" default="1.0" />
+  <arg name="leaf_size" default="0.5" />
   <arg name="measurement_range" default="200" />
   <arg name="instance_mode" default="0"/>
 
@@ -27,7 +26,7 @@
     <param name="instance_mode" value="$(arg instance_mode)" />
   </node>
 
-  <arg name="enable_gnss_backup" default="false" /> 
+  <arg name="enable_gnss_backup" default="true" /> 
 
   <arg name="base_frame" default="base_link" doc="Vehicle reference frame" />
   <arg name="resolution" default="4.0" doc="The ND voxel grid resolution" />
