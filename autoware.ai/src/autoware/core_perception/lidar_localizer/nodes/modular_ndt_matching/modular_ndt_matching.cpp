@@ -1149,7 +1149,7 @@ int main(int argc, char** argv)
   std::cout<<"----------------modular_ndt_matching_debug start------------------- "<< std::endl;
   std::cout<<"output pose topic:         " << _output_pose_topic << std::endl;
   std::cout<<"output pose topic rubis:         " << _output_pose_topic_rubis << std::endl;
-  std::cout<<"instance_mode param:          " <<  << std::endl;
+  std::cout<<"instance_mode param:          " << std::endl;
   std::cout<<"----------------modular_ndt_matching_debug end--------------------- "<< std::endl;
   // SPIN  
   if(!task_scheduling_flag && !task_profiling_flag){
