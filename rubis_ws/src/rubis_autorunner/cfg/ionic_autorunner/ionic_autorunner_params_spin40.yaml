@@ -1,6 +1,5 @@
 # Unit of rate: hz
 # Unit of task information: nano seconds
-
 # 1s  : 1000000000
 # 1ms : 1000000
 # 1us : 1000
@@ -21,7 +20,7 @@ voxel_grid_filter:
   task_scheduling_flag: 0
   task_profiling_flag: 1
   task_response_time_filename: "~/Documents/profiling/response_time/voxel_grid_filter.csv"
-  rate: 10
+  rate: 40
   task_minimum_inter_release_time: 100_000_000
   task_execution_time: 1_600_000
   task_relative_deadline: 100_000_000
@@ -32,7 +31,7 @@ modular_ndt_matching_FR:
   task_scheduling_flag: 0
   task_profiling_flag: 1
   task_response_time_filename: "~/Documents/profiling/response_time/ndt_matching.csv"
-  rate: 10
+  rate: 40
   task_minimum_inter_release_time: 100_000_000
   task_execution_time: 80_000_000
   task_relative_deadline: 80_000_000
@@ -57,7 +56,7 @@ ndt_matching:
   task_scheduling_flag: 0
   task_profiling_flag: 1
   task_response_time_filename: "~/Documents/profiling/response_time/ndt_matching.csv"
-  rate: 10
+  rate: 40
   task_minimum_inter_release_time: 100_000_000
   task_execution_time: 80_000_000
   task_relative_deadline: 80_000_000
@@ -74,7 +73,7 @@ ray_ground_filter_center:
   task_scheduling_flag: 0
   task_profiling_flag: 1
   task_response_time_filename: "~/Documents/profiling/response_time/ray_ground_filter.csv"
-  rate: 10 
+  rate: 40
   task_minimum_inter_release_time: 100_000_000
   task_execution_time: 100_000_000
   task_relative_deadline: 100_000_000
@@ -84,7 +83,7 @@ lidar_euclidean_cluster_detect:
   task_scheduling_flag: 0
   task_profiling_flag: 1
   task_response_time_filename: "~/Documents/profiling/response_time/lidar_euclidean_cluster_detect.csv"
-  rate: 10
+  rate: 40
   task_minimum_inter_release_time: 200_000_000
   task_execution_time: 50_000_000
   task_relative_deadline: 200_000_000
@@ -98,7 +97,7 @@ vision_darknet_detect:
   task_scheduling_flag: 0
   task_profiling_flag: 1
   task_response_time_filename: "~/Documents/profiling/response_time/vision_darknet_detect.csv"
-  rate: 10
+  rate: 40
   task_minimum_inter_release_time: 100_000_000
   task_execution_time: 75_000_000
   task_relative_deadline: 80_000_000
@@ -114,7 +113,7 @@ imm_ukf_pda_track:
   task_scheduling_flag: 0
   task_profiling_flag: 1
   task_response_time_filename: "~/Documents/profiling/response_time/imm_ukf_pda_track.csv"
-  rate: 10
+  rate: 40
   task_minimum_inter_release_time: 200_000_000
   task_execution_time: 100_000_000
   task_relative_deadline: 200_000_000
@@ -124,7 +123,7 @@ op_global_planner:
   task_scheduling_flag: 0
   task_profiling_flag: 1
   task_response_time_filename: "~/Documents/profiling/response_time/op_global_planner.csv"
-  rate: 10 #25
+  rate: 40 #25
   task_minimum_inter_release_time: 100_000_000
   task_execution_time: 45_000_000
   task_relative_deadline: 100_000_000
@@ -141,7 +140,7 @@ op_trajectory_generator:
   task_scheduling_flag: 0
   task_profiling_flag: 1
   task_response_time_filename: "~/Documents/profiling/response_time/op_trajectory_generator.csv"
-  rate: 10 #100
+  rate: 40 #100
   task_minimum_inter_release_time: 100_000_000
   task_execution_time: 2_900_000
   task_relative_deadline: 100_000_000
@@ -150,7 +149,7 @@ op_trajectory_evaluator:
   task_scheduling_flag: 0
   task_profiling_flag: 1
   task_response_time_filename: "~/Documents/profiling/response_time/op_trajectory_evaluator.csv"
-  rate: 10 #100
+  rate: 40 #100
   task_minimum_inter_release_time: 100_000_000
   task_execution_time: 3_600_000
   task_relative_deadline: 100_000_000
@@ -168,7 +167,7 @@ op_behavior_selector:
   task_scheduling_flag: 0
   task_profiling_flag: 1
   task_response_time_filename: "~/Documents/profiling/response_time/op_behavior_selector.csv"
-  rate: 10 #100
+  rate: 40 #100
   task_minimum_inter_release_time: 100_000_000
   task_execution_time: 20_800_000
   task_relative_deadline: 100_000_000
@@ -181,7 +180,7 @@ op_motion_predictor:
   task_scheduling_flag: 0
   task_profiling_flag: 1
   task_response_time_filename: "~/Documents/profiling/response_time/op_motion_predictor.csv"
-  rate: 10 #25
+  rate: 40 #25
   task_minimum_inter_release_time: 100_000_000
   task_execution_time: 3_800_000
   task_relative_deadline: 100_000_000
@@ -192,7 +191,7 @@ pure_pursuit:
   task_scheduling_flag: 0
   task_profiling_flag: 1
   task_response_time_filename: "~/Documents/profiling/response_time/pure_pursuit.csv"
-  rate: 10 #30
+  rate: 40 #30
   task_minimum_inter_release_time: 100_000_000
   task_execution_time: 3_000_000
   task_relative_deadline: 100_000_000
@@ -204,7 +203,7 @@ twist_filter:
   task_scheduling_flag: 0
   task_profiling_flag: 1
   task_response_time_filename: "~/Documents/profiling/response_time/twist_filter.csv"
-  rate: 10
+  rate: 40
   task_minimum_inter_release_time: 100_000_000
   task_execution_time: 2_000_000
   task_relative_deadline: 100_000_000
@@ -214,7 +213,7 @@ twist_gate:
   task_scheduling_flag: 0
   task_profiling_flag: 1
   task_response_time_filename: "~/Documents/profiling/response_time/twist_gate.csv"
-  rate: 10
+  rate: 40
   task_minimum_inter_release_time: 100_000_000
   task_execution_time: 2_000_000
   task_relative_deadline: 100_000_000
@@ -226,7 +225,7 @@ lidar_republisher:
   task_scheduling_flag: 0
   task_profiling_flag: 1
   task_response_time_filename: "~/Documents/profiling/response_time/lidar_republisher.csv"
-  rate: 10
+  rate: 40
   task_minimum_inter_release_time: 100_000_000
   task_execution_time: 70_000_000
   task_relative_deadline: 100_000_000
@@ -235,7 +234,7 @@ vel_relay:
   task_scheduling_flag: 0
   task_profiling_flag: 1
   task_response_time_filename: "~/Documents/profiling/response_time/vel_relay.csv"
-  rate: 10
+  rate: 40
   task_minimum_inter_release_time: 100_000_000
   task_execution_time: 300_000
   task_relative_deadline: 100_000_000
@@ -245,7 +244,7 @@ pose_relay:
   task_scheduling_flag: 0
   task_profiling_flag: 1
   task_response_time_filename: "~/Documents/profiling/response_time/pose_relay.csv"
-  rate: 10
+  rate: 40
   task_minimum_inter_release_time: 100_000_000
   task_execution_time: 300_000
   task_relative_deadline: 100_000_000
@@ -254,7 +253,7 @@ republish:
   task_scheduling_flag: 0
   task_profiling_flag: 1
   task_response_time_filename: "~/Documents/profiling/response_time/republish.csv"
-  rate: 10
+  rate: 40
   task_minimum_inter_release_time: 100_000_000
   task_execution_time: 35_000_000
   task_relative_deadline: 100_000_000

@@ -1,5 +1,5 @@
 <launch>
-  <rosparam command="load" file="$(env USER_HOME)/rubis_ws/src/rubis_autorunner/cfg/ionic_autorunner/ionic_autorunner_params.yaml" />
+  <rosparam command="load" file="$(env USER_HOME)/rubis_ws/src/rubis_autorunner/cfg/ionic_autorunner/ionic_autorunner_params_spin40.yaml" />
 
   <arg name="lidar_input_topic" default="/points_raw"/>
   <arg name="lidar_output_topic" default="/points_raw"/>

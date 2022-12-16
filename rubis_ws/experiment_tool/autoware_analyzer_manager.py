@@ -39,7 +39,8 @@ def main(argv):
          with open('autoware_analyzer.yaml', 'w') as f:
             yaml.dump(data,f,default_flow_style=True)
          # collect center offset
-         center_off(argv[1]+'.csv')
+         center_off_ndt(argv[1]+'.csv')
+         
       elif opt in ("-e", "--e2e"):
          with open('autoware_analyzer.yaml') as f:
             data = yaml.load(f, yaml.FullLoader)

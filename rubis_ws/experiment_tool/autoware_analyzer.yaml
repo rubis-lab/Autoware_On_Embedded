@@ -1,4 +1,4 @@
-{center_offset_path: ./data/test/test_center_offset.csv, center_offset_ylim: [0.0,
-    3], e2e_response_time_path: ./data/test/test_e2e.csv, e2e_response_time_ylim: [
-    0.0, 800.0], node_paths: {lidar_republishr: ./data/test/autoware_log/lidar_republisher.csv,
-    twist_gate: ./data/test/autoware_log/twist_gate.csv}, plot_path: ./data/test/test_plot.png}
+{center_offset_path: ./data/221209_spin40_xavier_01/221209_spin40_xavier_01_center_offset.csv,
+  center_offset_ylim: [0.0, 3], e2e_response_time_path: ./data/221209_spin40_xavier_01/221209_spin40_xavier_01_e2e.csv,
+  e2e_response_time_ylim: [0.0, 800.0], node_paths: {lidar_republishr: ./data/221209_spin40_xavier_01/autoware_log/lidar_republisher.csv,
+    twist_gate: ./data/221209_spin40_xavier_01/autoware_log/twist_gate.csv}, plot_path: ./data/221209_spin40_xavier_01/221209_spin40_xavier_01_plot.png}
