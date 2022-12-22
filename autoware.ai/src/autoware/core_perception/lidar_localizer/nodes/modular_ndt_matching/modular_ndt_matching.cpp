@@ -114,7 +114,7 @@ static float _ndt_res = 1.0;
 static double _step_size = 0.1;
 static double _trans_eps = 0.01;
 
-static int _use_init_pose;
+static bool _use_init_pose = false;
 static bool _use_gnss;
 static std::string _offset = "linear";  // linear, zero, quadratic
 static int _queue_size = 1000;
@@ -230,7 +230,7 @@ static void init_params()
   private_nh.param<double>("step_size", _step_size, 0.1);
   private_nh.param<double>("trans_epsilon", _trans_eps, 0.01);
 
-  private_nh.param<int>("use_init_pose", _use_init_pose, 1);
+  private_nh.param<bool>("use_init_pose", _use_init_pose, false);
 
   if(_use_init_pose){
     private_nh.param<double>("init_x", initial_pose.x, 0.0);
