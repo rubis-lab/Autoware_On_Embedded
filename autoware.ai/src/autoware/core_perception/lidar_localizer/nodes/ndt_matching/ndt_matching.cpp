@@ -48,6 +48,8 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/Quaternion.h>
 
+#include <rubis_msgs/PoseStamped.h>
+
 #include <tf/tf.h>
 #include <tf/transform_broadcaster.h>
 #include <tf/transform_datatypes.h>
@@ -177,8 +179,9 @@ static ros::Publisher current_pose_pub;
 static geometry_msgs::PoseStamped current_pose_msg;
  */
 
-static ros::Publisher localizer_pose_pub;
+static ros::Publisher localizer_pose_pub, rubis_localizer_pose_pub;
 static geometry_msgs::PoseStamped localizer_pose_msg;
+static rubis_msgs::PoseStamped rubis_localizer_pose_msg;
 
 static ros::Publisher estimate_twist_pub;
 static geometry_msgs::TwistStamped estimate_twist_msg;
@@ -1513,11 +1516,17 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
     rubis_ndt_pose_msg.instance = rubis::instance_;
     rubis_ndt_pose_msg.msg = ndt_pose_msg;
     rubis_ndt_pose_pub.publish(rubis_ndt_pose_msg);
+
+    rubis_msgs::PoseStamped rubis_localizer_pose_msg;
+    rubis_localizer_pose_msg.instance = rubis::instance_;
+    rubis_localizer_pose_msg.msg = localizer_pose_msg;
+    rubis_localizer_pose_pub.publish(rubis_localizer_pose_msg);
   }
 
   // current_pose is published by vel_pose_mux
   //    current_pose_pub.publish(current_pose_msg);
-  localizer_pose_pub.publish(localizer_pose_msg);
+  localizer_pose_pub.publish(localizer_pose_msg);  
+  
 
   matching_end = std::chrono::system_clock::now();
   exe_time = std::chrono::duration_cast<std::chrono::microseconds>(matching_end - matching_start).count() / 1000.0;
@@ -1970,9 +1979,11 @@ int main(int argc, char** argv)
   ndt_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/ndt_pose", 10);
   if(rubis::instance_mode_) rubis_ndt_pose_pub = nh.advertise<rubis_msgs::PoseStamped>("/rubis_ndt_pose",10);
   
-  // current_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/current_pose", 10);
-  localizer_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/localizer_pose", 10);
-  estimate_twist_pub = nh.advertise<geometry_msgs::TwistStamped>("/estimate_twist", 10);
+  localizer_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/current_pose", 10);
+  rubis_localizer_pose_pub = nh.advertise<rubis_msgs::PoseStamped>("/rubis_current_pose", 10);
+  // localizer_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/localizer_pose", 10);
+  estimate_twist_pub = nh.advertise<geometry_msgs::TwistStamped>("/current_velocity", 10);
+  // estimate_twist_pub = nh.advertise<geometry_msgs::TwistStamped>("/estimate_twist", 10);
   estimated_vel_mps_pub = nh.advertise<std_msgs::Float32>("/estimated_vel_mps", 10);
   estimated_vel_kmph_pub = nh.advertise<std_msgs::Float32>("/estimated_vel_kmph", 10);
   estimated_vel_pub = nh.advertise<geometry_msgs::Vector3Stamped>("/estimated_vel", 10);
