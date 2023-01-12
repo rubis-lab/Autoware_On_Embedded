@@ -6,13 +6,12 @@
 #include <autoware_msgs/NDTStat.h>
 #include <autoware_msgs/DetectedObjectArray.h>
 #include <visualization_msgs/MarkerArray.h>
-#define TOTAL_STEP_NUM 5 // Need to change when total step number is changed
 #define SLEEP_PERIOD 1
 
 class CubetownAutorunner : public AutorunnerBase{
 private:    
     ros::NodeHandle     nh_;
-    ROSAutorunner        ros_autorunner_;
+    ROSAutorunner       ros_autorunner_;
 private:
     virtual void register_subscribers();
 private:

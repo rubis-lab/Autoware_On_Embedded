@@ -48,16 +48,16 @@ add_executable(minicar_lane_keeping
   src/minicar_lane_keeping/minicar_lane_keeping.cpp
 )
   
-add_executable(cubetown_autorunner
+add_executable(cubetown_lkas_autorunner
   include/cubetown_autorunner/cubetown_autorunner.h
-  src/cubetown_autorunner/cubetown_autorunner_node.cpp
-  src/cubetown_autorunner/cubetown_autorunner.cpp
+  src/cubetown_autorunner/cubetown_lkas_autorunner_node.cpp
+  src/cubetown_autorunner/cubetown_lkas_autorunner.cpp
 )
 
-add_executable(cubetown_autorunner_gpu
+add_executable(cubetown_full_autorunner
   include/cubetown_autorunner/cubetown_autorunner.h
-  src/cubetown_autorunner/cubetown_autorunner_gpu_node.cpp
-  src/cubetown_autorunner/cubetown_autorunner_gpu.cpp
+  src/cubetown_autorunner/cubetown_full_autorunner_node.cpp
+  src/cubetown_autorunner/cubetown_full_autorunner.cpp
 )
 
 add_executable(tutorial_autorunner
@@ -90,14 +90,14 @@ target_link_libraries(minicar_lane_keeping
   ros_autorunner_lib
 )
 
-add_dependencies(cubetown_autorunner ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(cubetown_autorunner
+add_dependencies(cubetown_lkas_autorunner ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(cubetown_lkas_autorunner
   ${catkin_LIBRARIES}
   ros_autorunner_lib
 )
 
-add_dependencies(cubetown_autorunner_gpu ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(cubetown_autorunner_gpu
+add_dependencies(cubetown_full_autorunner ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(cubetown_full_autorunner
   ${catkin_LIBRARIES}
   ros_autorunner_lib
 )

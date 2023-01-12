@@ -37,7 +37,7 @@ public:
 public:
     ROSAutorunner(){}
     void init(ros::NodeHandle nh, Sub_v sub_v);
-    void Run();         // Execute each steps
+    bool Run();         // Execute each steps
 };
 
 class AutorunnerBase{
