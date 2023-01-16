@@ -83,9 +83,9 @@ void ROSAutorunner::init(ros::NodeHandle nh, Sub_v sub_v){
     print_step_info_list();
 }
 
-void ROSAutorunner::Run(){
+bool ROSAutorunner::Run(){
     if(current_step_ == step_info_list_.end()){
-        return;
+        return false;
     }
 
     if(!current_step_->check_topic)
@@ -109,7 +109,7 @@ void ROSAutorunner::Run(){
         ++current_step_;
     }      
 
-    return;
+    return true;
 }
 
 void ROSAutorunner::run_node(int step_id){
