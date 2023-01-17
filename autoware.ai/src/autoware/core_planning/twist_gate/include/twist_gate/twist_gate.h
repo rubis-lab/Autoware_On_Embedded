@@ -58,13 +58,15 @@ class TwistGate
 public:
   TwistGate(const ros::NodeHandle& nh, const ros::NodeHandle& private_nh);
   ~TwistGate();
+  int task_profiling_flag;
 
 private:
   void checkState();
   void watchdogTimer();
   void remoteCmdCallback(const remote_msgs_t::ConstPtr& input_msg);
   void autoCmdTwistCmdCallback(const geometry_msgs::TwistStamped::ConstPtr& input_msg);
-  void autoCmdRubisTwistCmdCallback(const rubis_msgs::TwistStamped::ConstPtr& _input_msg);
+  void autoCmdRubisTwistCmdCallback(const rubis_msgs::TwistStamped::ConstPtr& input_msg);
+  void _autoCmdRubisTwistCmdCallback(const rubis_msgs::TwistStamped::ConstPtr& input_msg);
   void modeCmdCallback(const tablet_socket_msgs::mode_cmd::ConstPtr& input_msg);
   void gearCmdCallback(const tablet_socket_msgs::gear_cmd::ConstPtr& input_msg);
   void accelCmdCallback(const autoware_msgs::AccelCmd::ConstPtr& input_msg);
@@ -105,6 +107,8 @@ private:
 
   std::thread watchdog_timer_thread_;
   bool is_alive;
+
+  rubis_msgs::TwistStamped::ConstPtr rubis_twist_cmd_ptr_;
 
   enum class CommandMode
   {

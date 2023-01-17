@@ -37,6 +37,7 @@
 #include <std_msgs/Float64.h>
 #include <std_msgs/Int32.h>
 #include <std_msgs/Bool.h>
+#include "rubis_msgs/LaneArrayWithPoseTwist.h"
 
 #include "op_planner/PlannerCommonDef.h"
 #include "op_planner/TrajectoryDynamicCosts.h"
@@ -100,6 +101,7 @@ protected:
   ros::Publisher pub_CollisionPointsRviz;
   ros::Publisher pub_LocalWeightedTrajectoriesRviz;
   ros::Publisher pub_LocalWeightedTrajectories;
+  ros::Publisher pub_LocalWeightedTrajectoriesWithPoseTwist;
   ros::Publisher pub_TrajectoryCost;
   ros::Publisher pub_SafetyBorderRviz;
   ros::Publisher pub_DistanceToPedestrian;
@@ -126,6 +128,10 @@ protected:
   tf::StampedTransform  m_velodyne_to_base_link;
   tf::StampedTransform  m_velodyne_to_map;
 
+  // Others
+  std::vector<PlannerHNS::Crossing> intersection_list_;
+  int task_profiling_flag_;
+  autoware_msgs::DetectedObjectArrayConstPtr object_msg_ptr_;
 
   // Callback function for subscriber.
   void callbackGetCurrentPose(const geometry_msgs::PoseStampedConstPtr& msg);
@@ -133,8 +139,9 @@ protected:
   void callbackGetCANInfo(const autoware_can_msgs::CANInfoConstPtr &msg);
   void callbackGetRobotOdom(const nav_msgs::OdometryConstPtr& msg);
   void callbackGetGlobalPlannerPath(const autoware_msgs::LaneArrayConstPtr& msg);
-  void callbackGetLocalPlannerPath(const autoware_msgs::LaneArrayConstPtr& msg);
+  void callbackGetLocalPlannerPath(const rubis_msgs::LaneArrayWithPoseTwistConstPtr& msg);
   void callbackGetPredictedObjects(const autoware_msgs::DetectedObjectArrayConstPtr& msg);
+  void _callbackGetPredictedObjects(const autoware_msgs::DetectedObjectArrayConstPtr& msg);
   void callbackGetBehaviorState(const geometry_msgs::TwistStampedConstPtr & msg);
   void callbackGetCurrentState(const std_msgs::Int32 & msg);
 

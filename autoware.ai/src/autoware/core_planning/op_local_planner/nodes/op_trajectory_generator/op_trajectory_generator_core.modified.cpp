@@ -44,15 +44,16 @@ TrajectoryGen::TrajectoryGen()
   pub_LocalTrajectoriesRviz = nh.advertise<visualization_msgs::MarkerArray>("local_trajectories_gen_rviz", 1);
 
   sub_initialpose = nh.subscribe("/initialpose", 1, &TrajectoryGen::callbackGetInitPose, this);
+  // sub_current_pose = nh.subscribe("/current_pose", 10, &TrajectoryGen::callbackGetCurrentPose, this);
 
   int bVelSource = 1;
   _nh.getParam("/op_trajectory_generator/velocitySource", bVelSource);
-  // if(bVelSource == 0)
-  //   sub_robot_odom = nh.subscribe("/odom", 10,  &TrajectoryGen::callbackGetRobotOdom, this);
+  if(bVelSource == 0)
+    sub_robot_odom = nh.subscribe("/odom", 10,  &TrajectoryGen::callbackGetRobotOdom, this);
   // else if(bVelSource == 1)
   //   sub_current_velocity = nh.subscribe("/current_velocity", 10, &TrajectoryGen::callbackGetVehicleStatus, this);
-  // else if(bVelSource == 2)
-  //   sub_can_info = nh.subscribe("/can_info", 10, &TrajectoryGen::callbackGetCANInfo, this);
+  else if(bVelSource == 2)
+    sub_can_info = nh.subscribe("/can_info", 10, &TrajectoryGen::callbackGetCANInfo, this);
 
   sub_GlobalPlannerPaths = nh.subscribe("/lane_waypoints_array", 1, &TrajectoryGen::callbackGetGlobalPlannerPath, this);
   
@@ -151,9 +152,10 @@ void TrajectoryGen::callbackGetInitPose(const geometry_msgs::PoseWithCovarianceS
 // }
 
 void TrajectoryGen::callbackGetCurrentPoseTwist(const rubis_msgs::PoseTwistStampedPtr& msg){
+  // Before spinOnce
+  if(task_profiling_flag_) rubis::sched::start_task_profiling();
+
   // Callback
-  rubis::instance_ = msg->instance;
-  
   m_CurrentPos = PlannerHNS::WayPoint(msg->pose.pose.position.x, msg->pose.pose.position.y, msg->pose.pose.position.z, tf::getYaw(msg->pose.pose.orientation));
   m_InitPos = m_CurrentPos;
   bNewCurrentPos = true;
@@ -165,9 +167,77 @@ void TrajectoryGen::callbackGetCurrentPoseTwist(const rubis_msgs::PoseTwistStamp
     m_VehicleStatus.steer = atan(m_CarInfo.wheel_base * msg->twist.twist.angular.z/msg->twist.twist.linear.x);
   UtilityHNS::UtilityH::GetTickCount(m_VehicleStatus.tStamp);
   bVehicleStatus = true;
+  
+  // After spinOnce
+  if(bInitPos && m_GlobalPaths.size()>0)
+  {
+    m_GlobalPathSections.clear();
 
-  current_pose_ = msg->pose;
-  current_twist_ = msg->twist;
+    for(unsigned int i = 0; i < m_GlobalPaths.size(); i++)
+    {
+      t_centerTrajectorySmoothed.clear();
+      PlannerHNS::PlanningHelpers::ExtractPartFromPointToDistanceDirectionFast(m_GlobalPaths.at(i), m_CurrentPos, m_PlanningParams.horizonDistance ,
+          m_PlanningParams.pathDensity ,t_centerTrajectorySmoothed);
+
+      m_GlobalPathSections.push_back(t_centerTrajectorySmoothed);
+    }
+
+    std::vector<PlannerHNS::WayPoint> sampledPoints_debug;
+    m_Planner.GenerateRunoffTrajectory(m_GlobalPathSections, m_CurrentPos,
+              m_PlanningParams.enableLaneChange,
+              m_VehicleStatus.speed,
+              m_PlanningParams.microPlanDistance,
+              m_PlanningParams.maxSpeed,
+              m_PlanningParams.minSpeed,
+              m_PlanningParams.carTipMargin,
+              m_PlanningParams.rollInMargin,
+              m_PlanningParams.rollInSpeedFactor,
+              m_PlanningParams.pathDensity,
+              m_PlanningParams.rollOutDensity,
+              m_PlanningParams.rollOutNumber,
+              m_PlanningParams.smoothingDataWeight,
+              m_PlanningParams.smoothingSmoothWeight,
+              m_PlanningParams.smoothingToleranceError,
+              m_PlanningParams.speedProfileFactor,
+              m_PlanningParams.enableHeadingSmoothing,
+              -1 , -1,
+              m_RollOuts, sampledPoints_debug);
+
+    rubis_msgs::LaneArrayWithPoseTwist local_lanes;
+    for(unsigned int i=0; i < m_RollOuts.size(); i++)
+    {
+      for(unsigned int j=0; j < m_RollOuts.at(i).size(); j++)
+      {
+        autoware_msgs::Lane lane;
+        PlannerHNS::PlanningHelpers::PredictConstantTimeCostForTrajectory(m_RollOuts.at(i).at(j), m_CurrentPos, m_PlanningParams.minSpeed, m_PlanningParams.microPlanDistance);
+        PlannerHNS::ROSHelpers::ConvertFromLocalLaneToAutowareLane(m_RollOuts.at(i).at(j), lane);
+        lane.closest_object_distance = 0;
+        lane.closest_object_velocity = 0;
+        lane.cost = 0;
+        lane.is_blocked = false;
+        lane.lane_index = i;
+        local_lanes.lane_array.lanes.push_back(lane);
+      }
+    }
+
+    rubis::instance_ = msg->instance;
+    local_lanes.instance = rubis::instance_;
+    local_lanes.pose = msg->pose;
+    local_lanes.twist = msg->twist;
+
+    pub_LocalTrajectoriesWithPoseTwist.publish(local_lanes);
+    pub_LocalTrajectories.publish(local_lanes.lane_array);
+    rubis::sched::task_state_ = TASK_STATE_DONE;
+  }
+  else{
+    sub_GlobalPlannerPaths = nh.subscribe("/lane_waypoints_array",   1,    &TrajectoryGen::callbackGetGlobalPlannerPath,   this);
+
+    visualization_msgs::MarkerArray all_rollOuts;
+    PlannerHNS::ROSHelpers::TrajectoriesToMarkers(m_RollOuts, all_rollOuts);
+    pub_LocalTrajectoriesRviz.publish(all_rollOuts);
+
+    if(task_profiling_flag_) rubis::sched::stop_task_profiling(0, rubis::sched::task_state_);
+  }
 
   if(rubis::sched::is_task_ready_ == TASK_NOT_READY) rubis::sched::init_task();  
 }
@@ -244,84 +314,7 @@ void TrajectoryGen::MainLoop()
 
   PlannerHNS::WayPoint prevState, state_change;
 
-  ros::Rate r(100);
-
-  while(ros::ok()){
-    if(task_profiling_flag_) rubis::sched::start_task_profiling();
-
-    ros::spinOnce();
-
-    if(bInitPos && m_GlobalPaths.size()>0)
-    {
-      m_GlobalPathSections.clear();
-
-      for(unsigned int i = 0; i < m_GlobalPaths.size(); i++)
-      {
-        t_centerTrajectorySmoothed.clear();
-        PlannerHNS::PlanningHelpers::ExtractPartFromPointToDistanceDirectionFast(m_GlobalPaths.at(i), m_CurrentPos, m_PlanningParams.horizonDistance ,
-            m_PlanningParams.pathDensity ,t_centerTrajectorySmoothed);
-
-        m_GlobalPathSections.push_back(t_centerTrajectorySmoothed);
-      }
-
-      std::vector<PlannerHNS::WayPoint> sampledPoints_debug;
-      m_Planner.GenerateRunoffTrajectory(m_GlobalPathSections, m_CurrentPos,
-                m_PlanningParams.enableLaneChange,
-                m_VehicleStatus.speed,
-                m_PlanningParams.microPlanDistance,
-                m_PlanningParams.maxSpeed,
-                m_PlanningParams.minSpeed,
-                m_PlanningParams.carTipMargin,
-                m_PlanningParams.rollInMargin,
-                m_PlanningParams.rollInSpeedFactor,
-                m_PlanningParams.pathDensity,
-                m_PlanningParams.rollOutDensity,
-                m_PlanningParams.rollOutNumber,
-                m_PlanningParams.smoothingDataWeight,
-                m_PlanningParams.smoothingSmoothWeight,
-                m_PlanningParams.smoothingToleranceError,
-                m_PlanningParams.speedProfileFactor,
-                m_PlanningParams.enableHeadingSmoothing,
-                -1 , -1,
-                m_RollOuts, sampledPoints_debug);
-
-      rubis_msgs::LaneArrayWithPoseTwist local_lanes;
-      for(unsigned int i=0; i < m_RollOuts.size(); i++)
-      {
-        for(unsigned int j=0; j < m_RollOuts.at(i).size(); j++)
-        {
-          autoware_msgs::Lane lane;
-          PlannerHNS::PlanningHelpers::PredictConstantTimeCostForTrajectory(m_RollOuts.at(i).at(j), m_CurrentPos, m_PlanningParams.minSpeed, m_PlanningParams.microPlanDistance);
-          PlannerHNS::ROSHelpers::ConvertFromLocalLaneToAutowareLane(m_RollOuts.at(i).at(j), lane);
-          lane.closest_object_distance = 0;
-          lane.closest_object_velocity = 0;
-          lane.cost = 0;
-          lane.is_blocked = false;
-          lane.lane_index = i;
-          local_lanes.lane_array.lanes.push_back(lane);
-        }
-      }
-
-      local_lanes.instance = rubis::instance_;
-      local_lanes.pose = current_pose_;
-      local_lanes.twist = current_twist_;
-
-      pub_LocalTrajectoriesWithPoseTwist.publish(local_lanes);
-      pub_LocalTrajectories.publish(local_lanes.lane_array);
-      rubis::sched::task_state_ = TASK_STATE_DONE;
-    }
-    else{
-      sub_GlobalPlannerPaths = nh.subscribe("/lane_waypoints_array",   1,    &TrajectoryGen::callbackGetGlobalPlannerPath,   this);
-
-      visualization_msgs::MarkerArray all_rollOuts;
-      PlannerHNS::ROSHelpers::TrajectoriesToMarkers(m_RollOuts, all_rollOuts);
-      pub_LocalTrajectoriesRviz.publish(all_rollOuts);
-
-      if(task_profiling_flag_) rubis::sched::stop_task_profiling(0, rubis::sched::task_state_);
-    }
-
-    r.sleep();
-  }
+  ros::spin();
 }
 
 }

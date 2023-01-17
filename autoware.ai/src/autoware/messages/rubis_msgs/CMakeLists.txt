@@ -18,6 +18,9 @@ add_message_files(
     TwistStamped.msg
     VehicleCmd.msg
     InsStat.msg
+    PoseTwistStamped.msg
+    LaneWithPoseTwist.msg
+    LaneArrayWithPoseTwist.msg
 )
 
 generate_messages(

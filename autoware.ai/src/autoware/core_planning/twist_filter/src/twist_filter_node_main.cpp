@@ -17,6 +17,7 @@
 #include "twist_filter/twist_filter_node.h"
 
 extern unsigned long rubis::instance_;
+extern 
 
 int main(int argc, char** argv)
 {
@@ -34,50 +35,17 @@ int main(int argc, char** argv)
 
   ros::NodeHandle private_nh("~");
   private_nh.param<int>("/twist_filter/task_scheduling_flag", task_scheduling_flag, 0);
-  private_nh.param<int>("/twist_filter/task_profiling_flag", task_profiling_flag, 0);
+  private_nh.param<int>("/twist_filter/task_profiling_flag", node.task_profiling_flag, 0);
   private_nh.param<std::string>("/twist_filter/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/twist_filter.csv");
   private_nh.param<int>("/twist_filter/rate", rate, 10);
   private_nh.param("/twist_filter/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
   private_nh.param("/twist_filter/task_execution_time", task_execution_time, (double)10);
   private_nh.param("/twist_filter/task_relative_deadline", task_relative_deadline, (double)10);
 
-  if(task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
-  
-  if(!task_scheduling_flag && !task_profiling_flag){
-    ros::spin();
-  }
-  else{
-    ros::Rate r(rate);
-    // Initialize task ( Wait until first necessary topic is published )
-    while(ros::ok()){
-      if(rubis::sched::is_task_ready_ == TASK_READY) break;
-      ros::spinOnce();
-      r.sleep();      
-    }
-
-    // Executing task
-    while(ros::ok()){
-      if(task_profiling_flag) rubis::sched::start_task_profiling();
-
-      if(rubis::sched::task_state_ == TASK_STATE_READY){
-        if(task_scheduling_flag) rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline); 
-        rubis::sched::task_state_ = TASK_STATE_RUNNING;     
-      }
-
-      ros::spinOnce();
-
-      if(task_profiling_flag){
-        rubis::sched::stop_task_profiling(rubis::instance_, rubis::sched::task_state_);
-      }
-
-      if(rubis::sched::task_state_ == TASK_STATE_DONE){
-        if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
-        rubis::sched::task_state_ = TASK_STATE_READY;
-      }
-      
-      r.sleep();
-    }
-  }
+  std::cout<<"#####1"<<std::endl;
+  if(node.task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
+  std::cout<<"#####2"<<std::endl;
+  ros::spin();
   
   return 0;
 }

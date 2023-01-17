@@ -30,12 +30,20 @@
 #include "op_planner/PlannerH.h"
 #include "op_planner/PlannerCommonDef.h"
 
+#include "rubis_msgs/PoseTwistStamped.h"
+#include "rubis_msgs/LaneArrayWithPoseTwist.h"
+
 namespace TrajectoryGeneratorNS
 {
 
 class TrajectoryGen
 {
+public:
+  int task_profiling_flag_;
 protected:
+  geometry_msgs::PoseStamped current_pose_;
+  geometry_msgs::TwistStamped current_twist_;
+
   PlannerHNS::PlannerH m_Planner;
   geometry_msgs::Pose m_OriginPos;
   PlannerHNS::WayPoint m_InitPos;
@@ -59,11 +67,12 @@ protected:
     PlannerHNS::CAR_BASIC_INFO m_CarInfo;
 
 
-    //ROS messages (topics)
+  //ROS messages (topics)
   ros::NodeHandle nh;
 
   //define publishers
   ros::Publisher pub_LocalTrajectories;
+  ros::Publisher pub_LocalTrajectoriesWithPoseTwist;
   ros::Publisher pub_LocalTrajectoriesRviz;
 
   // define subscribers.
@@ -73,15 +82,21 @@ protected:
   ros::Subscriber sub_robot_odom;
   ros::Subscriber sub_can_info;
   ros::Subscriber sub_GlobalPlannerPaths;
+  ros::Subscriber sub_pose_twist;
 
+  // Others
+  
 
   // Callback function for subscriber.
   void callbackGetInitPose(const geometry_msgs::PoseWithCovarianceStampedConstPtr &input);
-  void callbackGetCurrentPose(const geometry_msgs::PoseStampedConstPtr& msg);
+  // void callbackGetCurrentPose(const geometry_msgs::PoseStampedConstPtr& msg);
+
+  void callbackGetCurrentPoseTwist(const rubis_msgs::PoseTwistStampedPtr& msg);
   void callbackGetVehicleStatus(const geometry_msgs::TwistStampedConstPtr& msg);
   void callbackGetCANInfo(const autoware_can_msgs::CANInfoConstPtr &msg);
   void callbackGetRobotOdom(const nav_msgs::OdometryConstPtr& msg);
   void callbackGetGlobalPlannerPath(const autoware_msgs::LaneArrayConstPtr& msg);
+
 
   //Helper Functions
   void UpdatePlanningParams(ros::NodeHandle& _nh);

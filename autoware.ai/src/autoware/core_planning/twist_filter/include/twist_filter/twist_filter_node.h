@@ -34,6 +34,7 @@ class TwistFilterNode
 {
 public:
   TwistFilterNode();
+  int task_profiling_flag;
 
 private:
   ros::NodeHandle nh_, private_nh_;
@@ -51,8 +52,9 @@ private:
   ros::Subscriber twist_sub_, rubis_twist_sub_, ctrl_sub_, config_sub_;
   // Added by PHY
   ros::Subscriber emergency_stop_sub_;
+  autoware_msgs::ControlCommandStampedConstPtr ctrl_cmd_ptr_;
   
-  bool emergency_stop_;
+  bool emergency_stop_, current_emergency_stop_;
   int max_stop_count_;
   int current_stop_count_;
 
@@ -61,13 +63,16 @@ private:
   void rubisTwistCmdCallback(const rubis_msgs::TwistStampedConstPtr& _msg);
   inline void publishTwist(const geometry_msgs::TwistStampedConstPtr& msg);
   void ctrlCmdCallback(const autoware_msgs::ControlCommandStampedConstPtr& msg);
+  void _ctrlCmdCallback(const autoware_msgs::ControlCommandStampedConstPtr& msg);
   void checkTwist(const twist_filter::Twist twist, const twist_filter::Twist twist_prev, const double& dt);
   void checkCtrl(const twist_filter::Ctrl ctrl, const twist_filter::Ctrl ctrl_prev, const double& dt);
 
   //Added by PHY
   void emergencyStopCallback(const std_msgs::Bool& msg);
+  void _emergencyStopCallback();
 };
 
 }  // namespace twist_filter_node
 
 #endif  // TWIST_FILTER_TWIST_FILTER_NODE_H
+

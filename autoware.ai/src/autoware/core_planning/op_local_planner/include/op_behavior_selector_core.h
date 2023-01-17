@@ -61,12 +61,18 @@
 #include <visualization_msgs/Marker.h>
 #include <tf/transform_listener.h>
 
+#include "rubis_msgs/LaneArrayWithPoseTwist.h"
+#include "rubis_msgs/LaneWithPoseTwist.h"
+
 
 namespace BehaviorGeneratorNS
 {
 
 class BehaviorGen
 {
+public:
+  int task_profiling_flag_;
+  const rubis_msgs::LaneArrayWithPoseTwist lane_array_with_pose_twist_msg_;
 protected: //Planning Related variables
   double PI = 3.14159265;
 
@@ -120,12 +126,14 @@ protected: //Planning Related variables
   double m_sprintSpeed;
   bool m_sprintSwitch;
   double m_obstacleWaitingTimeinIntersection;
+  double distance_to_pdestrian_;
 
   //ROS messages (topics)
   ros::NodeHandle nh;
 
   //define publishers
   ros::Publisher pub_LocalPath;
+  ros::Publisher pub_LocalPathWithPosePub;
   ros::Publisher pub_LocalBasePath;
   ros::Publisher pub_ClosestIndex;
   ros::Publisher pub_BehaviorState;
@@ -159,15 +167,18 @@ protected: //Planning Related variables
   ros::Subscriber sub_SprintSwitch;
   ros::Subscriber sub_IntersectionCondition;
 
+  // Others
+  timespec planningTimer;
+  std_msgs::Bool emergency_stop_msg;
+
   // Callback function for subscriber.
-  void callbackGetCurrentPose(const geometry_msgs::PoseStampedConstPtr& msg);
-  void callbackGetVehicleStatus(const geometry_msgs::TwistStampedConstPtr& msg);
   void callbackGetCANInfo(const autoware_can_msgs::CANInfoConstPtr &msg);
   void callbackGetRobotOdom(const nav_msgs::OdometryConstPtr& msg);
   void callbackGetGlobalPlannerPath(const autoware_msgs::LaneArrayConstPtr& msg);
-  void callbackGetLocalPlannerPath(const autoware_msgs::LaneArrayConstPtr& msg);
+  void callbackGetLocalPlannerPath(const rubis_msgs::LaneArrayWithPoseTwistConstPtr& msg);
   void callbackGetLocalTrajectoryCost(const autoware_msgs::LaneConstPtr& msg);
   void callbackDistanceToPedestrian(const std_msgs::Float64& msg);
+  void _callbackDistanceToPedestrian();
   void callbackIntersectionCondition(const autoware_msgs::IntersectionCondition& msg);
 
   void callbackGetV2XTrafficLightSignals(const autoware_msgs::RUBISTrafficSignalArray& msg);
@@ -179,7 +190,7 @@ protected: //Planning Related variables
 
   //Helper Functions
   void UpdatePlanningParams(ros::NodeHandle& _nh);
-  void SendLocalPlanningTopics();
+  void SendLocalPlanningTopics(const rubis_msgs::LaneArrayWithPoseTwistConstPtr& msg);
   void VisualizeLocalPlanner();
   void LogLocalPlanningInfo(double dt);
   bool GetBaseMapTF();  
