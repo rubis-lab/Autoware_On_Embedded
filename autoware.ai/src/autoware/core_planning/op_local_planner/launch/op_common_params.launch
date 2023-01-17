@@ -52,7 +52,7 @@
   <arg name="enableSlowDownOnCurve"       default="false" />
   <arg name="curveVelocityRatio"       default="0.5" />  
 
-  <node pkg="op_local_planner" type="op_common_params" name="op_common_params" output="screen">
+  <node pkg="op_local_planner" type="op_common_params" name="op_common_params">
   
   <!-- Common Parameters -->
   

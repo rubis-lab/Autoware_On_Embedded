@@ -76,7 +76,8 @@ TrajectoryEval::TrajectoryEval()
 
   sub_GlobalPlannerPaths = nh.subscribe("/lane_waypoints_array", 1, &TrajectoryEval::callbackGetGlobalPlannerPath, this);
   sub_LocalPlannerPaths = nh.subscribe("/local_trajectories", 1, &TrajectoryEval::callbackGetLocalPlannerPath, this);
-  sub_predicted_objects = nh.subscribe("/predicted_objects", 1, &TrajectoryEval::callbackGetPredictedObjects, this);
+  // sub_predicted_objects = nh.subscribe("/predicted_objects", 1, &TrajectoryEval::callbackGetPredictedObjects, this);
+  sub_rubis_predicted_objects = nh.subscribe("/rubis_predicted_objects", 1, &TrajectoryEval::callbackGetRubisPredictedObjects, this);
   sub_current_behavior = nh.subscribe("/current_behavior", 1, &TrajectoryEval::callbackGetBehaviorState, this);
 
   PlannerHNS::ROSHelpers::InitCollisionPointsMarkers(50, m_CollisionsDummy);
@@ -311,6 +312,171 @@ void TrajectoryEval::callbackGetPredictedObjects(const autoware_msgs::DetectedOb
       }
 
       PlannerHNS::ROSHelpers::ConvertFromAutowareDetectedObjectToOpenPlannerDetectedObject(msg->objects.at(i), obj);
+
+
+      // transform center pose into map frame
+      geometry_msgs::PoseStamped pose_in_map;
+      pose_in_map.header = msg_obj.header;
+      pose_in_map.pose = msg_obj.pose;
+      try{
+        m_vtom_listener.transformPose("/map", pose_in_map, pose_in_map);
+      }
+      catch(tf::TransformException& ex)
+      {
+        // ROS_ERROR("Cannot transform object pose: %s", ex.what());
+        continue;
+      }
+      // msg_obj.header.frame_id = "map";
+      obj.center.pos.x = pose_in_map.pose.position.x;
+      obj.center.pos.y = pose_in_map.pose.position.y;
+      obj.center.pos.z = pose_in_map.pose.position.z;
+
+      // transform contour into map frame
+      for(unsigned int j = 0; j < msg_obj.convex_hull.polygon.points.size(); j++){
+        geometry_msgs::PoseStamped contour_point_in_map;
+        contour_point_in_map.header = msg_obj.header;
+        contour_point_in_map.pose.position.x = msg_obj.convex_hull.polygon.points.at(j).x;
+        contour_point_in_map.pose.position.y = msg_obj.convex_hull.polygon.points.at(j).y;
+        contour_point_in_map.pose.position.z = msg_obj.convex_hull.polygon.points.at(j).z;
+
+        // For resolve TF malform, set orientation w to 1
+        contour_point_in_map.pose.orientation.w = 1;
+
+        try{
+          m_vtom_listener.transformPose("/map", contour_point_in_map, contour_point_in_map);
+        }
+        catch(tf::TransformException& ex){
+          // ROS_ERROR("Cannot transform contour pose: %s", ex.what());
+          continue;
+        }
+
+        obj.contour.at(j).x = contour_point_in_map.pose.position.x;
+        obj.contour.at(j).y = contour_point_in_map.pose.position.y;
+        obj.contour.at(j).z = contour_point_in_map.pose.position.z;
+      }
+
+      msg_obj.header.frame_id = "map";
+
+      m_PredictedObjects.push_back(obj);
+    }
+    /*
+    else{ // If object is only detected at vision
+      int image_obj_center_x = msg_obj.x+msg_obj.width/2;
+      int image_obj_center_y = msg_obj.y+msg_obj.height/2;
+      // if (msg_obj.label == "person"){// If person is detected only in image
+      //   // TO ERASE
+      //   std::cout<<"object height:" << msg_obj.height << " / threshold:" << m_pedestrian_stop_img_height_threshold << std::endl;
+      //   if(image_obj_center_x >= image_person_detection_range_left && image_obj_center_x <= image_person_detection_range_right){ 
+      //     double temp_x_distance = 1000;
+      //     if(msg_obj.height >= m_pedestrian_stop_img_height_threshold) temp_x_distance = 10;
+      //     if(abs(temp_x_distance) < abs(distance_to_pedestrian)) distance_to_pedestrian = temp_x_distance;
+      //   }
+      // }                    
+      // else 
+      if(msg_obj.label == "car" || msg_obj.label == "truck" || msg_obj.label == "bus"){            
+        if((msg_obj.width > m_VehicleImageWidthThreshold) 
+              && (image_obj_center_x > image_vehicle_detection_range_left) 
+              && (image_obj_center_x < image_vehicle_detection_range_right)
+        )
+        {          
+          vehicle_cnt+=1;        
+        }
+      }
+    }
+    */
+
+    int image_obj_center_x = msg_obj.x+msg_obj.width/2;
+    int image_obj_center_y = msg_obj.y+msg_obj.height/2;
+    if (msg_obj.label == "person"){// If person is detected only in image
+      
+      // TO ERASE
+      // ROS_WARN("object height:%d // thr: %d\n", msg_obj.height, m_pedestrian_stop_img_height_threshold);
+      printf("center_x %d \n left: %d \n right %d\n\n\n", image_obj_center_x, image_person_detection_range_left, image_person_detection_range_right);
+      if(image_obj_center_x >= image_person_detection_range_left && image_obj_center_x <= image_person_detection_range_right){ 
+        double temp_x_distance = 1000;
+        if(msg_obj.height >= m_pedestrian_stop_img_height_threshold) temp_x_distance = 10;
+        if(abs(temp_x_distance) < abs(distance_to_pedestrian)) distance_to_pedestrian = temp_x_distance;
+      }
+    }
+    
+  }
+
+  // Publish Sprint Switch
+  std_msgs::Bool sprint_switch_msg;
+
+  if(vehicle_cnt != 0){
+    m_noVehicleCnt = 0;
+    sprint_switch_msg.data = false;
+  }
+  else{ // No vehicle is exist in front of the car
+    if(m_noVehicleCnt < m_SprintDecisionTime*10) {
+      m_noVehicleCnt +=1;
+      sprint_switch_msg.data = false;
+    }
+    else if (m_noVehicleCnt >= 5) sprint_switch_msg.data = true;
+  }  
+  pub_SprintSwitch.publish(sprint_switch_msg);
+
+  // ROS_INFO("object # : %d", m_PredictedObjects.size());
+  
+  std_msgs::Float64 distanceToPedestrianMsg; 
+  distanceToPedestrianMsg.data = distance_to_pedestrian;
+  pub_DistanceToPedestrian.publish(distanceToPedestrianMsg);
+}
+
+void TrajectoryEval::callbackGetRubisPredictedObjects(const rubis_msgs::DetectedObjectArrayConstPtr& msg)
+{ 
+  m_PredictedObjects.clear();
+  bPredictedObjects = true;
+  double distance_to_pedestrian = 1000;
+  int image_person_detection_range_left = m_ImageWidth/2 - m_ImageWidth*m_PedestrianImageDetectionRange/2;
+  int image_person_detection_range_right = m_ImageWidth/2 + m_ImageWidth*m_PedestrianImageDetectionRange/2;
+  
+  int image_vehicle_detection_range_left = m_ImageWidth/2 - m_ImageWidth*m_VehicleImageDetectionRange/2;
+  int image_vehicle_detection_range_right = m_ImageWidth/2 + m_ImageWidth*m_VehicleImageDetectionRange/2;
+
+  int vehicle_cnt = 0;
+
+  PlannerHNS::DetectedObject obj;
+  for(unsigned int i = 0 ; i <msg->object_array.objects.size(); i++)
+  {    
+    if(msg->object_array.objects.at(i).pose.position.y < -20 || msg->object_array.objects.at(i).pose.position.y > 20)
+      continue;    
+      
+    if(msg->object_array.objects.at(i).pose.position.z > 1 || msg->object_array.objects.at(i).pose.position.z < -1.5)
+      continue;
+
+    autoware_msgs::DetectedObject msg_obj = msg->object_array.objects.at(i);     
+
+    // #### Decison making for objects
+    
+    if(msg_obj.id > 0) // If fusion object is detected
+    {
+      // calculate distance to person first
+      // if(msg_obj.label == "person"){        
+      //   std::cout<<"Pedestrian box size(width x height):"<<msg_obj.width<<" "<<msg_obj.height<<std::endl;
+      //   geometry_msgs::PoseStamped pose;
+      //   pose.header = msg_obj.header;
+      //   pose.pose = msg_obj.pose;
+      //   try{
+      //     m_vtob_listener.transformPose("/base_link", pose, pose);
+      //     double temp_x_distance = pose.pose.position.x;
+      //     double temp_y_distance = pose.pose.position.y;
+      //     // y-axis: Left + / Right -          
+      //     if(temp_y_distance > m_PedestrianLeftThreshold || temp_y_distance < m_PedestrianRightThreshold ) continue;
+      //     if(abs(temp_x_distance) < abs(distance_to_pedestrian)) distance_to_pedestrian = temp_x_distance;          
+      //   }
+      //   catch(tf::TransformException& ex){
+      //     // ROS_ERROR("Cannot transform person pose: %s", ex.what());
+
+      //   }
+      // }
+
+      if(msg_obj.label == "car" || msg_obj.label == "truck" || msg_obj.label == "bus"){
+        vehicle_cnt += 1;
+      }
+
+      PlannerHNS::ROSHelpers::ConvertFromAutowareDetectedObjectToOpenPlannerDetectedObject(msg->object_array.objects.at(i), obj);
 
 
       // transform center pose into map frame

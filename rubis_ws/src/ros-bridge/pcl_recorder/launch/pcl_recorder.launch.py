@@ -10,7 +10,7 @@ def launch_enable_autopilot_publisher(context, *args, **kwargs):
     topic_name = "/carla/" + launch.substitutions.LaunchConfiguration('role_name').perform(context) + "/enable_autopilot"
     return [
         launch.actions.ExecuteProcess(
-            output="screen",
+           ,
             cmd=["ros2", "topic", "pub", topic_name,
                  "std_msgs/msg/Bool", "{'data': True}", "--qos-durability", "transient_local"],
             name='topic_pub_enable_autopilot')]

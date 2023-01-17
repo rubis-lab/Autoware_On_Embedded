@@ -1,5 +1,5 @@
 <launch>
     <rosparam file="$(find controller)/cfg/controller.yaml" />
-    <node pkg="controller" type="controller" name="controller" clear_params="true" output="screen" />
+    <node pkg="controller" type="controller" name="controller" clear_params="true" />
     <!-- <node pkg="rqt_plot" type="rqt_plot" name="cur_vel_plot" args="/car_ctrl_output/real_speed" /> -->
 </launch>

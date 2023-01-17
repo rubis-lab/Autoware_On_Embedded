@@ -260,8 +260,8 @@ bool GlobalPlanner::GenerateGlobalPlan(PlannerHNS::WayPoint& startPoint, Planner
 
   if(ret == 0)
   {
-    std::cout << "Can't Generate Global Path for Start (" << startPoint.pos.ToString()
-                        << ") and Goal (" << goalPoint.pos.ToString() << ")" << std::endl;
+    // std::cout << "Can't Generate Global Path for Start (" << startPoint.pos.ToString()
+    //                     << ") and Goal (" << goalPoint.pos.ToString() << ")" << std::endl;
     return false;
   }
 

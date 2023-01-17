@@ -29,7 +29,7 @@ def launch_target_speed_publisher(context, *args, **kwargs):
     data_string = "{'data': " + launch.substitutions.LaunchConfiguration('target_speed').perform(context) + "}"
     return [
         launch.actions.ExecuteProcess(
-            output="screen",
+           ,
             cmd=["ros2", "topic", "pub", topic_name,
                  "std_msgs/msg/Float64", data_string, "--qos-durability", "transient_local"],
             name='topic_pub_target_speed')]

@@ -27,7 +27,7 @@
   -->
   <arg name='ego_vehicle_role_name' default='["hero", "ego_vehicle", "hero0", "hero1", "hero2", "hero3", "hero4", "hero5", "hero6", "hero7", "hero8", "hero9"]'/>
       
-  <node pkg="carla_ros_bridge" name="carla_ros_bridge" type="bridge.py" output="screen" required="true">
+  <node pkg="carla_ros_bridge" name="carla_ros_bridge" type="bridge.py" required="true">
     <param name="host" value="$(arg host)" unless="$(eval host == '')"/>
     <param name="port" value="$(arg port)" unless="$(eval port == '')"/>
     <param name="timeout" value="$(arg timeout)" unless="$(eval timeout == '')"/>

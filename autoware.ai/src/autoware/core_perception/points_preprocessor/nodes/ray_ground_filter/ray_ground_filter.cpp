@@ -98,7 +98,11 @@ void RayGroundFilter::publish_cloud(const ros::Publisher& in_publisher,
                                                            << in_header.frame_id);
     return;
   }
-  in_publisher.publish(*trans_cloud_msg_ptr);
+
+  rubis_msgs::PointCloud2 msg;
+  msg.instance = rubis::instance_;
+  msg.msg = *trans_cloud_msg_ptr;
+  in_publisher.publish(msg);
 }
 
 /*!
@@ -391,6 +395,7 @@ void RayGroundFilter::CloudCallback(const sensor_msgs::PointCloud2ConstPtr& in_s
 void RayGroundFilter::RubisCloudCallback(const rubis_msgs::PointCloud2ConstPtr in_rubis_cloud)
 {
   sensor_msgs::PointCloud2ConstPtr in_sensor_cloud = boost::make_shared<const sensor_msgs::PointCloud2>(in_rubis_cloud->msg);
+  rubis::instance_ = in_rubis_cloud->instance;
   PublishFilteredClouds(in_sensor_cloud);
 }
 
@@ -466,8 +471,8 @@ void RayGroundFilter::Run()
   config_node_sub_ =
       node_handle_.subscribe("/config/ray_ground_filter", 1, &RayGroundFilter::update_config_params, this);
 
-  groundless_points_pub_ = node_handle_.advertise<sensor_msgs::PointCloud2>(no_ground_topic, 2);
-  ground_points_pub_ = node_handle_.advertise<sensor_msgs::PointCloud2>(ground_topic, 2);
+  groundless_points_pub_ = node_handle_.advertise<rubis_msgs::PointCloud2>(no_ground_topic, 2);
+  // ground_points_pub_ = node_handle_.advertise<sensor_msgs::PointCloud2>(ground_topic, 2);
   
   std::string node_name = ros::this_node::getName();
   node_handle_.param<int>(node_name+"/task_scheduling_flag", task_scheduling_flag, 0);
@@ -479,8 +484,7 @@ void RayGroundFilter::Run()
   node_handle_.param(node_name+"/task_relative_deadline", task_relative_deadline, (double)10);
   node_handle_.param<int>(node_name+"/instance_mode", instance_mode_, 0);
 
-  if(instance_mode_) points_node_sub_ = node_handle_.subscribe("/rubis_"+input_point_topic_.substr(1), 1, &RayGroundFilter::RubisCloudCallback, this);
-  else points_node_sub_ = node_handle_.subscribe(input_point_topic_, 1, &RayGroundFilter::CloudCallback, this);
+  points_node_sub_ = node_handle_.subscribe("/rubis_"+input_point_topic_.substr(1), 1, &RayGroundFilter::RubisCloudCallback, this);
 
   ROS_INFO("Ready");
 
@@ -508,7 +512,7 @@ void RayGroundFilter::Run()
 
       ros::spinOnce();
 
-      if(task_profiling_flag) rubis::sched::stop_task_profiling(0, rubis::sched::task_state_);
+      if(task_profiling_flag) rubis::sched::stop_task_profiling(rubis::instance_, rubis::sched::task_state_);
       if(rubis::sched::task_state_ == TASK_STATE_DONE){
         if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
         rubis::sched::task_state_ = TASK_STATE_READY;

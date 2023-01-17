@@ -33,6 +33,7 @@
 #include <pcl/filters/extract_indices.h>
 #include <velodyne_pointcloud/point_types.h>
 #include "autoware_config_msgs/ConfigRayGroundFilter.h"
+#include "rubis_msgs/PointCloud2.h"
 
 #include <tf2/transform_datatypes.h>
 #include <tf2_ros/transform_listener.h>

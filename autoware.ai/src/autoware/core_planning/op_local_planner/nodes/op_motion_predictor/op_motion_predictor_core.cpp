@@ -42,7 +42,8 @@ MotionPrediction::MotionPrediction()
   m_OriginPos.position.y  = transform.getOrigin().y();
   m_OriginPos.position.z  = transform.getOrigin().z();
 
-  pub_predicted_objects_trajectories = nh.advertise<autoware_msgs::DetectedObjectArray>("/predicted_objects", 1);
+  // pub_predicted_objects_trajectories = nh.advertise<autoware_msgs::DetectedObjectArray>("/predicted_objects", 1);
+  pub_rubis_predicted_objects_trajectories = nh.advertise<rubis_msgs::DetectedObjectArray>("/rubis_predicted_objects", 1);
   pub_PredictedTrajectoriesRviz = nh.advertise<visualization_msgs::MarkerArray>("/predicted_trajectories_rviz", 1);
   pub_CurbsRviz          = nh.advertise<visualization_msgs::MarkerArray>("/map_curbs_rviz", 1);
   pub_ParticlesRviz = nh.advertise<visualization_msgs::MarkerArray>("prediction_particles", 1);
@@ -61,11 +62,17 @@ MotionPrediction::MotionPrediction()
   _nh.param<std::string>("/op_motion_predictor/input_object_list", input_object_list_str, "[/tracked_objects]");
   std::vector<std::string> input_object_list = ParseInputStr(input_object_list_str);
 
-
-  for(auto it = input_object_list.begin(); it != input_object_list.end(); ++it){
+  for(auto it = input_object_list.begin(); it != input_object_list.end(); ++it){    
     std::string topic = *it;
-    objects_subs_.push_back(nh.subscribe(topic.c_str(), 1, &MotionPrediction::callbackGetTrackedObjects, this));
-    autoware_msgs::DetectedObjectArray msg;
+    std::cout<<topic<<std::endl;
+    
+    if(topic.find(std::string("rubis")) != std::string::npos){ // For rubis topic
+      objects_subs_.push_back(nh.subscribe(topic.c_str(), 1, &MotionPrediction::callbackGetRubisTrackedObjects, this));  
+    }
+    else{// For normal topic      
+      objects_subs_.push_back(nh.subscribe(topic.c_str(), 1, &MotionPrediction::callbackGetTrackedObjects, this));      
+    }
+    autoware_msgs::DetectedObjectArray msg;    
     object_msg_list_.push_back(msg);
   }
   
@@ -320,7 +327,6 @@ autoware_msgs::DetectedObjectArray MotionPrediction::TrasformObjAryToVeldoyne(co
 
 void MotionPrediction::callbackGetTrackedObjects(const autoware_msgs::DetectedObjectArrayConstPtr& in_msg)
 {
-  
   UtilityHNS::UtilityH::GetTickCount(m_SensingTimer);
   m_TrackedObjects.clear();
   bTrackedObjects = true;
@@ -408,8 +414,105 @@ void MotionPrediction::callbackGetTrackedObjects(const autoware_msgs::DetectedOb
     m_PredictedResultsResults.header.frame_id = "velodyne";
     
     pub_predicted_objects_trajectories.publish(m_PredictedResultsResults);
+  }
+}
+
+void MotionPrediction::callbackGetRubisTrackedObjects(const rubis_msgs::DetectedObjectArrayConstPtr& in_msg)
+{
+  rubis::instance_ = in_msg->instance;
+
+  UtilityHNS::UtilityH::GetTickCount(m_SensingTimer);
+  m_TrackedObjects.clear();
+  bTrackedObjects = true;
+
+  // Check frame id of the object is valid
+  std::string target_frame = in_msg->object_array.header.frame_id;
+  int obj_idx = getIndex(tf_str_list_, target_frame);
+  if(obj_idx == -1){      
+    std::cout<<target_frame<<std::endl;
+    ROS_ERROR("Cannot find index by frame id");      
+    exit(0);
+  }  
+
+  autoware_msgs::DetectedObjectArray msg; 
+  if(target_frame != "velodyne"){
+    msg = TrasformObjAryToVeldoyne(in_msg->object_array, transform_list_[obj_idx]);  
+  }
+  else{
+    msg = in_msg->object_array;
+  }
+  
+  
+  PlannerHNS::DetectedObject obj;
+
+  for(unsigned int i = 0 ; i <msg.objects.size(); i++)
+  {
+    // if(msg->objects.at(i).id > 0)
+    // {
+      PlannerHNS::ROSHelpers::ConvertFromAutowareDetectedObjectToOpenPlannerDetectedObject(msg.objects.at(i), obj);
+      m_TrackedObjects.push_back(obj);
+    // }
+  }
+  
+  if(bMap)
+  {
+    if(m_PredictBeh.m_bStepByStep && m_bGoNextStep)
+    {
+      m_bGoNextStep = false;
+      m_PredictBeh.DoOneStep(m_TrackedObjects, m_CurrentPos, m_PlanningParams.minSpeed, m_CarInfo.max_deceleration,  m_Map);
+    }
+    else if(!m_PredictBeh.m_bStepByStep)
+    {
+      m_PredictBeh.DoOneStep(m_TrackedObjects, m_CurrentPos, m_PlanningParams.minSpeed, m_CarInfo.max_deceleration,  m_Map);
+    }
+    object_msg_list_[obj_idx].objects.clear();
+    autoware_msgs::DetectedObject pred_obj;
+    for(unsigned int i = 0 ; i <m_PredictBeh.m_ParticleInfo_II.size(); i++)
+    {
+      PlannerHNS::ROSHelpers::ConvertFromOpenPlannerDetectedObjectToAutowareDetectedObject(m_PredictBeh.m_ParticleInfo_II.at(i)->obj, false, pred_obj);
+      if(m_PredictBeh.m_ParticleInfo_II.at(i)->best_beh_track)
+        pred_obj.behavior_state = m_PredictBeh.m_ParticleInfo_II.at(i)->best_beh_track->best_beh;
+      // pred_obj = TransformObjToVeldoyne(pred_obj, transform_list_[obj_idx]);
+      object_msg_list_[obj_idx].objects.push_back(pred_obj);
+    }
+    
+    if(m_bEnableCurbObstacles)
+    {
+      curr_curbs_obstacles.clear();
+      GenerateCurbsObstacles(curr_curbs_obstacles);
+      //std::cout << "Curbs No: " << curr_curbs_obstacles.size() << endl;
+      for(unsigned int i = 0 ; i <curr_curbs_obstacles.size(); i++)
+      {
+        PlannerHNS::ROSHelpers::ConvertFromOpenPlannerDetectedObjectToAutowareDetectedObject(curr_curbs_obstacles.at(i), false, pred_obj);
+        // pred_obj = TransformObjToVeldoyne(pred_obj, transform_list_[obj_idx]);
+        object_msg_list_[obj_idx].objects.push_back(pred_obj);
+      }
+    }
+
+    m_PredictedResultsResults.objects.clear();
+
+    for(auto it1 = object_msg_list_.begin(); it1 != object_msg_list_.end(); ++it1){
+  
+      auto object_msg_entry = *it1;
+      for(auto it2 = object_msg_entry.objects.begin(); it2 != object_msg_entry.objects.end(); ++it2){
+        auto object_entry = *it2;
+        object_entry.header.frame_id = "velodyne";
+        object_entry.convex_hull.header.frame_id = "velodyne";
+        object_entry.valid=true;
+        m_PredictedResultsResults.objects.push_back(object_entry);
+      }
+    }
+
+    m_PredictedResultsResults.header.stamp = ros::Time().now();
+    m_PredictedResultsResults.header.frame_id = "velodyne";
+
+    rubis_msgs::DetectedObjectArray output_msg;
+    output_msg.instance = rubis::instance_;
+    output_msg.object_array = m_PredictedResultsResults;
+    pub_rubis_predicted_objects_trajectories.publish(output_msg);
     rubis::sched::task_state_ = TASK_STATE_DONE;
   }
+
 }
 
 void MotionPrediction::GenerateCurbsObstacles(std::vector<PlannerHNS::DetectedObject>& curb_obstacles)
@@ -636,7 +739,7 @@ void MotionPrediction::MainLoop()
       UtilityHNS::UtilityH::GetTickCount(m_VisualizationTimer);
     }
 
-    if(task_profiling_flag) rubis::sched::stop_task_profiling(0, rubis::sched::task_state_);
+    if(task_profiling_flag) rubis::sched::stop_task_profiling(rubis::instance_, rubis::sched::task_state_);
 
     if(rubis::sched::is_task_ready_ == TASK_READY && rubis::sched::task_state_ == TASK_STATE_DONE){
       if(task_scheduling_flag) rubis::sched::yield_task_scheduling();

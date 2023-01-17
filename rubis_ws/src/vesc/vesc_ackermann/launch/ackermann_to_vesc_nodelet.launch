@@ -17,7 +17,7 @@
 
   <!-- Nodelet manager -->
   <node if="$(arg start_manager)" pkg="nodelet" type="nodelet" name="$(arg manager)"
-        args="manager" output="screen" launch-prefix="$(arg launch_prefix)">
+        args="manager" launch-prefix="$(arg launch_prefix)">
      <param name="num_worker_threads" value="$(arg num_worker_threads)" />
   </node>
 

@@ -10,7 +10,7 @@ roslaunch autoware_camera_lidar_calibrator camera_lidar_calibration.launch intri
     <arg name="target_frame" default="velodyne"/>
     <arg name="camera_frame" default="camera"/>
 
-    <node if="$(arg compressed_stream)" name="decompress" type="republish" pkg="image_transport" output="screen" args="compressed in:=/$(arg camera_id)/$(arg image_src) raw out:=/$(arg camera_id)/$(arg image_src)" />
+    <node if="$(arg compressed_stream)" name="decompress" type="republish" pkg="image_transport" args="compressed in:=/$(arg camera_id)/$(arg image_src) raw out:=/$(arg camera_id)/$(arg image_src)" />
 
     <node pkg="calibration_publisher" type="calibration_publisher" name="calibration_publisher" ns="$(arg camera_id)">
         <param name="register_lidar2camera_tf" type="bool" value="false"/>
@@ -22,16 +22,16 @@ roslaunch autoware_camera_lidar_calibrator camera_lidar_calibration.launch intri
         <param name="camera_frame" type="str" value="$(arg camera_frame)"/>
     </node>
 
-    <node pkg="image_processor" type="image_rectifier" name="rectifier" ns="$(arg camera_id)" output="screen">
+    <node pkg="image_processor" type="image_rectifier" name="rectifier" ns="$(arg camera_id)">
         <param name="image_src" value="$(arg image_src)" />
         <param name="camera_info_src" value="$(arg camera_info_src)" />
     </node>
 
-    <node pkg="image_view2" type="image_view2" name="image_view2" ns="$(arg camera_id)" output="screen">
+    <node pkg="image_view2" type="image_view2" name="image_view2" ns="$(arg camera_id)">
         <remap from="image" to="image_rectified" />
     </node>
 
-    <node pkg="autoware_camera_lidar_calibrator" type="autoware_camera_lidar_calibration_node" name="autoware_camera_lidar_calibration_node" ns="$(arg camera_id)" output="screen">
+    <node pkg="autoware_camera_lidar_calibrator" type="autoware_camera_lidar_calibration_node" name="autoware_camera_lidar_calibration_node" ns="$(arg camera_id)">
         <param name="image_src" value="/image_rectified" />
         <param name="camera_info_src" value="$(arg camera_info_src)" />
     </node>

@@ -22,7 +22,7 @@
 
   <arg name="intersectionFile" default="crossing_test/crossing_intersection.yaml" />
       
-  <node pkg="op_local_planner" type="op_trajectory_evaluator" name="op_trajectory_evaluator" output="screen">
+  <node pkg="op_local_planner" type="op_trajectory_evaluator" name="op_trajectory_evaluator">
     <rosparam command="load" file="$(find rubis_pkg)/cfg/$(arg intersectionFile)"/>
   
     <param name="enablePrediction"       value="$(arg enablePrediction)" />            

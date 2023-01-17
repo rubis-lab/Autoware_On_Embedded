@@ -22,7 +22,7 @@
   </include>
 
   <!-- Re-publishing simulator/camera_node/image/compressed topic to /image_raw as expected by Autoware -->
-  <node name="republish" type="republish" pkg="image_transport" output="screen" args="compressed in:=/simulator/camera_node/image raw out:=/image_raw"  />
+  <node name="republish" type="republish" pkg="image_transport" args="compressed in:=/simulator/camera_node/image raw out:=/image_raw"  />
 
   <include file="$(find rubis_pkg)/launch/lidar_republisher_params.launch">
     <arg name="input_topic" value="$(arg lidar_input_topic)" />

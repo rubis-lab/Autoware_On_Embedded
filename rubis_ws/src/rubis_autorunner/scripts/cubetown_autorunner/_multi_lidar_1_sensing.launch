@@ -19,7 +19,7 @@
   </include>
 
   <!-- Re-publishing simulator/camera_node/image/compressed topic to /image_raw as expected by Autoware -->
-  <node name="republish" type="republish" pkg="image_transport" output="screen" args="compressed in:=/simulator/camera_node/image raw out:=/image_raw"  />
+  <node name="republish" type="republish" pkg="image_transport" args="compressed in:=/simulator/camera_node/image raw out:=/image_raw"  />
 
   <arg name="instance_mode" default="0"/>
 
@@ -53,7 +53,7 @@
 
   <!-- gnss localizer -->
   <arg name="plane" default="0"/>
-  <node pkg="rubis_pkg" type="gnss_localizer" name="gnss_localizer" output="screen">
+  <node pkg="rubis_pkg" type="gnss_localizer" name="gnss_localizer">
     <param name="plane" value="$(arg plane)"/>
   </node>
 
