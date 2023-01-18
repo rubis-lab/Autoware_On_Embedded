@@ -168,10 +168,8 @@ TrajectoryCost TrajectoryDynamicCosts::DoOneStepStatic(const vector<vector<WayPo
   }
     
   // Calculate lane change cost: Scoring the cost by the distance between current path and candidate path
-
   int centralIndex = params.rollOutNumber/2;    
   if(rollOuts.size() % 2 == 0) centralIndex--;
-  std::cout<<"#### Central idx: "<< centralIndex << ::endl;
 
   m_TrajectoryCosts.clear();  
   for(unsigned int it=0; it< rollOuts.size(); it++)
