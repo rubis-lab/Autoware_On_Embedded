@@ -17,11 +17,11 @@
 #ifndef TWIST_FILTER_TWIST_FILTER_NODE_H
 #define TWIST_FILTER_TWIST_FILTER_NODE_H
 
+#include <ros/ros.h>
 #include "twist_filter/twist_filter.h"
 #include <memory>
 #include <std_msgs/Float32.h>
 #include <geometry_msgs/TwistStamped.h>
-#include <autoware_health_checker/health_checker/health_checker.h>
 #include <autoware_msgs/ControlCommandStamped.h>
 #include <autoware_config_msgs/ConfigTwistFilter.h>
 #include <std_msgs/Bool.h>
@@ -38,7 +38,6 @@ public:
 private:
   ros::NodeHandle nh_, private_nh_;
   std::shared_ptr<twist_filter::TwistFilter> twist_filter_ptr_;
-  autoware_health_checker::HealthChecker health_checker_;
 
   // publishers
   ros::Publisher twist_pub_, rubis_twist_pub_, ctrl_pub_;

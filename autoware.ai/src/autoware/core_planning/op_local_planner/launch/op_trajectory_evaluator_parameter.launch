@@ -5,11 +5,11 @@
   <arg name="horizontalSafetyDistance"   default="1.2" />
   <arg name="verticalSafetyDistance"     default="0.8" />
 
-  <arg name="weightPriority"   default="1" />
-  <arg name="weightTransition"     default="1" />
-  <arg name="weightLong"   default="1" />
-  <arg name="weightLat"     default="1" />
-  <arg name="LateralSkipDistance"   default="1.0" />
+  <arg name="weightPriority"   default="0.5" />
+  <arg name="weightTransition"     default="4" />
+  <arg name="weightLong"   default="0.5" />
+  <arg name="weightLat"     default="5" />
+  <arg name="LateralSkipDistance"   default="5.0" />
 
   <arg name="SprintDecisionTime" default="9999.0" /> 
 

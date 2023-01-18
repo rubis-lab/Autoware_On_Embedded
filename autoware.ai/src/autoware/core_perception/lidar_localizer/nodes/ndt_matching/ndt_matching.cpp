@@ -76,9 +76,6 @@
 
 #include <autoware_msgs/NDTStat.h>
 
-//headers in Autoware Health Checker
-#include <autoware_health_checker/health_checker/health_checker.h>
-
 #include <rubis_lib/sched.hpp>
 #include <rubis_msgs/PointCloud2.h>
 #include <rubis_msgs/PoseStamped.h>
@@ -96,8 +93,6 @@
 #define M_PI 3.14159265358979323846
 
 #define DEBUG
-
-static std::shared_ptr<autoware_health_checker::HealthChecker> health_checker_ptr_;
 
 struct pose
 {
@@ -994,8 +989,6 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
     }
   }
 
-  health_checker_ptr_->CHECK_RATE("topic_rate_filtered_points_slow", 8, 5, 1, "topic filtered_points subscribe rate slow.");
-
   matching_start = std::chrono::system_clock::now();
 
   static tf::TransformBroadcaster br, kalman_br;
@@ -1508,7 +1501,6 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
   }
 
   predict_pose_pub.publish(predict_pose_msg);
-  health_checker_ptr_->CHECK_RATE("topic_rate_ndt_pose_slow", 8, 5, 1, "topic ndt_pose publish rate slow.");
   ndt_pose_pub.publish(ndt_pose_msg);
   rubis::sched::task_state_ = TASK_STATE_DONE;
 
@@ -1531,7 +1523,6 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
   matching_end = std::chrono::system_clock::now();
   exe_time = std::chrono::duration_cast<std::chrono::microseconds>(matching_end - matching_start).count() / 1000.0;
   time_ndt_matching.data = exe_time;
-  health_checker_ptr_->CHECK_MAX_VALUE("time_ndt_matching", time_ndt_matching.data, 50, 70, 100, "value time_ndt_matching is too high.");
   time_ndt_matching_pub.publish(time_ndt_matching);
 
   // Set values for /estimate_twist
@@ -1549,8 +1540,6 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
   geometry_msgs::Vector3Stamped estimate_vel_msg;
   estimate_vel_msg.header.stamp = current_scan_time;
   estimate_vel_msg.vector.x = current_velocity;
-  health_checker_ptr_->CHECK_MAX_VALUE("estimate_twist_linear", current_velocity, 5, 10, 15, "value linear estimated twist is too high.");
-  health_checker_ptr_->CHECK_MAX_VALUE("estimate_twist_angular", angular_velocity, 5, 10, 15, "value linear angular twist is too high.");
   estimated_vel_pub.publish(estimate_vel_msg);
 
   previous_score = fitness_score;
@@ -1779,9 +1768,6 @@ int main(int argc, char** argv)
 
   ros::NodeHandle nh;
   ros::NodeHandle private_nh("~");
-  health_checker_ptr_ = std::make_shared<autoware_health_checker::HealthChecker>(nh,private_nh);
-  health_checker_ptr_->ENABLE();
-  health_checker_ptr_->NODE_ACTIVATE();
 
   // Set log file name.
   private_nh.getParam("output_log_data", _output_log_data);

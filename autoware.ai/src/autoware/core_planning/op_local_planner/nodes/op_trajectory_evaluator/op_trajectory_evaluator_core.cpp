@@ -582,7 +582,7 @@ void TrajectoryEval::callbackGetRubisPredictedObjects(const rubis_msgs::Detected
   }  
   pub_SprintSwitch.publish(sprint_switch_msg);
 
-  // ROS_INFO("object # : %d", m_PredictedObjects.size());
+  ROS_INFO("object # : %d", m_PredictedObjects.size());
   
   std_msgs::Float64 distanceToPedestrianMsg; 
   distanceToPedestrianMsg.data = distance_to_pedestrian;

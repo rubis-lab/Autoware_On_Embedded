@@ -692,25 +692,6 @@ void segmentByDistance(const pcl::PointCloud<pcl::PointXYZ>::Ptr in_cloud_ptr,
 
       jsk_recognition_msgs::BoundingBox bounding_box = final_clusters[i]->GetBoundingBox();
       geometry_msgs::PolygonStamped polygon = final_clusters[i]->GetPolygon();
-      jsk_rviz_plugins::Pictogram pictogram_cluster;
-      pictogram_cluster.header = _velodyne_header;
-
-      // PICTO
-      pictogram_cluster.mode = pictogram_cluster.STRING_MODE;
-      pictogram_cluster.pose.position.x = final_clusters[i]->GetMaxPoint().x;
-      pictogram_cluster.pose.position.y = final_clusters[i]->GetMaxPoint().y;
-      pictogram_cluster.pose.position.z = final_clusters[i]->GetMaxPoint().z;
-      tf::Quaternion quat(0.0, -0.7, 0.0, 0.7);
-      tf::quaternionTFToMsg(quat, pictogram_cluster.pose.orientation);
-      pictogram_cluster.size = 4;
-      std_msgs::ColorRGBA color;
-      color.a = 1;
-      color.r = 1;
-      color.g = 1;
-      color.b = 1;
-      pictogram_cluster.color = color;
-      pictogram_cluster.character = std::to_string(i);
-      // PICTO
 
       // pcl::PointXYZ min_point = final_clusters[i]->GetMinPoint();
       // pcl::PointXYZ max_point = final_clusters[i]->GetMaxPoint();
