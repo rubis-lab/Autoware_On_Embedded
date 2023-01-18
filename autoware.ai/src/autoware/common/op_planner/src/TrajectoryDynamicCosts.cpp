@@ -291,7 +291,6 @@ TrajectoryCost TrajectoryDynamicCosts::DoOneStep(const vector<vector<vector<WayP
     const std::vector<PlannerHNS::DetectedObject>& obj_list)
 {
   TrajectoryCost bestTrajectory;
-  std::cout<<"## block #2"<<std::endl;
   bestTrajectory.bBlocked = true;
   bestTrajectory.closest_obj_distance = params.horizonDistance;
   bestTrajectory.closest_obj_velocity = 0;
@@ -357,7 +356,6 @@ TrajectoryCost TrajectoryDynamicCosts::DoOneStep(const vector<vector<vector<WayP
   //All is blocked !
   if(smallestIndex == -1 && m_PrevCostIndex < (int)m_TrajectoryCosts.size())
   {
-    std::cout<<"## block #3"<<std::endl;
     bestTrajectory.bBlocked = true;
     bestTrajectory.lane_index = currLaneIndex;
     bestTrajectory.index = currIndex;
