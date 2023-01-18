@@ -8,7 +8,7 @@
 #include "op_planner/MatrixOperations.h"
 #include "float.h"
 
-#define DEBUG_ENABLE
+// #define DEBUG_ENABLE
 
 namespace PlannerHNS
 {
@@ -197,7 +197,6 @@ TrajectoryCost TrajectoryDynamicCosts::DoOneStepStatic(const vector<vector<WayPo
   // Calculate trajectory cost with object
   WayPoint p;
   m_AllContourPoints.clear();
-  std::cout<<"# obj list size: " << obj_list.size() <<std::endl;
   for(unsigned int io=0; io<obj_list.size(); io++) // Object in object list
   {
     // Only add centroid

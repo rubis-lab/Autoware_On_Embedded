@@ -261,6 +261,7 @@ void TrajectoryEval::callbackGetLocalPlannerPath(const autoware_msgs::LaneArrayC
 
 void TrajectoryEval::callbackGetPredictedObjects(const autoware_msgs::DetectedObjectArrayConstPtr& msg)
 {  
+  /*
   m_PredictedObjects.clear();
   bPredictedObjects = true;
   double distance_to_pedestrian = 1000;
@@ -338,31 +339,6 @@ void TrajectoryEval::callbackGetPredictedObjects(const autoware_msgs::DetectedOb
 
       m_PredictedObjects.push_back(obj);
     }
-    /*
-    else{ // If object is only detected at vision
-      int image_obj_center_x = msg_obj.x+msg_obj.width/2;
-      int image_obj_center_y = msg_obj.y+msg_obj.height/2;
-      // if (msg_obj.label == "person"){// If person is detected only in image
-      //   // TO ERASE
-      //   std::cout<<"object height:" << msg_obj.height << " / threshold:" << m_pedestrian_stop_img_height_threshold << std::endl;
-      //   if(image_obj_center_x >= image_person_detection_range_left && image_obj_center_x <= image_person_detection_range_right){ 
-      //     double temp_x_distance = 1000;
-      //     if(msg_obj.height >= m_pedestrian_stop_img_height_threshold) temp_x_distance = 10;
-      //     if(abs(temp_x_distance) < abs(distance_to_pedestrian)) distance_to_pedestrian = temp_x_distance;
-      //   }
-      // }                    
-      // else 
-      if(msg_obj.label == "car" || msg_obj.label == "truck" || msg_obj.label == "bus"){            
-        if((msg_obj.width > m_VehicleImageWidthThreshold) 
-              && (image_obj_center_x > image_vehicle_detection_range_left) 
-              && (image_obj_center_x < image_vehicle_detection_range_right)
-        )
-        {          
-          vehicle_cnt+=1;        
-        }
-      }
-    }
-    */
 
     int image_obj_center_x = msg_obj.x+msg_obj.width/2;
     int image_obj_center_y = msg_obj.y+msg_obj.height/2;
@@ -377,7 +353,6 @@ void TrajectoryEval::callbackGetPredictedObjects(const autoware_msgs::DetectedOb
         if(abs(temp_x_distance) < abs(distance_to_pedestrian)) distance_to_pedestrian = temp_x_distance;
       }
     }
-    
   }
 
   // Publish Sprint Switch
@@ -399,6 +374,7 @@ void TrajectoryEval::callbackGetPredictedObjects(const autoware_msgs::DetectedOb
   std_msgs::Float64 distanceToPedestrianMsg; 
   distanceToPedestrianMsg.data = distance_to_pedestrian;
   pub_DistanceToPedestrian.publish(distanceToPedestrianMsg);
+  */
 }
 
 void TrajectoryEval::callbackGetRubisPredictedObjects(const rubis_msgs::DetectedObjectArrayConstPtr& msg)
@@ -414,7 +390,8 @@ void TrajectoryEval::callbackGetRubisPredictedObjects(const rubis_msgs::Detected
 
   int vehicle_cnt = 0;
 
-  PlannerHNS::DetectedObject obj;
+  PlannerHNS::DetectedObject obj;  
+
   for(unsigned int i = 0 ; i <msg->object_array.objects.size(); i++)
   {    
     if(msg->object_array.objects.at(i).pose.position.y < -20 || msg->object_array.objects.at(i).pose.position.y > 20)
@@ -431,17 +408,19 @@ void TrajectoryEval::callbackGetRubisPredictedObjects(const rubis_msgs::Detected
 
     PlannerHNS::ROSHelpers::ConvertFromAutowareDetectedObjectToOpenPlannerDetectedObject(msg->object_array.objects.at(i), obj);
 
-    // transform center pose into map frame
     geometry_msgs::PoseStamped pose_in_map;
     pose_in_map.header = msg_obj.header;
     pose_in_map.pose = msg_obj.pose;
-    try{
-      m_vtom_listener.transformPose("/map", pose_in_map, pose_in_map);
-    }
-    catch(tf::TransformException& ex)
-    {
-      // ROS_ERROR("Cannot transform object pose: %s", ex.what());
-      continue;
+    while(1){
+      try{
+        m_vtom_listener.transformPose("/map", pose_in_map, pose_in_map);
+        break;
+      }
+      catch(tf::TransformException& ex)
+      {
+        // ROS_ERROR("Cannot transform object pose: %s", ex.what());
+        continue;
+      }
     }
     // msg_obj.header.frame_id = "map";
     obj.center.pos.x = pose_in_map.pose.position.x;
@@ -459,13 +438,16 @@ void TrajectoryEval::callbackGetRubisPredictedObjects(const rubis_msgs::Detected
       // For resolve TF malform, set orientation w to 1
       contour_point_in_map.pose.orientation.w = 1;
 
-      try{
-        m_vtom_listener.transformPose("/map", contour_point_in_map, contour_point_in_map);
-      }
-      catch(tf::TransformException& ex){
-        // ROS_ERROR("Cannot transform contour pose: %s", ex.what());
-        continue;
-      }
+      while(1){
+        try{
+          m_vtom_listener.transformPose("/map", contour_point_in_map, contour_point_in_map);
+          break;
+        }
+        catch(tf::TransformException& ex){
+          ROS_ERROR("Cannot transform contour pose: %s", ex.what());
+          continue;
+        }
+      }      
 
       obj.contour.at(j).x = contour_point_in_map.pose.position.x;
       obj.contour.at(j).y = contour_point_in_map.pose.position.y;

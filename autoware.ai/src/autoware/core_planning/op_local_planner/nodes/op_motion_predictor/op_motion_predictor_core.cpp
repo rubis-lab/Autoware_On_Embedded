@@ -87,19 +87,6 @@ MotionPrediction::MotionPrediction()
   else if(bVelSource == 2)
     sub_can_info = nh.subscribe("/can_info", 10, &MotionPrediction::callbackGetCANInfo, this);
   
-
-  /*  RT Scheduling setup  */
-  // sub_current_pose   = nh.subscribe("/current_pose", 1,  &MotionPrediction::callbackGetCurrentPose,     this); //origin 10
-
-  // int bVelSource = 1;
-  // _nh.getParam("/op_motion_predictor/velocitySource", bVelSource);
-  // if(bVelSource == 0)
-  //   sub_robot_odom = nh.subscribe("/odom", 1, &MotionPrediction::callbackGetRobotOdom, this); //origin 10
-  // else if(bVelSource == 1)
-  //   sub_current_velocity = nh.subscribe("/current_velocity", 1, &MotionPrediction::callbackGetVehicleStatus, this); //origin 10
-  // else if(bVelSource == 2)
-  //   sub_can_info = nh.subscribe("/can_info", 1, &MotionPrediction::callbackGetCANInfo, this); //origin 10
-
   UtilityHNS::UtilityH::GetTickCount(m_VisualizationTimer);
   PlannerHNS::ROSHelpers::InitPredMarkers(100, m_PredictedTrajectoriesDummy);
   PlannerHNS::ROSHelpers::InitCurbsMarkers(100, m_CurbsDummy);
@@ -327,6 +314,7 @@ autoware_msgs::DetectedObjectArray MotionPrediction::TrasformObjAryToVeldoyne(co
 
 void MotionPrediction::callbackGetTrackedObjects(const autoware_msgs::DetectedObjectArrayConstPtr& in_msg)
 {
+  std::cout<<"ERROR non rubis"<<std::endl;
   UtilityHNS::UtilityH::GetTickCount(m_SensingTimer);
   m_TrackedObjects.clear();
   bTrackedObjects = true;
