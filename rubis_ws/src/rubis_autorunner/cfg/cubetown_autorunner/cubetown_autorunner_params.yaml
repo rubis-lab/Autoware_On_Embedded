@@ -156,10 +156,10 @@ op_trajectory_evaluator:
   task_minimum_inter_release_time: 100_000_000
   task_execution_time: 3_600_000
   task_relative_deadline: 100_000_000
-  weightPriority: 0
-  weightTransition: 5
-  weightLong: 4
-  weightLat: 4
+  weightPriority: 1
+  weightTransition: 0.5
+  weightLong: 10
+  weightLat: 10
   ImageWidth: 1920
   ImageHeight: 1080
   SprintDecisionTime: 9999999.0
@@ -229,25 +229,6 @@ lidar_republisher:
   rate: 10
   task_minimum_inter_release_time: 100_000_000
   task_execution_time: 70_000_000
-  task_relative_deadline: 100_000_000
-
-vel_relay:
-  task_scheduling_flag: 0
-  task_profiling_flag: 1
-  task_response_time_filename: "~/Documents/profiling/response_time/vel_relay.csv"
-  rate: 10
-  task_minimum_inter_release_time: 100_000_000
-  task_execution_time: 300_000
-  task_relative_deadline: 100_000_000
-
-pose_relay:
-  instance_mode: 1
-  task_scheduling_flag: 0
-  task_profiling_flag: 1
-  task_response_time_filename: "~/Documents/profiling/response_time/pose_relay.csv"
-  rate: 10
-  task_minimum_inter_release_time: 100_000_000
-  task_execution_time: 300_000
   task_relative_deadline: 100_000_000
 
 republish:

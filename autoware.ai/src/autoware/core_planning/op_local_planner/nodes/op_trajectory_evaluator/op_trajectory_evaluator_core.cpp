@@ -556,7 +556,7 @@ void TrajectoryEval::callbackGetRubisPredictedObjects(const rubis_msgs::Detected
       
       // TO ERASE
       // ROS_WARN("object height:%d // thr: %d\n", msg_obj.height, m_pedestrian_stop_img_height_threshold);
-      printf("center_x %d \n left: %d \n right %d\n\n\n", image_obj_center_x, image_person_detection_range_left, image_person_detection_range_right);
+      // printf("center_x %d \n left: %d \n right %d\n\n\n", image_obj_center_x, image_person_detection_range_left, image_person_detection_range_right);
       if(image_obj_center_x >= image_person_detection_range_left && image_obj_center_x <= image_person_detection_range_right){ 
         double temp_x_distance = 1000;
         if(msg_obj.height >= m_pedestrian_stop_img_height_threshold) temp_x_distance = 10;
@@ -582,8 +582,6 @@ void TrajectoryEval::callbackGetRubisPredictedObjects(const rubis_msgs::Detected
   }  
   pub_SprintSwitch.publish(sprint_switch_msg);
 
-  ROS_INFO("object # : %d", m_PredictedObjects.size());
-  
   std_msgs::Float64 distanceToPedestrianMsg; 
   distanceToPedestrianMsg.data = distance_to_pedestrian;
   pub_DistanceToPedestrian.publish(distanceToPedestrianMsg);
@@ -676,7 +674,6 @@ void TrajectoryEval::MainLoop()
     UpdateMyParams();
     UpdateTf();
     
-
     ros::spinOnce();
     PlannerHNS::TrajectoryCost tc;
 

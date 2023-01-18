@@ -31,6 +31,7 @@ TrajectoryCost TrajectoryCosts::DoOneStep(const vector<vector<vector<WayPoint> >
     const PlanningParams& params, const CAR_BASIC_INFO& carInfo, const VehicleState& vehicleState,
     const std::vector<PlannerHNS::DetectedObject>& obj_list)
 {
+  /*
   TrajectoryCost bestTrajectory;
   bestTrajectory.bBlocked = true;
   bestTrajectory.closest_obj_distance = params.horizonDistance;
@@ -51,6 +52,11 @@ TrajectoryCost TrajectoryCosts::DoOneStep(const vector<vector<vector<WayPoint> >
       vector<TrajectoryCost> costs = CalculatePriorityAndLaneChangeCosts(rollOuts.at(il), il, params);
       m_TrajectoryCosts.insert(m_TrajectoryCosts.end(), costs.begin(), costs.end());
     }
+  }
+
+  std::cout<<"## Initail trajecotry cost"<<std::endl;
+  for(auto it = m_TrajectoryCosts.begin(); it != m_TrajectoryCosts.end(); it++){
+    std::cout<<it->ToString()<<std::endl;
   }
 
   CalculateTransitionCosts(m_TrajectoryCosts, currIndex, params);
@@ -123,6 +129,7 @@ TrajectoryCost TrajectoryCosts::DoOneStep(const vector<vector<vector<WayPoint> >
   m_PrevCostIndex = smallestIndex;
 
   return bestTrajectory;
+  */
 }
 
 void TrajectoryCosts::CalculateLateralAndLongitudinalCosts(vector<TrajectoryCost>& trajectoryCosts,
@@ -303,6 +310,8 @@ void TrajectoryCosts::NormalizeCosts(vector<TrajectoryCost>& trajectoryCosts)
       trajectoryCosts.at(ic).longitudinal_cost = trajectoryCosts.at(ic).longitudinal_cost / totalLongitudinalCosts;
     else
       trajectoryCosts.at(ic).longitudinal_cost = 0;
+    
+    std::cout<<"Costs("<<ic<<"): "<<trajectoryCosts.at(ic).priority_cost<<" "<<trajectoryCosts.at(ic).transition_cost<<" "<<trajectoryCosts.at(ic).lane_change_cost<<" "<<trajectoryCosts.at(ic).longitudinal_cost<<std::endl;
 
     trajectoryCosts.at(ic).priority_cost = m_WeightPriority*trajectoryCosts.at(ic).priority_cost;
     trajectoryCosts.at(ic).transition_cost = m_WeightTransition*trajectoryCosts.at(ic).transition_cost;
@@ -310,6 +319,7 @@ void TrajectoryCosts::NormalizeCosts(vector<TrajectoryCost>& trajectoryCosts)
     trajectoryCosts.at(ic).lateral_cost = m_WeightLat*trajectoryCosts.at(ic).lateral_cost;
     trajectoryCosts.at(ic).longitudinal_cost = m_WeightLong*trajectoryCosts.at(ic).longitudinal_cost;
 
+    std::cout<<"Weighted Costs("<<ic<<"): "<<trajectoryCosts.at(ic).priority_cost<<" "<<trajectoryCosts.at(ic).transition_cost<<" "<<trajectoryCosts.at(ic).lane_change_cost<<" "<<trajectoryCosts.at(ic).longitudinal_cost<<std::endl;
 
     trajectoryCosts.at(ic).cost = m_WeightPriority*trajectoryCosts.at(ic).priority_cost/5.0 +
         m_WeightLaneChange*trajectoryCosts.at(ic).lane_change_cost/5.0 +

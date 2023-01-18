@@ -5,7 +5,7 @@
   <arg name="samplingSpeedFactor"   default="0.25" />    
   <arg name="enableHeadingSmoothing"   default="false" />
       
-  <node pkg="op_local_planner" type="op_trajectory_generator" name="op_trajectory_generator">
+  <node pkg="op_local_planner" type="op_trajectory_generator" name="op_trajectory_generator" output="screen">
   
   <param name="samplingTipMargin"     value="$(arg samplingTipMargin)"  /> 
   <param name="samplingOutMargin"     value="$(arg samplingOutMargin)" /> 
