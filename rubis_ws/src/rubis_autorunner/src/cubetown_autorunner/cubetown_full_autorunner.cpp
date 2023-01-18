@@ -22,7 +22,7 @@ void CubetownAutorunner::register_subscribers(){
     // Set the check function(subscriber)
     sub_v_[STEP(1)] = nh_.subscribe("/points_raw", 1, &CubetownAutorunner::points_raw_cb, this);   
     sub_v_[STEP(2)] = nh_.subscribe("/ndt_stat", 1, &CubetownAutorunner::ndt_stat_cb, this);   
-    sub_v_[STEP(3)] = nh_.subscribe("/detection/object_tracker/objects_center", 1, &CubetownAutorunner::detection_cb, this);   
+    sub_v_[STEP(3)] = nh_.subscribe("/detection/lidar_detector/objects_center", 1, &CubetownAutorunner::detection_cb, this);   
     sub_v_[STEP(4)] = nh_.subscribe("/behavior_state", 1, &CubetownAutorunner::behavior_state_cb, this);   
 }
 

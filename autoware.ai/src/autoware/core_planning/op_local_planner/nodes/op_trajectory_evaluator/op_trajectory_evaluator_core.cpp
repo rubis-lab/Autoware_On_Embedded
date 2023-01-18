@@ -411,7 +411,7 @@ void TrajectoryEval::callbackGetRubisPredictedObjects(const rubis_msgs::Detected
     geometry_msgs::PoseStamped pose_in_map;
     pose_in_map.header = msg_obj.header;
     pose_in_map.pose = msg_obj.pose;
-    while(1){
+    for(int i = 0; i < 1000; i++){
       try{
         m_vtom_listener.transformPose("/map", pose_in_map, pose_in_map);
         break;
@@ -438,13 +438,13 @@ void TrajectoryEval::callbackGetRubisPredictedObjects(const rubis_msgs::Detected
       // For resolve TF malform, set orientation w to 1
       contour_point_in_map.pose.orientation.w = 1;
 
-      while(1){
+      for(int i = 0; i < 1000; i++){
         try{
           m_vtom_listener.transformPose("/map", contour_point_in_map, contour_point_in_map);
           break;
         }
         catch(tf::TransformException& ex){
-          ROS_ERROR("Cannot transform contour pose: %s", ex.what());
+          // ROS_ERROR("Cannot transform contour pose: %s", ex.what());
           continue;
         }
       }      

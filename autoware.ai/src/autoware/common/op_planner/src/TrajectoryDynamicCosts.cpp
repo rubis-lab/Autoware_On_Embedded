@@ -8,7 +8,7 @@
 #include "op_planner/MatrixOperations.h"
 #include "float.h"
 
-// #define DEBUG_ENABLE
+#define DEBUG_ENABLE
 
 namespace PlannerHNS
 {

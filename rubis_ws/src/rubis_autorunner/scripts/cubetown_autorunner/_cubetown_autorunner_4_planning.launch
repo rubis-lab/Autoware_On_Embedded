@@ -67,7 +67,7 @@
   <!-- op_motion_predictor -->
   <include file="$(find op_local_planner)/launch/op_motion_predictor.launch">
     <!-- <arg name="input_object_list"               default="[/detection/fusion_tools/objects_center]" /> -->
-    <arg name="input_object_list"               default="[/detection/object_tracker/rubis_objects_center]" />
+    <arg name="input_object_list"               default="[/detection/lidar_detector/rubis_objects_center]" />
     <arg name="object_tf_list"                  default="[velodyne]" />
     <arg name="enableCurbObstacles"             default="false" />    <!-- Detect curbs from map-->
     <arg name="enableGenrateBranches"           default="false"/>     <!-- Enable Branching -->
