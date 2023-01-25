@@ -127,6 +127,8 @@ static double _clustering_distance;
 static bool _use_gpu;
 static std::chrono::system_clock::time_point _start, _end;
 
+static int task_profiling_flag_ = 1;
+
 std::vector<std::vector<geometry_msgs::Point>> _way_area_points;
 std::vector<cv::Scalar> _colors;
 pcl::PointCloud<pcl::PointXYZ> _sensor_cloud;
@@ -855,6 +857,7 @@ void removePointsUpTo(const pcl::PointCloud<pcl::PointXYZ>::Ptr in_cloud_ptr,
 
 void velodyne_callback(const rubis_msgs::PointCloud2ConstPtr& in_sensor_cloud)
 {
+  if(task_profiling_flag_) rubis::sched::start_task_profiling();        
   rubis::instance_ = in_sensor_cloud->instance;
   //_start = std::chrono::system_clock::now();  
   if (!_using_sensor_cloud)
@@ -931,7 +934,10 @@ void velodyne_callback(const rubis_msgs::PointCloud2ConstPtr& in_sensor_cloud)
 
     _using_sensor_cloud = false;
   }
+
+  if(task_profiling_flag_) rubis::sched::stop_task_profiling(rubis::instance_, rubis::sched::task_state_);
 }
+
 int main(int argc, char **argv)
 {
   // Initialize ROS
@@ -941,8 +947,6 @@ int main(int argc, char **argv)
   ros::NodeHandle private_nh("~");
 
   // Scheduling Setup
-  int task_scheduling_flag;
-  int task_profiling_flag;
   std::string task_response_time_filename;
   int rate;
   double task_minimum_inter_release_time;
@@ -955,8 +959,7 @@ int main(int argc, char **argv)
   std::string gpu_response_time_filename;
   std::string gpu_deadline_filename;
 
-  private_nh.param<int>("/lidar_euclidean_cluster_detect/task_scheduling_flag", task_scheduling_flag, 0);
-  private_nh.param<int>("/lidar_euclidean_cluster_detect/task_profiling_flag", task_profiling_flag, 0);
+  private_nh.param<int>("/lidar_euclidean_cluster_detect/task_profiling_flag", task_profiling_flag_, 1);
   private_nh.param<std::string>("/lidar_euclidean_cluster_detect/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/lidar_euclidean_cluster_detect.csv");
   private_nh.param<int>("/lidar_euclidean_cluster_detect/rate", rate, 10);
   private_nh.param("/lidar_euclidean_cluster_detect/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
@@ -978,7 +981,7 @@ int main(int argc, char **argv)
 
   generateColors(_colors, 255);
 
-  if(task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
+  if(task_profiling_flag_) rubis::sched::init_task_profiling(task_response_time_filename);
 
   std::string label;
   std::string output_lane_str;
@@ -1111,40 +1114,8 @@ int main(int argc, char **argv)
 
   // Create a ROS subscriber for the input point cloud
   ros::Subscriber sub = h.subscribe(points_topic, 1, velodyne_callback);
-
-  if(!task_scheduling_flag && !task_profiling_flag){
-    ros::spin();
-  }
-  else{
-    ros::Rate r(rate);
-    // Initialize task ( Wait until first necessary topic is published )
-    while(ros::ok()){      
-      ros::spinOnce();
-      r.sleep();      
-      if(rubis::sched::is_task_ready_) break;
-    }
-
-    // Executing task
-    while(ros::ok()){
-      if(task_profiling_flag) rubis::sched::start_task_profiling();        
-      if(rubis::sched::task_state_ == TASK_STATE_READY){
-        if(task_scheduling_flag) rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline); 
-        if(gpu_profiling_flag || gpu_scheduling_flag) rubis::sched::start_job();
-        rubis::sched::task_state_ = TASK_STATE_RUNNING;     
-      }
-
-      ros::spinOnce();
-
-      if(task_profiling_flag) rubis::sched::stop_task_profiling(rubis::instance_, rubis::sched::task_state_);
-      if(rubis::sched::task_state_ == TASK_STATE_DONE){
-        if(gpu_profiling_flag || gpu_scheduling_flag) rubis::sched::finish_job();        
-        if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
-        rubis::sched::task_state_ = TASK_STATE_READY;
-      }
-      
-      r.sleep();
-    }
-  }
+  
+  ros::spin();
 
   return 0;
 }

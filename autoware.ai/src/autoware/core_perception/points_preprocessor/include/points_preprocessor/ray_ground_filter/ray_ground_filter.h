@@ -50,6 +50,8 @@
 class RayGroundFilter
 {
 private:
+  int task_profiling_flag_ = 0;
+
   ros::NodeHandle node_handle_;
   ros::Subscriber points_node_sub_;
   ros::Subscriber config_node_sub_;

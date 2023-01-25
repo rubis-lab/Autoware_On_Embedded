@@ -125,9 +125,12 @@ protected:
   ros::Subscriber sub_can_info      ;
   ros::Subscriber sub_StepSignal;
 
+  rubis_msgs::DetectedObjectArray objects_msgs_;
+
   // Callback function for subscriber.
   void callbackGetTrackedObjects(const autoware_msgs::DetectedObjectArrayConstPtr& msg);
   void callbackGetRubisTrackedObjects(const rubis_msgs::DetectedObjectArrayConstPtr& msg);
+  void _callbackGetRubisTrackedObjects(rubis_msgs::DetectedObjectArray& objects_msg);
   void callbackGetCurrentPose(const geometry_msgs::PoseStampedConstPtr& msg);
   void callbackGetVehicleStatus(const geometry_msgs::TwistStampedConstPtr& msg);
   void callbackGetCANInfo(const autoware_can_msgs::CANInfoConstPtr &msg);
@@ -145,6 +148,7 @@ protected:
   autoware_msgs::DetectedObject TransformObjToVeldoyne(const autoware_msgs::DetectedObject& in_obj, tf::StampedTransform &transform);
   autoware_msgs::DetectedObjectArray TrasformObjAryToVeldoyne(const autoware_msgs::DetectedObjectArray& in_obj, tf::StampedTransform &transform);
 
+  int task_profiling_flag_ = 0;
 public:
   MotionPrediction();
   virtual ~MotionPrediction();
