@@ -490,9 +490,6 @@ void PurePursuitNode::CallbackFinalWaypointsWithPoseTwist(const rubis_msgs::Lane
 
   publishTwistStamped(can_get_curvature, kappa);
   publishControlCommandStamped(can_get_curvature, kappa);
-  health_checker_ptr_->NODE_ACTIVATE();
-  health_checker_ptr_->CHECK_RATE("topic_rate_vehicle_cmd_slow", 8, 5, 1,
-    "topic vehicle_cmd publish rate slow.");
   // for visualization with Rviz
   pub11_.publish(displayNextWaypoint(pp_.getPoseOfNextWaypoint()));
   pub13_.publish(displaySearchRadius(

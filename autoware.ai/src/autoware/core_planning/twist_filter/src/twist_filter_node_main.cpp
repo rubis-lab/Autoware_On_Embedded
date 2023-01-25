@@ -42,9 +42,7 @@ int main(int argc, char** argv)
   private_nh.param("/twist_filter/task_execution_time", task_execution_time, (double)10);
   private_nh.param("/twist_filter/task_relative_deadline", task_relative_deadline, (double)10);
 
-  std::cout<<"#####1"<<std::endl;
   if(node.task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
-  std::cout<<"#####2"<<std::endl;
   ros::spin();
   
   return 0;
