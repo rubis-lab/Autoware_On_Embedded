@@ -411,7 +411,7 @@ void TrajectoryEval::callbackGetRubisPredictedObjects(const rubis_msgs::Detected
     geometry_msgs::PoseStamped pose_in_map;
     pose_in_map.header = msg_obj.header;
     pose_in_map.pose = msg_obj.pose;
-    for(int i = 0; i < 1000; i++){
+    while(1){
       try{
         m_vtom_listener.transformPose("/map", pose_in_map, pose_in_map);
         break;

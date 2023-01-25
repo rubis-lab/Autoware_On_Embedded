@@ -6,6 +6,7 @@
 #include <autoware_msgs/NDTStat.h>
 #include <autoware_msgs/DetectedObjectArray.h>
 #include <visualization_msgs/MarkerArray.h>
+#include <geometry_msgs/PoseWithCovarianceStamped.h>
 #define SLEEP_PERIOD 1
 
 class CubetownAutorunner : public AutorunnerBase{
@@ -22,6 +23,7 @@ private:
 
 public:
     Sub_v               sub_v_;
+    ros::Publisher      initial_pose_pub_;
 public:
     CubetownAutorunner() {}
     CubetownAutorunner(ros::NodeHandle nh) : nh_(nh){}
