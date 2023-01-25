@@ -23,7 +23,7 @@
   <arg name="numthreads" default="4" doc="vgicp threads num" />
   <arg name="leafsize" default="0.05" doc="point map downsample leafsize" />
 
-  <node pkg="gicp_localizer" type="gicp_localizer_node" name="gicp_localizer_node" output="screen">
+  <node pkg="gicp_localizer" type="gicp_localizer_node" name="gicp_localizer_node">
     <remap from="points_raw" to="$(arg input_sensor_points_topic)" />
     <remap from="pointcloud_map" to="$(arg input_map_points_topic)" />
     <remap from="gicp_pose" to="$(arg output_pose_topic)" />

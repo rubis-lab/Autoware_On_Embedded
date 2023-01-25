@@ -81,7 +81,7 @@
     <param name="instance_mode" value="$(arg instance_mode)" />
   </node>
 
-  <node pkg="lidar_localizer" type="modular_ndt_matching" name="modular_ndt_matching_FR" output="screen">
+  <node pkg="lidar_localizer" type="modular_ndt_matching" name="modular_ndt_matching_FR">
     <!-- pcl_generic=0, pcl_anh=1, pcl_anh_gpu=2, pcl_openmp=3 -->
     <param name="method_type" value="$(arg method_type)" />
 
@@ -161,7 +161,7 @@
     <param name="ndt_time_topic" value="ndt_time_B" />
   </node>
 
-  <node pkg="lidar_localizer" type="multi_ndt_combiner" name="multi_ndt_combiner" output="screen">
+  <node pkg="lidar_localizer" type="multi_ndt_combiner" name="multi_ndt_combiner">
     <rosparam param="pose_topics">["ndt_pose_FL", "ndt_pose_FR", "ndt_pose_B"]</rosparam>
     <rosparam param="stat_topics">["ndt_stat_FL", "ndt_stat_FR", "ndt_stat_B"]</rosparam>
     <param name="baselink_frame" value="base_link" />

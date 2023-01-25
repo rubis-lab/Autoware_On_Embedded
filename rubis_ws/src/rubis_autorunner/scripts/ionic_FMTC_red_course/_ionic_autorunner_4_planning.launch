@@ -20,7 +20,7 @@
   <arg name="goal_ori_z"            value="0.885" />
   <arg name="goal_ori_w"            value="-0.464" />
 
-  <node pkg="op_global_planner" type="op_global_planner" name="op_global_planner" output="screen">    
+  <node pkg="op_global_planner" type="op_global_planner" name="op_global_planner">    
     <rosparam command="load" file="$(find rubis_autorunner)/cfg/$(arg LaneInfoFile)"/>
     <param name="pathDensity"         value="$(arg pathDensity)" />
     <param name="enableSmoothing"       value="$(arg enableSmoothing)" />

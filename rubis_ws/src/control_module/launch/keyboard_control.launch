@@ -22,6 +22,6 @@
 
   <node pkg="vesc_driver" type="vesc_driver_node" name="vesc_driver" />
   <node pkg="control_module" type="twist_converter" name="twister_converter" />
-  <node pkg="control_module" type="control_module" name="control_module" output="screen">
+  <node pkg="control_module" type="control_module" name="control_module">
   </node>
 </launch>

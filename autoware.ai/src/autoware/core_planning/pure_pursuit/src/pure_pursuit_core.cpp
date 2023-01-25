@@ -45,9 +45,6 @@ PurePursuitNode::PurePursuitNode()
   , minimum_lookahead_distance_(6.0)
 {
   initForROS();
-  health_checker_ptr_ =
-    std::make_shared<autoware_health_checker::HealthChecker>(nh_, private_nh_);
-  health_checker_ptr_->ENABLE();
   // initialize for PurePursuit
   pp_.setLinearInterpolationParameter(is_linear_interpolation_);
 }

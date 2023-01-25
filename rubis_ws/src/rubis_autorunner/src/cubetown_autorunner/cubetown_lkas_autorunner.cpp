@@ -23,6 +23,8 @@ void CubetownAutorunner::register_subscribers(){
     sub_v_[STEP(1)] = nh_.subscribe("/points_raw", 1, &CubetownAutorunner::points_raw_cb, this);   
     sub_v_[STEP(2)] = nh_.subscribe("/ndt_stat", 1, &CubetownAutorunner::ndt_stat_cb, this); 
     sub_v_[STEP(3)] = nh_.subscribe("/behavior_state", 1, &CubetownAutorunner::behavior_state_cb, this); 
+
+    initial_pose_pub_ = nh_.advertise< geometry_msgs::PoseWithCovarianceStamped>("initialpose", 1);
 }
 
  void CubetownAutorunner::points_raw_cb(const sensor_msgs::PointCloud2& msg){
@@ -34,6 +36,21 @@ void CubetownAutorunner::register_subscribers(){
  }
 
  void CubetownAutorunner::ndt_stat_cb(const autoware_msgs::NDTStat& msg){
+    static int cnt = 0;
+    cnt++;
+    if(cnt > 200){        
+        geometry_msgs::PoseWithCovariance msg;
+        msg.pose.position.x = 56.3796081543;
+        msg.pose.position.y = -0.0106279850006;
+        msg.pose.position.z = 0.465716004372;
+        msg.pose.orientation.x = -0.00171861096474;
+        msg.pose.orientation.y = -0.00120572400155;
+        msg.pose.orientation.z = 0.707457658123;
+        msg.pose.orientation.w = 0.706752612;
+        initial_pose_pub_.publish(msg);
+        cnt = 0;
+    }
+    
     if(msg.score < 0.7 && !ros_autorunner_.step_info_list_[STEP(3)].is_prepared){
         ROS_WARN("[STEP 2] Localization is success");
     	sleep(SLEEP_PERIOD);

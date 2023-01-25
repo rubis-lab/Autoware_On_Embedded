@@ -35,7 +35,7 @@
   <arg name="numthreads" default="4" doc="vgicp threads num" />
   <arg name="leafsize" default="1.0" doc="point map downsample leafsize" />
 
-  <node pkg="gicp_localizer" type="gicp_localizer_node" name="gicp_localizer_node" output="screen">
+  <node pkg="gicp_localizer" type="gicp_localizer_node" name="gicp_localizer_node">
     <param name="init_x" value="$(arg init_x)" />
     <param name="init_y" value="$(arg init_y)" />
     <param name="init_z" value="$(arg init_z)" />

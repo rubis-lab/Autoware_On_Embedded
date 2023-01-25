@@ -147,13 +147,13 @@ double PlannerH::PlanUsingDP(const WayPoint& start,
   {
     GPSPoint sp = start.pos;
     GPSPoint gp = goalPos.pos;
-    cout << endl << "Error: PlannerH -> Can't Find Global Waypoint Nodes in the Map for Start (" <<  sp.ToString() << ") and Goal (" << gp.ToString() << ")" << endl;
+    // cout << endl << "Error: PlannerH -> Can't Find Global Waypoint Nodes in the Map for Start (" <<  sp.ToString() << ") and Goal (" << gp.ToString() << ")" << endl;
     return 0;
   }
 
   if(!pStart->pLane || !pGoal->pLane)
   {
-    cout << endl << "Error: PlannerH -> Null Lane, Start (" << pStart->pLane << ") and Goal (" << pGoal->pLane << ")" << endl;
+    // cout << endl << "Error: PlannerH -> Null Lane, Start (" << pStart->pLane << ") and Goal (" << pGoal->pLane << ")" << endl;
     return 0;
   }
 

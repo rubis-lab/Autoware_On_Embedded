@@ -38,6 +38,8 @@
 #include "autoware_msgs/DetectedObject.h"
 #include "autoware_msgs/DetectedObjectArray.h"
 
+#include "rubis_msgs/DetectedObjectArray.h"
+
 #include "ukf.h"
 
 extern int is_topic_ready;
@@ -90,7 +92,9 @@ private:
   const double CENTROID_DISTANCE = 0.2;//distance to consider centroids the same
 
   std::string input_topic_;
+  std::string input_rubis_topic_;
   std::string output_topic_;
+  std::string output_rubis_topic_;
 
   std::string tracking_frame_;
 
@@ -102,11 +106,15 @@ private:
   ros::NodeHandle node_handle_;
   ros::NodeHandle private_nh_;
   ros::Subscriber sub_detected_array_;
+  ros::Subscriber sub_rubis_detected_array_;
   ros::Publisher pub_object_array_;
+  ros::Publisher pub_rubis_object_array_;
 
   std_msgs::Header input_header_;
 
   void callback(const autoware_msgs::DetectedObjectArray& input);
+
+  void rubis_callback(const rubis_msgs::DetectedObjectArray& input);
 
   void transformPoseToGlobal(const autoware_msgs::DetectedObjectArray& input,
                              autoware_msgs::DetectedObjectArray& transformed_input);

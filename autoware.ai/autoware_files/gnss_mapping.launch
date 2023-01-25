@@ -33,8 +33,8 @@
   <arg name="tf_yaw" default="-0.785" />
 
   <!-- rosrun lidar_localizer ndt_mapping  -->
-  <node pkg="lidar_localizer" type="queue_counter" name="queue_counter" output="screen"/>
-  <node pkg="lidar_localizer" type="gnss_mapping" name="gnss_mapping" output="screen">
+  <node pkg="lidar_localizer" type="queue_counter" name="queue_counter"/>
+  <node pkg="lidar_localizer" type="gnss_mapping" name="gnss_mapping">
     <param name="voxel_leaf_size" value="$(arg voxel_leaf_size)" />
     <param name="min_scan_range" value="$(arg min_scan_range)" />
     <param name="max_scan_range" value="$(arg max_scan_range)" />

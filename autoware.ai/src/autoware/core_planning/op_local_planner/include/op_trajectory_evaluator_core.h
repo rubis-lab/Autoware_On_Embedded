@@ -41,6 +41,7 @@
 
 #include "op_planner/PlannerCommonDef.h"
 #include "op_planner/TrajectoryDynamicCosts.h"
+#include "rubis_msgs/DetectedObjectArray.h"
 
 
 
@@ -117,6 +118,7 @@ protected:
   ros::Subscriber sub_GlobalPlannerPaths;
   ros::Subscriber sub_LocalPlannerPaths;
   ros::Subscriber sub_predicted_objects;
+  ros::Subscriber sub_rubis_predicted_objects;
   ros::Subscriber sub_current_behavior;
 
   // HJW added
@@ -142,6 +144,7 @@ protected:
   void callbackGetLocalPlannerPath(const rubis_msgs::LaneArrayWithPoseTwistConstPtr& msg);
   void callbackGetPredictedObjects(const autoware_msgs::DetectedObjectArrayConstPtr& msg);
   void _callbackGetPredictedObjects(const autoware_msgs::DetectedObjectArrayConstPtr& msg);
+  void callbackGetRubisPredictedObjects(const rubis_msgs::DetectedObjectArrayConstPtr& msg);
   void callbackGetBehaviorState(const geometry_msgs::TwistStampedConstPtr & msg);
   void callbackGetCurrentState(const std_msgs::Int32 & msg);
 

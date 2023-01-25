@@ -21,6 +21,7 @@ add_message_files(
     PoseTwistStamped.msg
     LaneWithPoseTwist.msg
     LaneArrayWithPoseTwist.msg
+    DetectedObjectArray.msg
 )
 
 generate_messages(

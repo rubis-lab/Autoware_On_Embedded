@@ -8,7 +8,7 @@
   <arg name="walker_target_speed" default=""/>
 
 
-  <node pkg="carla_walker_agent" type="carla_walker_agent.py" name="carla_walker_agent_$(arg role_name)" output="screen">
+  <node pkg="carla_walker_agent" type="carla_walker_agent.py" name="carla_walker_agent_$(arg role_name)">
     <param name="role_name" value="$(arg role_name)" />
     <param name="mode" value="$(arg mode)" />
     <param name="walker_point1" value="$(arg walker_point1)"/>

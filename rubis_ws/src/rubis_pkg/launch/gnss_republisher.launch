@@ -1,6 +1,6 @@
 <launch>
     <arg name="input_topic" default="/nmea_sentence_origin"/>
-    <node pkg="rubis_pkg" type="gnss_republisher" name="gnss_republisher" output="screen">
+    <node pkg="rubis_pkg" type="gnss_republisher" name="gnss_republisher">
         <param name="/input_topic" value="$(arg input_topic)" />
     </node>
 </launch>

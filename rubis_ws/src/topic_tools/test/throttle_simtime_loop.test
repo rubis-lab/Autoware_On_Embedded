@@ -3,7 +3,7 @@
   <node pkg="rostopic" type="rostopic" name="rostopic_pub"
         args="pub -r 20 input std_msgs/String chatter"/>
   <node pkg="topic_tools" type="throttle" name="throttle"
-        args="messages input 5" output="screen"/>
+        args="messages input 5"/>
   <test test-name="throttle_simtime_loop"
         pkg="topic_tools" type="test_throttle_simtime_loop.py" />
 </launch>
