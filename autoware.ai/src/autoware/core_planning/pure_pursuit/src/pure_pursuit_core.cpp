@@ -205,14 +205,13 @@ void PurePursuitNode::run()
   double task_relative_deadline;
 
   private_nh.param<int>("/pure_pursuit/task_scheduling_flag", task_scheduling_flag, 0);
-  private_nh.param<int>("/pure_pursuit/task_profiling_flag", task_profiling_flag_, 0);
+  private_nh.param<int>("/pure_pursuit/task_profiling_flag", task_profiling_flag_, 1);
   private_nh.param<std::string>("/pure_pursuit/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/pure_pursuit.csv");
   private_nh.param<int>("/pure_pursuit/rate", rate, 10);
   private_nh.param("/pure_pursuit/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
   private_nh.param("/pure_pursuit/task_execution_time", task_execution_time, (double)10);
   private_nh.param("/pure_pursuit/task_relative_deadline", task_relative_deadline, (double)10);
-
-  ROS_INFO_STREAM("pure pursuit start");
+  if(task_profiling_flag_) rubis::sched::init_task_profiling(task_response_time_filename);  
 
   ros::spin();
 }
