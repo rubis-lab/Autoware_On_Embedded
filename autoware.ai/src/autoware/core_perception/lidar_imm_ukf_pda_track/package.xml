@@ -13,9 +13,10 @@
   <depend>amathutils_lib</depend>
   <depend>pcl_ros</depend>
   <depend>roscpp</depend>
-  <depend>roslint</depend>
+  <depend>roslint</depend>  
   <depend>tf</depend>
   <depend>vector_map</depend>
   <depend>lanelet2_extension</depend>
   <depend>rubis_lib</depend>
+  <depend>rubis_msgs</depend>
 </package>

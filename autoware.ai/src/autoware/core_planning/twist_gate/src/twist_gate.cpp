@@ -50,7 +50,6 @@ TwistGate::TwistGate(const ros::NodeHandle& nh, const ros::NodeHandle& private_n
   private_nh_.param<bool>("use_decision_maker", use_decision_maker_, false);
   private_nh_.param<int>("instance_mode", rubis::instance_mode_, 0);
 
-  health_checker_ptr_ = std::make_shared<autoware_health_checker::HealthChecker>(nh_, private_nh_);
   control_command_pub_ = nh_.advertise<std_msgs::String>("/ctrl_mode", 1);
   vehicle_cmd_pub_ = nh_.advertise<vehicle_cmd_msg_t>("/vehicle_cmd", 1, true);
   if(rubis::instance_mode_) rubis_vehicle_cmd_pub_ = nh_.advertise<rubis_msgs::VehicleCmd>("/rubis_vehicle_cmd", 1, true);
@@ -76,8 +75,6 @@ TwistGate::TwistGate(const ros::NodeHandle& nh, const ros::NodeHandle& private_n
 
   twist_gate_msg_.header.seq = 0;
   emergency_stop_msg_.data = false;
-  health_checker_ptr_->ENABLE();
-  health_checker_ptr_->NODE_ACTIVATE();
 
   remote_cmd_time_ = ros::Time::now();
   emergency_handling_time_ = ros::Time::now();
@@ -154,14 +151,10 @@ void TwistGate::watchdogTimer()
     if (command_mode_ == CommandMode::REMOTE)
     {
       const double dt = (now_time - remote_cmd_time_).toSec() * 1000;
-      health_checker_ptr_->CHECK_MAX_VALUE("remote_cmd_interval", dt, 700, 1000, 1500, "remote cmd interval is too "
-                                                                                       "long.");
     }
 
     // check push emergency stop button
     const int level = (emergency_stop_msg_.data) ? AwDiagStatus::ERROR : AwDiagStatus::OK;
-    health_checker_ptr_->CHECK_TRUE("emergency_stop_button", emergency_stop_msg_.data, level, "emergency stop button "
-                                                                                              "is pushed.");
 
     // if no emergency message received for more than timeout_period_
     if ((now_time - emergency_handling_time_) > timeout_period_)
@@ -211,10 +204,6 @@ void TwistGate::autoCmdRubisTwistCmdCallback(const rubis_msgs::TwistStamped::Con
 }
 
 inline void TwistGate::updateTwistGateMsg(const geometry_msgs::TwistStamped::ConstPtr& input_msg){
-  health_checker_ptr_->CHECK_RATE("topic_rate_twist_cmd_slow", 8, 5, 1, "topic twist_cmd subscribe rate slow.");
-  health_checker_ptr_->CHECK_MAX_VALUE("twist_cmd_linear_high", input_msg->twist.linear.x,
-    DBL_MAX, DBL_MAX, DBL_MAX, "linear twist_cmd is too high");
-
   if (command_mode_ == CommandMode::AUTO && !emergency_handling_active_)
   {
     twist_gate_msg_.header.frame_id = input_msg->header.frame_id;

@@ -42,10 +42,6 @@
 #include "tablet_socket_msgs/gear_cmd.h"
 #include "tablet_socket_msgs/mode_cmd.h"
 
-// headers in Autowae Health Checker
-#include <autoware_health_checker/health_checker/health_checker.h>
-
-
 extern int zero_flag_;
 
 class TwistGate
@@ -86,7 +82,6 @@ private:
 
   ros::NodeHandle nh_;
   ros::NodeHandle private_nh_;
-  std::shared_ptr<autoware_health_checker::HealthChecker> health_checker_ptr_;
   ros::Publisher control_command_pub_;
   ros::Publisher vehicle_cmd_pub_;
   ros::Publisher rubis_vehicle_cmd_pub_;

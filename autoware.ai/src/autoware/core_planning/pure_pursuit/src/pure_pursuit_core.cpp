@@ -45,9 +45,6 @@ PurePursuitNode::PurePursuitNode()
   , minimum_lookahead_distance_(6.0)
 {
   initForROS();
-  health_checker_ptr_ =
-    std::make_shared<autoware_health_checker::HealthChecker>(nh_, private_nh_);
-  health_checker_ptr_->ENABLE();
   // initialize for PurePursuit
   pp_.setLinearInterpolationParameter(is_linear_interpolation_);
 }
@@ -268,9 +265,6 @@ void PurePursuitNode::run()
 
     publishTwistStamped(can_get_curvature, kappa);
     publishControlCommandStamped(can_get_curvature, kappa);
-    health_checker_ptr_->NODE_ACTIVATE();
-    health_checker_ptr_->CHECK_RATE("topic_rate_vehicle_cmd_slow", 8, 5, 1,
-      "topic vehicle_cmd publish rate slow.");
     // for visualization with Rviz
     pub11_.publish(displayNextWaypoint(pp_.getPoseOfNextWaypoint()));
     pub13_.publish(displaySearchRadius(

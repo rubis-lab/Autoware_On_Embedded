@@ -5,7 +5,7 @@
         args="pub -r 5 input2 std_msgs/String input2"/>
 
   <!-- Initial topic non default -->
-  <node pkg="topic_tools" type="mux" name="mux_explicit" output="screen"
+  <node pkg="topic_tools" type="mux" name="mux_explicit"
         args="output input1 input2">
     <param name="initial_topic" value="input2" />
   </node>

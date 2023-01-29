@@ -35,7 +35,7 @@
   <arg name="gnss_pose_diff_threshold" default="5.0"/>
 
   <!-- ndt_matching -->
-  <node pkg="lidar_localizer" type="modular_ndt_matching" name="ndt_matching" output="screen">
+  <node pkg="lidar_localizer" type="modular_ndt_matching" name="ndt_matching">
     <param name="method_type" value="$(arg method_type)" />
 
     <!-- NDT config -->

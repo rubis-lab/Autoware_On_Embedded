@@ -83,16 +83,16 @@ void ROSAutorunner::init(ros::NodeHandle nh, Sub_v sub_v){
     print_step_info_list();
 }
 
-void ROSAutorunner::Run(){
+bool ROSAutorunner::Run(){
     if(current_step_ == step_info_list_.end()){
-        return;
+        return false;
     }
 
     if(!current_step_->check_topic)
         current_step_->is_prepared = true;
 
     if(current_step_->is_prepared == true){
-        ROS_WARN("[Step %d] Activated", INT_TO_STEP(current_step_->step_id));
+        ROS_WARN("[STEP %d] Activated", INT_TO_STEP(current_step_->step_id));
         if(current_step_->target_type == RUN)
             run_node(current_step_->step_id);
         else if(current_step_->target_type == LAUNCH)
@@ -109,7 +109,7 @@ void ROSAutorunner::Run(){
         ++current_step_;
     }      
 
-    return;
+    return true;
 }
 
 void ROSAutorunner::run_node(int step_id){

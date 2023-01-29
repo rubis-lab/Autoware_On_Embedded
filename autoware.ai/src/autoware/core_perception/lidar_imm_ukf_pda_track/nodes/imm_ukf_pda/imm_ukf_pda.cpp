@@ -54,13 +54,17 @@ ImmUkfPda::ImmUkfPda()
 
   // topic name
   private_nh_.param<std::string>("tracker_input_topic", input_topic_, "/detection/lidar_detector/objects");
+  private_nh_.param<std::string>("tracker_input_rubis_topic", input_rubis_topic_, "/detection/lidar_detector/rubis_objects_center");
   private_nh_.param<std::string>("tracker_output_topic", output_topic_, "/detection/object_tracker/objects");
+  private_nh_.param<std::string>("tracker_output_rubis_topic", output_rubis_topic_, "/detection/object_tracker/rubis_objects_center");
 }
 
 void ImmUkfPda::run()
 {
   pub_object_array_ = node_handle_.advertise<autoware_msgs::DetectedObjectArray>(output_topic_.c_str(), 1);
   sub_detected_array_ = node_handle_.subscribe(input_topic_.c_str(), 1, &ImmUkfPda::callback, this);
+  pub_rubis_object_array_ = node_handle_.advertise<rubis_msgs::DetectedObjectArray>(output_rubis_topic_.c_str(), 1);
+  sub_rubis_detected_array_ = node_handle_.subscribe(input_rubis_topic_.c_str(), 1, &ImmUkfPda::rubis_callback, this);
 
   if (use_vectormap_)
   {
@@ -68,6 +72,43 @@ void ImmUkfPda::run()
                                  vector_map::Category::NODE  |
                                  vector_map::Category::LANE, 1);
   }
+}
+
+void ImmUkfPda::rubis_callback(const rubis_msgs::DetectedObjectArray& input)
+{
+  rubis::instance_ = input.instance;
+  input_header_ = input.object_array.header;
+
+  if(use_vectormap_)
+  {
+    checkVectormapSubscription();
+  }
+
+  bool success = updateNecessaryTransform();
+  if (!success)
+  {
+    ROS_INFO("Could not find coordiante transformation");
+    return;
+  }
+
+  autoware_msgs::DetectedObjectArray transformed_input;
+  autoware_msgs::DetectedObjectArray detected_objects_output;
+  rubis_msgs::DetectedObjectArray rubis_detected_objects_output;
+  transformPoseToGlobal(input.object_array, transformed_input);
+  tracker(transformed_input, detected_objects_output);
+  transformPoseToLocal(detected_objects_output);
+
+  rubis_detected_objects_output.instance = rubis::instance_;
+  rubis_detected_objects_output.object_array = detected_objects_output;
+  pub_rubis_object_array_.publish(rubis_detected_objects_output);
+
+  if (is_benchmark_)
+  {
+    dumpResultText(detected_objects_output);
+  }
+
+  if(rubis::sched::is_task_ready_ == TASK_NOT_READY) rubis::sched::init_task();
+  rubis::sched::task_state_ = TASK_STATE_DONE;
 }
 
 void ImmUkfPda::callback(const autoware_msgs::DetectedObjectArray& input)
@@ -98,9 +139,6 @@ void ImmUkfPda::callback(const autoware_msgs::DetectedObjectArray& input)
   {
     dumpResultText(detected_objects_output);
   }
-
-  if(rubis::sched::is_task_ready_ == TASK_NOT_READY) rubis::sched::init_task();
-  rubis::sched::task_state_ = TASK_STATE_DONE;
 }
 
 void ImmUkfPda::checkVectormapSubscription()

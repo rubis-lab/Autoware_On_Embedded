@@ -21,6 +21,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   vector_map_server
   rubis_lib
+  rubis_msgs
 )
 
 find_package(OpenMP)

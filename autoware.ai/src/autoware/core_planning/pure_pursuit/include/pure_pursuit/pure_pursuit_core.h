@@ -39,8 +39,6 @@
 #include <pure_pursuit/pure_pursuit.h>
 #include <pure_pursuit/pure_pursuit_viz.h>
 
-#include <autoware_health_checker/health_checker/health_checker.h>
-
 #include <vector>
 #include <memory>
 
@@ -90,8 +88,6 @@ private:
   // handle
   ros::NodeHandle nh_;
   ros::NodeHandle private_nh_;
-
-  std::shared_ptr<autoware_health_checker::HealthChecker> health_checker_ptr_;
 
   // class
   PurePursuit pp_;

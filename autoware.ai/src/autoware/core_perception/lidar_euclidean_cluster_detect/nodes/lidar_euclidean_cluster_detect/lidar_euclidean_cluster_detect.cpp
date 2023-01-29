@@ -53,6 +53,9 @@
 #include "autoware_msgs/DetectedObject.h"
 #include "autoware_msgs/DetectedObjectArray.h"
 
+#include "rubis_msgs/PointCloud2.h"
+#include "rubis_msgs/DetectedObjectArray.h"
+
 #include <vector_map/vector_map.h>
 
 #include <tf/tf.h>
@@ -90,6 +93,8 @@ ros::Publisher _pub_clusters_message;
 ros::Publisher _pub_points_lanes_cloud;
 
 ros::Publisher _pub_detected_objects;
+
+ros::Publisher _pub_rubis_detected_objects;
 
 std_msgs::Header _velodyne_header;
 
@@ -203,6 +208,7 @@ void transformBoundingBox(const jsk_recognition_msgs::BoundingBox &in_boundingbo
 void publishDetectedObjects(const autoware_msgs::CloudClusterArray &in_clusters)
 {
   autoware_msgs::DetectedObjectArray detected_objects;
+  rubis_msgs::DetectedObjectArray rubis_detected_objects;
   detected_objects.header = in_clusters.header;
 
   for (size_t i = 0; i < in_clusters.clusters.size(); i++)
@@ -221,6 +227,11 @@ void publishDetectedObjects(const autoware_msgs::CloudClusterArray &in_clusters)
     detected_objects.objects.push_back(detected_object);
   }
   _pub_detected_objects.publish(detected_objects);
+
+  rubis_detected_objects.instance = rubis::instance_;
+  rubis_detected_objects.object_array = detected_objects;
+  
+  _pub_rubis_detected_objects.publish(rubis_detected_objects);
   
   if(rubis::sched::is_task_ready_ == TASK_NOT_READY){
     rubis::sched::init_task();
@@ -681,25 +692,6 @@ void segmentByDistance(const pcl::PointCloud<pcl::PointXYZ>::Ptr in_cloud_ptr,
 
       jsk_recognition_msgs::BoundingBox bounding_box = final_clusters[i]->GetBoundingBox();
       geometry_msgs::PolygonStamped polygon = final_clusters[i]->GetPolygon();
-      jsk_rviz_plugins::Pictogram pictogram_cluster;
-      pictogram_cluster.header = _velodyne_header;
-
-      // PICTO
-      pictogram_cluster.mode = pictogram_cluster.STRING_MODE;
-      pictogram_cluster.pose.position.x = final_clusters[i]->GetMaxPoint().x;
-      pictogram_cluster.pose.position.y = final_clusters[i]->GetMaxPoint().y;
-      pictogram_cluster.pose.position.z = final_clusters[i]->GetMaxPoint().z;
-      tf::Quaternion quat(0.0, -0.7, 0.0, 0.7);
-      tf::quaternionTFToMsg(quat, pictogram_cluster.pose.orientation);
-      pictogram_cluster.size = 4;
-      std_msgs::ColorRGBA color;
-      color.a = 1;
-      color.r = 1;
-      color.g = 1;
-      color.b = 1;
-      pictogram_cluster.color = color;
-      pictogram_cluster.character = std::to_string(i);
-      // PICTO
 
       // pcl::PointXYZ min_point = final_clusters[i]->GetMinPoint();
       // pcl::PointXYZ max_point = final_clusters[i]->GetMaxPoint();
@@ -861,8 +853,9 @@ void removePointsUpTo(const pcl::PointCloud<pcl::PointXYZ>::Ptr in_cloud_ptr,
   }
 }
 
-void velodyne_callback(const sensor_msgs::PointCloud2ConstPtr& in_sensor_cloud)
+void velodyne_callback(const rubis_msgs::PointCloud2ConstPtr& in_sensor_cloud)
 {
+  rubis::instance_ = in_sensor_cloud->instance;
   //_start = std::chrono::system_clock::now();  
   if (!_using_sensor_cloud)
   {
@@ -881,9 +874,9 @@ void velodyne_callback(const sensor_msgs::PointCloud2ConstPtr& in_sensor_cloud)
     autoware_msgs::Centroids centroids;
     autoware_msgs::CloudClusterArray cloud_clusters;
 
-    pcl::fromROSMsg(*in_sensor_cloud, *current_sensor_cloud_ptr);
+    pcl::fromROSMsg(in_sensor_cloud->msg, *current_sensor_cloud_ptr);
 
-    _velodyne_header = in_sensor_cloud->header;
+    _velodyne_header = in_sensor_cloud->msg.header;
 
     if (_remove_points_upto > 0.0)
     {
@@ -985,27 +978,13 @@ int main(int argc, char **argv)
 
   generateColors(_colors, 255);
 
-
-  /* For GPU scheduling */
-  #ifdef GPU_CLUSTERING
-  int key_id = 1;    
   if(task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
-  if(gpu_profiling_flag) rubis::sched::init_gpu_profiling(gpu_execution_time_filename, gpu_response_time_filename);
-  
-  if(gpu_scheduling_flag){
-    rubis::sched::init_gpu_scheduling("/tmp/cluster", gpu_deadline_filename, key_id);
-  }    
-  else if(gpu_scheduling_flag){
-    ROS_ERROR("GPU scheduling flag is true but type doesn't set to GPU!");
-    exit(1);
-  }
-  #endif
-
 
   std::string label;
   std::string output_lane_str;
   std::string output_cluster_str;
   std::string output_objects_str;
+  std::string rubis_output_objects_str;
   std::string point_cluster_str;
   std::string cluster_centeroids_str;
   std::string points_ground_str;
@@ -1014,6 +993,7 @@ int main(int argc, char **argv)
   output_lane_str = std::string("/points_lanes_")+label;
   output_cluster_str = std::string("/detection/lidar_detector/cloud_clusters_")+label;
   output_objects_str = std::string("/detection/lidar_detector/objects_")+label;
+  rubis_output_objects_str = std::string("/detection/lidar_detector/rubis_objects_")+label;
   point_cluster_str = std::string("/points_cluster_")+label;
   cluster_centeroids_str = std::string("/points_ground_")+label;
   points_ground_str = std::string("/cluster_centroids_")+label;
@@ -1024,6 +1004,7 @@ int main(int argc, char **argv)
   _pub_points_lanes_cloud = h.advertise<sensor_msgs::PointCloud2>(output_lane_str.c_str(), 1);
   _pub_clusters_message = h.advertise<autoware_msgs::CloudClusterArray>(output_cluster_str.c_str(), 1);
   _pub_detected_objects = h.advertise<autoware_msgs::DetectedObjectArray>(output_objects_str.c_str(), 1);
+  _pub_rubis_detected_objects = h.advertise<rubis_msgs::DetectedObjectArray>(rubis_output_objects_str.c_str(), 1);
 
   std::string points_topic, gridmap_topic;
 
@@ -1154,7 +1135,7 @@ int main(int argc, char **argv)
 
       ros::spinOnce();
 
-      if(task_profiling_flag) rubis::sched::stop_task_profiling(0, rubis::sched::task_state_);
+      if(task_profiling_flag) rubis::sched::stop_task_profiling(rubis::instance_, rubis::sched::task_state_);
       if(rubis::sched::task_state_ == TASK_STATE_DONE){
         if(gpu_profiling_flag || gpu_scheduling_flag) rubis::sched::finish_job();        
         if(task_scheduling_flag) rubis::sched::yield_task_scheduling();

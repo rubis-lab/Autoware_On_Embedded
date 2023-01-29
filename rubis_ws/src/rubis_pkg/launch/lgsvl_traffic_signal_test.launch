@@ -1,6 +1,6 @@
 <launch>
     <arg name="stopline_data" default="$(env HOME)/autoware.ai/rubis_ws/src/rubis_pkg/cfg/testbed_stop_line.yaml"/>
-    <node pkg="rubis_pkg" type="lgsvl_traffic_signal_test.py" name="lgsvl_traffic_signal_test" output="screen">
+    <node pkg="rubis_pkg" type="lgsvl_traffic_signal_test.py" name="lgsvl_traffic_signal_test">
         <!-- <rosparam command="load" file="$(find rubis_pkg)/cfg/testbed_stop_line.yaml"/> -->
         <rosparam command="load" file="$(arg stopline_data)"/>
     </node>

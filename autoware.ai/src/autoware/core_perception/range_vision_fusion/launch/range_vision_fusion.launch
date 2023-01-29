@@ -12,7 +12,7 @@
   <arg name="use_vector_map" default="false"/>
   <arg name="namespace" default="/detection/fusion_tools"/>
 
-  <node name="range_vision_fusion_$(arg label)" pkg="range_vision_fusion" type="range_vision_fusion" output="screen">
+  <node name="range_vision_fusion_$(arg label)" pkg="range_vision_fusion" type="range_vision_fusion">
     <param name="label" value="$(arg label)"/>
     <param name="detected_objects_range" value="$(arg detected_objects_range)"/>
     <param name="detected_objects_vision" value="$(arg detected_objects_vision)"/>
@@ -26,21 +26,21 @@
 
   <!-- <group if="$(arg use_vector_map)">
     <node name="object_roi_filter_range_fusion_$(arg label)" pkg="roi_object_filter" type="roi_object_filter"
-          output="screen" ns="$(arg namespace)">
+          ns="$(arg namespace)">
       <param name="objects_src_topic" value="/objects_$(arg label)"/>
       <param name="sync_topics" value="false"/>
       <param name="exception_list" value="[person, bicycle]"/>
       <param name="label" value="$(arg label)" />
     </node>
     <node pkg="detected_objects_visualizer" type="visualize_detected_objects" name="range_fusion_visualization_$(arg label)"
-          output="screen" ns="$(arg namespace)">
+          ns="$(arg namespace)">
       <param name="objects_src_topic" value="/objects_filtered_$(arg label)"/>
       <param name="label" value="$(arg label)" />
     </node>
   </group>
   <group unless="$(arg use_vector_map)"> -->
   <node pkg="detected_objects_visualizer" type="visualize_detected_objects" name="range_fusion_visualization_$(arg label)"
-        output="screen" ns="$(arg namespace)">
+        ns="$(arg namespace)">
     <param name="objects_src_topic" value="/objects_$(arg label)"/>
     <param name="label" value="$(arg label)" />
     <param name="hull_color" value="[255.,0.,0.,0.8]" />
