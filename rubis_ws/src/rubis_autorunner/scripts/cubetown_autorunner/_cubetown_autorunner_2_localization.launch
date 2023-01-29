@@ -6,7 +6,7 @@
   <arg name="init_roll" value="0.0" />
   <arg name="init_pitch" value="0.0" />
   <arg name="init_yaw" value="1.57" />
-  
+
   <!-- vel/pose connect -->
   <arg name="topic_pose_stamped" default="/ndt_pose" />
   <arg name="topic_twist_stamped" default="/estimate_twist" /> 

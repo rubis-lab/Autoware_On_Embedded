@@ -36,11 +36,13 @@ void CubetownAutorunner::register_subscribers(){
  }
 
  void CubetownAutorunner::ndt_pose_cb(const geometry_msgs::PoseStamped& msg){
-    static int cnt = 0;
-    cnt++;
-    if(cnt > 50){        
+    static int failure_cnt = 0, success_cnt = 0;
+    failure_cnt++;    
+
+    if(failure_cnt > 20){        
         std::cout<<"# Refresh inital pose"<<std::endl;
         geometry_msgs::PoseWithCovarianceStamped initial_pose_msg;
+        initial_pose_msg.header = msg.header;
         initial_pose_msg.pose.pose.position.x = 56.3796081543;
         initial_pose_msg.pose.pose.position.y = -0.0106279850006;
         initial_pose_msg.pose.pose.position.z = 0.465716004372;
@@ -49,18 +51,24 @@ void CubetownAutorunner::register_subscribers(){
         initial_pose_msg.pose.pose.orientation.z = 0.707457658123;
         initial_pose_msg.pose.pose.orientation.w = 0.706752612;
         initial_pose_pub_.publish(initial_pose_msg);
-        cnt = 0;
+        failure_cnt = 0;
     }
 
-    if(msg.pose.position.x <= 57.0 && msg.pose.position.x >= 55.0 &&
+    if(msg.pose.position.x <= 57.0 && msg.pose.position.x >= 55.0 &&        
         msg.pose.position.y >= -0.20 && msg.pose.position.y <= 0.00 &&
         !ros_autorunner_.step_info_list_[STEP(3)].is_prepared){
+        success_cnt++;
+        if(success_cnt < 5) return;
         ROS_WARN("[STEP 2] Localization is success");
     	sleep(SLEEP_PERIOD);
         ros_autorunner_.step_info_list_[STEP(3)].is_prepared = true;
     }
+    else{
+        success_cnt = 0;
+    }
     
  }
+
 
  void CubetownAutorunner::behavior_state_cb(const visualization_msgs::MarkerArray& msg){
     std::string state = msg.markers.front().text;    
