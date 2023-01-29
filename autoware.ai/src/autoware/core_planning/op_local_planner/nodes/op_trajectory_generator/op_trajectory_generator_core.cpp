@@ -244,7 +244,7 @@ void TrajectoryGen::MainLoop()
 
   PlannerHNS::WayPoint prevState, state_change;
 
-  ros::Rate r(100);
+  ros::Rate r(rate);
 
   while(ros::ok()){
     if(task_profiling_flag_) rubis::sched::start_task_profiling();
