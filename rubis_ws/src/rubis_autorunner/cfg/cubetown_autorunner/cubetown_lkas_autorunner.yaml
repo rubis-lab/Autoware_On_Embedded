@@ -1,5 +1,5 @@
 total_step_num: 4
-terminate_script_path: "~/rubis_ws/src/rubis_autorunner/scripts/cubetown_autorunner/terminate.sh"
+terminate_script_path: "~/rubis_ws/src/rubis_autorunner/scripts/cubetown_autorunner/terminate_desktop.sh"
 # step_# : 
 #     [0] pacakge name
 #     [1] target name( node name or launch script name )

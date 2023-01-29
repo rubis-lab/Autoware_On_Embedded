@@ -1,11 +1,18 @@
 <launch>
   <!-- cubetown -->
-  <arg name="init_x" value="57.1" />
+  <!-- <arg name="init_x" value="57.1" />
   <arg name="init_y" value="1.38" />
   <arg name="init_z" value="0.48" />
   <arg name="init_roll" value="0.0" />
   <arg name="init_pitch" value="0.0" />
-  <arg name="init_yaw" value="1.57" />
+  <arg name="init_yaw" value="1.57" /> -->
+
+  <arg name="init_x" value="0" />
+  <arg name="init_y" value="0" />
+  <arg name="init_z" value="0" />
+  <arg name="init_roll" value="0.0" />
+  <arg name="init_pitch" value="0.0" />
+  <arg name="init_yaw" value="0" />
 
   <!-- vel/pose connect -->
   <arg name="topic_pose_stamped" default="/ndt_pose" />
@@ -36,11 +43,11 @@
     pitch: $(arg init_pitch),
     yaw: $(arg init_yaw),
     use_predict_pose: 1,
-    error_threshold: 0.01,
-    resolution: 3.0,
-    step_size: 0.3,
+    error_threshold: 0.05,
+    resolution: 1.0,
+    step_size: 0.5,
     trans_epsilon: 0.01,
-    max_iterations: 10}
+    max_iterations: 2}
   '"/>
 
 </launch>
