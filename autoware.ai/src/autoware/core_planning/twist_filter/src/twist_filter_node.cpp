@@ -118,6 +118,7 @@ inline void TwistFilterNode::publishTwist(const geometry_msgs::TwistStampedConst
   if(rubis::instance_mode_ && rubis::instance_ != RUBIS_NO_INSTANCE){
     rubis_msgs::TwistStamped rubis_out_msg;
     rubis_out_msg.instance = rubis::instance_;
+    rubis_out_msg.obj_instance = rubis::obj_instance_;
     rubis_out_msg.msg = out_msg;
     rubis_twist_pub_.publish(rubis_out_msg);
   }
@@ -156,6 +157,7 @@ void TwistFilterNode::rubisTwistCmdCallback(const rubis_msgs::TwistStampedConstP
 
   geometry_msgs::TwistStampedConstPtr msg = boost::make_shared<const geometry_msgs::TwistStamped>(_msg-> msg);
   rubis::instance_ = _msg->instance;
+  rubis::obj_instance_ = _msg->obj_instance;
   publishTwist(msg);
 
   // After spin

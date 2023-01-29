@@ -3,6 +3,7 @@
 namespace rubis{
   int instance_mode_;
   unsigned long instance_;
+  unsigned long obj_instance_;
 namespace sched{
   int task_profiling_flag_;
   int gpu_profiling_flag_;
@@ -41,7 +42,7 @@ namespace sched{
     }
 
     chmod(task_reponse_time_filename.c_str(), strtol("0777", 0, 8));
-    fprintf(task_response_time_fp_, "iter,PID,start,end,instance,activation\n");
+    fprintf(task_response_time_fp_, "iter,PID,start,end,instance,activation,obj_instance\n");
   }
 
   void start_task_profiling(){
@@ -53,7 +54,7 @@ namespace sched{
       int activation = 0;
       if(state == TASK_STATE_DONE) activation = 1;
       clock_gettime(CLOCK_MONOTONIC, &task_end_time_);
-      fprintf(task_response_time_fp_, "%d,%d,%lld.%.9ld,%lld.%.9ld,%lu,%d\n",iter_++, getpid(), (long long)task_start_time_.tv_sec, task_start_time_.tv_nsec, (long long)task_end_time_.tv_sec, task_end_time_.tv_nsec, instance, activation);
+      fprintf(task_response_time_fp_, "%d,%d,%lld.%.9ld,%lld.%.9ld,%lu,%d,%lu\n",iter_++, getpid(), (long long)task_start_time_.tv_sec, task_start_time_.tv_nsec, (long long)task_end_time_.tv_sec, task_end_time_.tv_nsec, instance, activation, obj_instance_);
       fflush(task_response_time_fp_);
     }
   }

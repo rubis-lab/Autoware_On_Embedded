@@ -326,8 +326,9 @@ void TrajectoryEval::callbackGetLocalPlannerPath(const rubis_msgs::LaneArrayWith
         local_lanes.lane_array.lanes.push_back(lane);
       }
 
-      rubis::instance_ = msg->instance;
+      rubis::instance_ = msg->instance;      
       local_lanes.instance = rubis::instance_;
+      local_lanes.obj_instance = rubis::obj_instance_;
       local_lanes.pose = msg->pose;
       local_lanes.twist = msg->twist;
 
@@ -365,6 +366,7 @@ void TrajectoryEval::callbackGetLocalPlannerPath(const rubis_msgs::LaneArrayWith
 void TrajectoryEval::callbackGetPredictedObjects(const rubis_msgs::DetectedObjectArrayConstPtr& msg)
 {  
   object_msg_ = msg->object_array;
+  rubis::obj_instance_ = msg->obj_instance;
 }
 
 void TrajectoryEval::_callbackGetPredictedObjects(const autoware_msgs::DetectedObjectArray& objects_msg){

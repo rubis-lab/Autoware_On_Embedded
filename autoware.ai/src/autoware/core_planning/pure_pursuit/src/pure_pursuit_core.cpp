@@ -229,6 +229,7 @@ void PurePursuitNode::publishTwistStamped(
   if(rubis::instance_mode_ && rubis::instance_mode_ != RUBIS_NO_INSTANCE){
     rubis_msgs::TwistStamped rubis_ts;
     rubis_ts.instance = rubis::instance_;
+    rubis_ts.obj_instance = rubis::obj_instance_;
     rubis_ts.msg = ts;
     rubis_twist_pub_.publish(rubis_ts);
   }
@@ -425,6 +426,7 @@ void PurePursuitNode::CallbackFinalWaypointsWithPoseTwist(const rubis_msgs::Lane
 { 
   if(task_profiling_flag_) rubis::sched::start_task_profiling();
   rubis::instance_ = msg->instance;
+  rubis::obj_instance_ = msg->obj_instance;
 
   // Update pose
   geometry_msgs::PoseStampedConstPtr pose_ptr(new geometry_msgs::PoseStamped(msg->pose));

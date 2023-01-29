@@ -231,6 +231,7 @@ void publishDetectedObjects(const autoware_msgs::CloudClusterArray &in_clusters)
   _pub_detected_objects.publish(detected_objects);
 
   rubis_detected_objects.instance = rubis::instance_;
+  rubis_detected_objects.instance = rubis::obj_instance_;
   rubis_detected_objects.object_array = detected_objects;
   
   _pub_rubis_detected_objects.publish(rubis_detected_objects);
@@ -859,6 +860,7 @@ void velodyne_callback(const rubis_msgs::PointCloud2ConstPtr& in_sensor_cloud)
 {
   if(task_profiling_flag_) rubis::sched::start_task_profiling();        
   rubis::instance_ = in_sensor_cloud->instance;
+  rubis::obj_instance_ = in_sensor_cloud->instance;
   //_start = std::chrono::system_clock::now();  
   if (!_using_sensor_cloud)
   {

@@ -202,6 +202,7 @@ void TwistGate::_autoCmdRubisTwistCmdCallback(const rubis_msgs::TwistStamped::Co
 {
   if(rubis_twist_cmd_ptr_ == NULL) return;
   rubis::instance_ = input_msg->instance;  
+  rubis::obj_instance_ = input_msg->obj_instance;  
   geometry_msgs::TwistStamped::ConstPtr _input_msg = boost::make_shared<const geometry_msgs::TwistStamped>(input_msg->msg);
   updateTwistGateMsg(_input_msg); 
 }

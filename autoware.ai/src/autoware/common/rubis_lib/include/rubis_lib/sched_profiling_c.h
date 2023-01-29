@@ -16,6 +16,7 @@
 
 extern int instance_mode_;
 extern unsigned long instance_;
+extern unsigned long obj_instance_;
 
 extern int task_profiling_flag_;
 extern int gpu_profiling_flag_;

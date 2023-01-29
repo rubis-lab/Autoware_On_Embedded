@@ -468,6 +468,7 @@ void MotionPrediction::callbackGetRubisTrackedObjects(const rubis_msgs::Detected
 void MotionPrediction::_callbackGetRubisTrackedObjects(rubis_msgs::DetectedObjectArray& objects_msg)
 {
   rubis::instance_ = objects_msg.instance;
+  rubis::obj_instance_ = objects_msg.instance;
 
   UtilityHNS::UtilityH::GetTickCount(m_SensingTimer);
   m_TrackedObjects.clear();
@@ -556,6 +557,7 @@ void MotionPrediction::_callbackGetRubisTrackedObjects(rubis_msgs::DetectedObjec
 
     rubis_msgs::DetectedObjectArray output_msg;
     output_msg.instance = rubis::instance_;
+    output_msg.obj_instance = rubis::obj_instance_;
     output_msg.object_array = m_PredictedResultsResults;
     pub_rubis_predicted_objects_trajectories.publish(output_msg);
     rubis::sched::task_state_ = TASK_STATE_DONE;

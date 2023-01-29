@@ -348,6 +348,7 @@ void BehaviorGen::callbackGetLocalPlannerPath(const rubis_msgs::LaneArrayWithPos
   // Before spinOnce
   if(task_profiling_flag_) rubis::sched::start_task_profiling();
   rubis::instance_ = msg->instance;
+  rubis::obj_instance_ = msg->obj_instance;
 
   // Callback
   _callbackDistanceToPedestrian();
@@ -533,7 +534,7 @@ void BehaviorGen::callbackGetLocalPlannerPath(const rubis_msgs::LaneArrayWithPos
   else
     sub_GlobalPlannerPaths = nh.subscribe("/lane_waypoints_array",   1,    &BehaviorGen::callbackGetGlobalPlannerPath,   this);
 
-  if(task_profiling_flag_) rubis::sched::stop_task_profiling(0, rubis::sched::task_state_);
+  if(task_profiling_flag_) rubis::sched::stop_task_profiling(rubis::instance_, rubis::sched::task_state_);
 
   if(rubis::sched::is_task_ready_ == TASK_NOT_READY) rubis::sched::init_task();
 
@@ -658,6 +659,7 @@ void BehaviorGen::SendLocalPlanningTopics(const rubis_msgs::LaneArrayWithPoseTwi
 
   rubis_msgs::LaneWithPoseTwist final_waypoints_with_pose_twist_msg;
   final_waypoints_with_pose_twist_msg.instance = rubis::instance_;
+  final_waypoints_with_pose_twist_msg.obj_instance = rubis::obj_instance_;
   final_waypoints_with_pose_twist_msg.lane = m_CurrentTrajectoryToSend;  
   final_waypoints_with_pose_twist_msg.pose = msg->pose;
   final_waypoints_with_pose_twist_msg.twist = msg->twist;

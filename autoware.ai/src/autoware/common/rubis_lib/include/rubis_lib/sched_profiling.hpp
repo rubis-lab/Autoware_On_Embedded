@@ -14,6 +14,7 @@
 namespace rubis {
   extern int instance_mode_;
   extern unsigned long instance_;
+  extern unsigned long obj_instance_;
 
 namespace sched {
   extern int task_profiling_flag_;
