@@ -167,6 +167,7 @@ void PurePursuitNode::initForROS()
 
 
   // setup subscriber
+  pose_twist_sub_ = nh_.subscribe("/rubis_current_pose_twist", 1, &PurePursuitNode::CallbackTwistPose, this);
   final_waypoints_with_pose_twist_sub = nh_.subscribe("/final_waypoints_with_pose_twist", 10, &PurePursuitNode::CallbackFinalWaypointsWithPoseTwist, this);
 
   sub3_ = nh_.subscribe("config/waypoint_follower", 10,
@@ -422,11 +423,10 @@ double PurePursuitNode::findWayPointVelocity(autoware_msgs::Waypoint msg){
   return way_points_velocity_[idx];
 }
 
-void PurePursuitNode::CallbackFinalWaypointsWithPoseTwist(const rubis_msgs::LaneWithPoseTwistConstPtr& msg)
-{ 
+void PurePursuitNode::CallbackTwistPose(const rubis_msgs::PoseTwistStampedConstPtr& msg)
+{
   if(task_profiling_flag_) rubis::sched::start_task_profiling();
   rubis::instance_ = msg->instance;
-  rubis::obj_instance_ = msg->obj_instance;
 
   // Update pose
   geometry_msgs::PoseStampedConstPtr pose_ptr(new geometry_msgs::PoseStamped(msg->pose));
@@ -438,15 +438,15 @@ void PurePursuitNode::CallbackFinalWaypointsWithPoseTwist(const rubis_msgs::Lane
   is_velocity_set_ = true;
 
   if(use_algorithm_){
-    command_linear_velocity_ = findWayPointVelocity(msg->lane.waypoints.at(0));
+    command_linear_velocity_ = findWayPointVelocity(lane_.waypoints.at(0));
   }
   else{
-    command_linear_velocity_ = (!msg->lane.waypoints.empty()) ? msg->lane.waypoints.at(0).twist.twist.linear.x : 0;
+    command_linear_velocity_ = (!lane_.waypoints.empty()) ? lane_.waypoints.at(0).twist.twist.linear.x : 0;
   }
 
-  geometry_msgs::Point curr_point = msg->lane.waypoints.at(0).pose.pose.position;
-  geometry_msgs::Point near_point = msg->lane.waypoints.at(std::min(3, (int)msg->lane.waypoints.size() - 1)).pose.pose.position;
-  geometry_msgs::Point far_point = msg->lane.waypoints.at(std::min(30, (int)msg->lane.waypoints.size() - 1)).pose.pose.position;
+  geometry_msgs::Point curr_point = lane_.waypoints.at(0).pose.pose.position;
+  geometry_msgs::Point near_point = lane_.waypoints.at(std::min(3, (int)lane_.waypoints.size() - 1)).pose.pose.position;
+  geometry_msgs::Point far_point = lane_.waypoints.at(std::min(30, (int)lane_.waypoints.size() - 1)).pose.pose.position;
 
   double deg_1 = atan2((near_point.y - curr_point.y), (near_point.x - curr_point.x)) / 3.14 * 180;
   double deg_2 = atan2((far_point.y - curr_point.y), (far_point.x - curr_point.x)) / 3.14 * 180;
@@ -457,30 +457,8 @@ void PurePursuitNode::CallbackFinalWaypointsWithPoseTwist(const rubis_msgs::Lane
 
   angle_diff_ = angle_diff;
 
-  if(dynamic_param_flag_){
-    setLookaheadParamsByVel();
-  }
-  
-  if (add_virtual_end_waypoints_)
-  {
-    const LaneDirection solved_dir = getLaneDirection(msg->lane);
-    direction_ = (solved_dir != LaneDirection::Error) ? solved_dir : direction_;
-    autoware_msgs::Lane expanded_lane(msg->lane);
-    expand_size_ = -expanded_lane.waypoints.size();
-    connectVirtualLastWaypoints(&expanded_lane, direction_);
-    expand_size_ += expanded_lane.waypoints.size();
-
-    pp_.setCurrentWaypoints(expanded_lane.waypoints);
-  }
-  else
-  {
-    pp_.setCurrentWaypoints(msg->lane.waypoints);
-  }
-  is_waypoint_set_ = true;
-
-#ifdef USE_WAYPOINT_ORIENTATION
-  waypoint_pose_ = msg->lane.waypoints[0].pose;
-#endif
+  // Update waypoints
+  _CallbackFinalWaypointsWithPoseTwist();
 
   // After spinOnce
   pp_.setLookaheadDistance(computeLookaheadDistance());
@@ -517,6 +495,41 @@ void PurePursuitNode::CallbackFinalWaypointsWithPoseTwist(const rubis_msgs::Lane
   is_waypoint_set_ = false;
 
   if(task_profiling_flag_) rubis::sched::stop_task_profiling(rubis::instance_, rubis::sched::task_state_);
+
+}
+
+void PurePursuitNode::_CallbackFinalWaypointsWithPoseTwist()
+{
+  if(dynamic_param_flag_){
+    setLookaheadParamsByVel();
+  }
+  
+  if (add_virtual_end_waypoints_)
+  {
+    const LaneDirection solved_dir = getLaneDirection(lane_);
+    direction_ = (solved_dir != LaneDirection::Error) ? solved_dir : direction_;
+    autoware_msgs::Lane expanded_lane(lane_);
+    expand_size_ = -expanded_lane.waypoints.size();
+    connectVirtualLastWaypoints(&expanded_lane, direction_);
+    expand_size_ += expanded_lane.waypoints.size();
+
+    pp_.setCurrentWaypoints(expanded_lane.waypoints);
+  }
+  else
+  {
+    pp_.setCurrentWaypoints(lane_.waypoints);
+  }
+  is_waypoint_set_ = true;
+
+#ifdef USE_WAYPOINT_ORIENTATION
+  waypoint_pose_ = lane_.waypoints[0].pose;
+#endif
+}
+
+void PurePursuitNode::CallbackFinalWaypointsWithPoseTwist(const rubis_msgs::LaneWithPoseTwistConstPtr& msg)
+{   
+  rubis::obj_instance_ = msg->obj_instance;
+  lane_ = msg->lane;
 }
 
 void PurePursuitNode::connectVirtualLastWaypoints(

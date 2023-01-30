@@ -39,7 +39,7 @@ void CubetownAutorunner::register_subscribers(){
     static int failure_cnt = 0, success_cnt = 0;
     failure_cnt++;    
 
-    if(failure_cnt > 20){        
+    if(failure_cnt > 10){        
         std::cout<<"# Refresh inital pose"<<std::endl;
         geometry_msgs::PoseWithCovarianceStamped initial_pose_msg;
         initial_pose_msg.header = msg.header;
@@ -58,7 +58,7 @@ void CubetownAutorunner::register_subscribers(){
         msg.pose.position.y >= -0.20 && msg.pose.position.y <= 0.00 &&
         !ros_autorunner_.step_info_list_[STEP(3)].is_prepared){
         success_cnt++;
-        if(success_cnt < 5) return;
+        if(success_cnt < 3) return;
         ROS_WARN("[STEP 2] Localization is success");
     	sleep(SLEEP_PERIOD);
         ros_autorunner_.step_info_list_[STEP(3)].is_prepared = true;

@@ -27,6 +27,7 @@
 #include <geometry_msgs/Point.h>
 #include <rubis_msgs/PoseStamped.h>
 #include <rubis_msgs/TwistStamped.h>
+#include <rubis_msgs/PoseTwistStamped.h>
 
 #include <ros/ros.h>
 #include <std_msgs/Float32.h>
@@ -99,7 +100,7 @@ private:
     pub11_, pub12_, pub13_, pub14_, pub15_, pub16_, pub17_, pub18_;
 
   // subscriber
-  ros::Subscriber sub1_, sub3_, final_waypoints_with_pose_twist_sub, car_ctrl_output_sub;
+  ros::Subscriber sub1_, sub3_, pose_twist_sub_, final_waypoints_with_pose_twist_sub, car_ctrl_output_sub;
 
   // constant
   const int LOOP_RATE_;  // processing frequency
@@ -128,12 +129,14 @@ private:
   bool dynamic_param_flag_;
   int task_profiling_flag_ = 1;
   std::vector<DynamicParams> dynamic_params;
+  autoware_msgs::Lane lane_;
 
   // callbacks
-  void callbackFromConfig(
-    const autoware_config_msgs::ConfigWaypointFollowerConstPtr& config);
+  void callbackFromConfig(const autoware_config_msgs::ConfigWaypointFollowerConstPtr& config);
   void callbackFromWayPoints(const autoware_msgs::LaneConstPtr& msg);
+  void CallbackTwistPose(const rubis_msgs::PoseTwistStampedConstPtr& msg);
   void CallbackFinalWaypointsWithPoseTwist(const rubis_msgs::LaneWithPoseTwistConstPtr& msg);
+  void _CallbackFinalWaypointsWithPoseTwist();
 
   #ifdef IONIC
   void callbackCtrlOutput(const can_data_msgs::Car_ctrl_output::ConstPtr &msg);
