@@ -313,7 +313,7 @@ double PurePursuitNode::computeCommandVelocity() const
 
 double PurePursuitNode::computeCommandAccel() const
 {
-  if(pp_.getCurrentWaypoints().size() < 2) return;
+  if(pp_.getCurrentWaypoints().size() < 2) return 0.0;
   const geometry_msgs::Pose current_pose = pp_.getCurrentPose();
   const geometry_msgs::Pose target_pose =
     pp_.getCurrentWaypoints().at(1).pose.pose;
@@ -325,6 +325,7 @@ double PurePursuitNode::computeCommandAccel() const
   const double v0 = current_linear_velocity_;
   const double v = computeCommandVelocity();
   const double a = getSgn() * (v * v - v0 * v0) / (2 * x);
+
   return a;
 }
 
