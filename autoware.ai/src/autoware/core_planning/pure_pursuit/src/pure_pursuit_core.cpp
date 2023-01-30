@@ -313,6 +313,7 @@ double PurePursuitNode::computeCommandVelocity() const
 
 double PurePursuitNode::computeCommandAccel() const
 {
+  if(pp_.getCurrentWaypoints().size() < 2) return;
   const geometry_msgs::Pose current_pose = pp_.getCurrentPose();
   const geometry_msgs::Pose target_pose =
     pp_.getCurrentWaypoints().at(1).pose.pose;
@@ -436,6 +437,8 @@ void PurePursuitNode::CallbackTwistPose(const rubis_msgs::PoseTwistStampedConstP
   current_linear_velocity_ = msg->twist.twist.linear.x;
   pp_.setCurrentVelocity(current_linear_velocity_);
   is_velocity_set_ = true;
+
+  if(lane_.waypoints.size() < 1) return;
 
   if(use_algorithm_){
     command_linear_velocity_ = findWayPointVelocity(lane_.waypoints.at(0));
