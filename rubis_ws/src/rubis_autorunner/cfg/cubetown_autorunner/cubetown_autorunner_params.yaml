@@ -143,7 +143,7 @@ op_trajectory_generator:
   task_scheduling_flag: 0
   task_profiling_flag: 1
   task_response_time_filename: "~/Documents/profiling/response_time/op_trajectory_generator.csv"
-  rate: 20 #100
+  rate: 100 #100
   task_minimum_inter_release_time: 100_000_000
   task_execution_time: 2_900_000
   task_relative_deadline: 100_000_000

@@ -51,6 +51,7 @@ namespace TrajectoryEvaluatorNS
 class TrajectoryEval
 {
 protected:
+  bool is_objects_updated_;
 
   PlannerHNS::TrajectoryDynamicCosts m_TrajectoryCostsCalculator;
   bool m_bUseMoveingObjectsPrediction;

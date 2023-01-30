@@ -30,6 +30,7 @@ TrajectoryEval::TrajectoryEval()
   bWayGlobalPathToUse = false;
   m_bUseMoveingObjectsPrediction = false;
   m_noVehicleCnt = 0;
+  is_objects_updated_ = false;
 
   ros::NodeHandle _nh;
   UpdatePlanningParams(_nh);
@@ -220,7 +221,10 @@ void TrajectoryEval::callbackGetLocalPlannerPath(const rubis_msgs::LaneArrayWith
   UpdateTf();
 
   // Callback
-  _callbackGetPredictedObjects(object_msg_);
+  if(is_objects_updated_){
+    _callbackGetPredictedObjects(object_msg_);
+    is_objects_updated_ = false;
+  }
 
   m_CurrentPos = PlannerHNS::WayPoint(msg->pose.pose.position.x, msg->pose.pose.position.y, msg->pose.pose.position.z, tf::getYaw(msg->pose.pose.orientation));
   bNewCurrentPos = true;
@@ -367,6 +371,7 @@ void TrajectoryEval::callbackGetPredictedObjects(const rubis_msgs::DetectedObjec
 {  
   object_msg_ = msg->object_array;
   rubis::obj_instance_ = msg->obj_instance;
+  is_objects_updated_ = true;
 }
 
 void TrajectoryEval::_callbackGetPredictedObjects(const autoware_msgs::DetectedObjectArray& objects_msg){
