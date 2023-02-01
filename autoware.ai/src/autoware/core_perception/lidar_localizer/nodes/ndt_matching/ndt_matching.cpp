@@ -1978,8 +1978,8 @@ int main(int argc, char** argv)
   ros::Subscriber initialpose_sub = nh.subscribe("initialpose", 10, initialpose_callback); 
 
   ros::Subscriber points_sub;
-  if(rubis::instance_mode_) points_sub = nh.subscribe("rubis_filtered_points", _queue_size, rubis_points_callback); // _queue_size = 1000
-  else points_sub = nh.subscribe("filtered_points", _queue_size, points_callback); // _queue_size = 1000
+  if(rubis::instance_mode_) points_sub = nh.subscribe("rubis_filtered_points", 1, rubis_points_callback); // _queue_size = 1000
+  else points_sub = nh.subscribe("filtered_points", 1, points_callback); // _queue_size = 1000
   
   // ros::Subscriber odom_sub = nh.subscribe("/vehicle/odom", _queue_size * 10, odom_callback);
   // ros::Subscriber imu_sub = nh.subscribe(_imu_topic.c_str(), _queue_size * 10, imu_callback);

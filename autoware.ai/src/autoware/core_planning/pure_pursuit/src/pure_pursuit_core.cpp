@@ -168,7 +168,7 @@ void PurePursuitNode::initForROS()
 
   // setup subscriber
   pose_twist_sub_ = nh_.subscribe("/rubis_current_pose_twist", 1, &PurePursuitNode::CallbackTwistPose, this);
-  final_waypoints_with_pose_twist_sub = nh_.subscribe("/final_waypoints_with_pose_twist", 10, &PurePursuitNode::CallbackFinalWaypointsWithPoseTwist, this);
+  final_waypoints_with_pose_twist_sub = nh_.subscribe("/final_waypoints_with_pose_twist", 1, &PurePursuitNode::CallbackFinalWaypointsWithPoseTwist, this); // Def: 10
 
   sub3_ = nh_.subscribe("config/waypoint_follower", 10,
     &PurePursuitNode::callbackFromConfig, this);

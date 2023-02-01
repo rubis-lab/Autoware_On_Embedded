@@ -56,7 +56,7 @@ TrajectoryGen::TrajectoryGen()
 
   sub_GlobalPlannerPaths = nh.subscribe("/lane_waypoints_array", 1, &TrajectoryGen::callbackGetGlobalPlannerPath, this);
   
-  sub_pose_twist = nh.subscribe("/rubis_current_pose_twist", 10, &TrajectoryGen::callbackGetCurrentPoseTwist, this);
+  sub_pose_twist = nh.subscribe("/rubis_current_pose_twist", 1, &TrajectoryGen::callbackGetCurrentPoseTwist, this); // Def: 10
 }
 
 TrajectoryGen::~TrajectoryGen()

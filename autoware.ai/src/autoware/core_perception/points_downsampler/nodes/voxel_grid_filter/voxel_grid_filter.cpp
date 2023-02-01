@@ -212,12 +212,8 @@ int main(int argc, char** argv)
   // ros::Subscriber scan_sub = nh.subscribe(input_topic_name_, 10, scan_callback);
   ros::Subscriber scan_sub;
   
-  if(rubis::instance_mode_) scan_sub = nh.subscribe("/rubis_"+input_topic_name_, 10, rubis_scan_callback);
-  else scan_sub = nh.subscribe(input_topic_name_, 10, scan_callback);
-
-  /*  RT Scheduling setup  */
-  // ros::Subscriber config_sub = nh.subscribe("config/voxel_grid_filter", 1, config_callback); // origin 10
-  // ros::Subscriber scan_sub = nh.subscribe(input_topic_name_, 1, scan_callback); // origin 10
+  if(rubis::instance_mode_) scan_sub = nh.subscribe("/rubis_"+input_topic_name_, 1, rubis_scan_callback); // Def: 10
+  else scan_sub = nh.subscribe(input_topic_name_, 1, scan_callback); // Def: 10
 
   ros::spin();
 

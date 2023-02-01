@@ -70,17 +70,17 @@ void Nmea2TFPoseNode::initForROS()
   }
 
   // setup subscriber
-  sub1_ = nh_.subscribe("nmea_sentence", 100, &Nmea2TFPoseNode::callbackFromNmeaSentence, this);
-  sub2_ = nh_.subscribe("imu_raw", 100, &Nmea2TFPoseNode::callbackFromIMU, this);
+  sub1_ = nh_.subscribe("nmea_sentence", 1, &Nmea2TFPoseNode::callbackFromNmeaSentence, this);
+  sub2_ = nh_.subscribe("imu_raw", 1, &Nmea2TFPoseNode::callbackFromIMU, this);
 
   // setup publisher
   if(enable_offset_){
-    pub1_ = nh_.advertise<geometry_msgs::PoseStamped>("gnss_offset_pose", 10);
-    pub2_ = nh_.advertise<geometry_msgs::PoseStamped>("gnss_transformed_pose", 10);
+    pub1_ = nh_.advertise<geometry_msgs::PoseStamped>("gnss_offset_pose", 1);
+    pub2_ = nh_.advertise<geometry_msgs::PoseStamped>("gnss_transformed_pose", 1);
   }
   else
-    pub1_ = nh_.advertise<geometry_msgs::PoseStamped>("gnss_pose", 10);
-  vel_pub_ = nh_.advertise<geometry_msgs::TwistStamped>("gnss_vel", 10);
+    pub1_ = nh_.advertise<geometry_msgs::PoseStamped>("gnss_pose", 1);
+  vel_pub_ = nh_.advertise<geometry_msgs::TwistStamped>("gnss_vel", 1);
 }
 
 void Nmea2TFPoseNode::run()
