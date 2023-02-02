@@ -73,7 +73,7 @@ int main(int argc, char** argv){
     pnh.param("/camera_image/task_execution_time", task_execution_time, (double)100000000);
     pnh.param("/camera_image/task_relative_deadline", task_relative_deadline, (double)100000000);
     
-    if(task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
+    if(task_profiling_flag) rubis::init_task_profiling(task_response_time_filename);
 
     ROS_INFO("camera_id : %d / frequency : %d",camera_id, frequency);
     if(!frequency){
@@ -104,12 +104,7 @@ void CameraImage::sendImage(){
         
     while(nh_.ok()){
 
-        if(task_profiling_flag) rubis::sched::start_task_profiling();   
-
-        if(rubis::sched::task_state_ == TASK_STATE_READY){            
-            if(task_scheduling_flag) rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline);
-            rubis::sched::task_state_ = TASK_STATE_RUNNING;
-        }
+        if(task_profiling_flag) rubis::start_task_profiling();   
 
         cap >> frame;
         if(!frame.empty()){
@@ -118,16 +113,16 @@ void CameraImage::sendImage(){
             msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", frame).toImageMsg();
             msg->header.frame_id="camera";
             camera_image_pub_.publish(msg);
-            rubis::sched::is_task_ready_ = TASK_STATE_DONE;            
+            rubis::is_task_ready_ = TASK_STATE_DONE;            
         }                        
         // int ckey = cv::waitKey(1);
         // if(ckey == 27)break;
 
-        if(task_profiling_flag) rubis::sched::stop_task_profiling(0, rubis::sched::task_state_);
+        if(task_profiling_flag) rubis::stop_task_profiling(0, rubis::task_state_);
 
-        if(rubis::sched::task_state_ == TASK_STATE_DONE){            
-            if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
-            rubis::sched::task_state_ = TASK_STATE_READY;
+        if(rubis::task_state_ == TASK_STATE_DONE){            
+            if(task_scheduling_flag) rubis::yield_task_scheduling();
+            rubis::task_state_ = TASK_STATE_READY;
         }
         loop_rate.sleep();
     }

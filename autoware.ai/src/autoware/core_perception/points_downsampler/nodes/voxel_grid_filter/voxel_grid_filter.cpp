@@ -150,13 +150,13 @@ static void scan_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
 
 static void rubis_scan_callback(const rubis_msgs::PointCloud2::ConstPtr& _input)
 {
-  if(task_profiling_flag_) rubis::sched::start_task_profiling();
+  if(task_profiling_flag_) rubis::start_task_profiling();
 
   sensor_msgs::PointCloud2::ConstPtr input = boost::make_shared<const sensor_msgs::PointCloud2>(_input->msg);
   rubis::instance_ = _input->instance;
   publish_filtered_cloud(input);
 
-  if(task_profiling_flag_) rubis::sched::stop_task_profiling(rubis::instance_, rubis::sched::task_state_);
+  if(task_profiling_flag_) rubis::stop_task_profiling(rubis::instance_, rubis::task_state_);
 }
 
 int main(int argc, char** argv)
@@ -199,7 +199,7 @@ int main(int argc, char** argv)
   private_nh.param<int>(node_name+"/instance_mode", rubis::instance_mode_, 0);
 
   /* For Task scheduling */
-  if(task_profiling_flag_) rubis::sched::init_task_profiling(task_response_time_filename);
+  if(task_profiling_flag_) rubis::init_task_profiling(task_response_time_filename);
 
   // Publishers
   filtered_points_pub = nh.advertise<sensor_msgs::PointCloud2>(output_topic_name_, 10);

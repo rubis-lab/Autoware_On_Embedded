@@ -212,7 +212,7 @@ void PurePursuitNode::run()
   private_nh.param("/pure_pursuit/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
   private_nh.param("/pure_pursuit/task_execution_time", task_execution_time, (double)10);
   private_nh.param("/pure_pursuit/task_relative_deadline", task_relative_deadline, (double)10);
-  if(task_profiling_flag_) rubis::sched::init_task_profiling(task_response_time_filename);  
+  if(task_profiling_flag_) rubis::init_task_profiling(task_response_time_filename);  
 
   ros::spin();
 }
@@ -235,8 +235,8 @@ void PurePursuitNode::publishTwistStamped(
     rubis_twist_pub_.publish(rubis_ts);
   }
 
-  if(rubis::sched::is_task_ready_ == TASK_NOT_READY) rubis::sched::init_task();
-  rubis::sched::task_state_ = TASK_STATE_DONE;
+  if(rubis::is_task_ready_ == TASK_NOT_READY) rubis::init_task();
+  rubis::task_state_ = TASK_STATE_DONE;
 }
 
 void PurePursuitNode::publishControlCommandStamped(
@@ -427,7 +427,7 @@ double PurePursuitNode::findWayPointVelocity(autoware_msgs::Waypoint msg){
 
 void PurePursuitNode::CallbackTwistPose(const rubis_msgs::PoseTwistStampedConstPtr& msg)
 {
-  if(task_profiling_flag_) rubis::sched::start_task_profiling();
+  if(task_profiling_flag_) rubis::start_task_profiling();
   rubis::instance_ = msg->instance;
 
   // Update pose
@@ -498,7 +498,7 @@ void PurePursuitNode::CallbackTwistPose(const rubis_msgs::PoseTwistStampedConstP
   is_velocity_set_ = false;
   is_waypoint_set_ = false;
 
-  if(task_profiling_flag_) rubis::sched::stop_task_profiling(rubis::instance_, rubis::sched::task_state_);
+  if(task_profiling_flag_) rubis::stop_task_profiling(rubis::instance_, rubis::task_state_);
 
 }
 

@@ -437,20 +437,11 @@ void Yolo3DetectorNode::Run()
         // Executing task
         while(ros::ok()){
             if(task_profiling_flag) start_task_profiling();          
-            if(task_state_ == TASK_STATE_READY){
-                if(task_scheduling_flag) request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline); 
-                task_state_ = TASK_STATE_RUNNING;     
-            }
 
             ros::spinOnce();
 
             if(task_profiling_flag) stop_task_profiling(0, task_state_);
 
-            if(task_state_ == TASK_STATE_DONE){
-                if(task_scheduling_flag) yield_task_scheduling();
-                task_state_ = TASK_STATE_READY;
-            }
-            
             r.sleep();
         }
     }

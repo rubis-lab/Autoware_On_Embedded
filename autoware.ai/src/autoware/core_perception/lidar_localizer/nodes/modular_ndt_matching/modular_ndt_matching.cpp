@@ -846,7 +846,7 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
 
   health_checker_ptr_->CHECK_RATE("topic_rate_ndt_pose_slow", 8, 5, 1, "topic ndt_pose publish rate slow.");
   ndt_pose_pub.publish(ndt_pose_msg);
-  rubis::sched::task_state_ = TASK_STATE_DONE;
+  rubis::task_state_ = TASK_STATE_DONE;
 
   if(rubis::instance_mode_ && rubis::instance_ != RUBIS_NO_INSTANCE){
     rubis_ndt_pose_msg.instance = rubis::instance_;
@@ -945,8 +945,8 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
   previous_velocity_z = current_velocity_z;
   previous_accel = current_accel;
   
-  if(rubis::sched::is_task_ready_ == TASK_NOT_READY){
-    rubis::sched::init_task();
+  if(rubis::is_task_ready_ == TASK_NOT_READY){
+    rubis::init_task();
   }  
 }
 
@@ -1081,7 +1081,7 @@ int main(int argc, char** argv)
   private_nh.param(node_name+"/task_relative_deadline", task_relative_deadline, (double)10);
   private_nh.param<int>(node_name+"/instance_mode", rubis::instance_mode_, 0);
   
-  if(task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
+  if(task_profiling_flag) rubis::init_task_profiling(task_response_time_filename);
   
   Eigen::Translation3f tl_btol(_tf_x, _tf_y, _tf_z);                 // tl: translation
   Eigen::AngleAxisf rot_x_btol(_tf_roll, Eigen::Vector3f::UnitX());  // rot: rotation
@@ -1148,20 +1148,11 @@ int main(int argc, char** argv)
 
     // Executing task
     while(ros::ok()){
-      if(task_profiling_flag) rubis::sched::start_task_profiling();        
-      if(rubis::sched::task_state_ == TASK_STATE_READY){        
-        if(task_scheduling_flag) rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline); 
-        rubis::sched::task_state_ = TASK_STATE_RUNNING;     
-      }
+      if(task_profiling_flag) rubis::start_task_profiling();        
 
       ros::spinOnce();
 
-      if(task_profiling_flag) rubis::sched::stop_task_profiling(rubis::instance_, rubis::sched::task_state_);
-      
-      if(rubis::sched::task_state_ == TASK_STATE_DONE){      
-        if(task_scheduling_flag) rubis::sched::yield_task_scheduling();        
-        rubis::sched::task_state_ = TASK_STATE_READY;
-      }
+      if(task_profiling_flag) rubis::stop_task_profiling(rubis::instance_, rubis::task_state_);
       
       r.sleep();
     }

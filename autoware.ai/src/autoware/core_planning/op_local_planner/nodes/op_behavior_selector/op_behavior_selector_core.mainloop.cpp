@@ -393,7 +393,7 @@ void BehaviorGen::callbackGetLocalPlannerPath(const rubis_msgs::LaneArrayWithPos
     bRollOuts = true;
   }
 
-  if(rubis::sched::is_task_ready_ == TASK_NOT_READY) rubis::sched::init_task();
+  if(rubis::is_task_ready_ == TASK_NOT_READY) rubis::init_task();
 
 }
 
@@ -523,7 +523,7 @@ void BehaviorGen::SendLocalPlanningTopics(const rubis_msgs::LaneArrayWithPoseTwi
   pub_LocalPathWithPosePub.publish(final_waypoints_with_pose_twist_msg);
   pub_LocalPath.publish(m_CurrentTrajectoryToSend);
 
-  rubis::sched::task_state_ = TASK_STATE_DONE;
+  rubis::task_state_ = TASK_STATE_DONE;
 }
 
 void BehaviorGen::LogLocalPlanningInfo(double dt)
@@ -621,13 +621,13 @@ void BehaviorGen::MainLoop()
   private_nh.param("/op_behavior_selector/task_relative_deadline", task_relative_deadline, (double)10);
 
   /* For Task scheduling */
-  if(task_profiling_flag_) rubis::sched::init_task_profiling(task_response_time_filename);
+  if(task_profiling_flag_) rubis::init_task_profiling(task_response_time_filename);
 
   m_sprintSwitch = false;
 
   ros::Rate r(100);
   while(ros::ok()){
-    if(task_profiling_flag_) rubis::sched::start_task_profiling();
+    if(task_profiling_flag_) rubis::start_task_profiling();
 
     ros::spinOnce();
 
@@ -765,7 +765,7 @@ void BehaviorGen::MainLoop()
     else
       sub_GlobalPlannerPaths = nh.subscribe("/lane_waypoints_array",   1,    &BehaviorGen::callbackGetGlobalPlannerPath,   this);
 
-    if(task_profiling_flag_) rubis::sched::stop_task_profiling(0, rubis::sched::task_state_);    
+    if(task_profiling_flag_) rubis::stop_task_profiling(0, rubis::task_state_);    
     r.sleep();
   }
 }

@@ -725,7 +725,7 @@ ROSRangeVisionFusionApp::Run()
   double task_execution_time;
   double task_relative_deadline;
 
-  if(task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
+  if(task_profiling_flag) rubis::init_task_profiling(task_response_time_filename);
   
   tf::TransformListener transform_listener;
 

@@ -240,7 +240,7 @@ void GlobalPlanner::callbackGetVehicleStatus(const geometry_msgs::TwistStampedCo
     m_VehicleState.steer = atan(2.7 * msg->twist.angular.z/msg->twist.linear.x);
   UtilityHNS::UtilityH::GetTickCount(m_VehicleState.tStamp);
 
-  if(rubis::sched::is_task_ready_ == TASK_NOT_READY) rubis::sched::init_task();
+  if(rubis::is_task_ready_ == TASK_NOT_READY) rubis::init_task();
 }
 
 void GlobalPlanner::callbackGetCANInfo(const autoware_can_msgs::CANInfoConstPtr &msg)
@@ -468,7 +468,7 @@ void GlobalPlanner::MainLoop()
   private_nh.param("/op_global_planner/multilap_flag", multilap_flag, 0);
   private_nh.param("/op_global_planner/multilap_replanning_distance", multilap_replanning_distance, (double)50);
 
-  if(task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
+  if(task_profiling_flag) rubis::init_task_profiling(task_response_time_filename);
 
   timespec animation_timer;
   UtilityHNS::UtilityH::GetTickCount(animation_timer);
@@ -480,12 +480,7 @@ void GlobalPlanner::MainLoop()
 
   while (ros::ok())
   {
-    if(task_profiling_flag) rubis::sched::start_task_profiling();
-
-    if(rubis::sched::is_task_ready_ == TASK_READY && rubis::sched::task_state_ == TASK_STATE_READY){
-      if(task_scheduling_flag) rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline); 
-      rubis::sched::task_state_ = TASK_STATE_RUNNING;     
-    }
+    if(task_profiling_flag) rubis::start_task_profiling();
 
     ros::spinOnce();
     bool bMakeNewPlan = false;
@@ -618,13 +613,13 @@ void GlobalPlanner::MainLoop()
       VisualizeDestinations(m_GoalsPos, m_iCurrentGoalIndex);
     }
 
-    rubis::sched::task_state_ = TASK_STATE_DONE;
+    rubis::task_state_ = TASK_STATE_DONE;
 
-    if(task_profiling_flag) rubis::sched::stop_task_profiling(0, rubis::sched::task_state_);
+    if(task_profiling_flag) rubis::stop_task_profiling(0, rubis::task_state_);
 
-    if(rubis::sched::is_task_ready_ == TASK_READY && rubis::sched::task_state_ == TASK_STATE_DONE){
-      if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
-      rubis::sched::task_state_ = TASK_STATE_READY;
+    if(rubis::is_task_ready_ == TASK_READY && rubis::task_state_ == TASK_STATE_DONE){
+      if(task_scheduling_flag) rubis::yield_task_scheduling();
+      rubis::task_state_ = TASK_STATE_READY;
     }
     loop_rate.sleep();
   }

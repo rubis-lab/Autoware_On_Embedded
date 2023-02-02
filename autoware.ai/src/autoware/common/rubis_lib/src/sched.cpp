@@ -3,7 +3,6 @@
 // #define DEBUG 
 
 namespace rubis{
-namespace sched{
 
 int key_id_;
 int is_scheduled_;
@@ -22,37 +21,76 @@ int sched_getattr(pid_t pid, struct sched_attr *attr, unsigned int size, unsigne
 	return syscall(__NR_sched_getattr, pid, attr, size, flags);
 }
 
-bool set_sched_deadline(int _tid, __u64 _exec_time, __u64 _deadline, __u64 _period) {
-    struct sched_attr attr;
-    attr.size = sizeof(attr);
-    attr.sched_flags = 0;
-    attr.sched_nice = 0;
-    attr.sched_priority = 0;
-
-    attr.sched_policy = SCHED_DEADLINE; // 6
-    attr.sched_runtime = _exec_time;
-    attr.sched_deadline = _deadline;
-    attr.sched_period = _period;
-
-    int ret = sched_setattr(_tid, &attr, attr.sched_flags);
-    if(ret < 0) {
-        std::cerr << "[ERROR] sched_setattr failed. Are you root? (" << ret << ")" << std::endl;
-        perror("sched_setattr");
-        exit(-1);
-        return false;
-    } 
-    // else {
-    //     std::cerr << "[SCHED_DEADLINE] (" << _tid << ") exec_time: " << _exec_time << " _deadline: " << _deadline << " _period: " << _period << std::endl;
-    // }
-    return true;
+bool set_sched_fifo(int pid, int priority){
+  struct sched_param sp = {.sched_priority = (int32_t) priority};
+  int ret = sched_setscheduler(pid, SCHED_FIFO, &sp);
+  if(ret == -1){
+    perror("sched_setscheduler");
+    return false;
+  }
+  return true;
 }
 
-void request_task_scheduling(double task_minimum_inter_release_time, double task_execution_time, double task_relative_deadline){
-  sched::set_sched_deadline(gettid(), 
-    static_cast<uint64_t>(task_execution_time), 
-    static_cast<uint64_t>(task_relative_deadline), 
-    static_cast<uint64_t>(task_minimum_inter_release_time)
-  );
+bool set_sched_fifo(int pid, int priority, int child_priority){
+  if(pid == 0) pid = getpid();
+  bool output = set_sched_fifo(pid, priority);
+  std::vector<int> child_pids = get_child_pids(pid);
+
+  for(auto it = child_pids.begin(); it != child_pids.end(); it++){    
+    int child_pid = *it;
+    output = set_sched_fifo(child_pid, child_priority);
+  }
+
+  return output;
+}
+
+bool set_sched_rr(int pid, int priority){
+  struct sched_param sp = {.sched_priority = (int32_t) priority};
+  int ret = sched_setscheduler(pid, SCHED_RR, &sp);
+  if(ret == -1){
+    perror("sched_setscheduler");
+    return false;
+  }
+  return true;
+}
+
+bool set_sched_rr(int pid, int priority, int child_priority){
+  if(pid == 0) pid = getpid();
+  bool output = set_sched_rr(pid, priority);
+  std::vector<int> child_pids = get_child_pids(pid);
+
+  for(auto it = child_pids.begin(); it != child_pids.end(); it++){    
+    int child_pid = *it;
+    output = set_sched_rr(child_pid, child_priority);
+  }
+
+  return output;
+}
+
+bool set_sched_deadline(int pid, unsigned int exec_time, unsigned int deadline, unsigned int period) {
+
+  struct sched_attr attr;
+  attr.size = sizeof(attr);
+  attr.sched_flags = 0;
+  attr.sched_nice = 0;
+  attr.sched_priority = 0;
+
+  attr.sched_policy = SCHED_DEADLINE; // 6
+  attr.sched_runtime = (__u64)exec_time;
+  attr.sched_deadline = (__u64)deadline;
+  attr.sched_period = (__u64)period;
+
+  int ret = sched_setattr(pid, &attr, attr.sched_flags);
+  if(ret < 0) {
+      std::cerr << "[ERROR] sched_setattr failed. Are you root? (" << ret << ")" << std::endl;
+      perror("sched_setattr");
+      exit(-1);
+      return false;
+  } 
+  // else {
+  //     std::cerr << "[SCHED_DEADLINE] (" << _pid << ") exec_time: " << _exec_time << " _deadline: " << _deadline << " _period: " << _period << std::endl;
+  // }
+  return true;
 }
 
 void yield_task_scheduling(){
@@ -86,5 +124,55 @@ void disable_task(){
   is_task_ready_ = TASK_NOT_READY;
 }
 
-} // namespace sched
-} // namespace rubiss
+std::string get_cmd_output(const char* cmd) {
+    char buffer[128];
+    std::string result = "";
+    FILE* pipe = popen(cmd, "r");
+    if (!pipe) throw std::runtime_error("popen() failed!");
+    try {
+        while (fgets(buffer, sizeof(buffer), pipe) != NULL) {
+            result += buffer;
+        }
+    } catch (...) {
+        pclose(pipe);
+        throw;
+    }
+    pclose(pipe);
+    std::cout<<result<<std::endl;
+    return result;
+}
+
+std::vector<int> get_child_pids(int pid){
+  std::vector<int> child_pids;
+  std::string cmd = "ps -ef -T | grep " + std::to_string(pid);
+  std::string s = get_cmd_output(cmd.c_str());
+
+  std::vector<std::string> task_ps_info_vec = tokenize_string(s, "\n");
+
+  for(auto it = task_ps_info_vec.begin(); it != task_ps_info_vec.end(); ++it){
+    std::string task_ps_info = *it;
+    if(task_ps_info.find(std::string("grep")) != std::string::npos) continue;
+    if(task_ps_info.find(std::string("ps -ef -T")) != std::string::npos) continue;
+    std::vector<std::string> parsed_task_ps_info = tokenize_string(task_ps_info, " ");
+    int child_pid = std::stoi(parsed_task_ps_info[2]);
+    if(child_pid == pid) continue;
+    child_pids.push_back(child_pid);
+  }
+
+  return child_pids;
+}
+
+std::vector<std::string> tokenize_string(std::string s, std::string delimiter){
+  std::vector<std::string> output;
+  size_t pos = 0;
+
+  while ((pos = s.find(delimiter)) != std::string::npos) {
+      std::string token = s.substr(0, pos);
+      if(token.size() != 0) output.push_back(token);
+      s.erase(0, pos + delimiter.length());
+  }  
+
+  return output;
+}
+
+} // namespace rubis

@@ -147,7 +147,7 @@ void TrajectoryGen::callbackGetInitPose(const geometry_msgs::PoseWithCovarianceS
 //   UtilityHNS::UtilityH::GetTickCount(m_VehicleStatus.tStamp);
 //   bVehicleStatus = true;
 
-//   if(rubis::sched::is_task_ready_ == TASK_NOT_READY) rubis::sched::init_task();  
+//   if(rubis::is_task_ready_ == TASK_NOT_READY) rubis::init_task();  
 // }
 
 void TrajectoryGen::callbackGetCurrentPoseTwist(const rubis_msgs::PoseTwistStampedPtr& msg){
@@ -169,7 +169,7 @@ void TrajectoryGen::callbackGetCurrentPoseTwist(const rubis_msgs::PoseTwistStamp
   current_pose_ = msg->pose;
   current_twist_ = msg->twist;
 
-  if(rubis::sched::is_task_ready_ == TASK_NOT_READY) rubis::sched::init_task();  
+  if(rubis::is_task_ready_ == TASK_NOT_READY) rubis::init_task();  
 }
 
 
@@ -240,14 +240,14 @@ void TrajectoryGen::MainLoop()
   private_nh.param("/op_trajectory_generator/task_execution_time", task_execution_time, (double)10);
   private_nh.param("/op_trajectory_generator/task_relative_deadline", task_relative_deadline, (double)10);
 
-  if(task_profiling_flag_) rubis::sched::init_task_profiling(task_response_time_filename);
+  if(task_profiling_flag_) rubis::init_task_profiling(task_response_time_filename);
 
   PlannerHNS::WayPoint prevState, state_change;
 
   ros::Rate r(rate);
 
   while(ros::ok()){
-    if(task_profiling_flag_) rubis::sched::start_task_profiling();
+    if(task_profiling_flag_) rubis::start_task_profiling();
 
     ros::spinOnce();
 
@@ -308,7 +308,7 @@ void TrajectoryGen::MainLoop()
 
       pub_LocalTrajectoriesWithPoseTwist.publish(local_lanes);
       pub_LocalTrajectories.publish(local_lanes.lane_array);
-      rubis::sched::task_state_ = TASK_STATE_DONE;
+      rubis::task_state_ = TASK_STATE_DONE;
     }
     else{
       sub_GlobalPlannerPaths = nh.subscribe("/lane_waypoints_array",   1,    &TrajectoryGen::callbackGetGlobalPlannerPath,   this);
@@ -317,7 +317,7 @@ void TrajectoryGen::MainLoop()
       PlannerHNS::ROSHelpers::TrajectoriesToMarkers(m_RollOuts, all_rollOuts);
       pub_LocalTrajectoriesRviz.publish(all_rollOuts);
 
-      if(task_profiling_flag_) rubis::sched::stop_task_profiling(0, rubis::sched::task_state_);
+      if(task_profiling_flag_) rubis::stop_task_profiling(0, rubis::task_state_);
     }
 
     r.sleep();

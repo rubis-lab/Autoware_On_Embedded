@@ -123,8 +123,8 @@ inline void TwistFilterNode::publishTwist(const geometry_msgs::TwistStampedConst
     rubis_twist_pub_.publish(rubis_out_msg);
   }
 
-  if(rubis::sched::is_task_ready_ == TASK_NOT_READY) rubis::sched::init_task();
-  rubis::sched::task_state_ = TASK_STATE_DONE;
+  if(rubis::is_task_ready_ == TASK_NOT_READY) rubis::init_task();
+  rubis::task_state_ = TASK_STATE_DONE;
 
   // Publish lateral accel and jerk after smoothing
   auto lacc_smoothed_result = twist_filter_ptr_->calcLaccWithAngularZ(twist_out);
@@ -149,7 +149,7 @@ inline void TwistFilterNode::publishTwist(const geometry_msgs::TwistStampedConst
 
 void TwistFilterNode::rubisTwistCmdCallback(const rubis_msgs::TwistStampedConstPtr& _msg){
   // Before spin
-  if(task_profiling_flag) rubis::sched::start_task_profiling();
+  if(task_profiling_flag) rubis::start_task_profiling();
 
   // Callback
   _emergencyStopCallback();
@@ -161,7 +161,7 @@ void TwistFilterNode::rubisTwistCmdCallback(const rubis_msgs::TwistStampedConstP
   publishTwist(msg);
 
   // After spin
-  if(task_profiling_flag) rubis::sched::stop_task_profiling(rubis::instance_, rubis::sched::task_state_);
+  if(task_profiling_flag) rubis::stop_task_profiling(rubis::instance_, rubis::task_state_);
 }
 
 

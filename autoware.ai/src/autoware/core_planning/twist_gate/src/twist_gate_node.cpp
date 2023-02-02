@@ -47,7 +47,7 @@ int main(int argc, char** argv)
   private_nh.param("/twist_gate/task_relative_deadline", task_relative_deadline, (double)10);
   private_nh.param<int>("/twist_gate/zero_flag", zero_flag_, 0);
 
-  if(twist_gate.task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
+  if(twist_gate.task_profiling_flag) rubis::init_task_profiling(task_response_time_filename);
 
   ros::spin();
 

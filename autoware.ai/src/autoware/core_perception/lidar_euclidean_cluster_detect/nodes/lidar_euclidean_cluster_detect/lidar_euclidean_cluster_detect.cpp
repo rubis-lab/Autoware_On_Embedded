@@ -236,11 +236,11 @@ void publishDetectedObjects(const autoware_msgs::CloudClusterArray &in_clusters)
   
   _pub_rubis_detected_objects.publish(rubis_detected_objects);
   
-  if(rubis::sched::is_task_ready_ == TASK_NOT_READY){
-    rubis::sched::init_task();
+  if(rubis::is_task_ready_ == TASK_NOT_READY){
+    rubis::init_task();
   }
   
-  rubis::sched::task_state_ = TASK_STATE_DONE;
+  rubis::task_state_ = TASK_STATE_DONE;
 }
 
 void publishCloudClusters(const ros::Publisher *in_publisher, const autoware_msgs::CloudClusterArray &in_clusters,
@@ -857,7 +857,7 @@ void removePointsUpTo(const pcl::PointCloud<pcl::PointXYZ>::Ptr in_cloud_ptr,
 
 void velodyne_callback(const rubis_msgs::PointCloud2ConstPtr& in_sensor_cloud)
 {
-  if(task_profiling_flag_) rubis::sched::start_task_profiling();        
+  if(task_profiling_flag_) rubis::start_task_profiling();        
   rubis::instance_ = in_sensor_cloud->instance;
   rubis::obj_instance_ = in_sensor_cloud->instance;
   //_start = std::chrono::system_clock::now();  
@@ -936,7 +936,7 @@ void velodyne_callback(const rubis_msgs::PointCloud2ConstPtr& in_sensor_cloud)
     _using_sensor_cloud = false;
   }
 
-  if(task_profiling_flag_) rubis::sched::stop_task_profiling(rubis::instance_, rubis::sched::task_state_);
+  if(task_profiling_flag_) rubis::stop_task_profiling(rubis::instance_, rubis::task_state_);
 }
 
 int main(int argc, char **argv)
@@ -971,7 +971,7 @@ int main(int argc, char **argv)
 
   generateColors(_colors, 255);
 
-  if(task_profiling_flag_) rubis::sched::init_task_profiling(task_response_time_filename);
+  if(task_profiling_flag_) rubis::init_task_profiling(task_response_time_filename);
 
   std::string label;
   std::string output_lane_str;

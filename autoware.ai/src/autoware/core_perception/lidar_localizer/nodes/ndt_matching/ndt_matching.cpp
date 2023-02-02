@@ -1502,7 +1502,7 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
 
   predict_pose_pub.publish(predict_pose_msg);
   ndt_pose_pub.publish(ndt_pose_msg);
-  rubis::sched::task_state_ = TASK_STATE_DONE;
+  rubis::task_state_ = TASK_STATE_DONE;
 
   // current_pose is published by vel_pose_mux
   //    current_pose_pub.publish(current_pose_msg);
@@ -1706,8 +1706,8 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
   is_kalman_filter_on_msgs.data = _is_kalman_filter_on;
   is_kalman_filter_on_pub.publish(is_kalman_filter_on_msgs);
   
-  if(rubis::sched::is_task_ready_ == TASK_NOT_READY){
-    rubis::sched::init_task();
+  if(rubis::is_task_ready_ == TASK_NOT_READY){
+    rubis::init_task();
   }  
 }
 
@@ -1717,13 +1717,13 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input){
 }
 
 static void rubis_points_callback(const rubis_msgs::PointCloud2::ConstPtr& _input){
-  if(task_profiling_flag_) rubis::sched::start_task_profiling();
+  if(task_profiling_flag_) rubis::start_task_profiling();
 
   sensor_msgs::PointCloud2::ConstPtr input = boost::make_shared<const sensor_msgs::PointCloud2>(_input->msg);
   rubis::instance_ = _input->instance;
   ndt_matching(input);
 
-  if(task_profiling_flag_) rubis::sched::stop_task_profiling(rubis::instance_, rubis::sched::task_state_);
+  if(task_profiling_flag_) rubis::stop_task_profiling(rubis::instance_, rubis::task_state_);
 }
 
 static void ins_stat_callback(const rubis_msgs::InsStat::ConstPtr& input){
@@ -1912,7 +1912,7 @@ int main(int argc, char** argv)
   private_nh.param(node_name+"/task_relative_deadline", task_relative_deadline, (double)10);
   private_nh.param<int>(node_name+"/instance_mode", rubis::instance_mode_, 0);
   
-  if(task_profiling_flag_) rubis::sched::init_task_profiling(task_response_time_filename);
+  if(task_profiling_flag_) rubis::init_task_profiling(task_response_time_filename);
   
   Eigen::Translation3f tl_btol(_tf_x, _tf_y, _tf_z);                 // tl: translation
   Eigen::AngleAxisf rot_x_btol(_tf_roll, Eigen::Vector3f::UnitX());  // rot: rotation

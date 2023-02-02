@@ -10,7 +10,7 @@ int is_topic_ready = 1;
 int task_profiling_flag_;
 
 void points_cb(const sensor_msgs::PointCloud2ConstPtr& msg){
-    if(task_profiling_flag_) rubis::sched::start_task_profiling();
+    if(task_profiling_flag_) rubis::start_task_profiling();
 
     sensor_msgs::PointCloud2 msg_with_intensity = *msg;
     
@@ -26,9 +26,26 @@ void points_cb(const sensor_msgs::PointCloud2ConstPtr& msg){
         pub_rubis.publish(rubis_msg_with_intensity);
     }
 
-    if(task_profiling_flag_) rubis::sched::stop_task_profiling(rubis::instance_, rubis::sched::task_state_);
+    if(task_profiling_flag_) rubis::stop_task_profiling(rubis::instance_, rubis::task_state_);
     rubis::instance_ = rubis::instance_+1;
     rubis::obj_instance_ = rubis::obj_instance_+1;
+}
+
+std::string exec(const char* cmd) {
+    char buffer[128];
+    std::string result = "";
+    FILE* pipe = popen(cmd, "r");
+    if (!pipe) throw std::runtime_error("popen() failed!");
+    try {
+        while (fgets(buffer, sizeof(buffer), pipe) != NULL) {
+            result += buffer;
+        }
+    } catch (...) {
+        pclose(pipe);
+        throw;
+    }
+    pclose(pipe);
+    return result;
 }
 
 int main(int argc, char** argv){
@@ -71,8 +88,8 @@ int main(int argc, char** argv){
     private_nh.param("/lidar_republisher/task_relative_deadline", task_relative_deadline, (double)10);
 
     /* For Task scheduling */
-    if(task_profiling_flag_) rubis::sched::init_task_profiling(task_response_time_filename);
-
+    if(task_profiling_flag_) rubis::init_task_profiling(task_response_time_filename);
+    
     ros::spin();
     
     return 0;

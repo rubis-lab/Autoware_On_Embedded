@@ -111,8 +111,8 @@ void in_cb(const ros::MessageEvent<ShapeShifter>& msg_event)
   else
     g_pub.publish(msg);
   
-  if(rubis::sched::is_task_ready_ == TASK_NOT_READY) rubis::sched::init_task();
-  rubis::sched::task_state_ = TASK_STATE_DONE;
+  if(rubis::is_task_ready_ == TASK_NOT_READY) rubis::init_task();
+  rubis::task_state_ = TASK_STATE_DONE;
 
 }
 
@@ -214,7 +214,7 @@ int main(int argc, char **argv)
     pnh.param("/pose_relay/task_relative_deadline", task_relative_deadline, (double)100000000);
   }
 
-  if(task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
+  if(task_profiling_flag) rubis::init_task_profiling(task_response_time_filename);
 
   subscribe();
 
@@ -225,29 +225,19 @@ int main(int argc, char **argv)
     ros::Rate r(rate);
     // Initialize task ( Wait until first necessary topic is published )
     while(ros::ok()){
-      if(rubis::sched::is_task_ready_ == TASK_READY) break;
+      if(rubis::is_task_ready_ == TASK_READY) break;
       ros::spinOnce();
       r.sleep();      
     }
 
     // Executing task
     while(ros::ok()){
-      if(task_profiling_flag) rubis::sched::start_task_profiling();
-
-      if(rubis::sched::task_state_ == TASK_STATE_READY){        
-        if(task_scheduling_flag) rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline); 
-        rubis::sched::task_state_ = TASK_STATE_RUNNING;     
-      }
+      if(task_profiling_flag) rubis::start_task_profiling();
 
       ros::spinOnce();
 
-      if(task_profiling_flag) rubis::sched::stop_task_profiling(RUBIS_NO_INSTANCE, rubis::sched::task_state_);
+      if(task_profiling_flag) rubis::stop_task_profiling(RUBIS_NO_INSTANCE, rubis::task_state_);
 
-      if(rubis::sched::task_state_ == TASK_STATE_DONE){        
-        if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
-        rubis::sched::task_state_ = TASK_STATE_READY;
-      }
-      
       r.sleep();
     }
   }

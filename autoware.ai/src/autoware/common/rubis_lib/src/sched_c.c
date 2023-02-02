@@ -41,14 +41,6 @@ int set_sched_deadline(int _tid, __u64 _exec_time, __u64 _deadline, __u64 _perio
     return 1;
 }
 
-void request_task_scheduling(double task_minimum_inter_release_time, double task_execution_time, double task_relative_deadline){
-  set_sched_deadline(gettid(), 
-    (u_int64_t)(task_execution_time), 
-    (u_int64_t)(task_relative_deadline), 
-    (u_int64_t)(task_minimum_inter_release_time)
-  );
-}
-
 void yield_task_scheduling(){
   sched_yield();
 }
@@ -73,7 +65,6 @@ void termination(){
 
   exit(0);
 }
-
 
 void init_task(){
   is_task_ready_ = TASK_READY;

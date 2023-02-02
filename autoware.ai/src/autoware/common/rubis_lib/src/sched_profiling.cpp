@@ -4,7 +4,7 @@ namespace rubis{
   int instance_mode_;
   unsigned long instance_;
   unsigned long obj_instance_;
-namespace sched{
+
   int task_profiling_flag_;
   int iter_;
 
@@ -54,5 +54,4 @@ namespace sched{
     return current_time;
   }
 
-}// end namespace
 }

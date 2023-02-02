@@ -157,7 +157,7 @@ void TrajectoryEval::UpdatePlanningParams(ros::NodeHandle& _nh)
 //   UtilityHNS::UtilityH::GetTickCount(m_VehicleStatus.tStamp);
 //   bVehicleStatus = true;
 
-//   if(rubis::sched::is_task_ready_ == TASK_NOT_READY) rubis::sched::init_task();
+//   if(rubis::is_task_ready_ == TASK_NOT_READY) rubis::init_task();
 // }
 
 void TrajectoryEval::callbackGetCANInfo(const autoware_can_msgs::CANInfoConstPtr &msg)
@@ -480,7 +480,7 @@ void TrajectoryEval::MainLoop()
   private_nh.param("/op_trajectory_evaluator/task_execution_time", task_execution_time, (double)10);
   private_nh.param("/op_trajectory_evaluator/task_relative_deadline", task_relative_deadline, (double)10);  
 
-  if(task_profiling_flag_) rubis::sched::init_task_profiling(task_response_time_filename);
+  if(task_profiling_flag_) rubis::init_task_profiling(task_response_time_filename);
 
   PlannerHNS::WayPoint prevState, state_change;
 
@@ -567,7 +567,7 @@ void TrajectoryEval::MainLoop()
 
         pub_LocalWeightedTrajectoriesWithPoseTwist.publish(local_lanes);
         pub_LocalWeightedTrajectories.publish(local_lanes.lane_array);
-        rubis::sched::task_state_ = TASK_STATE_DONE;
+        rubis::task_state_ = TASK_STATE_DONE;
       }
       else
       {
@@ -592,7 +592,7 @@ void TrajectoryEval::MainLoop()
     else
       sub_GlobalPlannerPaths = nh.subscribe("/lane_waypoints_array",   1,    &TrajectoryEval::callbackGetGlobalPlannerPath,   this);
 
-    if(task_profiling_flag_) rubis::sched::stop_task_profiling(0, rubis::sched::task_state_);  
+    if(task_profiling_flag_) rubis::stop_task_profiling(0, rubis::task_state_);  
 
     r.sleep();
   }

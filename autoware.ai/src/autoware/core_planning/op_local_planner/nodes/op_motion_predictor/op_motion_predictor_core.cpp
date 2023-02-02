@@ -246,7 +246,7 @@ void MotionPrediction::callbackGetVehicleStatus(const geometry_msgs::TwistStampe
   UtilityHNS::UtilityH::GetTickCount(m_VehicleStatus.tStamp);
   bVehicleStatus = true;
 
-  if(rubis::sched::is_task_ready_ == TASK_NOT_READY) rubis::sched::init_task();  
+  if(rubis::is_task_ready_ == TASK_NOT_READY) rubis::init_task();  
 }
 
 void MotionPrediction::callbackGetCANInfo(const autoware_can_msgs::CANInfoConstPtr &msg)
@@ -406,7 +406,7 @@ void MotionPrediction::callbackGetTrackedObjects(const autoware_msgs::DetectedOb
 }
 
 void MotionPrediction::callbackGetRubisTrackedObjects(const rubis_msgs::DetectedObjectArrayConstPtr& in_msg){
-  if(task_profiling_flag_) rubis::sched::start_task_profiling();
+  if(task_profiling_flag_) rubis::start_task_profiling();
 
   rubis_msgs::DetectedObjectArray msg = *in_msg;
   _callbackGetRubisTrackedObjects(msg);
@@ -462,7 +462,7 @@ void MotionPrediction::callbackGetRubisTrackedObjects(const rubis_msgs::Detected
     UtilityHNS::UtilityH::GetTickCount(m_VisualizationTimer);
   }
 
-  if(task_profiling_flag_) rubis::sched::stop_task_profiling(rubis::instance_, rubis::sched::task_state_);
+  if(task_profiling_flag_) rubis::stop_task_profiling(rubis::instance_, rubis::task_state_);
 }
 
 void MotionPrediction::_callbackGetRubisTrackedObjects(rubis_msgs::DetectedObjectArray& objects_msg)
@@ -560,7 +560,7 @@ void MotionPrediction::_callbackGetRubisTrackedObjects(rubis_msgs::DetectedObjec
     output_msg.obj_instance = rubis::obj_instance_;
     output_msg.object_array = m_PredictedResultsResults;
     pub_rubis_predicted_objects_trajectories.publish(output_msg);
-    rubis::sched::task_state_ = TASK_STATE_DONE;
+    rubis::task_state_ = TASK_STATE_DONE;
   }
 
 }
@@ -719,7 +719,7 @@ void MotionPrediction::MainLoop()
   private_nh.param("/op_motion_predictor/task_execution_time", task_execution_time, (double)10);
   private_nh.param("/op_motion_predictor/task_relative_deadline", task_relative_deadline, (double)10);
 
-  if(task_profiling_flag_) rubis::sched::init_task_profiling(task_response_time_filename);
+  if(task_profiling_flag_) rubis::init_task_profiling(task_response_time_filename);
 
   ros::spin();
 }

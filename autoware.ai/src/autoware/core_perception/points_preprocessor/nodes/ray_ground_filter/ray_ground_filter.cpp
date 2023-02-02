@@ -379,8 +379,8 @@ inline void RayGroundFilter::PublishFilteredClouds(const sensor_msgs::PointCloud
   publish_cloud(ground_points_pub_, ground_cloud_ptr, in_sensor_cloud->header);
   publish_cloud(groundless_points_pub_, no_ground_cloud_ptr, in_sensor_cloud->header);
 
-  if(rubis::sched::is_task_ready_ == TASK_NOT_READY) rubis::sched::init_task();
-  rubis::sched::task_state_ = TASK_STATE_DONE;
+  if(rubis::is_task_ready_ == TASK_NOT_READY) rubis::init_task();
+  rubis::task_state_ = TASK_STATE_DONE;
 }
 
 void RayGroundFilter::CloudCallback(const sensor_msgs::PointCloud2ConstPtr& in_sensor_cloud)
@@ -391,11 +391,11 @@ void RayGroundFilter::CloudCallback(const sensor_msgs::PointCloud2ConstPtr& in_s
 
 void RayGroundFilter::RubisCloudCallback(const rubis_msgs::PointCloud2ConstPtr in_rubis_cloud)
 {
-  if(task_profiling_flag_) rubis::sched::start_task_profiling();
+  if(task_profiling_flag_) rubis::start_task_profiling();
   sensor_msgs::PointCloud2ConstPtr in_sensor_cloud = boost::make_shared<const sensor_msgs::PointCloud2>(in_rubis_cloud->msg);
   rubis::instance_ = in_rubis_cloud->instance;
   PublishFilteredClouds(in_sensor_cloud);
-  if(task_profiling_flag_) rubis::sched::stop_task_profiling(rubis::instance_, rubis::sched::task_state_);
+  if(task_profiling_flag_) rubis::stop_task_profiling(rubis::instance_, rubis::task_state_);
 }
 
 RayGroundFilter::RayGroundFilter() : node_handle_("~"), tf_listener_(tf_buffer_)
@@ -483,7 +483,7 @@ void RayGroundFilter::Run()
   ROS_INFO("Ready");
 
   /* For Task scheduling */
-  if(task_profiling_flag_) rubis::sched::init_task_profiling(task_response_time_filename);
+  if(task_profiling_flag_) rubis::init_task_profiling(task_response_time_filename);
 
   ros::spin();
 }
