@@ -6,9 +6,6 @@ int key_id_;
 int is_scheduled_;
 char* task_filename_;
 
-int is_task_ready_ = TASK_NOT_READY;
-int task_state_ = TASK_STATE_READY;
-
 // system call hook to call SCHED_DEADLINE
 int sched_setattr(pid_t pid, const struct sched_attr *attr, unsigned int flags){
 	return syscall(__NR_sched_setattr, pid, attr, flags);
@@ -59,17 +56,7 @@ void termination(){
       exit(1);
   }
 
-  if(task_profiling_flag_){
-    fclose(task_response_time_fp_);
-  }
+  fclose(task_response_time_fp_);
 
   exit(0);
-}
-
-void init_task(){
-  is_task_ready_ = TASK_READY;
-}
-
-void disable_task(){
-  is_task_ready_ = TASK_NOT_READY;
 }

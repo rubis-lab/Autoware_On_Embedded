@@ -282,11 +282,6 @@ void Yolo3DetectorNode::image_callback(const sensor_msgs::ImageConstPtr& in_imag
 
     free(darknet_image_.data);
     
-    if(is_task_ready_ == TASK_NOT_READY){
-        init_task();
-    }
-    
-    task_state_ = TASK_STATE_DONE;
 }
 
 void Yolo3DetectorNode::config_cb(const autoware_config_msgs::ConfigSSD::ConstPtr& param)
@@ -326,16 +321,12 @@ void Yolo3DetectorNode::Run()
     int key_id = 2;
 
     // Scheduling Setup
-    int task_scheduling_flag;
-    int task_profiling_flag;
     std::string task_response_time_filename_str;
     int rate;
     double task_minimum_inter_release_time;
     double task_execution_time;
     double task_relative_deadline;
 
-    private_node_handle.param<int>("/vision_darknet_detect/task_scheduling_flag", task_scheduling_flag, 0);
-    private_node_handle.param<int>("/vision_darknet_detect/task_profiling_flag", task_profiling_flag, 0);
     private_node_handle.param<std::string>("/vision_darknet_detect/task_response_time_filename", task_response_time_filename_str, "~/Documents/profiling/response_time/vision_darknet_detect.csv");
     private_node_handle.param<int>("/vision_darknet_detect/rate", rate, 10);
     private_node_handle.param("/vision_darknet_detect/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
@@ -344,7 +335,7 @@ void Yolo3DetectorNode::Run()
     
     char* task_response_time_filename = strdup(task_response_time_filename_str.c_str());
 
-    if(task_profiling_flag) init_task_profiling(task_response_time_filename);
+    init_task_profiling(task_response_time_filename);
 
     //RECEIVE IMAGE TOPIC NAME
     std::string image_raw_topic_str;
@@ -422,28 +413,17 @@ void Yolo3DetectorNode::Run()
 
     ROS_INFO_STREAM( __APP_NAME__ << "" );
 
-    if(!task_scheduling_flag && !task_profiling_flag){
-        ros::spin();
-    }
-    else{
-        ros::Rate r(rate);
-        // Initialize task ( Wait until first necessary topic is published )
-        while(ros::ok()){
-            if(is_task_ready_) break;
-            ros::spinOnce();
-            r.sleep();      
-        }
+    ros::Rate r(rate);
 
-        // Executing task
-        while(ros::ok()){
-            if(task_profiling_flag) start_task_profiling();          
+    // Executing task
+    while(ros::ok()){
+        start_task_profiling();          
 
-            ros::spinOnce();
+        ros::spinOnce();
 
-            if(task_profiling_flag) stop_task_profiling(0, task_state_);
+        stop_task_profiling(0, 0);
 
-            r.sleep();
-        }
+        r.sleep();
     }
     ROS_INFO("END Yolo");
 

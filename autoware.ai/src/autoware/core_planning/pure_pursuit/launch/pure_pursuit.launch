@@ -7,7 +7,6 @@
   <arg name="const_velocity" default="5.0"/>
   <arg name="lookahead_ratio" default="2.0"/>
   <arg name="minimum_lookahead_distance" default="6.0"/>
-  <arg name="instance_mode" default="0"/>
 
 
   <!-- 0 = waypoints, 1 = provided constant velocity -->
@@ -15,7 +14,6 @@
   
   <!-- rosrun waypoint_follower pure_pursuit -->
   <node pkg="pure_pursuit" type="pure_pursuit" name="pure_pursuit" >
-    <param name="instance_mode" value="$(arg instance_mode)" />
     <param name="is_linear_interpolation" value="$(arg is_linear_interpolation)"/>
     <param name="publishes_for_steering_robot" value="$(arg publishes_for_steering_robot)"/>
     <param name="add_virtual_end_waypoints" value="$(arg add_virtual_end_waypoints)"/>

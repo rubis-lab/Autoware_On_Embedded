@@ -93,8 +93,6 @@ struct sched_attr {
 extern int key_id_;
 extern int is_scheduled_;
 extern std::string task_filename_;
-extern int task_state_;
-extern int is_task_ready_;
 
 int sched_setattr(pid_t pid, const struct sched_attr *attr, unsigned int flags);
 int sched_getattr(pid_t pid, struct sched_attr *attr, unsigned int size, unsigned int flags);
@@ -105,10 +103,9 @@ bool set_sched_fifo(int pid, int priority, int child_priority);
 bool set_sched_rr(int pid, int priority);
 bool set_sched_rr(int pid, int priority, int child_priority);
 
+bool init_task_scheduling(std::string policy, struct sched_attr attr);
 void yield_task_scheduling();
-
-void init_task();
-void disable_task();
+struct sched_attr create_sched_attr(int priority, int exec_time, int deadline, int period);
 
 void sig_handler(int signum);
 void termination();

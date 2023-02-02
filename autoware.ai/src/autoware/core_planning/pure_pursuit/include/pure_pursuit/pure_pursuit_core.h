@@ -127,7 +127,6 @@ private:
 
   // Added by PHY
   bool dynamic_param_flag_;
-  int task_profiling_flag_ = 1;
   std::vector<DynamicParams> dynamic_params;
   autoware_msgs::Lane lane_;
 

@@ -29,8 +29,6 @@ int main(int argc, char** argv)
   ros::NodeHandle private_nh("~");
 
   // Scheduling Setup
-  int task_scheduling_flag;
-  int task_profiling_flag;
   std::string task_response_time_filename;
   int rate;
   double task_minimum_inter_release_time;
@@ -39,7 +37,6 @@ int main(int argc, char** argv)
 
   TwistGate twist_gate(nh, private_nh);
 
-  private_nh.param<int>("/twist_gate/task_profiling_flag", twist_gate.task_profiling_flag, 0);
   private_nh.param<std::string>("/twist_gate/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/twist_gate.csv");
   private_nh.param<int>("/twist_gate/rate", rate, 10);
   private_nh.param("/twist_gate/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
@@ -47,7 +44,7 @@ int main(int argc, char** argv)
   private_nh.param("/twist_gate/task_relative_deadline", task_relative_deadline, (double)10);
   private_nh.param<int>("/twist_gate/zero_flag", zero_flag_, 0);
 
-  if(twist_gate.task_profiling_flag) rubis::init_task_profiling(task_response_time_filename);
+  rubis::init_task_profiling(task_response_time_filename);
 
   ros::spin();
 

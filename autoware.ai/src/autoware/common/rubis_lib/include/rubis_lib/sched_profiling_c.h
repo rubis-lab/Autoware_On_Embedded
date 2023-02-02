@@ -10,15 +10,11 @@
 #include <unistd.h>
 #include <string.h>
 #include <time.h>
-#include <rubis_lib/common_c.h>
 
 #define rubis_lib_BUFFER_SIZE 1024
 
-extern int instance_mode_;
 extern unsigned long instance_;
 extern unsigned long obj_instance_;
-
-extern int task_profiling_flag_;
 
 extern FILE* task_response_time_fp_;
 

@@ -240,7 +240,6 @@ void GlobalPlanner::callbackGetVehicleStatus(const geometry_msgs::TwistStampedCo
     m_VehicleState.steer = atan(2.7 * msg->twist.angular.z/msg->twist.linear.x);
   UtilityHNS::UtilityH::GetTickCount(m_VehicleState.tStamp);
 
-  if(rubis::is_task_ready_ == TASK_NOT_READY) rubis::init_task();
 }
 
 void GlobalPlanner::callbackGetCANInfo(const autoware_can_msgs::CANInfoConstPtr &msg)
@@ -447,8 +446,6 @@ void GlobalPlanner::MainLoop()
   ros::NodeHandle private_nh("~");
 
   // Scheduling Setup
-  int task_scheduling_flag;
-  int task_profiling_flag;
   std::string task_response_time_filename;
   int rate;
   double task_minimum_inter_release_time;
@@ -458,8 +455,6 @@ void GlobalPlanner::MainLoop()
   double multilap_replanning_distance;
   int planning_fail_cnt;
 
-  private_nh.param<int>("/op_global_planner/task_scheduling_flag", task_scheduling_flag, 0);
-  private_nh.param<int>("/op_global_planner/task_profiling_flag", task_profiling_flag, 0);
   private_nh.param<std::string>("/op_global_planner/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/op_global_planner.csv");
   private_nh.param<int>("/op_global_planner/rate", rate, 10);
   private_nh.param("/op_global_planner/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
@@ -468,19 +463,16 @@ void GlobalPlanner::MainLoop()
   private_nh.param("/op_global_planner/multilap_flag", multilap_flag, 0);
   private_nh.param("/op_global_planner/multilap_replanning_distance", multilap_replanning_distance, (double)50);
 
-  if(task_profiling_flag) rubis::init_task_profiling(task_response_time_filename);
+  rubis::init_task_profiling(task_response_time_filename);
 
   timespec animation_timer;
   UtilityHNS::UtilityH::GetTickCount(animation_timer);
 
   ros::Rate loop_rate(rate);
-  if(!task_scheduling_flag && !task_profiling_flag) loop_rate = ros::Rate(25);
-  
-
 
   while (ros::ok())
   {
-    if(task_profiling_flag) rubis::start_task_profiling();
+    rubis::start_task_profiling();
 
     ros::spinOnce();
     bool bMakeNewPlan = false;
@@ -613,14 +605,10 @@ void GlobalPlanner::MainLoop()
       VisualizeDestinations(m_GoalsPos, m_iCurrentGoalIndex);
     }
 
-    rubis::task_state_ = TASK_STATE_DONE;
+    
 
-    if(task_profiling_flag) rubis::stop_task_profiling(0, rubis::task_state_);
+    rubis::stop_task_profiling(0, 0);
 
-    if(rubis::is_task_ready_ == TASK_READY && rubis::task_state_ == TASK_STATE_DONE){
-      if(task_scheduling_flag) rubis::yield_task_scheduling();
-      rubis::task_state_ = TASK_STATE_READY;
-    }
     loop_rate.sleep();
   }
 }

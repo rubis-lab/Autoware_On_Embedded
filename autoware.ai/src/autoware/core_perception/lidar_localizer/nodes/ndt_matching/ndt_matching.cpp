@@ -292,10 +292,6 @@ static float _recovery_score_diff_threshold = 1.0;
 static float _failure_pose_diff_threshold = 4.0;
 static float _recovery_pose_diff_threshold = 1.0;
 
-// Flags
-static int task_profiling_flag_;
-
-
 void ToQuaternion(double yaw, double pitch, double roll, geometry_msgs::Quaternion &q)
 {
     double cy = cos(yaw * 0.5);
@@ -1502,7 +1498,7 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
 
   predict_pose_pub.publish(predict_pose_msg);
   ndt_pose_pub.publish(ndt_pose_msg);
-  rubis::task_state_ = TASK_STATE_DONE;
+  
 
   // current_pose is published by vel_pose_mux
   //    current_pose_pub.publish(current_pose_msg);
@@ -1544,12 +1540,10 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
 
   ndt_stat_pub.publish(ndt_stat_msg);
 
-  if(rubis::instance_mode_ && rubis::instance_ != RUBIS_NO_INSTANCE){
-    rubis_pose_twist_msg.instance = rubis::instance_;
-    rubis_pose_twist_msg.pose = ndt_pose_msg;
-    rubis_pose_twist_msg.twist = estimate_twist_msg;
-    rubis_pose_twist_pub.publish(rubis_pose_twist_msg);
-  }
+  rubis_pose_twist_msg.instance = rubis::instance_;
+  rubis_pose_twist_msg.pose = ndt_pose_msg;
+  rubis_pose_twist_msg.twist = estimate_twist_msg;
+  rubis_pose_twist_pub.publish(rubis_pose_twist_msg);
 
   /* Compute NDT_Reliability */
   ndt_reliability.data = Wa * (exe_time / 100.0) * 100.0 + Wb * (iteration / 10.0) * 100.0 +
@@ -1706,24 +1700,21 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
   is_kalman_filter_on_msgs.data = _is_kalman_filter_on;
   is_kalman_filter_on_pub.publish(is_kalman_filter_on_msgs);
   
-  if(rubis::is_task_ready_ == TASK_NOT_READY){
-    rubis::init_task();
-  }  
 }
 
 static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input){
-  rubis::instance_ = RUBIS_NO_INSTANCE;
+  rubis::instance_ = 0;
   ndt_matching(input);
 }
 
 static void rubis_points_callback(const rubis_msgs::PointCloud2::ConstPtr& _input){
-  if(task_profiling_flag_) rubis::start_task_profiling();
+  rubis::start_task_profiling();
 
   sensor_msgs::PointCloud2::ConstPtr input = boost::make_shared<const sensor_msgs::PointCloud2>(_input->msg);
   rubis::instance_ = _input->instance;
   ndt_matching(input);
 
-  if(task_profiling_flag_) rubis::stop_task_profiling(rubis::instance_, rubis::task_state_);
+  rubis::stop_task_profiling(rubis::instance_, 0);
 }
 
 static void ins_stat_callback(const rubis_msgs::InsStat::ConstPtr& input){
@@ -1895,7 +1886,6 @@ int main(int argc, char** argv)
 #endif
 
   // Scheduling Setup
-  int task_scheduling_flag;  
   std::string task_response_time_filename;
   int rate;
   double task_minimum_inter_release_time;
@@ -1903,16 +1893,13 @@ int main(int argc, char** argv)
   double task_relative_deadline;
 
   std::string node_name = ros::this_node::getName();
-  private_nh.param<int>(node_name+"/task_scheduling_flag", task_scheduling_flag, 0);
-  private_nh.param<int>(node_name+"/task_profiling_flag", task_profiling_flag_, 0);
   private_nh.param<std::string>(node_name+"/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/ndt_matching.csv");
   private_nh.param<int>(node_name+"/rate", rate, 10);
   private_nh.param(node_name+"/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
   private_nh.param(node_name+"/task_execution_time", task_execution_time, (double)10);
   private_nh.param(node_name+"/task_relative_deadline", task_relative_deadline, (double)10);
-  private_nh.param<int>(node_name+"/instance_mode", rubis::instance_mode_, 0);
   
-  if(task_profiling_flag_) rubis::init_task_profiling(task_response_time_filename);
+  rubis::init_task_profiling(task_response_time_filename);
   
   Eigen::Translation3f tl_btol(_tf_x, _tf_y, _tf_z);                 // tl: translation
   Eigen::AngleAxisf rot_x_btol(_tf_roll, Eigen::Vector3f::UnitX());  // rot: rotation
@@ -1937,7 +1924,7 @@ int main(int argc, char** argv)
   kalman_filtered_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/kalman_filtered_pose", 10);
 
   ndt_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/ndt_pose", 10);
-  if(rubis::instance_mode_) rubis_pose_twist_pub = nh.advertise<rubis_msgs::PoseTwistStamped>("/rubis_current_pose_twist",10);
+  rubis_pose_twist_pub = nh.advertise<rubis_msgs::PoseTwistStamped>("/rubis_current_pose_twist",10);
   
   localizer_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/current_pose", 10);
   // localizer_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/localizer_pose", 10);
@@ -1957,8 +1944,7 @@ int main(int argc, char** argv)
   ros::Subscriber initialpose_sub = nh.subscribe("initialpose", 10, initialpose_callback); 
 
   ros::Subscriber points_sub;
-  if(rubis::instance_mode_) points_sub = nh.subscribe("rubis_filtered_points", 1, rubis_points_callback); // _queue_size = 1000
-  else points_sub = nh.subscribe("filtered_points", 1, points_callback); // _queue_size = 1000
+  points_sub = nh.subscribe("rubis_filtered_points", 1, rubis_points_callback); // _queue_size = 1000
   
   // ros::Subscriber odom_sub = nh.subscribe("/vehicle/odom", _queue_size * 10, odom_callback);
   // ros::Subscriber imu_sub = nh.subscribe(_imu_topic.c_str(), _queue_size * 10, imu_callback);

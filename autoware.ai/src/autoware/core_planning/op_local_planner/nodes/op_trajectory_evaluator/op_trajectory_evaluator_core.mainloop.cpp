@@ -156,8 +156,6 @@ void TrajectoryEval::UpdatePlanningParams(ros::NodeHandle& _nh)
 //     m_VehicleStatus.steer = atan(m_CarInfo.wheel_base * msg->twist.angular.z/msg->twist.linear.x);
 //   UtilityHNS::UtilityH::GetTickCount(m_VehicleStatus.tStamp);
 //   bVehicleStatus = true;
-
-//   if(rubis::is_task_ready_ == TASK_NOT_READY) rubis::init_task();
 // }
 
 void TrajectoryEval::callbackGetCANInfo(const autoware_can_msgs::CANInfoConstPtr &msg)
@@ -465,22 +463,19 @@ void TrajectoryEval::MainLoop()
   ros::NodeHandle private_nh("~");
 
   // Scheduling Setup
-  int task_scheduling_flag;  
   std::string task_response_time_filename;
   int rate;
   double task_minimum_inter_release_time;
   double task_execution_time;
   double task_relative_deadline; 
 
-  private_nh.param<int>("/op_trajectory_evaluator/task_scheduling_flag", task_scheduling_flag, 0);
-  private_nh.param<int>("/op_trajectory_evaluator/task_profiling_flag", task_profiling_flag_, 0);
   private_nh.param<std::string>("/op_trajectory_evaluator/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/op_trajectory_evaluator.csv");
   private_nh.param<int>("/op_trajectory_evaluator/rate", rate, 10);
   private_nh.param("/op_trajectory_evaluator/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
   private_nh.param("/op_trajectory_evaluator/task_execution_time", task_execution_time, (double)10);
   private_nh.param("/op_trajectory_evaluator/task_relative_deadline", task_relative_deadline, (double)10);  
 
-  if(task_profiling_flag_) rubis::init_task_profiling(task_response_time_filename);
+  rubis::init_task_profiling(task_response_time_filename);
 
   PlannerHNS::WayPoint prevState, state_change;
 
@@ -567,7 +562,7 @@ void TrajectoryEval::MainLoop()
 
         pub_LocalWeightedTrajectoriesWithPoseTwist.publish(local_lanes);
         pub_LocalWeightedTrajectories.publish(local_lanes.lane_array);
-        rubis::task_state_ = TASK_STATE_DONE;
+        
       }
       else
       {
@@ -592,7 +587,7 @@ void TrajectoryEval::MainLoop()
     else
       sub_GlobalPlannerPaths = nh.subscribe("/lane_waypoints_array",   1,    &TrajectoryEval::callbackGetGlobalPlannerPath,   this);
 
-    if(task_profiling_flag_) rubis::stop_task_profiling(0, rubis::task_state_);  
+    rubis::stop_task_profiling(0, 0);  
 
     r.sleep();
   }

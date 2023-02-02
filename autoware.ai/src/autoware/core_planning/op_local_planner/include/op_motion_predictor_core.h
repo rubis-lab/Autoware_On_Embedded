@@ -148,7 +148,6 @@ protected:
   autoware_msgs::DetectedObject TransformObjToVeldoyne(const autoware_msgs::DetectedObject& in_obj, tf::StampedTransform &transform);
   autoware_msgs::DetectedObjectArray TrasformObjAryToVeldoyne(const autoware_msgs::DetectedObjectArray& in_obj, tf::StampedTransform &transform);
 
-  int task_profiling_flag_ = 0;
 public:
   MotionPrediction();
   virtual ~MotionPrediction();

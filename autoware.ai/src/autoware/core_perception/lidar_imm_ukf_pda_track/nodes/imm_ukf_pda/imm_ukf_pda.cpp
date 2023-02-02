@@ -107,8 +107,6 @@ void ImmUkfPda::rubis_callback(const rubis_msgs::DetectedObjectArray& input)
     dumpResultText(detected_objects_output);
   }
 
-  if(rubis::is_task_ready_ == TASK_NOT_READY) rubis::init_task();
-  rubis::task_state_ = TASK_STATE_DONE;
 }
 
 void ImmUkfPda::callback(const autoware_msgs::DetectedObjectArray& input)

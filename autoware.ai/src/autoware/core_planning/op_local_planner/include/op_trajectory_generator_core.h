@@ -38,8 +38,6 @@ namespace TrajectoryGeneratorNS
 
 class TrajectoryGen
 {
-public:
-  int task_profiling_flag_;
 protected:
   geometry_msgs::PoseStamped current_pose_;
   geometry_msgs::TwistStamped current_twist_;

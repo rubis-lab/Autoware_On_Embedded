@@ -127,8 +127,6 @@ static double _clustering_distance;
 static bool _use_gpu;
 static std::chrono::system_clock::time_point _start, _end;
 
-static int task_profiling_flag_ = 1;
-
 std::vector<std::vector<geometry_msgs::Point>> _way_area_points;
 std::vector<cv::Scalar> _colors;
 pcl::PointCloud<pcl::PointXYZ> _sensor_cloud;
@@ -236,11 +234,6 @@ void publishDetectedObjects(const autoware_msgs::CloudClusterArray &in_clusters)
   
   _pub_rubis_detected_objects.publish(rubis_detected_objects);
   
-  if(rubis::is_task_ready_ == TASK_NOT_READY){
-    rubis::init_task();
-  }
-  
-  rubis::task_state_ = TASK_STATE_DONE;
 }
 
 void publishCloudClusters(const ros::Publisher *in_publisher, const autoware_msgs::CloudClusterArray &in_clusters,
@@ -857,7 +850,7 @@ void removePointsUpTo(const pcl::PointCloud<pcl::PointXYZ>::Ptr in_cloud_ptr,
 
 void velodyne_callback(const rubis_msgs::PointCloud2ConstPtr& in_sensor_cloud)
 {
-  if(task_profiling_flag_) rubis::start_task_profiling();        
+  rubis::start_task_profiling();        
   rubis::instance_ = in_sensor_cloud->instance;
   rubis::obj_instance_ = in_sensor_cloud->instance;
   //_start = std::chrono::system_clock::now();  
@@ -936,7 +929,7 @@ void velodyne_callback(const rubis_msgs::PointCloud2ConstPtr& in_sensor_cloud)
     _using_sensor_cloud = false;
   }
 
-  if(task_profiling_flag_) rubis::stop_task_profiling(rubis::instance_, rubis::task_state_);
+  rubis::stop_task_profiling(rubis::instance_, 0);
 }
 
 int main(int argc, char **argv)
@@ -954,7 +947,6 @@ int main(int argc, char **argv)
   double task_execution_time;
   double task_relative_deadline; 
 
-  private_nh.param<int>("/lidar_euclidean_cluster_detect/task_profiling_flag", task_profiling_flag_, 1);
   private_nh.param<std::string>("/lidar_euclidean_cluster_detect/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/lidar_euclidean_cluster_detect.csv");
   private_nh.param<int>("/lidar_euclidean_cluster_detect/rate", rate, 10);
   private_nh.param("/lidar_euclidean_cluster_detect/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
@@ -971,7 +963,7 @@ int main(int argc, char **argv)
 
   generateColors(_colors, 255);
 
-  if(task_profiling_flag_) rubis::init_task_profiling(task_response_time_filename);
+  rubis::init_task_profiling(task_response_time_filename);
 
   std::string label;
   std::string output_lane_str;

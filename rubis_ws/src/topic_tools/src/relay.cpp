@@ -110,10 +110,6 @@ void in_cb(const ros::MessageEvent<ShapeShifter>& msg_event)
   }
   else
     g_pub.publish(msg);
-  
-  if(rubis::is_task_ready_ == TASK_NOT_READY) rubis::init_task();
-  rubis::task_state_ = TASK_STATE_DONE;
-
 }
 
 void timer_cb(const ros::TimerEvent&)
@@ -187,8 +183,6 @@ int main(int argc, char **argv)
   
 
   // scheduling
-  int task_scheduling_flag = 0;
-  int task_profiling_flag = 0;
   std::string task_response_time_filename;
   int rate = 0;
   double task_minimum_inter_release_time = 0;
@@ -196,8 +190,6 @@ int main(int argc, char **argv)
   double task_relative_deadline = 0;
 
   if(g_output_topic == std::string("/current_velocity")){
-    pnh.param<int>("/vel_relay/task_scheduling_flag", task_scheduling_flag, 0);
-    pnh.param<int>("/vel_relay/task_profiling_flag", task_profiling_flag, 0);
     pnh.param<std::string>("/vel_relay/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/vel_relay.csv");
     pnh.param<int>("/vel_relay/rate", rate, 10);
     pnh.param("/vel_relay/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)100000000);
@@ -205,8 +197,6 @@ int main(int argc, char **argv)
     pnh.param("/vel_relay/task_relative_deadline", task_relative_deadline, (double)100000000);
   }
   else if (g_output_topic == std::string("/current_pose")){
-    pnh.param<int>("/pose_relay/task_scheduling_flag", task_scheduling_flag, 0);
-    pnh.param<int>("/pose_relay/task_profiling_flag", task_profiling_flag, 0);
     pnh.param<std::string>("/pose_relay/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/pose_relay.csv");
     pnh.param<int>("/pose_relay/rate", rate, 10);
     pnh.param("/pose_relay/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)100000000);
@@ -214,32 +204,19 @@ int main(int argc, char **argv)
     pnh.param("/pose_relay/task_relative_deadline", task_relative_deadline, (double)100000000);
   }
 
-  if(task_profiling_flag) rubis::init_task_profiling(task_response_time_filename);
+  rubis::init_task_profiling(task_response_time_filename);
 
   subscribe();
 
-  if(!task_scheduling_flag && !task_profiling_flag){
-    ros::spin();
-  }
-  else{
-    ros::Rate r(rate);
-    // Initialize task ( Wait until first necessary topic is published )
-    while(ros::ok()){
-      if(rubis::is_task_ready_ == TASK_READY) break;
-      ros::spinOnce();
-      r.sleep();      
-    }
+  ros::Rate r(rate);
+  while(ros::ok()){
+    rubis::start_task_profiling();
 
-    // Executing task
-    while(ros::ok()){
-      if(task_profiling_flag) rubis::start_task_profiling();
+    ros::spinOnce();
 
-      ros::spinOnce();
+    rubis::stop_task_profiling(0, 0);
 
-      if(task_profiling_flag) rubis::stop_task_profiling(RUBIS_NO_INSTANCE, rubis::task_state_);
-
-      r.sleep();
-    }
+    r.sleep();
   }
 
   return 0;

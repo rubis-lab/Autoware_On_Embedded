@@ -146,8 +146,6 @@ void TrajectoryGen::callbackGetInitPose(const geometry_msgs::PoseWithCovarianceS
 //     m_VehicleStatus.steer = atan(m_CarInfo.wheel_base * msg->twist.angular.z/msg->twist.linear.x);
 //   UtilityHNS::UtilityH::GetTickCount(m_VehicleStatus.tStamp);
 //   bVehicleStatus = true;
-
-//   if(rubis::is_task_ready_ == TASK_NOT_READY) rubis::init_task();  
 // }
 
 void TrajectoryGen::callbackGetCurrentPoseTwist(const rubis_msgs::PoseTwistStampedPtr& msg){
@@ -168,8 +166,6 @@ void TrajectoryGen::callbackGetCurrentPoseTwist(const rubis_msgs::PoseTwistStamp
 
   current_pose_ = msg->pose;
   current_twist_ = msg->twist;
-
-  if(rubis::is_task_ready_ == TASK_NOT_READY) rubis::init_task();  
 }
 
 
@@ -233,21 +229,20 @@ void TrajectoryGen::MainLoop()
   double task_execution_time;
   double task_relative_deadline; 
 
-  private_nh.param<int>("/op_trajectory_generator/task_profiling_flag", task_profiling_flag_, 0);
   private_nh.param<std::string>("/op_trajectory_generator/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/op_trajectory_generator.csv");
   private_nh.param<int>("/op_trajectory_generator/rate", rate, 10);
   private_nh.param("/op_trajectory_generator/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
   private_nh.param("/op_trajectory_generator/task_execution_time", task_execution_time, (double)10);
   private_nh.param("/op_trajectory_generator/task_relative_deadline", task_relative_deadline, (double)10);
 
-  if(task_profiling_flag_) rubis::init_task_profiling(task_response_time_filename);
+  rubis::init_task_profiling(task_response_time_filename);
 
   PlannerHNS::WayPoint prevState, state_change;
 
   ros::Rate r(rate);
 
   while(ros::ok()){
-    if(task_profiling_flag_) rubis::start_task_profiling();
+    rubis::start_task_profiling();
 
     ros::spinOnce();
 
@@ -308,7 +303,7 @@ void TrajectoryGen::MainLoop()
 
       pub_LocalTrajectoriesWithPoseTwist.publish(local_lanes);
       pub_LocalTrajectories.publish(local_lanes.lane_array);
-      rubis::task_state_ = TASK_STATE_DONE;
+      
     }
     else{
       sub_GlobalPlannerPaths = nh.subscribe("/lane_waypoints_array",   1,    &TrajectoryGen::callbackGetGlobalPlannerPath,   this);
@@ -317,7 +312,7 @@ void TrajectoryGen::MainLoop()
       PlannerHNS::ROSHelpers::TrajectoriesToMarkers(m_RollOuts, all_rollOuts);
       pub_LocalTrajectoriesRviz.publish(all_rollOuts);
 
-      if(task_profiling_flag_) rubis::stop_task_profiling(0, rubis::task_state_);
+      rubis::stop_task_profiling(0, 0);
     }
 
     r.sleep();

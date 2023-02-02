@@ -71,7 +71,6 @@ namespace BehaviorGeneratorNS
 class BehaviorGen
 {
 public:
-  int task_profiling_flag_;
   const rubis_msgs::LaneArrayWithPoseTwist lane_array_with_pose_twist_msg_;
 protected: //Planning Related variables
   double PI = 3.14159265;

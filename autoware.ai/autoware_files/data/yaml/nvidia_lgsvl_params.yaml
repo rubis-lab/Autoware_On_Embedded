@@ -12,7 +12,7 @@
 # Localization
 voxel_grid_filter:
   task_scheduling_flag: 0
-  task_profiling_flag: 0
+  
   task_response_time_filename: "~/Documents/profiling/response_time/voxel_grid_filter.csv"
   rate: 10 
   task_minimum_inter_release_time: 100000000
@@ -23,7 +23,7 @@ ndt_matching:
   localizer: "velodyne"
 
   task_scheduling_flag: 0
-  task_profiling_flag: 0
+  
   task_response_time_filename: "~/Documents/profiling/response_time/ndt_matching.csv"
   rate: 10
   task_minimum_inter_release_time: 100000000
@@ -37,7 +37,7 @@ compare_map_filter:
   max_clipping_height: 0.5
 
   task_scheduling_flag: 0
-  task_profiling_flag: 0
+  
   task_response_time_filename: "~/Documents/profiling/response_time/compare_map_filter.csv"
   rate: 10
   task_minimum_inter_release_time: 100000000
@@ -46,7 +46,7 @@ compare_map_filter:
 
 lidar_euclidean_cluster_detect:
   task_scheduling_flag: 0
-  task_profiling_flag: 0
+  
   task_response_time_filename: "~/Documents/profiling/response_time/lidar_euclidean_cluster_detect.csv"
   rate: 10 
   task_minimum_inter_release_time: 100000000
@@ -55,7 +55,7 @@ lidar_euclidean_cluster_detect:
 
 vision_darknet_detect:
   task_scheduling_flag: 0
-  task_profiling_flag: 0
+  
   task_response_time_filename: "~/Documents/profiling/response_time/vision_darknet_detect.csv"
   rate: 10 
   task_minimum_inter_release_time: 100000000
@@ -66,7 +66,7 @@ vision_darknet_detect:
 
 imm_ukf_pda_track:
   task_scheduling_flag: 0
-  task_profiling_flag: 0
+  
   task_response_time_filename: "~/Documents/profiling/response_time/imm_ukf_pda_track.csv"
   rate: 10 
   task_minimum_inter_release_time: 100000000
@@ -76,7 +76,7 @@ imm_ukf_pda_track:
 # Planning
 op_global_planner:
   task_scheduling_flag: 0
-  task_profiling_flag: 0
+  
   task_response_time_filename: "~/Documents/profiling/response_time/op_global_planner.csv"
   rate: 25 #25
   task_minimum_inter_release_time: 100000000
@@ -93,7 +93,7 @@ op_common_params:
 
 op_trajectory_generator:
   task_scheduling_flag: 0
-  task_profiling_flag: 0
+  
   task_response_time_filename: "~/Documents/profiling/response_time/op_trajectory_generator.csv"
   rate: 100 #100
   task_minimum_inter_release_time: 10000000
@@ -102,7 +102,7 @@ op_trajectory_generator:
 
 op_trajectory_evaluator:
   task_scheduling_flag: 0
-  task_profiling_flag: 0
+  
   task_response_time_filename: "~/Documents/profiling/response_time/op_trajectory_evaluator.csv"
   rate: 10 #100
   task_minimum_inter_release_time: 100000000
@@ -118,7 +118,7 @@ op_trajectory_evaluator:
 
 op_behavior_selector:
   task_scheduling_flag: 0
-  task_profiling_flag: 0
+  
   task_response_time_filename: "~/Documents/profiling/response_time/op_behavior_selector.csv"
   rate: 10 #100
   task_minimum_inter_release_time: 10000000
@@ -131,7 +131,7 @@ op_behavior_selector:
 
 op_motion_predictor:
   task_scheduling_flag: 0
-  task_profiling_flag: 0
+  
   task_response_time_filename: "~/Documents/profiling/response_time/op_motion_predictor.csv"
   rate: 10 #25
   task_minimum_inter_release_time: 40000000
@@ -141,7 +141,7 @@ op_motion_predictor:
 # Control
 pure_pursuit:
   task_scheduling_flag: 0
-  task_profiling_flag: 0
+  
   task_response_time_filename: "~/Documents/profiling/response_time/pure_pursuit.csv"
   rate: 10 #30
   task_minimum_inter_release_time: 33333333
@@ -152,7 +152,7 @@ pure_pursuit:
 
 twist_filter:
   task_scheduling_flag: 0
-  task_profiling_flag: 0
+  
   task_response_time_filename: "~/Documents/profiling/response_time/twist_filter.csv"
   rate: 10 
   task_minimum_inter_release_time: 100000000
@@ -161,7 +161,7 @@ twist_filter:
 
 twist_gate:
   task_scheduling_flag: 0
-  task_profiling_flag: 0
+  
   task_response_time_filename: "~/Documents/profiling/response_time/twist_gate.csv"
   rate: 10 
   task_minimum_inter_release_time: 100000000
@@ -172,7 +172,7 @@ twist_gate:
 # Others
 lidar_republisher:
   task_scheduling_flag: 0
-  task_profiling_flag: 0
+  
   task_response_time_filename: "~/Documents/profiling/response_time/lidar_republisher.csv"
   rate: 10
   task_minimum_inter_release_time: 100000000
@@ -181,7 +181,7 @@ lidar_republisher:
 
 vel_relay:
   task_scheduling_flag: 0
-  task_profiling_flag: 0
+  
   task_response_time_filename: "~/Documents/profiling/response_time/vel_relay.csv"
   rate: 10
   task_minimum_inter_release_time: 100000000
@@ -190,7 +190,7 @@ vel_relay:
 
 vel_relay:
   task_scheduling_flag: 0
-  task_profiling_flag: 0
+  
   task_response_time_filename: "~/Documents/profiling/response_time/pose_relay.csv"
   rate: 10
   task_minimum_inter_release_time: 100000000
@@ -199,7 +199,7 @@ vel_relay:
 
 republish:
   task_scheduling_flag: 0
-  task_profiling_flag: 1
+  
   task_response_time_filename: "~/Documents/profiling/response_time/republish.csv"
   rate: 10
   task_minimum_inter_release_time: 100000000

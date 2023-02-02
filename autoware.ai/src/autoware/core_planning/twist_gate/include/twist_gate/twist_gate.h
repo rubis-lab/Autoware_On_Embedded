@@ -54,7 +54,6 @@ class TwistGate
 public:
   TwistGate(const ros::NodeHandle& nh, const ros::NodeHandle& private_nh);
   ~TwistGate();
-  int task_profiling_flag;
 
 private:
   void checkState();

@@ -142,7 +142,6 @@ void PurePursuitNode::initForROS()
   nh_.param("vehicle_info/wheel_base", wheel_base_, 2.7);
 
   private_nh_.param("/pure_pursuit/dynamic_params_flag", dynamic_param_flag_, false);
-  private_nh_.param("/pure_pursuit/instance_mode", rubis::instance_mode_, 0);
   
   if(dynamic_param_flag_){
     XmlRpc::XmlRpcValue xml_list;
@@ -175,7 +174,7 @@ void PurePursuitNode::initForROS()
   
   // setup publisher
   twist_pub_ = nh_.advertise<geometry_msgs::TwistStamped>("twist_raw", 10);
-  if(rubis::instance_mode_) rubis_twist_pub_ = nh_.advertise<rubis_msgs::TwistStamped>("rubis_twist_raw", 10);
+  rubis_twist_pub_ = nh_.advertise<rubis_msgs::TwistStamped>("rubis_twist_raw", 10);
 
   pub2_ = nh_.advertise<autoware_msgs::ControlCommandStamped>("ctrl_raw", 10);
   pub11_ = nh_.advertise<visualization_msgs::Marker>("next_waypoint_mark", 0);
@@ -198,21 +197,18 @@ void PurePursuitNode::run()
   ros::NodeHandle private_nh("~");
 
   // Scheduling Setup
-  int task_scheduling_flag;
   std::string task_response_time_filename;
   int rate;
   double task_minimum_inter_release_time;
   double task_execution_time;
   double task_relative_deadline;
 
-  private_nh.param<int>("/pure_pursuit/task_scheduling_flag", task_scheduling_flag, 0);
-  private_nh.param<int>("/pure_pursuit/task_profiling_flag", task_profiling_flag_, 1);
   private_nh.param<std::string>("/pure_pursuit/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/pure_pursuit.csv");
   private_nh.param<int>("/pure_pursuit/rate", rate, 10);
   private_nh.param("/pure_pursuit/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
   private_nh.param("/pure_pursuit/task_execution_time", task_execution_time, (double)10);
   private_nh.param("/pure_pursuit/task_relative_deadline", task_relative_deadline, (double)10);
-  if(task_profiling_flag_) rubis::init_task_profiling(task_response_time_filename);  
+  rubis::init_task_profiling(task_response_time_filename);  
 
   ros::spin();
 }
@@ -227,16 +223,11 @@ void PurePursuitNode::publishTwistStamped(
   ts.twist.angular.z = can_get_curvature ? kappa * ts.twist.linear.x : 0;
   twist_pub_.publish(ts);
 
-  if(rubis::instance_mode_ && rubis::instance_mode_ != RUBIS_NO_INSTANCE){
-    rubis_msgs::TwistStamped rubis_ts;
-    rubis_ts.instance = rubis::instance_;
-    rubis_ts.obj_instance = rubis::obj_instance_;
-    rubis_ts.msg = ts;
-    rubis_twist_pub_.publish(rubis_ts);
-  }
-
-  if(rubis::is_task_ready_ == TASK_NOT_READY) rubis::init_task();
-  rubis::task_state_ = TASK_STATE_DONE;
+  rubis_msgs::TwistStamped rubis_ts;
+  rubis_ts.instance = rubis::instance_;
+  rubis_ts.obj_instance = rubis::obj_instance_;
+  rubis_ts.msg = ts;
+  rubis_twist_pub_.publish(rubis_ts);
 }
 
 void PurePursuitNode::publishControlCommandStamped(
@@ -427,7 +418,7 @@ double PurePursuitNode::findWayPointVelocity(autoware_msgs::Waypoint msg){
 
 void PurePursuitNode::CallbackTwistPose(const rubis_msgs::PoseTwistStampedConstPtr& msg)
 {
-  if(task_profiling_flag_) rubis::start_task_profiling();
+  rubis::start_task_profiling();
   rubis::instance_ = msg->instance;
 
   // Update pose
@@ -498,7 +489,7 @@ void PurePursuitNode::CallbackTwistPose(const rubis_msgs::PoseTwistStampedConstP
   is_velocity_set_ = false;
   is_waypoint_set_ = false;
 
-  if(task_profiling_flag_) rubis::stop_task_profiling(rubis::instance_, rubis::task_state_);
+  rubis::stop_task_profiling(rubis::instance_, 0);
 
 }
 

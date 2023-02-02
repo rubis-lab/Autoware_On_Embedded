@@ -8,20 +8,15 @@ ros::Subscriber rubis_sub_, sub_;
 ros::Publisher rubis_pub_, pub_;
 
 inline void relay(const geometry_msgs::PoseStampedConstPtr& msg){
-    if(rubis::instance_mode_ && rubis::instance_ != RUBIS_NO_INSTANCE){
-        rubis_msgs::PoseStamped rubis_msg;
-        rubis_msg.instance = rubis::instance_;
-        rubis_msg.msg = *msg;
-        rubis_pub_.publish(rubis_msg);
-    }
+    rubis_msgs::PoseStamped rubis_msg;
+    rubis_msg.instance = rubis::instance_;
+    rubis_msg.msg = *msg;
+    rubis_pub_.publish(rubis_msg);
     pub_.publish(msg);
-
-    if(rubis::is_task_ready_ == TASK_NOT_READY) rubis::init_task();
-    rubis::task_state_ = TASK_STATE_DONE;
 }
 
 void cb(const geometry_msgs::PoseStampedConstPtr& msg){
-    rubis::instance_ = RUBIS_NO_INSTANCE;
+    rubis::instance_ = 0;
     relay(msg);
 }
 
@@ -35,8 +30,6 @@ int main(int argc, char* argv[]){
     ros::init(argc, argv, "pose_relay");  
 
     // Scheduling Setup
-    int task_scheduling_flag;
-    int task_profiling_flag;
     std::string task_response_time_filename;
     int rate;
     double task_minimum_inter_release_time;
@@ -45,55 +38,34 @@ int main(int argc, char* argv[]){
 
     ros::NodeHandle nh;
 
-    nh.param<int>("/pose_relay/task_scheduling_flag", task_scheduling_flag, 0);
-    nh.param<int>("/pose_relay/task_profiling_flag", task_profiling_flag, 0);
     nh.param<std::string>("/pose_relay/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/pose_relay.csv");
     nh.param<int>("/pose_relay/rate", rate, 10);
     nh.param("/pose_relay/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
     nh.param("/pose_relay/task_execution_time", task_execution_time, (double)10);
     nh.param("/pose_relay/task_relative_deadline", task_relative_deadline, (double)10);
-    nh.param<int>("/pose_relay/instance_mode", rubis::instance_mode_, 0);
 
     input_topic_ = std::string(argv[1]);
 
     std::cout<<"!!! input topic  "<<input_topic_<<std::endl;
 
-    if(rubis::instance_mode_){
-        rubis_input_topic_ = "/rubis_"+input_topic_.substr(1);
-        rubis_sub_ = nh.subscribe(rubis_input_topic_, 10, rubis_cb);
-        rubis_pub_ = nh.advertise<rubis_msgs::PoseStamped>("/rubis_current_pose", 10);
-    }
-    else{
-        rubis_sub_ = nh.subscribe(input_topic_, 10, cb);
-    }
+    rubis_input_topic_ = "/rubis_"+input_topic_.substr(1);
+    rubis_sub_ = nh.subscribe(rubis_input_topic_, 10, rubis_cb);
+    rubis_pub_ = nh.advertise<rubis_msgs::PoseStamped>("/rubis_current_pose", 10);
 
     pub_ = nh.advertise<geometry_msgs::PoseStamped>("/current_pose", 10);
 
     /* For Task scheduling */
-    if(task_profiling_flag) rubis::init_task_profiling(task_response_time_filename);
+    rubis::init_task_profiling(task_response_time_filename);
 
-    if(!task_scheduling_flag && !task_profiling_flag){
-        ros::spin();
-    }
-    else{
-        ros::Rate r(rate);
-        // Initialize task ( Wait until first necessary topic is published )
-        while(ros::ok()){
-            if(rubis::is_task_ready_ == TASK_READY) break;
-            ros::spinOnce();
-            r.sleep();      
-        }
+    ros::Rate r(rate);
+    while(ros::ok()){
+        rubis::start_task_profiling();
 
-        // Executing task
-        while(ros::ok()){
-            if(task_profiling_flag) rubis::start_task_profiling();
+        ros::spinOnce();
 
-            ros::spinOnce();
+        rubis::stop_task_profiling(rubis::instance_, 0);
 
-            if(task_profiling_flag) rubis::stop_task_profiling(rubis::instance_, rubis::task_state_);
-
-            r.sleep();
-        }
+        r.sleep();
     }
 
     return 0;

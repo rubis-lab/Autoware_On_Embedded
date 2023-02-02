@@ -29,21 +29,19 @@ TwistFilterNode::TwistFilterNode() : nh_(), private_nh_("~")
   nh_.param("twist_filter/lowpass_gain_angular_z", twist_filter_config.lowpass_gain_angular_z, 0.0);
   nh_.param("twist_filter/lowpass_gain_steering_angle", twist_filter_config.lowpass_gain_steering_angle, 0.0);
   nh_.param("twist_filter/max_stop_count", max_stop_count_, 30);
-  nh_.param("twist_filter/instance_mode", rubis::instance_mode_, 0);
   twist_filter_ptr_ = std::make_shared<twist_filter::TwistFilter>(twist_filter_config);
   emergency_stop_ = false;
   current_stop_count_ = 0;
 
   // Subscribe
-  if(rubis::instance_mode_) rubis_twist_sub_ = nh_.subscribe("rubis_twist_raw", 1, &TwistFilterNode::rubisTwistCmdCallback, this);
-  else twist_sub_ = nh_.subscribe("twist_raw", 1, &TwistFilterNode::twistCmdCallback, this);
+  rubis_twist_sub_ = nh_.subscribe("rubis_twist_raw", 1, &TwistFilterNode::rubisTwistCmdCallback, this);
   ctrl_sub_ = nh_.subscribe("ctrl_raw", 1, &TwistFilterNode::ctrlCmdCallback, this);
   config_sub_ = nh_.subscribe("config/twist_filter", 10, &TwistFilterNode::configCallback, this);
   emergency_stop_sub_ = nh_.subscribe("emergency_stop", 1 ,&TwistFilterNode::emergencyStopCallback, this);
 
   // Publish
   twist_pub_ = nh_.advertise<geometry_msgs::TwistStamped>("twist_cmd", 5);
-  if(rubis::instance_mode_) rubis_twist_pub_ = nh_.advertise<rubis_msgs::TwistStamped>("rubis_twist_cmd", 5);
+  rubis_twist_pub_ = nh_.advertise<rubis_msgs::TwistStamped>("rubis_twist_cmd", 5);
   ctrl_pub_ = nh_.advertise<autoware_msgs::ControlCommandStamped>("ctrl_cmd", 5);
   twist_lacc_limit_debug_pub_ = private_nh_.advertise<std_msgs::Float32>("limitation_debug/twist/lateral_accel", 5);
   twist_ljerk_limit_debug_pub_ = private_nh_.advertise<std_msgs::Float32>("limitation_debug/twist/lateral_jerk", 5);
@@ -115,16 +113,11 @@ inline void TwistFilterNode::publishTwist(const geometry_msgs::TwistStampedConst
     out_msg.twist.angular.z = 0;
   }
   twist_pub_.publish(out_msg);
-  if(rubis::instance_mode_ && rubis::instance_ != RUBIS_NO_INSTANCE){
-    rubis_msgs::TwistStamped rubis_out_msg;
-    rubis_out_msg.instance = rubis::instance_;
-    rubis_out_msg.obj_instance = rubis::obj_instance_;
-    rubis_out_msg.msg = out_msg;
-    rubis_twist_pub_.publish(rubis_out_msg);
-  }
-
-  if(rubis::is_task_ready_ == TASK_NOT_READY) rubis::init_task();
-  rubis::task_state_ = TASK_STATE_DONE;
+  rubis_msgs::TwistStamped rubis_out_msg;
+  rubis_out_msg.instance = rubis::instance_;
+  rubis_out_msg.obj_instance = rubis::obj_instance_;
+  rubis_out_msg.msg = out_msg;
+  rubis_twist_pub_.publish(rubis_out_msg);
 
   // Publish lateral accel and jerk after smoothing
   auto lacc_smoothed_result = twist_filter_ptr_->calcLaccWithAngularZ(twist_out);
@@ -149,7 +142,7 @@ inline void TwistFilterNode::publishTwist(const geometry_msgs::TwistStampedConst
 
 void TwistFilterNode::rubisTwistCmdCallback(const rubis_msgs::TwistStampedConstPtr& _msg){
   // Before spin
-  if(task_profiling_flag) rubis::start_task_profiling();
+  rubis::start_task_profiling();
 
   // Callback
   _emergencyStopCallback();
@@ -161,13 +154,13 @@ void TwistFilterNode::rubisTwistCmdCallback(const rubis_msgs::TwistStampedConstP
   publishTwist(msg);
 
   // After spin
-  if(task_profiling_flag) rubis::stop_task_profiling(rubis::instance_, rubis::task_state_);
+  rubis::stop_task_profiling(rubis::instance_, 0);
 }
 
 
 void TwistFilterNode::twistCmdCallback(const geometry_msgs::TwistStampedConstPtr& msg)
 {
-  rubis::instance_ = RUBIS_NO_INSTANCE;
+  rubis::instance_ = 0;
   publishTwist(msg);
 }
 

@@ -133,7 +133,6 @@ protected:
 
   // Others
   std::vector<PlannerHNS::Crossing> intersection_list_;
-  int task_profiling_flag_;
   autoware_msgs::DetectedObjectArray object_msg_;
 
   // Callback function for subscriber.

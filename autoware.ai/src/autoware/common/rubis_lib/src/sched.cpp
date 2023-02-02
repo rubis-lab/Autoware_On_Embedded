@@ -8,8 +8,16 @@ int key_id_;
 int is_scheduled_;
 std::string task_filename_;
 
-int is_task_ready_ = TASK_NOT_READY;
-int task_state_ = TASK_STATE_READY;
+struct sched_attr create_sched_attr(int priority, int exec_time, int deadline, int period){
+  struct sched_attr attr;
+
+  attr.sched_priority = (__u32)priority;
+  attr.sched_runtime = (__u64)exec_time;
+  attr.sched_deadline = (__u64)deadline;
+  attr.sched_period = (__u64)period;
+
+  return attr;
+}
 
 // system call hook to call SCHED_DEADLINE
 int sched_setattr(pid_t pid, const struct sched_attr *attr, unsigned int flags){
@@ -93,6 +101,26 @@ bool set_sched_deadline(int pid, unsigned int exec_time, unsigned int deadline, 
   return true;
 }
 
+bool init_task_scheduling(std::string policy, struct sched_attr attr){
+  if(policy.compare(std::string("NONE")) == 0){
+    return true;
+  }
+  else if(policy.compare(std::string("SCHED_FIFO")) == 0){
+    return set_sched_fifo(getpid(), attr.sched_priority, 10);
+  }
+  else if(policy.compare(std::string("SCHED_RR")) == 0){
+    return set_sched_rr(getpid(), attr.sched_priority, 10);
+  }
+  else if(policy.compare(std::string("SCHED_DEADLINE")) == 0){
+    return set_sched_deadline(getpid(), attr.sched_runtime, attr.sched_deadline, attr.sched_period);
+  }
+  else{
+    std::cout<<"[ERROR] Invalidate scheduling policy: "<<policy<<std::endl;
+  }
+
+  return true;
+}
+
 void yield_task_scheduling(){
   sched_yield();
 }
@@ -110,18 +138,9 @@ void termination(){
       exit(1);
   }
 
-  if(task_profiling_flag_){
-    fclose(task_response_time_fp_);
-  }
+  fclose(task_response_time_fp_);
+  
   exit(0);
-}
-
-void init_task(){
-  is_task_ready_ = TASK_READY;
-}
-
-void disable_task(){
-  is_task_ready_ = TASK_NOT_READY;
 }
 
 std::string get_cmd_output(const char* cmd) {
@@ -138,7 +157,6 @@ std::string get_cmd_output(const char* cmd) {
         throw;
     }
     pclose(pipe);
-    std::cout<<result<<std::endl;
     return result;
 }
 

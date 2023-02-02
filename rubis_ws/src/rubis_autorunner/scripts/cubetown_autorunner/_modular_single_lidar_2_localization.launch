@@ -15,7 +15,6 @@
   <arg name="output_log" default="false" />
   <arg name="leaf_size" default="1.0" />
   <arg name="measurement_range" default="200" />
-  <arg name="instance_mode" default="0"/>
 
   <arg name="method_type" default="0"/>
   <arg name="max_iter" default="10"/>

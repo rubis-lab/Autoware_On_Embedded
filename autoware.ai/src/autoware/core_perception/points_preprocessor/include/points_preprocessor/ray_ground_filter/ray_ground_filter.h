@@ -50,8 +50,6 @@
 class RayGroundFilter
 {
 private:
-  int task_profiling_flag_ = 0;
-
   ros::NodeHandle node_handle_;
   ros::Subscriber points_node_sub_;
   ros::Subscriber config_node_sub_;
@@ -79,8 +77,6 @@ private:
 
   std::vector<cv::Scalar> colors_;
   const size_t color_num_ = 60;  // different number of color to generate
-
-  int instance_mode_ = 0;
 
   struct PointXYZIRTColor
   {

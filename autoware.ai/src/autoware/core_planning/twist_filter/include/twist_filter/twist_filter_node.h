@@ -34,7 +34,6 @@ class TwistFilterNode
 {
 public:
   TwistFilterNode();
-  int task_profiling_flag;
 
 private:
   ros::NodeHandle nh_, private_nh_;

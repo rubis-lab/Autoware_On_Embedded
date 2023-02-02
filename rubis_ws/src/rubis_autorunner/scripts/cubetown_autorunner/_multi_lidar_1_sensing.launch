@@ -21,24 +21,19 @@
   <!-- Re-publishing simulator/camera_node/image/compressed topic to /image_raw as expected by Autoware -->
   <node name="republish" type="republish" pkg="image_transport" args="compressed in:=/simulator/camera_node/image raw out:=/image_raw"  />
 
-  <arg name="instance_mode" default="0"/>
-
   <node pkg="rubis_pkg" type="lidar_republisher" name="lidar_republisher_FL">
     <param name="/input_topic" value="points_raw_FL" />
     <param name="/output_topic" value="points_raw_FL_repub" />
-    <param name="/instance_mode" value="$(arg instance_mode)" />
   </node>
 
   <node pkg="rubis_pkg" type="lidar_republisher" name="lidar_republisher_FR">
     <param name="/input_topic" value="points_raw_FR" />
     <param name="/output_topic" value="points_raw_FR_repub" />
-    <param name="/instance_mode" value="$(arg instance_mode)" />
   </node>
 
   <node pkg="rubis_pkg" type="lidar_republisher" name="lidar_republisher_B">
     <param name="/input_topic" value="points_raw_B" />
     <param name="/output_topic" value="points_raw_B_repub" />
-    <param name="/instance_mode" value="$(arg instance_mode)" />
   </node>
 
   <node pkg="tf" type="static_transform_publisher" name="vel_to_velodyne_FR" args="0 0 0 0 0 0 velodyne_FR velodyne 10"/>

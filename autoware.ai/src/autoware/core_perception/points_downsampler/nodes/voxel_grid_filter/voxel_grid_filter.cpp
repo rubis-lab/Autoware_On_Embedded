@@ -55,8 +55,6 @@ static std::string input_topic_name_;
 static std::string output_topic_name_;
 static double measurement_range = MAX_MEASUREMENT_RANGE;
 
-static int task_profiling_flag_;
-
 static void config_callback(const autoware_config_msgs::ConfigVoxelGridFilter::ConstPtr& input)
 {
   voxel_leaf_size = input->voxel_leaf_size;
@@ -99,12 +97,10 @@ inline static void publish_filtered_cloud(const sensor_msgs::PointCloud2::ConstP
   filtered_msg.header = input->header;
   filtered_points_pub.publish(filtered_msg);
 
-  if(rubis::instance_mode_ && rubis::instance_ != RUBIS_NO_INSTANCE){
-    rubis_msgs::PointCloud2 rubis_filtered_msg;
-    rubis_filtered_msg.msg = filtered_msg;
-    rubis_filtered_msg.instance = rubis::instance_;
-    rubis_filtered_points_pub.publish(rubis_filtered_msg);
-  }
+  rubis_msgs::PointCloud2 rubis_filtered_msg;
+  rubis_filtered_msg.msg = filtered_msg;
+  rubis_filtered_msg.instance = rubis::instance_;
+  rubis_filtered_points_pub.publish(rubis_filtered_msg);
 
   points_downsampler_info_msg.header = input->header;
   points_downsampler_info_msg.filter_name = "voxel_grid_filter";
@@ -144,19 +140,19 @@ inline static void publish_filtered_cloud(const sensor_msgs::PointCloud2::ConstP
 
 static void scan_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
 {
-  rubis::instance_ = RUBIS_NO_INSTANCE;
+  rubis::instance_ = 0;
   publish_filtered_cloud(input);
 }
 
 static void rubis_scan_callback(const rubis_msgs::PointCloud2::ConstPtr& _input)
 {
-  if(task_profiling_flag_) rubis::start_task_profiling();
+  rubis::start_task_profiling();
 
   sensor_msgs::PointCloud2::ConstPtr input = boost::make_shared<const sensor_msgs::PointCloud2>(_input->msg);
   rubis::instance_ = _input->instance;
   publish_filtered_cloud(input);
 
-  if(task_profiling_flag_) rubis::stop_task_profiling(rubis::instance_, rubis::task_state_);
+  rubis::stop_task_profiling(rubis::instance_, 0);
 }
 
 int main(int argc, char** argv)
@@ -167,7 +163,6 @@ int main(int argc, char** argv)
   ros::NodeHandle private_nh("~");
 
   // Scheduling Setup
-  int task_scheduling_flag;  
   std::string task_response_time_filename;
   int rate;
   double task_minimum_inter_release_time;
@@ -189,22 +184,18 @@ int main(int argc, char** argv)
   private_nh.param<double>("leaf_size", voxel_leaf_size, 0.1);
 
   std::string node_name = ros::this_node::getName();
-  private_nh.param<int>(node_name+"/task_scheduling_flag", task_scheduling_flag, 0);
-  private_nh.param<int>(node_name+"/task_profiling_flag", task_profiling_flag_, 0);
   private_nh.param<std::string>(node_name+"/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/voxel_grid_filter.csv");
   private_nh.param<int>(node_name+"/rate", rate, 10);
   private_nh.param(node_name+"/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
   private_nh.param(node_name+"/task_execution_time", task_execution_time, (double)10);
   private_nh.param(node_name+"/task_relative_deadline", task_relative_deadline, (double)10);
-  private_nh.param<int>(node_name+"/instance_mode", rubis::instance_mode_, 0);
 
   /* For Task scheduling */
-  if(task_profiling_flag_) rubis::init_task_profiling(task_response_time_filename);
+  rubis::init_task_profiling(task_response_time_filename);
 
   // Publishers
   filtered_points_pub = nh.advertise<sensor_msgs::PointCloud2>(output_topic_name_, 10);
-  if(rubis::instance_mode_)
-    rubis_filtered_points_pub = nh.advertise<rubis_msgs::PointCloud2>("/rubis_" + output_topic_name_, 10);
+  rubis_filtered_points_pub = nh.advertise<rubis_msgs::PointCloud2>("/rubis_" + output_topic_name_, 10);
   points_downsampler_info_pub = nh.advertise<points_downsampler::PointsDownsamplerInfo>("/points_downsampler_info", 1000);
 
   // Subscribers
@@ -212,8 +203,7 @@ int main(int argc, char** argv)
   // ros::Subscriber scan_sub = nh.subscribe(input_topic_name_, 10, scan_callback);
   ros::Subscriber scan_sub;
   
-  if(rubis::instance_mode_) scan_sub = nh.subscribe("/rubis_"+input_topic_name_, 1, rubis_scan_callback); // Def: 10
-  else scan_sub = nh.subscribe(input_topic_name_, 1, scan_callback); // Def: 10
+  scan_sub = nh.subscribe("/rubis_"+input_topic_name_, 1, rubis_scan_callback); // Def: 10
 
   ros::spin();
 

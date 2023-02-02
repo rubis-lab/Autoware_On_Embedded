@@ -245,8 +245,6 @@ void MotionPrediction::callbackGetVehicleStatus(const geometry_msgs::TwistStampe
     m_VehicleStatus.steer = atan(m_CarInfo.wheel_base * msg->twist.angular.z/msg->twist.linear.x);
   UtilityHNS::UtilityH::GetTickCount(m_VehicleStatus.tStamp);
   bVehicleStatus = true;
-
-  if(rubis::is_task_ready_ == TASK_NOT_READY) rubis::init_task();  
 }
 
 void MotionPrediction::callbackGetCANInfo(const autoware_can_msgs::CANInfoConstPtr &msg)
@@ -406,7 +404,7 @@ void MotionPrediction::callbackGetTrackedObjects(const autoware_msgs::DetectedOb
 }
 
 void MotionPrediction::callbackGetRubisTrackedObjects(const rubis_msgs::DetectedObjectArrayConstPtr& in_msg){
-  if(task_profiling_flag_) rubis::start_task_profiling();
+  rubis::start_task_profiling();
 
   rubis_msgs::DetectedObjectArray msg = *in_msg;
   _callbackGetRubisTrackedObjects(msg);
@@ -462,7 +460,7 @@ void MotionPrediction::callbackGetRubisTrackedObjects(const rubis_msgs::Detected
     UtilityHNS::UtilityH::GetTickCount(m_VisualizationTimer);
   }
 
-  if(task_profiling_flag_) rubis::stop_task_profiling(rubis::instance_, rubis::task_state_);
+  rubis::stop_task_profiling(rubis::instance_, 0);
 }
 
 void MotionPrediction::_callbackGetRubisTrackedObjects(rubis_msgs::DetectedObjectArray& objects_msg)
@@ -560,7 +558,7 @@ void MotionPrediction::_callbackGetRubisTrackedObjects(rubis_msgs::DetectedObjec
     output_msg.obj_instance = rubis::obj_instance_;
     output_msg.object_array = m_PredictedResultsResults;
     pub_rubis_predicted_objects_trajectories.publish(output_msg);
-    rubis::task_state_ = TASK_STATE_DONE;
+    
   }
 
 }
@@ -712,14 +710,13 @@ void MotionPrediction::MainLoop()
   double task_execution_time;
   double task_relative_deadline; 
 
-  private_nh.param<int>("/op_motion_predictor/task_profiling_flag", task_profiling_flag_, 0);
   private_nh.param<std::string>("/op_motion_predictor/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/op_motion_predictor.csv");
   private_nh.param<int>("/op_motion_predictor/rate", rate, 10);
   private_nh.param("/op_motion_predictor/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
   private_nh.param("/op_motion_predictor/task_execution_time", task_execution_time, (double)10);
   private_nh.param("/op_motion_predictor/task_relative_deadline", task_relative_deadline, (double)10);
 
-  if(task_profiling_flag_) rubis::init_task_profiling(task_response_time_filename);
+  rubis::init_task_profiling(task_response_time_filename);
 
   ros::spin();
 }

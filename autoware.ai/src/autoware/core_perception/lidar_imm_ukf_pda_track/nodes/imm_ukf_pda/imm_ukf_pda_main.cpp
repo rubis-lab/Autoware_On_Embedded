@@ -24,16 +24,12 @@ int main(int argc, char** argv)
   ros::NodeHandle private_nh("~");
 
   // Scheduling Setup
-  int task_scheduling_flag;
-  int task_profiling_flag;
   std::string task_response_time_filename;
   int rate;
   double task_minimum_inter_release_time;
   double task_execution_time;
   double task_relative_deadline; 
 
-  private_nh.param<int>("/imm_ukf_pda_track/task_scheduling_flag", task_scheduling_flag, 0);
-  private_nh.param<int>("/imm_ukf_pda_track/task_profiling_flag", task_profiling_flag, 0);
   private_nh.param<std::string>("/imm_ukf_pda_track/task_response_time_filename", task_response_time_filename, "~/profiling/response_time/imm_ukf_pda_track.csv");
   private_nh.param<int>("/imm_ukf_pda_track/rate", rate, 10);
   private_nh.param("/imm_ukf_pda_track/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
@@ -43,30 +39,17 @@ int main(int argc, char** argv)
   ImmUkfPda app;
   app.run();
 
-  if(task_profiling_flag) rubis::init_task_profiling(task_response_time_filename);
+  rubis::init_task_profiling(task_response_time_filename);
 
-  if(!task_scheduling_flag && !task_profiling_flag){
-    ros::spin();
-  }
-  else{
-    ros::Rate r(rate);
-    // Initialize task ( Wait until first necessary topic is published )
-    while(ros::ok()){
-      if(rubis::is_task_ready_) break;
-      ros::spinOnce();
-      r.sleep();      
-    }
+  ros::Rate r(rate);
+  while(ros::ok()){
+    rubis::start_task_profiling();
 
-    // Executing task
-    while(ros::ok()){
-      if(task_profiling_flag) rubis::start_task_profiling();
+    ros::spinOnce();
 
-      ros::spinOnce();
+    rubis::stop_task_profiling(rubis::instance_, 0);
 
-      if(task_profiling_flag) rubis::stop_task_profiling(rubis::instance_, rubis::task_state_);
-
-      r.sleep();
-    }
+    r.sleep();
   }
 
   return 0;
