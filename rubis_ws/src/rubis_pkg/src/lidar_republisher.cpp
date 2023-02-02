@@ -28,6 +28,7 @@ void points_cb(const sensor_msgs::PointCloud2ConstPtr& msg){
 
     if(task_profiling_flag_) rubis::sched::stop_task_profiling(rubis::instance_, rubis::sched::task_state_);
     rubis::instance_ = rubis::instance_+1;
+    rubis::obj_instance_ = rubis::obj_instance_+1;
 }
 
 int main(int argc, char** argv){
