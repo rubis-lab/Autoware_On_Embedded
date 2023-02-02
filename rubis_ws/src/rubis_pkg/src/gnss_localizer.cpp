@@ -81,6 +81,28 @@ void Nmea2TFPoseNode::initForROS()
   else
     pub1_ = nh_.advertise<geometry_msgs::PoseStamped>("gnss_pose", 1);
   vel_pub_ = nh_.advertise<geometry_msgs::TwistStamped>("gnss_vel", 1);
+
+  // Scheduling & Profiling Setup
+  std::string node_name = ros::this_node::getName();
+  std::string task_response_time_filename;
+  nh_.param<std::string>(node_name+"/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/gnss_localizer.csv");
+
+  int rate;
+  nh_.param<int>(node_name+"/rate", rate, 10);
+
+  struct rubis::sched_attr attr;
+  std::string policy;
+  int priority, exec_time ,deadline, period;
+    
+  nh_.param(node_name+"/task_scheduling_configs/policy", policy, std::string("NONE"));    
+  nh_.param(node_name+"/task_scheduling_configs/priority", priority, 99);
+  nh_.param(node_name+"/task_scheduling_configs/exec_time", exec_time, 0);
+  nh_.param(node_name+"/task_scheduling_configs/deadline", deadline, 0);
+  nh_.param(node_name+"/task_scheduling_configs/period", period, 0);
+  attr = rubis::create_sched_attr(priority, exec_time, deadline, period);    
+  rubis::init_task_scheduling(policy, attr);
+
+  rubis::init_task_profiling(task_response_time_filename);
 }
 
 void Nmea2TFPoseNode::run()

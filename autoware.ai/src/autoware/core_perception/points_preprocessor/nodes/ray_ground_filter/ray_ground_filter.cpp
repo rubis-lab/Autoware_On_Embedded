@@ -405,13 +405,6 @@ RayGroundFilter::RayGroundFilter() : node_handle_("~"), tf_listener_(tf_buffer_)
 
 void RayGroundFilter::Run()
 {
-  // Scheduling Setup
-  std::string task_response_time_filename;
-  int rate;
-  double task_minimum_inter_release_time;
-  double task_execution_time;
-  double task_relative_deadline;
-
   // Model   |   Horizontal   |   Vertical   | FOV(Vertical)    degrees / rads
   // ----------------------------------------------------------
   // HDL-64  |0.08-0.35(0.32) |     0.4      |  -24.9 <=x<=2.0   (26.9  / 0.47)
@@ -467,19 +460,31 @@ void RayGroundFilter::Run()
   groundless_points_pub_ = node_handle_.advertise<rubis_msgs::PointCloud2>(no_ground_topic, 2);
   ground_points_pub_ = node_handle_.advertise<sensor_msgs::PointCloud2>(ground_topic, 2);
   
+  // Scheduling & Profiling Setup
   std::string node_name = ros::this_node::getName();
+  std::string task_response_time_filename;
   node_handle_.param<std::string>(node_name+"/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/ray_ground_filter.csv");
+
+  int rate;
   node_handle_.param<int>(node_name+"/rate", rate, 10);
-  node_handle_.param(node_name+"/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
-  node_handle_.param(node_name+"/task_execution_time", task_execution_time, (double)10);
-  node_handle_.param(node_name+"/task_relative_deadline", task_relative_deadline, (double)10);
+
+  struct rubis::sched_attr attr;
+  std::string policy;
+  int priority, exec_time ,deadline, period;
+    
+  node_handle_.param(node_name+"/task_scheduling_configs/policy", policy, std::string("NONE"));    
+  node_handle_.param(node_name+"/task_scheduling_configs/priority", priority, 99);
+  node_handle_.param(node_name+"/task_scheduling_configs/exec_time", exec_time, 0);
+  node_handle_.param(node_name+"/task_scheduling_configs/deadline", deadline, 0);
+  node_handle_.param(node_name+"/task_scheduling_configs/period", period, 0);
+  attr = rubis::create_sched_attr(priority, exec_time, deadline, period);    
+  rubis::init_task_scheduling(policy, attr);
+
+  rubis::init_task_profiling(task_response_time_filename);
 
   points_node_sub_ = node_handle_.subscribe("/rubis_"+input_point_topic_.substr(1), 1, &RayGroundFilter::RubisCloudCallback, this);
 
   ROS_INFO("Ready");
-
-  /* For Task scheduling */
-  rubis::init_task_profiling(task_response_time_filename);
 
   ros::spin();
 }

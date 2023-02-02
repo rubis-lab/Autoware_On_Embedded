@@ -24,22 +24,11 @@ int main(int argc, char** argv)
   ros::NodeHandle private_nh("~");
 
   // Scheduling Setup
-  std::string task_response_time_filename;
   int rate;
-  double task_minimum_inter_release_time;
-  double task_execution_time;
-  double task_relative_deadline; 
-
-  private_nh.param<std::string>("/imm_ukf_pda_track/task_response_time_filename", task_response_time_filename, "~/profiling/response_time/imm_ukf_pda_track.csv");
   private_nh.param<int>("/imm_ukf_pda_track/rate", rate, 10);
-  private_nh.param("/imm_ukf_pda_track/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
-  private_nh.param("/imm_ukf_pda_track/task_execution_time", task_execution_time, (double)10);
-  private_nh.param("/imm_ukf_pda_track/task_relative_deadline", task_relative_deadline, (double)10);
 
   ImmUkfPda app;
   app.run();
-
-  rubis::init_task_profiling(task_response_time_filename);
 
   ros::Rate r(rate);
   while(ros::ok()){

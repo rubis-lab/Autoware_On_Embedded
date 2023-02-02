@@ -523,18 +523,25 @@ void TrajectoryEval::MainLoop()
 {
   ros::NodeHandle private_nh("~");
 
-  // Scheduling Setup
+  // Scheduling & Profiling Setup
+  std::string node_name = ros::this_node::getName();
   std::string task_response_time_filename;
-  int rate;
-  double task_minimum_inter_release_time;
-  double task_execution_time;
-  double task_relative_deadline; 
+  private_nh.param<std::string>(node_name+"/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/op_trajectory_evaluator.csv");
 
-  private_nh.param<std::string>("/op_trajectory_evaluator/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/op_trajectory_evaluator.csv");
-  private_nh.param<int>("/op_trajectory_evaluator/rate", rate, 10);
-  private_nh.param("/op_trajectory_evaluator/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
-  private_nh.param("/op_trajectory_evaluator/task_execution_time", task_execution_time, (double)10);
-  private_nh.param("/op_trajectory_evaluator/task_relative_deadline", task_relative_deadline, (double)10);  
+  int rate;
+  private_nh.param<int>(node_name+"/rate", rate, 10);
+
+  struct rubis::sched_attr attr;
+  std::string policy;
+  int priority, exec_time ,deadline, period;
+    
+  private_nh.param(node_name+"/task_scheduling_configs/policy", policy, std::string("NONE"));    
+  private_nh.param(node_name+"/task_scheduling_configs/priority", priority, 99);
+  private_nh.param(node_name+"/task_scheduling_configs/exec_time", exec_time, 0);
+  private_nh.param(node_name+"/task_scheduling_configs/deadline", deadline, 0);
+  private_nh.param(node_name+"/task_scheduling_configs/period", period, 0);
+  attr = rubis::create_sched_attr(priority, exec_time, deadline, period);    
+  rubis::init_task_scheduling(policy, attr);
 
   rubis::init_task_profiling(task_response_time_filename);
 

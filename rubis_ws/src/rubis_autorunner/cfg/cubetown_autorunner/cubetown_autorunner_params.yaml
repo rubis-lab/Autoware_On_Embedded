@@ -1,39 +1,46 @@
 # Unit of rate: hz
-# Unit of task information: nano seconds
+# Unit of scheduling params: ns
 
-# 1s  : 1000000000
-# 1ms : 1000000
-# 1us : 1000
+# 1s  : 1_000_000_000
+# 1ms : 1_000_000
+# 1us : 1_000
 # 1ns : 1
 
 #rate = hz
 # other time unut = ns
 
+# Lane Keeping
 lidar_republisher:
   rate: 10
   task_scheduling_configs:
-    policy: "SCHED_RR"
-    priority: 20
-    exec_time: 0 # ns
-    deadline: 0 # ns
-    period: 0 # ns
-  
+    policy: "NONE"
+    priority: 99
+    exec_time: 1_000_000
+    deadline: 2_000_000
+    period: 2_000_000  
   task_response_time_filename: "~/Documents/profiling/response_time/lidar_republisher.csv"  
 
-# Localization
 voxel_grid_filter:
   rate: 10
   task_scheduling_configs:
-    policy: "SCHED_FIF"
-    priority: 20
+    policy: "NONE"
+    priority: 99
     exec_time: 0 # ns
     deadline: 0 # ns
     period: 0 # ns
   task_response_time_filename: "~/Documents/profiling/response_time/voxel_grid_filter.csv"  
 
 ndt_matching:
-  use_kalman_filter: True
-
+  rate: 10
+  task_scheduling_configs:
+    policy: "NONE"
+    priority: 20
+    exec_time: 0 # ns
+    deadline: 0 # ns
+    period: 0 # ns
+  task_response_time_filename: "~/Documents/profiling/response_time/ndt_matching.csv"
+  
+  use_kalman_filter: False
   tf_x: 1.0510799 
   tf_y: 0
   tf_z: 1.96
@@ -42,114 +49,64 @@ ndt_matching:
   tf_yaw: 0
   localizer: "velodyne"
 
-  task_scheduling_policy: 0
+pure_pursuit:
+  rate: 30 #30
   task_scheduling_configs:
-    policy: "SCHED_FIFO"
+    policy: "NONE"
     priority: 20
     exec_time: 0 # ns
     deadline: 0 # ns
-    period: 0 # ns
-  
-  task_response_time_filename: "~/Documents/profiling/response_time/ndt_matching.csv"
-  rate: 10
+    period: 0 # ns  
+  task_response_time_filename: "~/Documents/profiling/response_time/pure_pursuit.csv"  
 
-  task_scheduling_policy: 0
+  dynamic_params_flag: False
+  dynamic_params_path: "~/autoware.ai/autoware_files/lgsvl_file/parameter/lgsvl_pure_pursuit.yaml"
+
+twist_filter:
+  rate: 10
   task_scheduling_configs:
     policy: "NONE"
     priority: 20
     exec_time: 0 # ns
     deadline: 0 # ns
     period: 0 # ns
-  
-  task_response_time_filename: "~/Documents/profiling/response_time/ndt_matching.csv"
-  rate: 10
-  task_minimum_inter_release_time: 100_000_000
-  task_execution_time: 80_000_000
-  task_relative_deadline: 80_000_000
+  task_response_time_filename: "~/Documents/profiling/response_time/twist_filter.csv"
 
 # Detection
 ray_ground_filter_center:
-  task_scheduling_policy: 0
+  rate: 10 
   task_scheduling_configs:
     policy: "NONE"
     priority: 20
     exec_time: 0 # ns
     deadline: 0 # ns
     period: 0 # ns
-  
-  
   task_response_time_filename: "~/Documents/profiling/response_time/ray_ground_filter.csv"
-  rate: 10 
-  task_minimum_inter_release_time: 100_000_000
-  task_execution_time: 100_000_000
-  task_relative_deadline: 100_000_000
 
 lidar_euclidean_cluster_detect:
-  task_scheduling_policy: 0
+  rate: 10
   task_scheduling_configs:
     policy: "NONE"
     priority: 20
     exec_time: 0 # ns
     deadline: 0 # ns
     period: 0 # ns
-  
-  
   task_response_time_filename: "~/Documents/profiling/response_time/lidar_euclidean_cluster_detect.csv"
-  rate: 10
-  task_minimum_inter_release_time: 200_000_000
-  task_execution_time: 50_000_000
-  task_relative_deadline: 200_000_000
 
-vision_darknet_detect:
-  task_scheduling_policy: 0
-  task_scheduling_configs:
-    policy: "NONE"
-    priority: 20
-    exec_time: 0 # ns
-    deadline: 0 # ns
-    period: 0 # ns
-  
-  
-  task_response_time_filename: "~/Documents/profiling/response_time/vision_darknet_detect.csv"
-  rate: 10
-  task_minimum_inter_release_time: 100_000_000
-  task_execution_time: 75_000_000
-  task_relative_deadline: 80_000_000
   network_definition_file: "~/autoware.ai/autoware_files/vision/yolov3-320.cfg"
   pretrained_model_file: "~/autoware.ai/autoware_files/vision/yolov3-320.weights"
 
-imm_ukf_pda_track:
-  task_scheduling_policy: 0
-  task_scheduling_configs:
-    policy: "NONE"
-    priority: 20
-    exec_time: 0 # ns
-    deadline: 0 # ns
-    period: 0 # ns
-  
-  
-  task_response_time_filename: "~/Documents/profiling/response_time/imm_ukf_pda_track.csv"
-  rate: 10
-  task_minimum_inter_release_time: 200_000_000
-  task_execution_time: 100_000_000
-  task_relative_deadline: 200_000_000
-
 # Planning
 op_global_planner:
-  task_scheduling_policy: 0
+  rate: 25 #25
   task_scheduling_configs:
     policy: "NONE"
     priority: 20
     exec_time: 0 # ns
     deadline: 0 # ns
     period: 0 # ns
-  
-  
   task_response_time_filename: "~/Documents/profiling/response_time/op_global_planner.csv"
-  rate: 25 #25
-  task_minimum_inter_release_time: 100_000_000
-  task_execution_time: 45_000_000
-  task_relative_deadline: 100_000_000
+
   multilap_flag: 1
 
 op_common_params:
@@ -160,36 +117,25 @@ op_common_params:
   maxDeceleration: -10.0
 
 op_trajectory_generator:
-  task_scheduling_policy: 0
+  rate: 100 #100
   task_scheduling_configs:
     policy: "NONE"
     priority: 20
     exec_time: 0 # ns
     deadline: 0 # ns
     period: 0 # ns
-  
-  
   task_response_time_filename: "~/Documents/profiling/response_time/op_trajectory_generator.csv"
-  rate: 100 #100
-  task_minimum_inter_release_time: 100_000_000
-  task_execution_time: 2_900_000
-  task_relative_deadline: 100_000_000
 
 op_trajectory_evaluator:
-  task_scheduling_policy: 0
+  rate: 100 #100
   task_scheduling_configs:
     policy: "NONE"
     priority: 20
     exec_time: 0 # ns
     deadline: 0 # ns
     period: 0 # ns
-  
-  
   task_response_time_filename: "~/Documents/profiling/response_time/op_trajectory_evaluator.csv"
-  rate: 100 #100
-  task_minimum_inter_release_time: 100_000_000
-  task_execution_time: 3_600_000
-  task_relative_deadline: 100_000_000
+
   weightPriority: 1
   weightTransition: 0.5
   weightLong: 10
@@ -199,106 +145,39 @@ op_trajectory_evaluator:
   SprintDecisionTime: 9999999.0
 
 op_behavior_selector:
-  task_scheduling_policy: 0
+  rate: 100 #100
   task_scheduling_configs:
     policy: "NONE"
     priority: 20
     exec_time: 0 # ns
     deadline: 0 # ns
     period: 0 # ns
-  
-  
   task_response_time_filename: "~/Documents/profiling/response_time/op_behavior_selector.csv"
-  rate: 100 #100
-  task_minimum_inter_release_time: 100_000_000
-  task_execution_time: 20_800_000
-  task_relative_deadline: 100_000_000
+
   distanceToPedestrianThreshold: 15.0
   sprintSpeed: 10.0
   obstacleWaitingTimeinIntersection: 2.0
   turnThreshold: 30.0
 
 op_motion_predictor:
-  task_scheduling_policy: 0
-  task_scheduling_configs:
-    policy: "NONE"
-    priority: 20
-    exec_time: 0 # ns
-    deadline: 0 # ns
-    period: 0 # ns
-  
-  
-  task_response_time_filename: "~/Documents/profiling/response_time/op_motion_predictor.csv"
   rate: 25 #25
-  task_minimum_inter_release_time: 100_000_000
-  task_execution_time: 3_800_000
-  task_relative_deadline: 100_000_000
-
-# Control
-pure_pursuit:
-  task_scheduling_policy: 0
   task_scheduling_configs:
     policy: "NONE"
     priority: 20
     exec_time: 0 # ns
     deadline: 0 # ns
-    period: 0 # ns
-  
-  
-  task_response_time_filename: "~/Documents/profiling/response_time/pure_pursuit.csv"
-  rate: 30 #30
-  task_minimum_inter_release_time: 100_000_000
-  task_execution_time: 3_000_000
-  task_relative_deadline: 100_000_000
-  dynamic_params_flag: False
-  dynamic_params_path: "~/autoware.ai/autoware_files/lgsvl_file/parameter/lgsvl_pure_pursuit.yaml"
+    period: 0 # ns  
+  task_response_time_filename: "~/Documents/profiling/response_time/op_motion_predictor.csv"
 
-twist_filter:
-  task_scheduling_policy: 0
-  task_scheduling_configs:
-    policy: "NONE"
-    priority: 20
-    exec_time: 0 # ns
-    deadline: 0 # ns
-    period: 0 # ns
-  
-  
-  task_response_time_filename: "~/Documents/profiling/response_time/twist_filter.csv"
-  rate: 10
-  task_minimum_inter_release_time: 100_000_000
-  task_execution_time: 2_000_000
-  task_relative_deadline: 100_000_000
-
+# Independent
 twist_gate:
-  task_scheduling_policy: 0
+  rate: 10
   task_scheduling_configs:
     policy: "NONE"
     priority: 20
     exec_time: 0 # ns
     deadline: 0 # ns
     period: 0 # ns
-  
-  
   task_response_time_filename: "~/Documents/profiling/response_time/twist_gate.csv"
-  rate: 10
-  task_minimum_inter_release_time: 100_000_000
-  task_execution_time: 2_000_000
-  task_relative_deadline: 100_000_000
+
   zero_flag: 0 ## Publish target velocity as 0
-
-
-republish:
-  task_scheduling_policy: 0
-  task_scheduling_configs:
-    policy: "NONE"
-    priority: 20
-    exec_time: 0 # ns
-    deadline: 0 # ns
-    period: 0 # ns
-  
-  
-  task_response_time_filename: "~/Documents/profiling/response_time/republish.csv"
-  rate: 10
-  task_minimum_inter_release_time: 100_000_000
-  task_execution_time: 35_000_000
-  task_relative_deadline: 100_000_000

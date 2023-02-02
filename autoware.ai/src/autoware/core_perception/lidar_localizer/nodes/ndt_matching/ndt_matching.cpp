@@ -1884,22 +1884,28 @@ int main(int argc, char** argv)
     exit(1);
   }
 #endif
-
-  // Scheduling Setup
-  std::string task_response_time_filename;
-  int rate;
-  double task_minimum_inter_release_time;
-  double task_execution_time;
-  double task_relative_deadline;
-
+  // Scheduling & Profiling Setup
   std::string node_name = ros::this_node::getName();
+  std::string task_response_time_filename;
   private_nh.param<std::string>(node_name+"/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/ndt_matching.csv");
+
+  int rate;
   private_nh.param<int>(node_name+"/rate", rate, 10);
-  private_nh.param(node_name+"/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
-  private_nh.param(node_name+"/task_execution_time", task_execution_time, (double)10);
-  private_nh.param(node_name+"/task_relative_deadline", task_relative_deadline, (double)10);
-  
+
+  struct rubis::sched_attr attr;
+  std::string policy;
+  int priority, exec_time ,deadline, period;
+    
+  private_nh.param(node_name+"/task_scheduling_configs/policy", policy, std::string("NONE"));    
+  private_nh.param(node_name+"/task_scheduling_configs/priority", priority, 99);
+  private_nh.param(node_name+"/task_scheduling_configs/exec_time", exec_time, 0);
+  private_nh.param(node_name+"/task_scheduling_configs/deadline", deadline, 0);
+  private_nh.param(node_name+"/task_scheduling_configs/period", period, 0);
+  attr = rubis::create_sched_attr(priority, exec_time, deadline, period);    
+  rubis::init_task_scheduling(policy, attr);
+
   rubis::init_task_profiling(task_response_time_filename);
+
   
   Eigen::Translation3f tl_btol(_tf_x, _tf_y, _tf_z);                 // tl: translation
   Eigen::AngleAxisf rot_x_btol(_tf_roll, Eigen::Vector3f::UnitX());  // rot: rotation
@@ -1953,7 +1959,6 @@ int main(int argc, char** argv)
   
   pthread_t thread;
   pthread_create(&thread, NULL, thread_func, NULL);
-
 
   ros::Rate r(rate);
   while(ros::ok()){

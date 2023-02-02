@@ -65,22 +65,22 @@ int main(int argc, char** argv){
     rubis_output_topic = "/rubis_"+output_topic.substr(1);
     pub_rubis = nh.advertise<rubis_msgs::PointCloud2>(rubis_output_topic, 1);
     
-    int rate;
-    private_nh.param<int>("/lidar_republisher/rate", rate, 10);
-
+    // Scheduling & Profiling Setup
     std::string task_response_time_filename;
-    private_nh.param<std::string>("/lidar_republisher/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/lidar_republisher.csv");
-    
+    private_nh.param<std::string>(node_name+"/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/lidar_republisher.csv");
+
+    int rate;
+    private_nh.param<int>(node_name+"/rate", rate, 10);
+
     struct rubis::sched_attr attr;
     std::string policy;
     int priority, exec_time ,deadline, period;
-    
-    private_nh.param("/lidar_republisher/task_scheduling_configs/policy", policy, std::string("NONE"));    
-    private_nh.param("/lidar_republisher/task_scheduling_configs/priority", priority, 99);
-    private_nh.param("/lidar_republisher/task_scheduling_configs/exec_time", exec_time, 0);
-    private_nh.param("/lidar_republisher/task_scheduling_configs/deadline", deadline, 0);
-    private_nh.param("/lidar_republisher/task_scheduling_configs/period", period, 0);    
 
+    private_nh.param(node_name+"/task_scheduling_configs/policy", policy, std::string("NONE"));    
+    private_nh.param(node_name+"/task_scheduling_configs/priority", priority, 99);
+    private_nh.param(node_name+"/task_scheduling_configs/exec_time", exec_time, 0);
+    private_nh.param(node_name+"/task_scheduling_configs/deadline", deadline, 0);
+    private_nh.param(node_name+"/task_scheduling_configs/period", period, 0);
     attr = rubis::create_sched_attr(priority, exec_time, deadline, period);    
     rubis::init_task_scheduling(policy, attr);
 
