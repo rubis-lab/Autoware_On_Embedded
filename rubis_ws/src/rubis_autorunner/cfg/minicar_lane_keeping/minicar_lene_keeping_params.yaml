@@ -51,11 +51,6 @@ ndt_matching:
   task_minimum_inter_release_time: 100000000
   task_execution_time: 70000000
   task_relative_deadline: 100000000
-  gpu_scheduling_flag: 0
-  gpu_profiling_flag: 0
-  gpu_execution_time_filename: "~/Documents/gpu_profiling/test_ndt_matching_execution_time.csv"
-  gpu_response_time_filename: "~/Documents/gpu_profiling/test_ndt_matching_response_time.csv"
-  gpu_deadline_filename: "~/Documents/gpu_deadline/ndt_matching_gpu_deadline.csv"
 
 # Planning
 op_global_planner:

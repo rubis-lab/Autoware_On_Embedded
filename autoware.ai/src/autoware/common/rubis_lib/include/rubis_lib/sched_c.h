@@ -89,31 +89,11 @@ struct sched_attr {
 	__u64 sched_period;
 };
 
-// GPU 
-typedef struct  gpuSchedInfo{
-    int pid;
-    unsigned long deadline;
-    int state; // NONE = 0, WAIT = 1, RUN = 2
-    int scheduling_flag;
-} GPUSchedInfo;
-
 extern int key_id_;
 extern int is_scheduled_;
-extern int gpu_scheduling_flag_;
-extern GPUSchedInfo* gpu_sched_info_;
-extern int gpu_scheduler_pid_;
 extern char* task_filename_;
-extern char* gpu_deadline_filename_;
-// extern unsigned long gpu_deadline_list_[1024];
-extern unsigned long* gpu_deadline_list_;
-extern unsigned int max_gpu_id_;
-extern unsigned int gpu_seg_id_;
-extern unsigned int cpu_seg_id_;
 extern int task_state_;
 extern int is_task_ready_;
-extern int was_in_loop_;
-extern int loop_cnt_;
-extern int gpu_seg_cnt_in_loop_;
 
 // Task scheduling
 // int sched_setattr(pid_t pid, const struct sched_attr *attr, unsigned int flags);
@@ -124,9 +104,6 @@ void yield_task_scheduling();
 void init_task();
 void disable_task();
 
-// GPU scheduling
-void init_gpu_scheduling(char* task_filename, char* gpu_deadline_filename, int key_id);
-void get_deadline_list();
 void sig_handler(int signum);
 void termination();
 unsigned long get_current_time_us();
@@ -134,13 +111,4 @@ unsigned long get_current_time_us();
 void start_job();
 void finish_job();
 
-void request_gpu();
-void yield_gpu();
-void yield_gpu_with_remark(const char* remark);
-
-void request_gpu_in_loop(int flag);
-void yield_gpu_in_loop(int flag);
-void yield_gpu_with_remark_in_loop(int flag, const char* remark);
-void print_loop_info(const char* tag);
-void print_gpu_deadline_list();
 #endif

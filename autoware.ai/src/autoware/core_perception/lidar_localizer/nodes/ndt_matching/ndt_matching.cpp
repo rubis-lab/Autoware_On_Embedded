@@ -1708,7 +1708,6 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
   
   if(rubis::sched::is_task_ready_ == TASK_NOT_READY){
     rubis::sched::init_task();
-    if(rubis::sched::gpu_profiling_flag_) rubis::sched::start_gpu_profiling();
   }  
 }
 
@@ -1903,12 +1902,6 @@ int main(int argc, char** argv)
   double task_execution_time;
   double task_relative_deadline;
 
-  int gpu_scheduling_flag;
-  int gpu_profiling_flag;
-  std::string gpu_execution_time_filename;
-  std::string gpu_response_time_filename;
-  std::string gpu_deadline_filename;
-
   std::string node_name = ros::this_node::getName();
   private_nh.param<int>(node_name+"/task_scheduling_flag", task_scheduling_flag, 0);
   private_nh.param<int>(node_name+"/task_profiling_flag", task_profiling_flag_, 0);
@@ -1917,24 +1910,10 @@ int main(int argc, char** argv)
   private_nh.param(node_name+"/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
   private_nh.param(node_name+"/task_execution_time", task_execution_time, (double)10);
   private_nh.param(node_name+"/task_relative_deadline", task_relative_deadline, (double)10);
-  private_nh.param(node_name+"/gpu_scheduling_flag", gpu_scheduling_flag, 0);
-  private_nh.param(node_name+"/gpu_profiling_flag", gpu_profiling_flag, 0);
-  private_nh.param<std::string>(node_name+"/gpu_execution_time_filename", gpu_execution_time_filename, "~/Documents/gpu_profiling/test_ndt_matching_execution_time.csv");
-  private_nh.param<std::string>(node_name+"/gpu_response_time_filename", gpu_response_time_filename, "~/Documents/gpu_profiling/test_ndt_matching_response_time.csv");
-  private_nh.param<std::string>(node_name+"/gpu_deadline_filename", gpu_deadline_filename, "~/Documents/gpu_deadline/ndt_matching_gpu_deadline.csv");
   private_nh.param<int>(node_name+"/instance_mode", rubis::instance_mode_, 0);
   
   if(task_profiling_flag_) rubis::sched::init_task_profiling(task_response_time_filename);
-  if(gpu_profiling_flag) rubis::sched::init_gpu_profiling(gpu_execution_time_filename, gpu_response_time_filename);
   
-  if( (_method_type == MethodType::PCL_ANH_GPU) && (gpu_scheduling_flag == 1) ){
-    rubis::sched::init_gpu_scheduling("/tmp/ndt_matching", gpu_deadline_filename, 0);
-  }    
-  else if(_method_type != MethodType::PCL_ANH_GPU && gpu_scheduling_flag == 1){
-    ROS_ERROR("GPU scheduling flag is true but type doesn't set to GPU!");
-    exit(1);
-  }
-
   Eigen::Translation3f tl_btol(_tf_x, _tf_y, _tf_z);                 // tl: translation
   Eigen::AngleAxisf rot_x_btol(_tf_roll, Eigen::Vector3f::UnitX());  // rot: rotation
   Eigen::AngleAxisf rot_y_btol(_tf_pitch, Eigen::Vector3f::UnitY());

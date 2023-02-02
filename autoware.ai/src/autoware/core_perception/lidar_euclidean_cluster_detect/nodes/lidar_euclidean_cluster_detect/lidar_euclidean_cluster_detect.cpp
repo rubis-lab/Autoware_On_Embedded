@@ -238,7 +238,6 @@ void publishDetectedObjects(const autoware_msgs::CloudClusterArray &in_clusters)
   
   if(rubis::sched::is_task_ready_ == TASK_NOT_READY){
     rubis::sched::init_task();
-    if(rubis::sched::gpu_profiling_flag_) rubis::sched::start_gpu_profiling();
   }
   
   rubis::sched::task_state_ = TASK_STATE_DONE;
@@ -955,23 +954,12 @@ int main(int argc, char **argv)
   double task_execution_time;
   double task_relative_deadline; 
 
-  int gpu_scheduling_flag;
-  int gpu_profiling_flag;
-  std::string gpu_execution_time_filename;
-  std::string gpu_response_time_filename;
-  std::string gpu_deadline_filename;
-
   private_nh.param<int>("/lidar_euclidean_cluster_detect/task_profiling_flag", task_profiling_flag_, 1);
   private_nh.param<std::string>("/lidar_euclidean_cluster_detect/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/lidar_euclidean_cluster_detect.csv");
   private_nh.param<int>("/lidar_euclidean_cluster_detect/rate", rate, 10);
   private_nh.param("/lidar_euclidean_cluster_detect/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
   private_nh.param("/lidar_euclidean_cluster_detect/task_execution_time", task_execution_time, (double)10);
   private_nh.param("/lidar_euclidean_cluster_detect/task_relative_deadline", task_relative_deadline, (double)10);
-  private_nh.param("/lidar_euclidean_cluster_detect/gpu_scheduling_flag", gpu_scheduling_flag, 0);
-  private_nh.param("/lidar_euclidean_cluster_detect/gpu_profiling_flag", gpu_profiling_flag, 0);
-  private_nh.param<std::string>("/lidar_euclidean_cluster_detect/gpu_execution_time_filename", gpu_execution_time_filename, "~/Documents/gpu_profiling/test_clustering_execution_time.csv");
-  private_nh.param<std::string>("/lidar_euclidean_cluster_detect/gpu_response_time_filename", gpu_response_time_filename, "~/Documents/gpu_profiling/test_clustering_response_time.csv");
-  private_nh.param<std::string>("/lidar_euclidean_cluster_detect/gpu_deadline_filename", gpu_deadline_filename, "~/Documents/gpu_deadline/cluster_gpu_deadline.csv");
 
   tf::StampedTransform transform;
   tf::TransformListener listener;
