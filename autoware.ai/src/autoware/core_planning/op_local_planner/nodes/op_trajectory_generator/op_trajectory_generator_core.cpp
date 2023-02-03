@@ -39,7 +39,7 @@ TrajectoryGen::TrajectoryGen()
   m_OriginPos.position.y  = transform.getOrigin().y();
   m_OriginPos.position.z  = transform.getOrigin().z();
 
-  pub_LocalTrajectories = nh.advertise<autoware_msgs::LaneArray>("local_trajectories", 1);
+  // pub_LocalTrajectories = nh.advertise<autoware_msgs::LaneArray>("local_trajectories", 1);
   pub_LocalTrajectoriesWithPoseTwist = nh.advertise<rubis_msgs::LaneArrayWithPoseTwist>("local_trajectories_with_pose_twist", 1);
   pub_LocalTrajectoriesRviz = nh.advertise<visualization_msgs::MarkerArray>("local_trajectories_gen_rviz", 1);
 
@@ -309,7 +309,7 @@ void TrajectoryGen::MainLoop()
       local_lanes.twist = current_twist_;
 
       pub_LocalTrajectoriesWithPoseTwist.publish(local_lanes);
-      pub_LocalTrajectories.publish(local_lanes.lane_array);
+      // pub_LocalTrajectories.publish(local_lanes.lane_array);
       
     }
     else{

@@ -43,7 +43,7 @@ TrajectoryEval::TrajectoryEval()
 
   pub_CollisionPointsRviz = nh.advertise<visualization_msgs::MarkerArray>("dynamic_collision_points_rviz", 1);
   pub_LocalWeightedTrajectoriesRviz = nh.advertise<visualization_msgs::MarkerArray>("local_trajectories_eval_rviz", 1);
-  pub_LocalWeightedTrajectories = nh.advertise<rubis_msgs::LaneArrayWithPoseTwist>("local_weighted_trajectories", 1);
+  // pub_LocalWeightedTrajectories = nh.advertise<rubis_msgs::LaneArrayWithPoseTwist>("local_weighted_trajectories", 1);
   pub_LocalWeightedTrajectoriesWithPoseTwist = nh.advertise<rubis_msgs::LaneArrayWithPoseTwist>("local_weighted_trajectories_with_pose_twist", 1);
   pub_TrajectoryCost = nh.advertise<autoware_msgs::Lane>("local_trajectory_cost", 1);
   pub_SafetyBorderRviz = nh.advertise<visualization_msgs::Marker>("safety_border", 1);
@@ -218,22 +218,35 @@ void TrajectoryEval::callbackGetLocalPlannerPath(const rubis_msgs::LaneArrayWith
   UpdateMyParams();
   UpdateTf();
 
-  // Callback
+  // callback for objects
   if(is_objects_updated_){
     _callbackGetPredictedObjects(object_msg_);
     is_objects_updated_ = false;
   }
 
-  m_CurrentPos = PlannerHNS::WayPoint(msg->pose.pose.position.x, msg->pose.pose.position.y, msg->pose.pose.position.z, tf::getYaw(msg->pose.pose.orientation));
-  bNewCurrentPos = true;
+  static double prev_x = 0.0, prev_y = 0.0, prev_speed = 0.0;
+  
+  // callback for current pose
+  if(prev_x != msg->pose.pose.position.x || prev_y != msg->pose.pose.position.y){
+    m_CurrentPos = PlannerHNS::WayPoint(msg->pose.pose.position.x, msg->pose.pose.position.y, msg->pose.pose.position.z, tf::getYaw(msg->pose.pose.orientation));
+    bNewCurrentPos = true;
+    prev_x = msg->pose.pose.position.x;
+    prev_y = msg->pose.pose.position.y;
+  }
 
-  m_VehicleStatus.speed = msg->twist.twist.linear.x;
-  m_CurrentPos.v = m_VehicleStatus.speed;
-  if(fabs(msg->twist.twist.linear.x) > 0.25)
-    m_VehicleStatus.steer = atan(m_CarInfo.wheel_base * msg->twist.twist.angular.z/msg->twist.twist.linear.x);
-  UtilityHNS::UtilityH::GetTickCount(m_VehicleStatus.tStamp);
-  bVehicleStatus = true;  
+  // callback for vehicle status
+  if(prev_speed != msg->twist.twist.linear.x){
+    m_VehicleStatus.speed = msg->twist.twist.linear.x;
+    m_CurrentPos.v = m_VehicleStatus.speed;
+    if(fabs(msg->twist.twist.linear.x) > 0.25)
+      m_VehicleStatus.steer = atan(m_CarInfo.wheel_base * msg->twist.twist.angular.z/msg->twist.twist.linear.x);
+    UtilityHNS::UtilityH::GetTickCount(m_VehicleStatus.tStamp);
+    bVehicleStatus = true;      
+    prev_speed = msg->twist.twist.linear.x;
+  }
 
+
+  // callback for local planner path
   if(msg->lane_array.lanes.size() > 0)
   {
     m_GeneratedRollOuts.clear();
@@ -335,8 +348,7 @@ void TrajectoryEval::callbackGetLocalPlannerPath(const rubis_msgs::LaneArrayWith
       local_lanes.twist = msg->twist;
 
       pub_LocalWeightedTrajectoriesWithPoseTwist.publish(local_lanes);
-      pub_LocalWeightedTrajectories.publish(local_lanes.lane_array);
-      
+      // pub_LocalWeightedTrajectories.publish(local_lanes.lane_array);
     }
     else
     {

@@ -350,19 +350,30 @@ void BehaviorGen::callbackGetLocalPlannerPath(const rubis_msgs::LaneArrayWithPos
   rubis::instance_ = msg->instance;
   rubis::obj_instance_ = msg->obj_instance;
 
-  // Callback
+  // Callback for distance to pedestrian
   _callbackDistanceToPedestrian();
 
-  m_VehicleStatus.speed = msg->twist.twist.linear.x;
-  m_CurrentPos.v = m_VehicleStatus.speed;
-  if(fabs(msg->twist.twist.linear.x) > 0.25)
-    m_VehicleStatus.steer = atan(m_CarInfo.wheel_base * msg->twist.twist.angular.z/msg->twist.twist.linear.x);
-  UtilityHNS::UtilityH::GetTickCount(m_VehicleStatus.tStamp);
-  bVehicleStatus = true;
+  static double prev_x = 0.0, prev_y = 0.0, prev_speed = 0.0;
+  // Callback for current velocity
+  if(prev_speed != msg->twist.twist.linear.x){
+    m_VehicleStatus.speed = msg->twist.twist.linear.x;
+    m_CurrentPos.v = m_VehicleStatus.speed;
+    if(fabs(msg->twist.twist.linear.x) > 0.25)
+      m_VehicleStatus.steer = atan(m_CarInfo.wheel_base * msg->twist.twist.angular.z/msg->twist.twist.linear.x);
+    UtilityHNS::UtilityH::GetTickCount(m_VehicleStatus.tStamp);
+    bVehicleStatus = true;
+    prev_speed = msg->twist.twist.linear.x;
+  }
 
-  m_CurrentPos = PlannerHNS::WayPoint(msg->pose.pose.position.x, msg->pose.pose.position.y, msg->pose.pose.position.z, tf::getYaw(msg->pose.pose.orientation));
-  bNewCurrentPos = true;
+  // Callback for current pose
+  if(prev_x != msg->pose.pose.position.x || prev_y != msg->pose.pose.position.y){
+    m_CurrentPos = PlannerHNS::WayPoint(msg->pose.pose.position.x, msg->pose.pose.position.y, msg->pose.pose.position.z, tf::getYaw(msg->pose.pose.orientation));
+    bNewCurrentPos = true;
+    prev_x = msg->pose.pose.position.x;
+    prev_y = msg->pose.pose.position.y;
+  }
 
+  // Callback for local planner path
   if(msg->lane_array.lanes.size() > 0)
   {
     m_RollOuts.clear();

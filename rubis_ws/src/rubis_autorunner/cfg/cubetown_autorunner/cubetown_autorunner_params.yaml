@@ -17,7 +17,7 @@ lidar_republisher:
     priority: 99
     exec_time: 1_000_000
     deadline: 2_000_000
-    period: 2_000_000  
+    period: 2_000_000
   task_response_time_filename: "~/Documents/profiling/response_time/lidar_republisher.csv"  
 
 voxel_grid_filter:
