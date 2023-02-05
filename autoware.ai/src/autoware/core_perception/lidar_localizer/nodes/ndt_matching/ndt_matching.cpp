@@ -74,13 +74,11 @@
 
 #include <autoware_msgs/NDTStat.h>
 
-//headers in Autoware Health Checker
-#include <autoware_health_checker/health_checker/health_checker.h>
-
 #include <rubis_lib/sched.hpp>
 #include <rubis_msgs/PointCloud2.h>
 #include <rubis_msgs/PoseStamped.h>
 #include <rubis_msgs/InsStat.h>
+#include <rubis_msgs/PoseTwistStamped.h>
 
 #define SPIN_PROFILING
 
@@ -94,8 +92,6 @@
 #define M_PI 3.14159265358979323846
 
 #define DEBUG
-
-static std::shared_ptr<autoware_health_checker::HealthChecker> health_checker_ptr_;
 
 struct pose
 {
@@ -168,17 +164,16 @@ static geometry_msgs::PoseStamped predict_pose_imu_odom_msg;
 static ros::Publisher ndt_pose_pub;
 static geometry_msgs::PoseStamped ndt_pose_msg;
 
-static ros::Publisher rubis_ndt_pose_pub;
-static rubis_msgs::PoseStamped rubis_ndt_pose_msg;
-
 // current_pose is published by vel_pose_mux
 /*
 static ros::Publisher current_pose_pub;
 static geometry_msgs::PoseStamped current_pose_msg;
  */
 
+static ros::Publisher rubis_pose_twist_pub;
 static ros::Publisher localizer_pose_pub;
 static geometry_msgs::PoseStamped localizer_pose_msg;
+static rubis_msgs::PoseTwistStamped rubis_pose_twist_msg;
 
 static ros::Publisher estimate_twist_pub;
 static geometry_msgs::TwistStamped estimate_twist_msg;
@@ -296,7 +291,6 @@ static float _failure_score_diff_threshold = 10.0;
 static float _recovery_score_diff_threshold = 1.0;
 static float _failure_pose_diff_threshold = 4.0;
 static float _recovery_pose_diff_threshold = 1.0;
-
 
 void ToQuaternion(double yaw, double pitch, double roll, geometry_msgs::Quaternion &q)
 {
@@ -991,8 +985,6 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
     }
   }
 
-  health_checker_ptr_->CHECK_RATE("topic_rate_filtered_points_slow", 8, 5, 1, "topic filtered_points subscribe rate slow.");
-
   matching_start = std::chrono::system_clock::now();
 
   static tf::TransformBroadcaster br, kalman_br;
@@ -1505,24 +1497,16 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
   }
 
   predict_pose_pub.publish(predict_pose_msg);
-  health_checker_ptr_->CHECK_RATE("topic_rate_ndt_pose_slow", 8, 5, 1, "topic ndt_pose publish rate slow.");
   ndt_pose_pub.publish(ndt_pose_msg);
-  rubis::sched::task_state_ = TASK_STATE_DONE;
-
-  if(rubis::instance_mode_ && rubis::instance_ != RUBIS_NO_INSTANCE){
-    rubis_ndt_pose_msg.instance = rubis::instance_;
-    rubis_ndt_pose_msg.msg = ndt_pose_msg;
-    rubis_ndt_pose_pub.publish(rubis_ndt_pose_msg);
-  }
+  
 
   // current_pose is published by vel_pose_mux
   //    current_pose_pub.publish(current_pose_msg);
-  localizer_pose_pub.publish(localizer_pose_msg);
-
+  localizer_pose_pub.publish(localizer_pose_msg);  
+  
   matching_end = std::chrono::system_clock::now();
   exe_time = std::chrono::duration_cast<std::chrono::microseconds>(matching_end - matching_start).count() / 1000.0;
   time_ndt_matching.data = exe_time;
-  health_checker_ptr_->CHECK_MAX_VALUE("time_ndt_matching", time_ndt_matching.data, 50, 70, 100, "value time_ndt_matching is too high.");
   time_ndt_matching_pub.publish(time_ndt_matching);
 
   // Set values for /estimate_twist
@@ -1540,8 +1524,6 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
   geometry_msgs::Vector3Stamped estimate_vel_msg;
   estimate_vel_msg.header.stamp = current_scan_time;
   estimate_vel_msg.vector.x = current_velocity;
-  health_checker_ptr_->CHECK_MAX_VALUE("estimate_twist_linear", current_velocity, 5, 10, 15, "value linear estimated twist is too high.");
-  health_checker_ptr_->CHECK_MAX_VALUE("estimate_twist_angular", angular_velocity, 5, 10, 15, "value linear angular twist is too high.");
   estimated_vel_pub.publish(estimate_vel_msg);
 
   previous_score = fitness_score;
@@ -1558,8 +1540,10 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
 
   ndt_stat_pub.publish(ndt_stat_msg);
 
-
-
+  rubis_pose_twist_msg.instance = rubis::instance_;
+  rubis_pose_twist_msg.pose = ndt_pose_msg;
+  rubis_pose_twist_msg.twist = estimate_twist_msg;
+  rubis_pose_twist_pub.publish(rubis_pose_twist_msg);
 
   /* Compute NDT_Reliability */
   ndt_reliability.data = Wa * (exe_time / 100.0) * 100.0 + Wb * (iteration / 10.0) * 100.0 +
@@ -1716,21 +1700,21 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
   is_kalman_filter_on_msgs.data = _is_kalman_filter_on;
   is_kalman_filter_on_pub.publish(is_kalman_filter_on_msgs);
   
-  if(rubis::sched::is_task_ready_ == TASK_NOT_READY){
-    rubis::sched::init_task();
-    if(rubis::sched::gpu_profiling_flag_) rubis::sched::start_gpu_profiling();
-  }  
 }
 
 static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input){
-  rubis::instance_ = RUBIS_NO_INSTANCE;
+  rubis::instance_ = 0;
   ndt_matching(input);
 }
 
 static void rubis_points_callback(const rubis_msgs::PointCloud2::ConstPtr& _input){
+  rubis::start_task_profiling();
+
   sensor_msgs::PointCloud2::ConstPtr input = boost::make_shared<const sensor_msgs::PointCloud2>(_input->msg);
   rubis::instance_ = _input->instance;
   ndt_matching(input);
+
+  rubis::stop_task_profiling(rubis::instance_, 0);
 }
 
 static void ins_stat_callback(const rubis_msgs::InsStat::ConstPtr& input){
@@ -1770,9 +1754,6 @@ int main(int argc, char** argv)
 
   ros::NodeHandle nh;
   ros::NodeHandle private_nh("~");
-  health_checker_ptr_ = std::make_shared<autoware_health_checker::HealthChecker>(nh,private_nh);
-  health_checker_ptr_->ENABLE();
-  health_checker_ptr_->NODE_ACTIVATE();
 
   // Set log file name.
   private_nh.getParam("output_log_data", _output_log_data);
@@ -1903,48 +1884,29 @@ int main(int argc, char** argv)
     exit(1);
   }
 #endif
-
-  // Scheduling Setup
-  int task_scheduling_flag;
-  int task_profiling_flag;
-  std::string task_response_time_filename;
-  int rate;
-  double task_minimum_inter_release_time;
-  double task_execution_time;
-  double task_relative_deadline;
-
-  int gpu_scheduling_flag;
-  int gpu_profiling_flag;
-  std::string gpu_execution_time_filename;
-  std::string gpu_response_time_filename;
-  std::string gpu_deadline_filename;
-
+  // Scheduling & Profiling Setup
   std::string node_name = ros::this_node::getName();
-  private_nh.param<int>(node_name+"/task_scheduling_flag", task_scheduling_flag, 0);
-  private_nh.param<int>(node_name+"/task_profiling_flag", task_profiling_flag, 0);
+  std::string task_response_time_filename;
   private_nh.param<std::string>(node_name+"/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/ndt_matching.csv");
-  private_nh.param<int>(node_name+"/rate", rate, 10);
-  private_nh.param(node_name+"/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
-  private_nh.param(node_name+"/task_execution_time", task_execution_time, (double)10);
-  private_nh.param(node_name+"/task_relative_deadline", task_relative_deadline, (double)10);
-  private_nh.param(node_name+"/gpu_scheduling_flag", gpu_scheduling_flag, 0);
-  private_nh.param(node_name+"/gpu_profiling_flag", gpu_profiling_flag, 0);
-  private_nh.param<std::string>(node_name+"/gpu_execution_time_filename", gpu_execution_time_filename, "~/Documents/gpu_profiling/test_ndt_matching_execution_time.csv");
-  private_nh.param<std::string>(node_name+"/gpu_response_time_filename", gpu_response_time_filename, "~/Documents/gpu_profiling/test_ndt_matching_response_time.csv");
-  private_nh.param<std::string>(node_name+"/gpu_deadline_filename", gpu_deadline_filename, "~/Documents/gpu_deadline/ndt_matching_gpu_deadline.csv");
-  private_nh.param<int>(node_name+"/instance_mode", rubis::instance_mode_, 0);
-  
-  if(task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
-  if(gpu_profiling_flag) rubis::sched::init_gpu_profiling(gpu_execution_time_filename, gpu_response_time_filename);
-  
-  if( (_method_type == MethodType::PCL_ANH_GPU) && (gpu_scheduling_flag == 1) ){
-    rubis::sched::init_gpu_scheduling("/tmp/ndt_matching", gpu_deadline_filename, 0);
-  }    
-  else if(_method_type != MethodType::PCL_ANH_GPU && gpu_scheduling_flag == 1){
-    ROS_ERROR("GPU scheduling flag is true but type doesn't set to GPU!");
-    exit(1);
-  }
 
+  int rate;
+  private_nh.param<int>(node_name+"/rate", rate, 10);
+
+  struct rubis::sched_attr attr;
+  std::string policy;
+  int priority, exec_time ,deadline, period;
+    
+  private_nh.param(node_name+"/task_scheduling_configs/policy", policy, std::string("NONE"));    
+  private_nh.param(node_name+"/task_scheduling_configs/priority", priority, 99);
+  private_nh.param(node_name+"/task_scheduling_configs/exec_time", exec_time, 0);
+  private_nh.param(node_name+"/task_scheduling_configs/deadline", deadline, 0);
+  private_nh.param(node_name+"/task_scheduling_configs/period", period, 0);
+  attr = rubis::create_sched_attr(priority, exec_time, deadline, period);    
+  rubis::init_task_scheduling(policy, attr);
+
+  rubis::init_task_profiling(task_response_time_filename);
+
+  
   Eigen::Translation3f tl_btol(_tf_x, _tf_y, _tf_z);                 // tl: translation
   Eigen::AngleAxisf rot_x_btol(_tf_roll, Eigen::Vector3f::UnitX());  // rot: rotation
   Eigen::AngleAxisf rot_y_btol(_tf_pitch, Eigen::Vector3f::UnitY());
@@ -1968,11 +1930,12 @@ int main(int argc, char** argv)
   kalman_filtered_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/kalman_filtered_pose", 10);
 
   ndt_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/ndt_pose", 10);
-  if(rubis::instance_mode_) rubis_ndt_pose_pub = nh.advertise<rubis_msgs::PoseStamped>("/rubis_ndt_pose",10);
+  rubis_pose_twist_pub = nh.advertise<rubis_msgs::PoseTwistStamped>("/rubis_current_pose_twist",10);
   
-  // current_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/current_pose", 10);
-  localizer_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/localizer_pose", 10);
-  estimate_twist_pub = nh.advertise<geometry_msgs::TwistStamped>("/estimate_twist", 10);
+  localizer_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/current_pose", 10);
+  // localizer_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/localizer_pose", 10);
+  estimate_twist_pub = nh.advertise<geometry_msgs::TwistStamped>("/current_velocity", 10);
+  // estimate_twist_pub = nh.advertise<geometry_msgs::TwistStamped>("/estimate_twist", 10);
   estimated_vel_mps_pub = nh.advertise<std_msgs::Float32>("/estimated_vel_mps", 10);
   estimated_vel_kmph_pub = nh.advertise<std_msgs::Float32>("/estimated_vel_kmph", 10);
   estimated_vel_pub = nh.advertise<geometry_msgs::Vector3Stamped>("/estimated_vel", 10);
@@ -1982,60 +1945,31 @@ int main(int argc, char** argv)
 
   // Subscribers
   ros::Subscriber param_sub = nh.subscribe("config/ndt", 10, param_callback);
-  ros::Subscriber gnss_sub = nh.subscribe("gnss_pose", 10, gnss_callback); 
+  // ros::Subscriber gnss_sub = nh.subscribe("gnss_pose", 10, gnss_callback);
   ros::Subscriber map_sub = nh.subscribe("points_map", 1, map_callback);
   ros::Subscriber initialpose_sub = nh.subscribe("initialpose", 10, initialpose_callback); 
 
   ros::Subscriber points_sub;
-  if(rubis::instance_mode_) points_sub = nh.subscribe("rubis_filtered_points", _queue_size, rubis_points_callback); // _queue_size = 1000
-  else points_sub = nh.subscribe("filtered_points", _queue_size, points_callback); // _queue_size = 1000
+  points_sub = nh.subscribe("rubis_filtered_points", 1, rubis_points_callback); // _queue_size = 1000
   
   // ros::Subscriber odom_sub = nh.subscribe("/vehicle/odom", _queue_size * 10, odom_callback);
   // ros::Subscriber imu_sub = nh.subscribe(_imu_topic.c_str(), _queue_size * 10, imu_callback);
 
-  ros::Subscriber ins_stat_sub = nh.subscribe("/ins_stat", 1, ins_stat_callback);
+  // ros::Subscriber ins_stat_sub = nh.subscribe("/ins_stat", 1, ins_stat_callback);
   
   pthread_t thread;
   pthread_create(&thread, NULL, thread_func, NULL);
 
-  // SPIN  
-  if(!task_scheduling_flag && !task_profiling_flag){
-    ros::spin();
+  ros::Rate r(rate);
+  while(ros::ok()){
+    if(map_loaded == 1) break;
+    ros::spinOnce();
+    r.sleep();      
   }
-  else{ 
-    ros::Rate r(rate);
+  
+  map_sub.shutdown();
 
-    // Initialize task ( Wait until first necessary topic is published )
-    while(ros::ok()){
-      if(map_loaded == 1) break;
-      ros::spinOnce();
-      r.sleep();      
-    }
-    
-    map_sub.shutdown();
-
-    // Executing task
-    while(ros::ok()){
-      if(task_profiling_flag) rubis::sched::start_task_profiling();        
-      if(rubis::sched::task_state_ == TASK_STATE_READY){        
-        if(task_scheduling_flag) rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline); 
-        if(gpu_profiling_flag || gpu_scheduling_flag) rubis::sched::start_job();
-        rubis::sched::task_state_ = TASK_STATE_RUNNING;     
-      }
-
-      ros::spinOnce();
-
-      if(task_profiling_flag) rubis::sched::stop_task_profiling(rubis::instance_, rubis::sched::task_state_);
-      
-      if(rubis::sched::task_state_ == TASK_STATE_DONE){      
-        if(gpu_profiling_flag || gpu_scheduling_flag) rubis::sched::finish_job();        
-        if(task_scheduling_flag) rubis::sched::yield_task_scheduling();        
-        rubis::sched::task_state_ = TASK_STATE_READY;
-      }
-      
-      r.sleep();
-    }
-  }
+  ros::spin();
 
   return 0;
 }

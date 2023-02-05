@@ -8,7 +8,7 @@
 
   <!-- Ackermann to VESC node -->
   <node pkg="vesc_ackermann" type="ackermann_to_vesc_node" name="ackermann_to_vesc_node"
-        output="screen" launch-prefix="$(arg launch_prefix)" >
+        launch-prefix="$(arg launch_prefix)" >
   </node>
 
 </launch>

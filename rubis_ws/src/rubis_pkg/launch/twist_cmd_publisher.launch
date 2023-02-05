@@ -1,6 +1,6 @@
 <launch>
     <arg name="target_velocity" default="2.0"/>
-    <node pkg="rubis_pkg" type="twist_cmd_publisher" name="twist_cmd_publisher" output="screen">
+    <node pkg="rubis_pkg" type="twist_cmd_publisher" name="twist_cmd_publisher">
         <param name="target_velocity" value="$(arg target_velocity)" />
     </node>
 

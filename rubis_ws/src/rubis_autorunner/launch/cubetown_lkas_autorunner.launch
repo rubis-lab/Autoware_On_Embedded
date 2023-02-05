@@ -1,0 +1,4 @@
+<launch>
+    <rosparam command="load" file="$(env USER_HOME)/rubis_ws/src/rubis_autorunner/cfg/cubetown_autorunner/cubetown_lkas_autorunner.yaml" />
+    <node pkg="rubis_autorunner" type="cubetown_lkas_autorunner" name="cubetown_lkas_autorunner" output="screen" />
+</launch>

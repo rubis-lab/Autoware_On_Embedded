@@ -19,7 +19,7 @@
     <rosparam command="load" file="$(arg kalman_filter_params)" />
     <rosparam command="load" file="$(arg transformation_params)" />
 
-    <node pkg="gnss_module" type="gnss_module" name="gnss_module" output="screen">
+    <node pkg="gnss_module" type="gnss_module" name="gnss_module">
         <param name="pose_topic_name" value="$(arg pose_topic_name)"/>
         <param name="x_offset" value="$(arg x_offset)"/>
         <param name="y_offset" value="$(arg y_offset)"/>

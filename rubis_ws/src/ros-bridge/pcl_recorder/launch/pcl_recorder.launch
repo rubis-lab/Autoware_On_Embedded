@@ -9,7 +9,7 @@
         args="pub -l /carla/$(arg role_name)/enable_autopilot std_msgs/Bool '{ data: true}' " />
 
   <!-- pcl map capturing -->
-  <node pkg="pcl_recorder" type="pcl_recorder_node" name="pcl_recorder_node" output="screen">
+  <node pkg="pcl_recorder" type="pcl_recorder_node" name="pcl_recorder_node">
     <param name="role_name" value="$(arg role_name)" />
   </node>
 

@@ -45,16 +45,3 @@ install(
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
-
-if(CATKIN_ENABLE_TESTING)
-  roslint_add_test()
-  find_package(rostest REQUIRED)
-  add_rostest_gtest(
-    test-twist_gate
-    test/test_twist_gate.test
-    test/src/test_twist_gate.cpp
-    src/twist_gate.cpp
-  )
-  add_dependencies(test-twist_gate ${catkin_EXPORTED_TARGETS})
-  target_link_libraries(test-twist_gate ${catkin_LIBRARIES})
-endif()

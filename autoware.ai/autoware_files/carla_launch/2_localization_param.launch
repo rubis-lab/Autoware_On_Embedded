@@ -14,14 +14,12 @@
   <!-- points downsampler -->
   <arg name="leaf_size" default="1.0" />
   <arg name="measurement_range" default="200" />
-  <arg name="instance_mode" default="0"/>
 
   <node pkg="points_downsampler" name="voxel_grid_filter" type="voxel_grid_filter">
     <param name="input_topic_name" value="points_raw" />
     <param name="output_topic_name" value="filtered_points" />
     <param name="leaf_size" value="$(arg leaf_size)" />
     <param name="measurement_range" value="$(arg measurement_range)" />
-    <param name="instance_mode" value="$(arg instance_mode)" />
   </node>
 
   <!-- pcl_generic=0, pcl_anh=1, pcl_anh_gpu=2, pcl_openmp=3 -->
@@ -35,7 +33,7 @@
   <arg name="gnss_pose_diff_threshold" default="5.0"/>
 
   <!-- ndt_matching -->
-  <node pkg="lidar_localizer" type="modular_ndt_matching" name="ndt_matching" output="screen">
+  <node pkg="lidar_localizer" type="modular_ndt_matching" name="ndt_matching">
     <param name="method_type" value="$(arg method_type)" />
 
     <!-- NDT config -->

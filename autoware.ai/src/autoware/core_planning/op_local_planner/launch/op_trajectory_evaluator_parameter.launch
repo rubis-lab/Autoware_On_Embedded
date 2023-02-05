@@ -4,28 +4,18 @@
   <arg name="enablePrediction"       default="false" />                
   <arg name="horizontalSafetyDistance"   default="1.2" />
   <arg name="verticalSafetyDistance"     default="0.8" />
-
-  <arg name="weightPriority"   default="0.5" />
-  <arg name="weightTransition"     default="4" />
-  <arg name="weightLong"   default="0.5" />
-  <arg name="weightLat"     default="5" />
   <arg name="LateralSkipDistance"   default="5.0" />
 
   <arg name="SprintDecisionTime" default="9999.0" /> 
 
   <arg name="intersectionFile" default="crossing_test/crossing_intersection.yaml" />
       
-  <node pkg="op_local_planner" type="op_trajectory_evaluator" name="op_trajectory_evaluator" output="screen">
+  <node pkg="op_local_planner" type="op_trajectory_evaluator" name="op_trajectory_evaluator">
     <rosparam command="load" file="$(find rubis_pkg)/cfg/$(arg intersectionFile)"/>
   
     <param name="enablePrediction"       value="$(arg enablePrediction)" />            
     <param name="horizontalSafetyDistance"   value="$(arg horizontalSafetyDistance)" />
     <param name="verticalSafetyDistance"   value="$(arg verticalSafetyDistance)" />    
-
-    <param name="weightPriority"       value="$(arg weightPriority)" />            
-    <param name="weightTransition"       value="$(arg weightTransition)" />            
-    <param name="weightLong"       value="$(arg weightLong)" />            
-    <param name="weightLat"       value="$(arg weightLat)" />            
     <param name="LateralSkipDistance"       value="$(arg LateralSkipDistance)" />                
 
     <!-- For detecting person and vehicle -->

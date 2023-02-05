@@ -52,7 +52,7 @@
   <arg name="stopLineMargin"       default="10.0" />
   <arg name="stopLineDetectionDistance"       default="20.0" />
 
-  <node pkg="op_local_planner" type="op_common_params" name="op_common_params" output="screen">
+  <node pkg="op_local_planner" type="op_common_params" name="op_common_params">
   
   <!-- Common Parameters -->
   

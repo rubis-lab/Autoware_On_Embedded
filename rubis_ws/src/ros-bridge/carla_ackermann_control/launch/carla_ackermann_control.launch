@@ -11,7 +11,7 @@
   <arg name="accel_Ki" default="0.08" />
   <arg name="accel_Kd" default="0.001" />
 
-  <node pkg="carla_ackermann_control" type="carla_ackermann_control_node.py" name="carla_ackermann_control_$(arg role_name)" output="screen">
+  <node pkg="carla_ackermann_control" type="carla_ackermann_control_node.py" name="carla_ackermann_control_$(arg role_name)">
     <param name="role_name" value="$(arg role_name)" />
     <param name="control_loop_rate" value="$(arg control_loop_rate)" />
     <param name="speed_Kp" value="$(arg speed_Kp)" />
@@ -23,5 +23,5 @@
     <rosparam file="$(find carla_ackermann_control)/config/settings.ros1.yaml" command="load" />
   </node>
 
-  <node pkg="carla_ros_bridge" type="carla_current_velocity_publisher.py" name="carla_current_velocity_publisher" output="screen" />
+  <node pkg="carla_ros_bridge" type="carla_current_velocity_publisher.py" name="carla_current_velocity_publisher" />
 </launch>

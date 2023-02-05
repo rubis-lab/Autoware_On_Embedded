@@ -8,7 +8,6 @@
   <arg name="lowpass_gain_angular_z" default="0.0" />
   <arg name="lowpass_gain_steering_angle" default="0.0" />
   <arg name="max_stop_count" default="40" /> <!-- 10 = 1 second -->
-  <arg name="instance_mode" defaut="0" />
 
   <param name="vehicle_info/wheel_base" value="$(arg wheel_base)" />
 
@@ -24,12 +23,10 @@
     <param name="lowpass_gain_angular_z" value="$(arg lowpass_gain_angular_z)" />
     <param name="lowpass_gain_steering_angle" value="$(arg lowpass_gain_steering_angle)" />
     <param name="max_stop_count" value="$(arg max_stop_count)" />
-    <param name="instance_mode" value="$(arg instance_mode)" />
   </node>
 
   <node pkg="twist_gate" type="twist_gate" name="twist_gate">
     <param name="loop_rate" value="$(arg loop_rate)" />
     <param name="use_decision_maker" value="$(arg use_decision_maker)" />
-    <param name="instance_mode" value="$(arg instance_mode)" />
   </node>
 </launch>

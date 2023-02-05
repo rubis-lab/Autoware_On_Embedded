@@ -24,7 +24,7 @@
 
   <!-- rosrun lidar_tracker euclidean_cluster _points_node:="" -->
   <group if="$(arg use_ll2)">
-    <node pkg="imm_ukf_pda_track" type="imm_ukf_pda_lanelet2" name="imm_ukf_pda_01_lanelet2" output="screen">
+    <node pkg="imm_ukf_pda_track" type="imm_ukf_pda_lanelet2" name="imm_ukf_pda_01_lanelet2">
       <param name="gating_threshold" value="$(arg gating_threshold)" />
       <param name="gate_probability" value="$(arg gate_probability)" />
       <param name="detection_probability" value="$(arg detection_probability)" />
@@ -46,7 +46,7 @@
   </group>
 
   <group unless="$(arg use_ll2)">
-    <node pkg="imm_ukf_pda_track" type="imm_ukf_pda" name="imm_ukf_pda_01" output="screen">
+    <node pkg="imm_ukf_pda_track" type="imm_ukf_pda" name="imm_ukf_pda_01">
       <param name="gating_threshold" value="$(arg gating_threshold)" />
       <param name="gate_probability" value="$(arg gate_probability)" />
       <param name="detection_probability" value="$(arg detection_probability)" />
@@ -69,9 +69,9 @@
 
 
   <node pkg="detected_objects_visualizer" type="visualize_detected_objects" name="ukf_track_visualization_01"
-        output="screen" ns="$(arg namespace)"/>
+        ns="$(arg namespace)"/>
 
   <node pkg="topic_tools" type="relay" name="ukf_track_relay_01"
-        output="screen" args="$(arg namespace)/objects /detection/objects"/>
+        args="$(arg namespace)/objects /detection/objects"/>
 
 </launch>

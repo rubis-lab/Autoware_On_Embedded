@@ -42,7 +42,8 @@ MotionPrediction::MotionPrediction()
   m_OriginPos.position.y  = transform.getOrigin().y();
   m_OriginPos.position.z  = transform.getOrigin().z();
 
-  pub_predicted_objects_trajectories = nh.advertise<autoware_msgs::DetectedObjectArray>("/predicted_objects", 1);
+  // pub_predicted_objects_trajectories = nh.advertise<autoware_msgs::DetectedObjectArray>("/predicted_objects", 1);
+  pub_rubis_predicted_objects_trajectories = nh.advertise<rubis_msgs::DetectedObjectArray>("/rubis_predicted_objects", 1);
   pub_PredictedTrajectoriesRviz = nh.advertise<visualization_msgs::MarkerArray>("/predicted_trajectories_rviz", 1);
   pub_CurbsRviz          = nh.advertise<visualization_msgs::MarkerArray>("/map_curbs_rviz", 1);
   pub_ParticlesRviz = nh.advertise<visualization_msgs::MarkerArray>("prediction_particles", 1);
@@ -61,38 +62,31 @@ MotionPrediction::MotionPrediction()
   _nh.param<std::string>("/op_motion_predictor/input_object_list", input_object_list_str, "[/tracked_objects]");
   std::vector<std::string> input_object_list = ParseInputStr(input_object_list_str);
 
-
-  for(auto it = input_object_list.begin(); it != input_object_list.end(); ++it){
+  for(auto it = input_object_list.begin(); it != input_object_list.end(); ++it){    
     std::string topic = *it;
-    objects_subs_.push_back(nh.subscribe(topic.c_str(), 1, &MotionPrediction::callbackGetTrackedObjects, this));
-    autoware_msgs::DetectedObjectArray msg;
+    std::cout<<topic<<std::endl;
+    
+    if(topic.find(std::string("rubis")) != std::string::npos){ // For rubis topic
+      objects_subs_.push_back(nh.subscribe(topic.c_str(), 1, &MotionPrediction::callbackGetRubisTrackedObjects, this));  
+    }
+    else{// For normal topic      
+      objects_subs_.push_back(nh.subscribe(topic.c_str(), 1, &MotionPrediction::callbackGetTrackedObjects, this));      
+    }
+    autoware_msgs::DetectedObjectArray msg;    
     object_msg_list_.push_back(msg);
   }
   
-  sub_current_pose   = nh.subscribe("/current_pose", 10,  &MotionPrediction::callbackGetCurrentPose,     this);
+  sub_current_pose   = nh.subscribe("/current_pose", 1,  &MotionPrediction::callbackGetCurrentPose,     this); // Def: 1
 
   int bVelSource = 1;
   _nh.getParam("/op_motion_predictor/velocitySource", bVelSource);
   if(bVelSource == 0)
-    sub_robot_odom = nh.subscribe("/odom", 10, &MotionPrediction::callbackGetRobotOdom, this);
+    sub_robot_odom = nh.subscribe("/odom", 1, &MotionPrediction::callbackGetRobotOdom, this); // Def: 1
   else if(bVelSource == 1)
-    sub_current_velocity = nh.subscribe("/current_velocity", 10, &MotionPrediction::callbackGetVehicleStatus, this);
+    sub_current_velocity = nh.subscribe("/current_velocity", 1, &MotionPrediction::callbackGetVehicleStatus, this); // Def: 1
   else if(bVelSource == 2)
-    sub_can_info = nh.subscribe("/can_info", 10, &MotionPrediction::callbackGetCANInfo, this);
+    sub_can_info = nh.subscribe("/can_info", 1, &MotionPrediction::callbackGetCANInfo, this); // Def: 1
   
-
-  /*  RT Scheduling setup  */
-  // sub_current_pose   = nh.subscribe("/current_pose", 1,  &MotionPrediction::callbackGetCurrentPose,     this); //origin 10
-
-  // int bVelSource = 1;
-  // _nh.getParam("/op_motion_predictor/velocitySource", bVelSource);
-  // if(bVelSource == 0)
-  //   sub_robot_odom = nh.subscribe("/odom", 1, &MotionPrediction::callbackGetRobotOdom, this); //origin 10
-  // else if(bVelSource == 1)
-  //   sub_current_velocity = nh.subscribe("/current_velocity", 1, &MotionPrediction::callbackGetVehicleStatus, this); //origin 10
-  // else if(bVelSource == 2)
-  //   sub_can_info = nh.subscribe("/can_info", 1, &MotionPrediction::callbackGetCANInfo, this); //origin 10
-
   UtilityHNS::UtilityH::GetTickCount(m_VisualizationTimer);
   PlannerHNS::ROSHelpers::InitPredMarkers(100, m_PredictedTrajectoriesDummy);
   PlannerHNS::ROSHelpers::InitCurbsMarkers(100, m_CurbsDummy);
@@ -251,8 +245,6 @@ void MotionPrediction::callbackGetVehicleStatus(const geometry_msgs::TwistStampe
     m_VehicleStatus.steer = atan(m_CarInfo.wheel_base * msg->twist.angular.z/msg->twist.linear.x);
   UtilityHNS::UtilityH::GetTickCount(m_VehicleStatus.tStamp);
   bVehicleStatus = true;
-
-  if(rubis::sched::is_task_ready_ == TASK_NOT_READY) rubis::sched::init_task();  
 }
 
 void MotionPrediction::callbackGetCANInfo(const autoware_can_msgs::CANInfoConstPtr &msg)
@@ -320,7 +312,7 @@ autoware_msgs::DetectedObjectArray MotionPrediction::TrasformObjAryToVeldoyne(co
 
 void MotionPrediction::callbackGetTrackedObjects(const autoware_msgs::DetectedObjectArrayConstPtr& in_msg)
 {
-  
+  std::cout<<"ERROR non rubis"<<std::endl;
   UtilityHNS::UtilityH::GetTickCount(m_SensingTimer);
   m_TrackedObjects.clear();
   bTrackedObjects = true;
@@ -408,8 +400,167 @@ void MotionPrediction::callbackGetTrackedObjects(const autoware_msgs::DetectedOb
     m_PredictedResultsResults.header.frame_id = "velodyne";
     
     pub_predicted_objects_trajectories.publish(m_PredictedResultsResults);
-    rubis::sched::task_state_ = TASK_STATE_DONE;
   }
+}
+
+void MotionPrediction::callbackGetRubisTrackedObjects(const rubis_msgs::DetectedObjectArrayConstPtr& in_msg){
+  rubis::start_task_profiling();
+
+  rubis_msgs::DetectedObjectArray msg = *in_msg;
+  _callbackGetRubisTrackedObjects(msg);
+
+  if(m_MapType == PlannerHNS::MAP_KML_FILE && !bMap)
+  {
+    bMap = true;
+    PlannerHNS::MappingHelpers::LoadKML(m_MapPath, m_Map);
+  }
+  else if (m_MapType == PlannerHNS::MAP_FOLDER && !bMap)
+  {
+    bMap = true;
+    PlannerHNS::MappingHelpers::ConstructRoadNetworkFromDataFiles(m_MapPath, m_Map, true);
+  }
+  else if (m_MapType == PlannerHNS::MAP_AUTOWARE && !bMap)
+  {
+    std::vector<UtilityHNS::AisanDataConnFileReader::DataConn> conn_data;;
+
+    if(m_MapRaw.GetVersion()==2)
+    {
+      PlannerHNS::MappingHelpers::ConstructRoadNetworkFromROSMessageV2(m_MapRaw.pLanes->m_data_list, m_MapRaw.pPoints->m_data_list,
+          m_MapRaw.pCenterLines->m_data_list, m_MapRaw.pIntersections->m_data_list,m_MapRaw.pAreas->m_data_list,
+          m_MapRaw.pLines->m_data_list, m_MapRaw.pStopLines->m_data_list,  m_MapRaw.pSignals->m_data_list,
+          m_MapRaw.pVectors->m_data_list, m_MapRaw.pCurbs->m_data_list, m_MapRaw.pRoadedges->m_data_list, m_MapRaw.pWayAreas->m_data_list,
+          m_MapRaw.pCrossWalks->m_data_list, m_MapRaw.pNodes->m_data_list, conn_data,
+          m_MapRaw.pLanes, m_MapRaw.pPoints, m_MapRaw.pNodes, m_MapRaw.pLines, PlannerHNS::GPSPoint(), m_Map, true, m_PlanningParams.enableLaneChange, true);
+
+      if(m_Map.roadSegments.size() > 0)
+      {
+        bMap = true;
+        std::cout << " ******* Map V2 Is Loaded successfully from the Motion Predictor !! " << std::endl;
+      }
+    }
+    else if(m_MapRaw.GetVersion()==1)
+    {
+      PlannerHNS::MappingHelpers::ConstructRoadNetworkFromROSMessage(m_MapRaw.pLanes->m_data_list, m_MapRaw.pPoints->m_data_list,
+          m_MapRaw.pCenterLines->m_data_list, m_MapRaw.pIntersections->m_data_list,m_MapRaw.pAreas->m_data_list,
+          m_MapRaw.pLines->m_data_list, m_MapRaw.pStopLines->m_data_list,  m_MapRaw.pSignals->m_data_list,
+          m_MapRaw.pVectors->m_data_list, m_MapRaw.pCurbs->m_data_list, m_MapRaw.pRoadedges->m_data_list, m_MapRaw.pWayAreas->m_data_list,
+          m_MapRaw.pCrossWalks->m_data_list, m_MapRaw.pNodes->m_data_list, conn_data,  PlannerHNS::GPSPoint(), m_Map, true);
+
+      if(m_Map.roadSegments.size() > 0)
+      {
+        bMap = true;
+        std::cout << " ******* Map V1 Is Loaded successfully from the Motion Predictor !! " << std::endl;
+      }
+    }
+  }
+
+  if(UtilityHNS::UtilityH::GetTimeDiffNow(m_VisualizationTimer) > m_VisualizationTime)
+  {
+    VisualizePrediction();
+    UtilityHNS::UtilityH::GetTickCount(m_VisualizationTimer);
+  }
+
+  rubis::stop_task_profiling(rubis::instance_, 0);
+}
+
+void MotionPrediction::_callbackGetRubisTrackedObjects(rubis_msgs::DetectedObjectArray& objects_msg)
+{
+  rubis::instance_ = objects_msg.instance;
+  rubis::obj_instance_ = objects_msg.instance;
+
+  UtilityHNS::UtilityH::GetTickCount(m_SensingTimer);
+  m_TrackedObjects.clear();
+  bTrackedObjects = true;
+
+  // Check frame id of the object is valid
+  std::string target_frame = objects_msg.object_array.header.frame_id;
+  int obj_idx = getIndex(tf_str_list_, target_frame);
+  if(obj_idx == -1){      
+    std::cout<<target_frame<<std::endl;
+    ROS_ERROR("Cannot find index by frame id");      
+    exit(0);
+  }  
+
+  autoware_msgs::DetectedObjectArray msg; 
+  if(target_frame != "velodyne"){
+    msg = TrasformObjAryToVeldoyne(objects_msg.object_array, transform_list_[obj_idx]);  
+  }
+  else{
+    msg = objects_msg.object_array;
+  }
+  
+  
+  PlannerHNS::DetectedObject obj;
+
+  for(unsigned int i = 0 ; i <msg.objects.size(); i++)
+  {
+    // if(msg->objects.at(i).id > 0)
+    // {
+      PlannerHNS::ROSHelpers::ConvertFromAutowareDetectedObjectToOpenPlannerDetectedObject(msg.objects.at(i), obj);
+      m_TrackedObjects.push_back(obj);
+    // }
+  }
+  
+  if(bMap)
+  {
+    if(m_PredictBeh.m_bStepByStep && m_bGoNextStep)
+    {
+      m_bGoNextStep = false;
+      m_PredictBeh.DoOneStep(m_TrackedObjects, m_CurrentPos, m_PlanningParams.minSpeed, m_CarInfo.max_deceleration,  m_Map);
+    }
+    else if(!m_PredictBeh.m_bStepByStep)
+    {
+      m_PredictBeh.DoOneStep(m_TrackedObjects, m_CurrentPos, m_PlanningParams.minSpeed, m_CarInfo.max_deceleration,  m_Map);
+    }
+    object_msg_list_[obj_idx].objects.clear();
+    autoware_msgs::DetectedObject pred_obj;
+    for(unsigned int i = 0 ; i <m_PredictBeh.m_ParticleInfo_II.size(); i++)
+    {
+      PlannerHNS::ROSHelpers::ConvertFromOpenPlannerDetectedObjectToAutowareDetectedObject(m_PredictBeh.m_ParticleInfo_II.at(i)->obj, false, pred_obj);
+      if(m_PredictBeh.m_ParticleInfo_II.at(i)->best_beh_track)
+        pred_obj.behavior_state = m_PredictBeh.m_ParticleInfo_II.at(i)->best_beh_track->best_beh;
+      // pred_obj = TransformObjToVeldoyne(pred_obj, transform_list_[obj_idx]);
+      object_msg_list_[obj_idx].objects.push_back(pred_obj);
+    }
+    
+    if(m_bEnableCurbObstacles)
+    {
+      curr_curbs_obstacles.clear();
+      GenerateCurbsObstacles(curr_curbs_obstacles);
+      //std::cout << "Curbs No: " << curr_curbs_obstacles.size() << endl;
+      for(unsigned int i = 0 ; i <curr_curbs_obstacles.size(); i++)
+      {
+        PlannerHNS::ROSHelpers::ConvertFromOpenPlannerDetectedObjectToAutowareDetectedObject(curr_curbs_obstacles.at(i), false, pred_obj);
+        // pred_obj = TransformObjToVeldoyne(pred_obj, transform_list_[obj_idx]);
+        object_msg_list_[obj_idx].objects.push_back(pred_obj);
+      }
+    }
+
+    m_PredictedResultsResults.objects.clear();
+
+    for(auto it1 = object_msg_list_.begin(); it1 != object_msg_list_.end(); ++it1){
+  
+      auto object_msg_entry = *it1;
+      for(auto it2 = object_msg_entry.objects.begin(); it2 != object_msg_entry.objects.end(); ++it2){
+        auto object_entry = *it2;
+        object_entry.header.frame_id = "velodyne";
+        object_entry.convex_hull.header.frame_id = "velodyne";
+        object_entry.valid=true;
+        m_PredictedResultsResults.objects.push_back(object_entry);
+      }
+    }
+
+    m_PredictedResultsResults.header.stamp = ros::Time().now();
+    m_PredictedResultsResults.header.frame_id = "velodyne";
+
+    rubis_msgs::DetectedObjectArray output_msg;
+    output_msg.instance = rubis::instance_;
+    output_msg.obj_instance = rubis::obj_instance_;
+    output_msg.object_array = m_PredictedResultsResults;
+    pub_rubis_predicted_objects_trajectories.publish(output_msg);
+    
+  }
+
 }
 
 void MotionPrediction::GenerateCurbsObstacles(std::vector<PlannerHNS::DetectedObject>& curb_obstacles)
@@ -552,99 +703,29 @@ void MotionPrediction::MainLoop()
 
   ros::NodeHandle private_nh("~");
 
-  // Scheduling Setup
-  int task_scheduling_flag;
-  int task_profiling_flag;
+  // Scheduling & Profiling Setup
+  std::string node_name = ros::this_node::getName();
   std::string task_response_time_filename;
+  private_nh.param<std::string>(node_name+"/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/op_motion_predictor.csv");
+
   int rate;
-  double task_minimum_inter_release_time;
-  double task_execution_time;
-  double task_relative_deadline; 
+  private_nh.param<int>(node_name+"/rate", rate, 10);
 
-  private_nh.param<int>("/op_motion_predictor/task_scheduling_flag", task_scheduling_flag, 0);
-  private_nh.param<int>("/op_motion_predictor/task_profiling_flag", task_profiling_flag, 0);
-  private_nh.param<std::string>("/op_motion_predictor/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/op_motion_predictor.csv");
-  private_nh.param<int>("/op_motion_predictor/rate", rate, 10);
-  private_nh.param("/op_motion_predictor/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
-  private_nh.param("/op_motion_predictor/task_execution_time", task_execution_time, (double)10);
-  private_nh.param("/op_motion_predictor/task_relative_deadline", task_relative_deadline, (double)10);
+  struct rubis::sched_attr attr;
+  std::string policy;
+  int priority, exec_time ,deadline, period;
+    
+  private_nh.param(node_name+"/task_scheduling_configs/policy", policy, std::string("NONE"));    
+  private_nh.param(node_name+"/task_scheduling_configs/priority", priority, 99);
+  private_nh.param(node_name+"/task_scheduling_configs/exec_time", exec_time, 0);
+  private_nh.param(node_name+"/task_scheduling_configs/deadline", deadline, 0);
+  private_nh.param(node_name+"/task_scheduling_configs/period", period, 0);
+  attr = rubis::create_sched_attr(priority, exec_time, deadline, period);    
+  rubis::init_task_scheduling(policy, attr);
 
-  if(task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
+  rubis::init_task_profiling(task_response_time_filename);
 
-  ros::Rate loop_rate(rate);
-  if(!task_scheduling_flag && !task_profiling_flag) loop_rate = ros::Rate(25);
-
-  while (ros::ok())
-  {
-    if(task_profiling_flag) rubis::sched::start_task_profiling();
-
-    if(rubis::sched::is_task_ready_ == TASK_READY && rubis::sched::task_state_ == TASK_STATE_READY){
-      if(task_scheduling_flag) rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline); 
-      rubis::sched::task_state_ = TASK_STATE_RUNNING;     
-    }
-
-    ros::spinOnce();
-
-    if(m_MapType == PlannerHNS::MAP_KML_FILE && !bMap)
-    {
-      bMap = true;
-      PlannerHNS::MappingHelpers::LoadKML(m_MapPath, m_Map);
-    }
-    else if (m_MapType == PlannerHNS::MAP_FOLDER && !bMap)
-    {
-      bMap = true;
-      PlannerHNS::MappingHelpers::ConstructRoadNetworkFromDataFiles(m_MapPath, m_Map, true);
-    }
-    else if (m_MapType == PlannerHNS::MAP_AUTOWARE && !bMap)
-    {
-      std::vector<UtilityHNS::AisanDataConnFileReader::DataConn> conn_data;;
-
-      if(m_MapRaw.GetVersion()==2)
-      {
-        PlannerHNS::MappingHelpers::ConstructRoadNetworkFromROSMessageV2(m_MapRaw.pLanes->m_data_list, m_MapRaw.pPoints->m_data_list,
-            m_MapRaw.pCenterLines->m_data_list, m_MapRaw.pIntersections->m_data_list,m_MapRaw.pAreas->m_data_list,
-            m_MapRaw.pLines->m_data_list, m_MapRaw.pStopLines->m_data_list,  m_MapRaw.pSignals->m_data_list,
-            m_MapRaw.pVectors->m_data_list, m_MapRaw.pCurbs->m_data_list, m_MapRaw.pRoadedges->m_data_list, m_MapRaw.pWayAreas->m_data_list,
-            m_MapRaw.pCrossWalks->m_data_list, m_MapRaw.pNodes->m_data_list, conn_data,
-            m_MapRaw.pLanes, m_MapRaw.pPoints, m_MapRaw.pNodes, m_MapRaw.pLines, PlannerHNS::GPSPoint(), m_Map, true, m_PlanningParams.enableLaneChange, true);
-
-        if(m_Map.roadSegments.size() > 0)
-        {
-          bMap = true;
-          std::cout << " ******* Map V2 Is Loaded successfully from the Motion Predictor !! " << std::endl;
-        }
-      }
-      else if(m_MapRaw.GetVersion()==1)
-      {
-        PlannerHNS::MappingHelpers::ConstructRoadNetworkFromROSMessage(m_MapRaw.pLanes->m_data_list, m_MapRaw.pPoints->m_data_list,
-            m_MapRaw.pCenterLines->m_data_list, m_MapRaw.pIntersections->m_data_list,m_MapRaw.pAreas->m_data_list,
-            m_MapRaw.pLines->m_data_list, m_MapRaw.pStopLines->m_data_list,  m_MapRaw.pSignals->m_data_list,
-            m_MapRaw.pVectors->m_data_list, m_MapRaw.pCurbs->m_data_list, m_MapRaw.pRoadedges->m_data_list, m_MapRaw.pWayAreas->m_data_list,
-            m_MapRaw.pCrossWalks->m_data_list, m_MapRaw.pNodes->m_data_list, conn_data,  PlannerHNS::GPSPoint(), m_Map, true);
-
-        if(m_Map.roadSegments.size() > 0)
-        {
-          bMap = true;
-          std::cout << " ******* Map V1 Is Loaded successfully from the Motion Predictor !! " << std::endl;
-        }
-      }
-    }
-
-    if(UtilityHNS::UtilityH::GetTimeDiffNow(m_VisualizationTimer) > m_VisualizationTime)
-    {
-      VisualizePrediction();
-      UtilityHNS::UtilityH::GetTickCount(m_VisualizationTimer);
-    }
-
-    if(task_profiling_flag) rubis::sched::stop_task_profiling(0, rubis::sched::task_state_);
-
-    if(rubis::sched::is_task_ready_ == TASK_READY && rubis::sched::task_state_ == TASK_STATE_DONE){
-      if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
-      rubis::sched::task_state_ = TASK_STATE_READY;
-    }
-
-    loop_rate.sleep();
-  }
+  ros::spin();
 }
 
 void MotionPrediction::TransformPose(const geometry_msgs::PoseStamped &in_pose, geometry_msgs::PoseStamped& out_pose, const tf::StampedTransform &in_transform)

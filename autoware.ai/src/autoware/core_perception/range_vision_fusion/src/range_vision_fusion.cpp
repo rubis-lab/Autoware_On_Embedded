@@ -717,15 +717,13 @@ ROSRangeVisionFusionApp::Run()
   ros::NodeHandle private_node_handle("~");
 
   // Scheduling Setup
-  int task_scheduling_flag;
-  int task_profiling_flag;
   std::string task_response_time_filename;
   int rate;
   double task_minimum_inter_release_time;
   double task_execution_time;
   double task_relative_deadline;
 
-  if(task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
+  rubis::init_task_profiling(task_response_time_filename);
   
   tf::TransformListener transform_listener;
 

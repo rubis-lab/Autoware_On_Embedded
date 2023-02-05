@@ -17,6 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   vector_map
   rubis_lib
+  rubis_msgs
 )
 
 

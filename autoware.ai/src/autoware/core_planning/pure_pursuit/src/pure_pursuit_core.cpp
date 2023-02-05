@@ -45,9 +45,6 @@ PurePursuitNode::PurePursuitNode()
   , minimum_lookahead_distance_(6.0)
 {
   initForROS();
-  health_checker_ptr_ =
-    std::make_shared<autoware_health_checker::HealthChecker>(nh_, private_nh_);
-  health_checker_ptr_->ENABLE();
   // initialize for PurePursuit
   pp_.setLinearInterpolationParameter(is_linear_interpolation_);
 }
@@ -145,7 +142,6 @@ void PurePursuitNode::initForROS()
   nh_.param("vehicle_info/wheel_base", wheel_base_, 2.7);
 
   private_nh_.param("/pure_pursuit/dynamic_params_flag", dynamic_param_flag_, false);
-  private_nh_.param("/pure_pursuit/instance_mode", rubis::instance_mode_, 0);
   
   if(dynamic_param_flag_){
     XmlRpc::XmlRpcValue xml_list;
@@ -170,26 +166,15 @@ void PurePursuitNode::initForROS()
 
 
   // setup subscriber
-  sub1_ = nh_.subscribe("final_waypoints", 10,
-    &PurePursuitNode::callbackFromWayPoints, this);
-
-  if(rubis::instance_mode_) rubis_pose_sub_ = nh_.subscribe("rubis_current_pose", 10, &PurePursuitNode::callbackFromRubisCurrentPose, this);
-  else pose_sub_ = nh_.subscribe("current_pose", 10, &PurePursuitNode::callbackFromCurrentPose, this);
+  pose_twist_sub_ = nh_.subscribe("/rubis_current_pose_twist", 1, &PurePursuitNode::CallbackTwistPose, this);
+  final_waypoints_with_pose_twist_sub = nh_.subscribe("/final_waypoints_with_pose_twist", 1, &PurePursuitNode::CallbackFinalWaypointsWithPoseTwist, this); // Def: 10
 
   sub3_ = nh_.subscribe("config/waypoint_follower", 10,
     &PurePursuitNode::callbackFromConfig, this);
   
-  #ifdef SVL
-  velocity_sub_ = nh_.subscribe("current_velocity", 10, &PurePursuitNode::callbackFromCurrentVelocity, this);
-  #endif
-
-  #ifdef IONIC
-  car_ctrl_output_sub = nh_.subscribe("car_ctrl_output", 10, &PurePursuitNode::callbackCtrlOutput, this);
-  #endif
-
   // setup publisher
   twist_pub_ = nh_.advertise<geometry_msgs::TwistStamped>("twist_raw", 10);
-  if(rubis::instance_mode_) rubis_twist_pub_ = nh_.advertise<rubis_msgs::TwistStamped>("rubis_twist_raw", 10);
+  rubis_twist_pub_ = nh_.advertise<rubis_msgs::TwistStamped>("rubis_twist_raw", 10);
 
   pub2_ = nh_.advertise<autoware_msgs::ControlCommandStamped>("ctrl_raw", 10);
   pub11_ = nh_.advertise<visualization_msgs::Marker>("next_waypoint_mark", 0);
@@ -211,101 +196,31 @@ void PurePursuitNode::run()
 {
   ros::NodeHandle private_nh("~");
 
-  // Scheduling Setup
-  int task_scheduling_flag;
-  int task_profiling_flag;
+  // Scheduling & Profiling Setup
+  std::string node_name = ros::this_node::getName();
   std::string task_response_time_filename;
+  private_nh.param<std::string>(node_name+"/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/pure_pursuit.csv");
+
   int rate;
-  double task_minimum_inter_release_time;
-  double task_execution_time;
-  double task_relative_deadline;
+  private_nh.param<int>(node_name+"/rate", rate, 10);
 
-  private_nh.param<int>("/pure_pursuit/task_scheduling_flag", task_scheduling_flag, 0);
-  private_nh.param<int>("/pure_pursuit/task_profiling_flag", task_profiling_flag, 0);
-  private_nh.param<std::string>("/pure_pursuit/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/pure_pursuit.csv");
-  private_nh.param<int>("/pure_pursuit/rate", rate, 10);
-  private_nh.param("/pure_pursuit/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
-  private_nh.param("/pure_pursuit/task_execution_time", task_execution_time, (double)10);
-  private_nh.param("/pure_pursuit/task_relative_deadline", task_relative_deadline, (double)10);
+  struct rubis::sched_attr attr;
+  std::string policy;
+  int priority, exec_time ,deadline, period;
+    
+  private_nh.param(node_name+"/task_scheduling_configs/policy", policy, std::string("NONE"));    
+  private_nh.param(node_name+"/task_scheduling_configs/priority", priority, 99);
+  private_nh.param(node_name+"/task_scheduling_configs/exec_time", exec_time, 0);
+  private_nh.param(node_name+"/task_scheduling_configs/deadline", deadline, 0);
+  private_nh.param(node_name+"/task_scheduling_configs/period", period, 0);
+  attr = rubis::create_sched_attr(priority, exec_time, deadline, period);    
+  rubis::init_task_scheduling(policy, attr);
 
-  ROS_INFO_STREAM("pure pursuit start");
+  rubis::init_task_profiling(task_response_time_filename);
 
-  if(task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
-
-  ros::Rate loop_rate(LOOP_RATE_);
-  if(!task_scheduling_flag && !task_profiling_flag) loop_rate = ros::Rate(rate);
-
-  while (ros::ok())
-  {
-    if(task_profiling_flag) rubis::sched::start_task_profiling();
-
-    if(rubis::sched::is_task_ready_ == TASK_READY && rubis::sched::task_state_ == TASK_STATE_READY){
-      if(task_scheduling_flag) rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline); 
-      rubis::sched::task_state_ = TASK_STATE_RUNNING;     
-    }
-
-    ros::spinOnce();
-    if (!is_pose_set_ || !is_waypoint_set_ || !is_velocity_set_)
-    {
-      // ROS_WARN("Necessary topics are not subscribed yet ... ");
-      
-      if(task_profiling_flag) rubis::sched::stop_task_profiling(rubis::instance_, rubis::sched::task_state_);
-
-      if(rubis::sched::is_task_ready_ == TASK_READY && rubis::sched::task_state_ == TASK_STATE_DONE){
-        if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
-        rubis::sched::task_state_ = TASK_STATE_READY;
-      }
-
-      loop_rate.sleep();
-      continue;
-    }
-
-    pp_.setLookaheadDistance(computeLookaheadDistance());
-    pp_.setMinimumLookaheadDistance(minimum_lookahead_distance_);
-
-    double kappa = 0;
-    bool can_get_curvature = pp_.canGetCurvature(&kappa);
-
-    publishTwistStamped(can_get_curvature, kappa);
-    publishControlCommandStamped(can_get_curvature, kappa);
-    health_checker_ptr_->NODE_ACTIVATE();
-    health_checker_ptr_->CHECK_RATE("topic_rate_vehicle_cmd_slow", 8, 5, 1,
-      "topic vehicle_cmd publish rate slow.");
-    // for visualization with Rviz
-    pub11_.publish(displayNextWaypoint(pp_.getPoseOfNextWaypoint()));
-    pub13_.publish(displaySearchRadius(
-      pp_.getCurrentPose().position, pp_.getLookaheadDistance()));
-    pub12_.publish(displayNextTarget(pp_.getPoseOfNextTarget()));
-    pub15_.publish(displayTrajectoryCircle(
-        waypoint_follower::generateTrajectoryCircle(
-          pp_.getPoseOfNextTarget(), pp_.getCurrentPose())));
-    if (add_virtual_end_waypoints_)
-    {
-      pub18_.publish(
-        displayExpandWaypoints(pp_.getCurrentWaypoints(), expand_size_));
-    }
-    std_msgs::Float32 angular_gravity_msg;
-    angular_gravity_msg.data =
-      computeAngularGravity(computeCommandVelocity(), kappa);
-    pub16_.publish(angular_gravity_msg);
-
-    publishDeviationCurrentPosition(
-      pp_.getCurrentPose().position, pp_.getCurrentWaypoints());
-
-    is_pose_set_ = false;
-    is_velocity_set_ = false;
-    is_waypoint_set_ = false;
-
-    if(task_profiling_flag) rubis::sched::stop_task_profiling(rubis::instance_, rubis::sched::task_state_);
-
-    if(rubis::sched::is_task_ready_ == TASK_READY && rubis::sched::task_state_ == TASK_STATE_DONE){
-      if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
-      rubis::sched::task_state_ = TASK_STATE_READY;
-    }
-
-    loop_rate.sleep();
-  }
+  ros::spin();
 }
+
 
 void PurePursuitNode::publishTwistStamped(
   const bool& can_get_curvature, const double& kappa) const
@@ -316,15 +231,11 @@ void PurePursuitNode::publishTwistStamped(
   ts.twist.angular.z = can_get_curvature ? kappa * ts.twist.linear.x : 0;
   twist_pub_.publish(ts);
 
-  if(rubis::instance_mode_ && rubis::instance_mode_ != RUBIS_NO_INSTANCE){
-    rubis_msgs::TwistStamped rubis_ts;
-    rubis_ts.instance = rubis::instance_;
-    rubis_ts.msg = ts;
-    rubis_twist_pub_.publish(rubis_ts);
-  }
-
-  if(rubis::sched::is_task_ready_ == TASK_NOT_READY) rubis::sched::init_task();
-  rubis::sched::task_state_ = TASK_STATE_DONE;
+  rubis_msgs::TwistStamped rubis_ts;
+  rubis_ts.instance = rubis::instance_;
+  rubis_ts.obj_instance = rubis::obj_instance_;
+  rubis_ts.msg = ts;
+  rubis_twist_pub_.publish(rubis_ts);
 }
 
 void PurePursuitNode::publishControlCommandStamped(
@@ -401,6 +312,7 @@ double PurePursuitNode::computeCommandVelocity() const
 
 double PurePursuitNode::computeCommandAccel() const
 {
+  if(pp_.getCurrentWaypoints().size() < 2) return 0.0;
   const geometry_msgs::Pose current_pose = pp_.getCurrentPose();
   const geometry_msgs::Pose target_pose =
     pp_.getCurrentWaypoints().at(1).pose.pose;
@@ -412,6 +324,7 @@ double PurePursuitNode::computeCommandAccel() const
   const double v0 = current_linear_velocity_;
   const double v = computeCommandVelocity();
   const double a = getSgn() * (v * v - v0 * v0) / (2 * x);
+
   return a;
 }
 
@@ -455,7 +368,7 @@ void PurePursuitNode::publishDeviationCurrentPosition(
   pub17_.publish(msg);
 }
 
-inline void PurePursuitNode::updateCurrentPose(const geometry_msgs::PoseStampedConstPtr& msg){
+inline void PurePursuitNode::updateCurrentPose(geometry_msgs::PoseStampedConstPtr& msg){
 #ifndef USE_WAYPOINT_ORIENTATION
   pp_.setCurrentPose(msg);
 #else
@@ -467,27 +380,6 @@ inline void PurePursuitNode::updateCurrentPose(const geometry_msgs::PoseStampedC
 #endif
   is_pose_set_ = true;
 }
-
-void PurePursuitNode::callbackFromCurrentPose(const geometry_msgs::PoseStampedConstPtr& msg)
-{
-  updateCurrentPose(msg);
-}
-
-void PurePursuitNode::callbackFromRubisCurrentPose(const rubis_msgs::PoseStampedConstPtr& _msg)
-{
-  geometry_msgs::PoseStampedConstPtr msg = boost::make_shared<const geometry_msgs::PoseStamped>(_msg->msg);
-  rubis::instance_ = _msg->instance;
-  updateCurrentPose(msg);
-}
-
-#ifdef SVL
-void PurePursuitNode::callbackFromCurrentVelocity(const geometry_msgs::TwistStampedConstPtr& msg)
-{
-  current_linear_velocity_ = msg->twist.linear.x;
-  pp_.setCurrentVelocity(current_linear_velocity_);
-  is_velocity_set_ = true;
-}
-#endif
 
 #ifdef IONIC
 void PurePursuitNode::callbackCtrlOutput(const can_data_msgs::Car_ctrl_output::ConstPtr &msg)
@@ -532,19 +424,32 @@ double PurePursuitNode::findWayPointVelocity(autoware_msgs::Waypoint msg){
   return way_points_velocity_[idx];
 }
 
-void PurePursuitNode::callbackFromWayPoints(
-  const autoware_msgs::LaneConstPtr& msg)
+void PurePursuitNode::CallbackTwistPose(const rubis_msgs::PoseTwistStampedConstPtr& msg)
 {
+  rubis::start_task_profiling();
+  rubis::instance_ = msg->instance;
+
+  // Update pose
+  geometry_msgs::PoseStampedConstPtr pose_ptr(new geometry_msgs::PoseStamped(msg->pose));
+  updateCurrentPose(pose_ptr);
+
+  // Update twist
+  current_linear_velocity_ = msg->twist.twist.linear.x;
+  pp_.setCurrentVelocity(current_linear_velocity_);
+  is_velocity_set_ = true;
+
+  if(lane_.waypoints.size() < 1) return;
+
   if(use_algorithm_){
-    command_linear_velocity_ = findWayPointVelocity(msg->waypoints.at(0));
+    command_linear_velocity_ = findWayPointVelocity(lane_.waypoints.at(0));
   }
   else{
-    command_linear_velocity_ = (!msg->waypoints.empty()) ? msg->waypoints.at(0).twist.twist.linear.x : 0;
+    command_linear_velocity_ = (!lane_.waypoints.empty()) ? lane_.waypoints.at(0).twist.twist.linear.x : 0;
   }
 
-  geometry_msgs::Point curr_point = msg->waypoints.at(0).pose.pose.position;
-  geometry_msgs::Point near_point = msg->waypoints.at(std::min(3, (int)msg->waypoints.size() - 1)).pose.pose.position;
-  geometry_msgs::Point far_point = msg->waypoints.at(std::min(30, (int)msg->waypoints.size() - 1)).pose.pose.position;
+  geometry_msgs::Point curr_point = lane_.waypoints.at(0).pose.pose.position;
+  geometry_msgs::Point near_point = lane_.waypoints.at(std::min(3, (int)lane_.waypoints.size() - 1)).pose.pose.position;
+  geometry_msgs::Point far_point = lane_.waypoints.at(std::min(30, (int)lane_.waypoints.size() - 1)).pose.pose.position;
 
   double deg_1 = atan2((near_point.y - curr_point.y), (near_point.x - curr_point.x)) / 3.14 * 180;
   double deg_2 = atan2((far_point.y - curr_point.y), (far_point.x - curr_point.x)) / 3.14 * 180;
@@ -555,15 +460,58 @@ void PurePursuitNode::callbackFromWayPoints(
 
   angle_diff_ = angle_diff;
 
+  // Update waypoints
+  _CallbackFinalWaypointsWithPoseTwist();
+
+  // After spinOnce
+  pp_.setLookaheadDistance(computeLookaheadDistance());
+  pp_.setMinimumLookaheadDistance(minimum_lookahead_distance_);
+
+  double kappa = 0;
+  bool can_get_curvature = pp_.canGetCurvature(&kappa);
+
+  publishTwistStamped(can_get_curvature, kappa);
+  publishControlCommandStamped(can_get_curvature, kappa);
+  // for visualization with Rviz
+  pub11_.publish(displayNextWaypoint(pp_.getPoseOfNextWaypoint()));
+  pub13_.publish(displaySearchRadius(
+    pp_.getCurrentPose().position, pp_.getLookaheadDistance()));
+  pub12_.publish(displayNextTarget(pp_.getPoseOfNextTarget()));
+  pub15_.publish(displayTrajectoryCircle(
+      waypoint_follower::generateTrajectoryCircle(
+        pp_.getPoseOfNextTarget(), pp_.getCurrentPose())));
+  if (add_virtual_end_waypoints_)
+  {
+    pub18_.publish(
+      displayExpandWaypoints(pp_.getCurrentWaypoints(), expand_size_));
+  }
+  std_msgs::Float32 angular_gravity_msg;
+  angular_gravity_msg.data =
+    computeAngularGravity(computeCommandVelocity(), kappa);
+  pub16_.publish(angular_gravity_msg);
+
+  publishDeviationCurrentPosition(
+    pp_.getCurrentPose().position, pp_.getCurrentWaypoints());
+
+  is_pose_set_ = false;
+  is_velocity_set_ = false;
+  is_waypoint_set_ = false;
+
+  rubis::stop_task_profiling(rubis::instance_, 0);
+
+}
+
+void PurePursuitNode::_CallbackFinalWaypointsWithPoseTwist()
+{
   if(dynamic_param_flag_){
     setLookaheadParamsByVel();
   }
   
   if (add_virtual_end_waypoints_)
   {
-    const LaneDirection solved_dir = getLaneDirection(*msg);
+    const LaneDirection solved_dir = getLaneDirection(lane_);
     direction_ = (solved_dir != LaneDirection::Error) ? solved_dir : direction_;
-    autoware_msgs::Lane expanded_lane(*msg);
+    autoware_msgs::Lane expanded_lane(lane_);
     expand_size_ = -expanded_lane.waypoints.size();
     connectVirtualLastWaypoints(&expanded_lane, direction_);
     expand_size_ += expanded_lane.waypoints.size();
@@ -572,13 +520,19 @@ void PurePursuitNode::callbackFromWayPoints(
   }
   else
   {
-    pp_.setCurrentWaypoints(msg->waypoints);
+    pp_.setCurrentWaypoints(lane_.waypoints);
   }
   is_waypoint_set_ = true;
 
 #ifdef USE_WAYPOINT_ORIENTATION
-  waypoint_pose_ = msg->waypoints[0].pose;
+  waypoint_pose_ = lane_.waypoints[0].pose;
 #endif
+}
+
+void PurePursuitNode::CallbackFinalWaypointsWithPoseTwist(const rubis_msgs::LaneWithPoseTwistConstPtr& msg)
+{   
+  rubis::obj_instance_ = msg->obj_instance;
+  lane_ = msg->lane;
 }
 
 void PurePursuitNode::connectVirtualLastWaypoints(

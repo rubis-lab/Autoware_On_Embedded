@@ -62,7 +62,7 @@ static void config_callback(const autoware_config_msgs::ConfigVoxelGridFilter::C
 }
 
 inline static void publish_filtered_cloud(const sensor_msgs::PointCloud2::ConstPtr& input)
-{
+{  
   pcl::PointCloud<pcl::PointXYZI> scan;
   pcl::fromROSMsg(*input, scan);
 
@@ -97,12 +97,10 @@ inline static void publish_filtered_cloud(const sensor_msgs::PointCloud2::ConstP
   filtered_msg.header = input->header;
   filtered_points_pub.publish(filtered_msg);
 
-  if(rubis::instance_mode_ && rubis::instance_ != RUBIS_NO_INSTANCE){
-    rubis_msgs::PointCloud2 rubis_filtered_msg;
-    rubis_filtered_msg.msg = filtered_msg;
-    rubis_filtered_msg.instance = rubis::instance_;
-    rubis_filtered_points_pub.publish(rubis_filtered_msg);
-  }
+  rubis_msgs::PointCloud2 rubis_filtered_msg;
+  rubis_filtered_msg.msg = filtered_msg;
+  rubis_filtered_msg.instance = rubis::instance_;
+  rubis_filtered_points_pub.publish(rubis_filtered_msg);
 
   points_downsampler_info_msg.header = input->header;
   points_downsampler_info_msg.filter_name = "voxel_grid_filter";
@@ -137,22 +135,24 @@ inline static void publish_filtered_cloud(const sensor_msgs::PointCloud2::ConstP
       << points_downsampler_info_msg.exe_time << ","
       << std::endl;
   }
-
-  if(rubis::sched::is_task_ready_ == TASK_NOT_READY) rubis::sched::init_task();
-  rubis::sched::task_state_ = TASK_STATE_DONE;
+  
 }
 
 static void scan_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
 {
-  rubis::instance_ = RUBIS_NO_INSTANCE;
+  rubis::instance_ = 0;
   publish_filtered_cloud(input);
 }
 
 static void rubis_scan_callback(const rubis_msgs::PointCloud2::ConstPtr& _input)
 {
+  rubis::start_task_profiling();
+
   sensor_msgs::PointCloud2::ConstPtr input = boost::make_shared<const sensor_msgs::PointCloud2>(_input->msg);
   rubis::instance_ = _input->instance;
   publish_filtered_cloud(input);
+
+  rubis::stop_task_profiling(rubis::instance_, 0);
 }
 
 int main(int argc, char** argv)
@@ -161,15 +161,6 @@ int main(int argc, char** argv)
 
   ros::NodeHandle nh;
   ros::NodeHandle private_nh("~");
-
-  // Scheduling Setup
-  int task_scheduling_flag;
-  int task_profiling_flag;
-  std::string task_response_time_filename;
-  int rate;
-  double task_minimum_inter_release_time;
-  double task_execution_time;
-  double task_relative_deadline; 
 
   private_nh.param<std::string>("input_topic_name", input_topic_name_, std::string("points_raw"));
   private_nh.param<std::string>("output_topic_name", output_topic_name_, std::string("filtered_points"));
@@ -185,23 +176,32 @@ int main(int argc, char** argv)
   private_nh.param<double>("measurement_range", measurement_range, MAX_MEASUREMENT_RANGE);
   private_nh.param<double>("leaf_size", voxel_leaf_size, 0.1);
 
+  // Scheduling & Profiling Setup
   std::string node_name = ros::this_node::getName();
-  private_nh.param<int>(node_name+"/task_scheduling_flag", task_scheduling_flag, 0);
-  private_nh.param<int>(node_name+"/task_profiling_flag", task_profiling_flag, 0);
-  private_nh.param<std::string>(node_name+"/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/voxel_grid_filter.csv");
-  private_nh.param<int>(node_name+"/rate", rate, 10);
-  private_nh.param(node_name+"/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
-  private_nh.param(node_name+"/task_execution_time", task_execution_time, (double)10);
-  private_nh.param(node_name+"/task_relative_deadline", task_relative_deadline, (double)10);
-  private_nh.param<int>(node_name+"/instance_mode", rubis::instance_mode_, 0);
+  std::string task_response_time_filename;
+  private_nh.param<std::string>(node_name+"/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/voexl_grid_filter.csv");
 
-  /* For Task scheduling */
-  if(task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
+  int rate;
+  private_nh.param<int>(node_name+"/rate", rate, 10);
+
+  struct rubis::sched_attr attr;
+  std::string policy;
+  int priority, exec_time ,deadline, period;
+    
+  private_nh.param(node_name+"/task_scheduling_configs/policy", policy, std::string("NONE"));    
+  private_nh.param(node_name+"/task_scheduling_configs/priority", priority, 99);
+  private_nh.param(node_name+"/task_scheduling_configs/exec_time", exec_time, 0);
+  private_nh.param(node_name+"/task_scheduling_configs/deadline", deadline, 0);
+  private_nh.param(node_name+"/task_scheduling_configs/period", period, 0);
+  attr = rubis::create_sched_attr(priority, exec_time, deadline, period);    
+  rubis::init_task_scheduling(policy, attr);
+
+  rubis::init_task_profiling(task_response_time_filename);
+
 
   // Publishers
   filtered_points_pub = nh.advertise<sensor_msgs::PointCloud2>(output_topic_name_, 10);
-  if(rubis::instance_mode_)
-    rubis_filtered_points_pub = nh.advertise<rubis_msgs::PointCloud2>("/rubis_" + output_topic_name_, 10);
+  rubis_filtered_points_pub = nh.advertise<rubis_msgs::PointCloud2>("/rubis_" + output_topic_name_, 10);
   points_downsampler_info_pub = nh.advertise<points_downsampler::PointsDownsamplerInfo>("/points_downsampler_info", 1000);
 
   // Subscribers
@@ -209,47 +209,9 @@ int main(int argc, char** argv)
   // ros::Subscriber scan_sub = nh.subscribe(input_topic_name_, 10, scan_callback);
   ros::Subscriber scan_sub;
   
-  if(rubis::instance_mode_) scan_sub = nh.subscribe("/rubis_"+input_topic_name_, 10, rubis_scan_callback);
-  else scan_sub = nh.subscribe(input_topic_name_, 10, scan_callback);
+  scan_sub = nh.subscribe("/rubis_"+input_topic_name_, 1, rubis_scan_callback); // Def: 10
 
-  /*  RT Scheduling setup  */
-  // ros::Subscriber config_sub = nh.subscribe("config/voxel_grid_filter", 1, config_callback); // origin 10
-  // ros::Subscriber scan_sub = nh.subscribe(input_topic_name_, 1, scan_callback); // origin 10
-
-  if(!task_scheduling_flag && !task_profiling_flag){
-    ros::spin();
-  }
-  else{
-    ros::Rate r(rate);
-    // Initialize task ( Wait until first necessary topic is published )
-    while(ros::ok()){
-      if(rubis::sched::is_task_ready_ == TASK_READY) break;
-      ros::spinOnce();
-      r.sleep();      
-    }
-
-    // Executing task
-    while(ros::ok()){
-      if(task_profiling_flag) rubis::sched::start_task_profiling();
-      if(rubis::sched::task_state_ == TASK_STATE_READY){        
-        if(task_scheduling_flag) rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline); 
-        rubis::sched::task_state_ = TASK_STATE_RUNNING;     
-      }
-
-      ros::spinOnce();
-
-      if(task_profiling_flag) rubis::sched::stop_task_profiling(rubis::instance_, rubis::sched::task_state_);
-      if(rubis::sched::task_state_ == TASK_STATE_DONE){        
-        if(task_scheduling_flag) rubis::sched::yield_task_scheduling();        
-        rubis::sched::task_state_ = TASK_STATE_READY;
-      }
-      
-      r.sleep();
-    }
-  }
-
-  if(rubis::sched::is_task_ready_ == TASK_NOT_READY) rubis::sched::init_task();
-  rubis::sched::task_state_ = TASK_STATE_DONE;
+  ros::spin();
 
   return 0;
 }

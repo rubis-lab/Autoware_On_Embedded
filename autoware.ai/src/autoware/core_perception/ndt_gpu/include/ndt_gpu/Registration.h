@@ -14,11 +14,6 @@
 #include <stdio.h>
 #include <rubis_lib/sched.hpp>
 
-#define HTOD 0
-#define DTOH 1
-#define LAUNCH 2
-#define GPU_PROFILING 1
-
 using namespace rubis;
 
 void start_profiling_execution_time();

@@ -34,6 +34,8 @@ BehaviorGen::BehaviorGen()
   bBestCost = false;
   bMap = false;
   bRollOuts = false;
+  UtilityHNS::UtilityH::GetTickCount(planningTimer);
+  distance_to_pdestrian_ = 1000.0;
 
   ros::NodeHandle _nh;
   UpdatePlanningParams(_nh);
@@ -50,6 +52,7 @@ BehaviorGen::BehaviorGen()
   m_OriginPos.position.z  = transform.getOrigin().z();
 
   pub_LocalPath = nh.advertise<autoware_msgs::Lane>("final_waypoints", 1,true);
+  pub_LocalPathWithPosePub = nh.advertise<rubis_msgs::LaneWithPoseTwist>("final_waypoints_with_pose_twist", 1,true);
   pub_LocalBasePath = nh.advertise<autoware_msgs::Lane>("base_waypoints", 1,true);
   pub_ClosestIndex = nh.advertise<std_msgs::Int32>("closest_waypoint", 1,true);
   pub_BehaviorState = nh.advertise<geometry_msgs::TwistStamped>("current_behavior", 1);
@@ -61,36 +64,19 @@ BehaviorGen::BehaviorGen()
   pub_turnMarker = nh.advertise<visualization_msgs::MarkerArray>("turn_marker", 1);
   pub_currentState = nh.advertise<std_msgs::Int32>("current_state", 1);
 
-  sub_current_pose = nh.subscribe("/current_pose", 10,  &BehaviorGen::callbackGetCurrentPose, this); 
-
-  int bVelSource = 1;
-  _nh.getParam("/op_trajectory_evaluator/velocitySource", bVelSource);
-  if(bVelSource == 0)
-    sub_robot_odom = nh.subscribe("/odom", 10, &BehaviorGen::callbackGetRobotOdom, this);
-  else if(bVelSource == 1)
-    sub_current_velocity = nh.subscribe("/current_velocity", 10, &BehaviorGen::callbackGetVehicleStatus, this);
-  else if(bVelSource == 2)
-    sub_can_info = nh.subscribe("/can_info", 10, &BehaviorGen::callbackGetCANInfo, this);
-  
-  /*  RT Scheduling setup  */
-  // sub_current_pose = nh.subscribe("/current_pose", 1,  &BehaviorGen::callbackGetCurrentPose, this); //origin 10
-
   // int bVelSource = 1;
   // _nh.getParam("/op_trajectory_evaluator/velocitySource", bVelSource);
   // if(bVelSource == 0)
-  //   sub_robot_odom = nh.subscribe("/odom", 1, &BehaviorGen::callbackGetRobotOdom, this); //origin 10
-  // else if(bVelSource == 1)
-  //   sub_current_velocity = nh.subscribe("/current_velocity", 1, &BehaviorGen::callbackGetVehicleStatus, this); //origin 10
+  //   sub_robot_odom = nh.subscribe("/odom", 10, &BehaviorGen::callbackGetRobotOdom, this);
   // else if(bVelSource == 2)
-  //   sub_can_info = nh.subscribe("/can_info", 1, &BehaviorGen::callbackGetCANInfo, this); //origin 10
+  //   sub_can_info = nh.subscribe("/can_info", 10, &BehaviorGen::callbackGetCANInfo, this);
 
   sub_GlobalPlannerPaths = nh.subscribe("/lane_waypoints_array", 1, &BehaviorGen::callbackGetGlobalPlannerPath, this);
-  sub_LocalPlannerPaths = nh.subscribe("/local_weighted_trajectories", 1, &BehaviorGen::callbackGetLocalPlannerPath, this);
+  sub_LocalPlannerPaths = nh.subscribe("/local_weighted_trajectories_with_pose_twist", 1, &BehaviorGen::callbackGetLocalPlannerPath, this);
   // sub_TrafficLightStatus = nh.subscribe("/light_color", 1, &BehaviorGen::callbackGetTrafficLightStatus, this);
   // sub_TrafficLightSignals  = nh.subscribe("/roi_signal", 1, &BehaviorGen::callbackGetTrafficLightSignals, this);
   sub_Trajectory_Cost = nh.subscribe("/local_trajectory_cost", 1, &BehaviorGen::callbackGetLocalTrajectoryCost, this);
-
-  sub_TrafficLightSignals  = nh.subscribe("/v2x_traffic_signal", 1, &BehaviorGen::callbackGetV2XTrafficLightSignals, this);
+  // sub_TrafficLightSignals  = nh.subscribe("/v2x_traffic_signal", 1, &BehaviorGen::callbackGetV2XTrafficLightSignals, this);
 
   sub_twist_raw = nh.subscribe("/twist_raw", 1, &BehaviorGen::callbackGetTwistRaw, this);
   sub_twist_cmd = nh.subscribe("/twist_cmd", 1, &BehaviorGen::callbackGetTwistCMD, this);
@@ -206,9 +192,8 @@ void BehaviorGen::UpdatePlanningParams(ros::NodeHandle& _nh)
   m_BehaviorGenerator.m_obstacleWaitingTimeinIntersection = m_obstacleWaitingTimeinIntersection;
 }
 
-void BehaviorGen::callbackDistanceToPedestrian(const std_msgs::Float64& msg){
-  double distance = msg.data;
-  if(distance < m_distanceToPedestrianThreshold){
+void BehaviorGen::_callbackDistanceToPedestrian(){
+  if(distance_to_pdestrian_ < m_distanceToPedestrianThreshold){
     m_PlanningParams.pedestrianAppearence = true;
   }
   else
@@ -216,7 +201,10 @@ void BehaviorGen::callbackDistanceToPedestrian(const std_msgs::Float64& msg){
     m_PlanningParams.pedestrianAppearence = false;
   }
   m_BehaviorGenerator.UpdatePedestrianAppearence(m_PlanningParams.pedestrianAppearence);
-  // m_BehaviorGenerator.printPedestrianAppearence();
+}
+
+void BehaviorGen::callbackDistanceToPedestrian(const std_msgs::Float64& msg){
+  distance_to_pdestrian_ = msg.data;
 }
 
 void BehaviorGen::callbackIntersectionCondition(const autoware_msgs::IntersectionCondition& msg){
@@ -243,24 +231,6 @@ void BehaviorGen::callbackGetTwistCMD(const geometry_msgs::TwistStampedConstPtr&
 void BehaviorGen::callbackGetCommandCMD(const autoware_msgs::ControlCommandConstPtr& msg)
 {
   m_Ctrl_cmd = *msg;
-}
-
-void BehaviorGen::callbackGetCurrentPose(const geometry_msgs::PoseStampedConstPtr& msg)
-{
-  m_CurrentPos = PlannerHNS::WayPoint(msg->pose.position.x, msg->pose.position.y, msg->pose.position.z, tf::getYaw(msg->pose.orientation));
-  bNewCurrentPos = true;
-}
-
-void BehaviorGen::callbackGetVehicleStatus(const geometry_msgs::TwistStampedConstPtr& msg)
-{
-  m_VehicleStatus.speed = msg->twist.linear.x;
-  m_CurrentPos.v = m_VehicleStatus.speed;
-  if(fabs(msg->twist.linear.x) > 0.25)
-    m_VehicleStatus.steer = atan(m_CarInfo.wheel_base * msg->twist.angular.z/msg->twist.linear.x);
-  UtilityHNS::UtilityH::GetTickCount(m_VehicleStatus.tStamp);
-  bVehicleStatus = true;
-
-  if(rubis::sched::is_task_ready_ == TASK_NOT_READY) rubis::sched::init_task();
 }
 
 void BehaviorGen::callbackGetCANInfo(const autoware_can_msgs::CANInfoConstPtr &msg)
@@ -373,17 +343,46 @@ void BehaviorGen::callbackGetLocalTrajectoryCost(const autoware_msgs::LaneConstP
   m_TrajectoryBestCost.closest_obj_velocity = msg->closest_object_velocity;
 }
 
-void BehaviorGen::callbackGetLocalPlannerPath(const autoware_msgs::LaneArrayConstPtr& msg)
+void BehaviorGen::callbackGetLocalPlannerPath(const rubis_msgs::LaneArrayWithPoseTwistConstPtr& msg)
 {
-  if(msg->lanes.size() > 0)
+  // Before spinOnce
+  rubis::start_task_profiling();
+  rubis::instance_ = msg->instance;
+  rubis::obj_instance_ = msg->obj_instance;
+
+  // Callback for distance to pedestrian
+  _callbackDistanceToPedestrian();
+
+  static double prev_x = 0.0, prev_y = 0.0, prev_speed = 0.0;
+  // Callback for current velocity
+  if(prev_speed != msg->twist.twist.linear.x){
+    m_VehicleStatus.speed = msg->twist.twist.linear.x;
+    m_CurrentPos.v = m_VehicleStatus.speed;
+    if(fabs(msg->twist.twist.linear.x) > 0.25)
+      m_VehicleStatus.steer = atan(m_CarInfo.wheel_base * msg->twist.twist.angular.z/msg->twist.twist.linear.x);
+    UtilityHNS::UtilityH::GetTickCount(m_VehicleStatus.tStamp);
+    bVehicleStatus = true;
+    prev_speed = msg->twist.twist.linear.x;
+  }
+
+  // Callback for current pose
+  if(prev_x != msg->pose.pose.position.x || prev_y != msg->pose.pose.position.y){
+    m_CurrentPos = PlannerHNS::WayPoint(msg->pose.pose.position.x, msg->pose.pose.position.y, msg->pose.pose.position.z, tf::getYaw(msg->pose.pose.orientation));
+    bNewCurrentPos = true;
+    prev_x = msg->pose.pose.position.x;
+    prev_y = msg->pose.pose.position.y;
+  }
+
+  // Callback for local planner path
+  if(msg->lane_array.lanes.size() > 0)
   {
     m_RollOuts.clear();
     int globalPathId_roll_outs = -1;
 
-    for(unsigned int i = 0 ; i < msg->lanes.size(); i++)
+    for(unsigned int i = 0 ; i < msg->lane_array.lanes.size(); i++)
     {
       std::vector<PlannerHNS::WayPoint> path;
-      PlannerHNS::ROSHelpers::ConvertFromAutowareLaneToLocalLane(msg->lanes.at(i), path);
+      PlannerHNS::ROSHelpers::ConvertFromAutowareLaneToLocalLane(msg->lane_array.lanes.at(i), path);
       m_RollOuts.push_back(path);
 
       if(path.size() > 0)
@@ -410,6 +409,143 @@ void BehaviorGen::callbackGetLocalPlannerPath(const autoware_msgs::LaneArrayCons
     m_BehaviorGenerator.m_RollOuts = m_RollOuts;
     bRollOuts = true;
   }
+
+  // Main Loop
+  // Check Pedestrian is Appeared
+  double dt  = UtilityHNS::UtilityH::GetTimeDiffNow(planningTimer);
+  UtilityHNS::UtilityH::GetTickCount(planningTimer);
+
+  if(m_MapType == PlannerHNS::MAP_KML_FILE && !bMap)
+  {
+    bMap = true;
+    PlannerHNS::MappingHelpers::LoadKML(m_MapPath, m_Map);
+  }
+  else if (m_MapType == PlannerHNS::MAP_FOLDER && !bMap)
+  {
+    bMap = true;
+    PlannerHNS::MappingHelpers::ConstructRoadNetworkFromDataFiles(m_MapPath, m_Map, true);
+
+  }
+  else if (m_MapType == PlannerHNS::MAP_AUTOWARE && !bMap)
+  {
+    std::vector<UtilityHNS::AisanDataConnFileReader::DataConn> conn_data;;
+
+    if(m_MapRaw.GetVersion()==2)
+    {
+      PlannerHNS::MappingHelpers::ConstructRoadNetworkFromROSMessageV2(m_MapRaw.pLanes->m_data_list, m_MapRaw.pPoints->m_data_list,
+          m_MapRaw.pCenterLines->m_data_list, m_MapRaw.pIntersections->m_data_list,m_MapRaw.pAreas->m_data_list,
+          m_MapRaw.pLines->m_data_list, m_MapRaw.pStopLines->m_data_list,  m_MapRaw.pSignals->m_data_list,
+          m_MapRaw.pVectors->m_data_list, m_MapRaw.pCurbs->m_data_list, m_MapRaw.pRoadedges->m_data_list, m_MapRaw.pWayAreas->m_data_list,
+          m_MapRaw.pCrossWalks->m_data_list, m_MapRaw.pNodes->m_data_list, conn_data,
+          m_MapRaw.pLanes, m_MapRaw.pPoints, m_MapRaw.pNodes, m_MapRaw.pLines, PlannerHNS::GPSPoint(), m_Map, true, m_PlanningParams.enableLaneChange, false);
+
+      try{
+        // Add Traffic Signal Info from yaml file
+        XmlRpc::XmlRpcValue traffic_light_list;
+        nh.getParam("/op_behavior_selector/traffic_light_list", traffic_light_list);
+
+        // Add Stop Line Info from yaml file
+        XmlRpc::XmlRpcValue stop_line_list;
+        nh.getParam("/op_behavior_selector/stop_line_list", stop_line_list);
+
+        // Add Crossing Info from yaml file
+        // XmlRpc::XmlRpcValue intersection_list;
+        // nh.getParam("/op_behavior_selector/intersection_list", intersection_list);
+
+        PlannerHNS::MappingHelpers::ConstructRoadNetwork_RUBIS(m_Map, traffic_light_list, stop_line_list);
+      }
+      catch(XmlRpc::XmlRpcException& e){
+        ROS_ERROR("[XmlRpc Error] %s", e.getMessage().c_str());
+        exit(1);
+      }
+
+      m_BehaviorGenerator.m_Map = m_Map;
+
+      if(m_Map.roadSegments.size() > 0)
+      {
+        bMap = true;
+        std::cout << " ******* Map V2 Is Loaded successfully from the Behavior Selector !! " << std::endl;
+      }
+    }
+    else if(m_MapRaw.GetVersion()==1)
+    {
+      PlannerHNS::MappingHelpers::ConstructRoadNetworkFromROSMessage(m_MapRaw.pLanes->m_data_list, m_MapRaw.pPoints->m_data_list,
+          m_MapRaw.pCenterLines->m_data_list, m_MapRaw.pIntersections->m_data_list,m_MapRaw.pAreas->m_data_list,
+          m_MapRaw.pLines->m_data_list, m_MapRaw.pStopLines->m_data_list,  m_MapRaw.pSignals->m_data_list,
+          m_MapRaw.pVectors->m_data_list, m_MapRaw.pCurbs->m_data_list, m_MapRaw.pRoadedges->m_data_list, m_MapRaw.pWayAreas->m_data_list,
+          m_MapRaw.pCrossWalks->m_data_list, m_MapRaw.pNodes->m_data_list, conn_data,  PlannerHNS::GPSPoint(), m_Map, true, m_PlanningParams.enableLaneChange, false);
+
+      if(m_Map.roadSegments.size() > 0)
+      {
+        bMap = true;
+        std::cout << " ******* Map V1 Is Loaded successfully from the Behavior Selector !! " << std::endl;
+      }
+    }
+  }
+
+  if(bNewCurrentPos && m_GlobalPaths.size()>0)
+  {
+    if(bNewLightSignal)
+    {
+      m_PrevTrafficLight = m_CurrTrafficLight;
+      bNewLightSignal = false;
+    }
+
+    if(bNewLightStatus)
+    {
+      bNewLightStatus = false;
+      for(unsigned int itls = 0 ; itls < m_PrevTrafficLight.size() ; itls++)
+        m_PrevTrafficLight.at(itls).lightState = m_CurrLightStatus;
+    }
+    
+    m_BehaviorGenerator.m_sprintSwitch = m_sprintSwitch;
+    m_CurrentBehavior = m_BehaviorGenerator.DoOneStep(dt, m_CurrentPos, m_VehicleStatus, 1, m_CurrTrafficLight, m_TrajectoryBestCost, 0);
+    std_msgs::Int32 curr_state_msg;
+    curr_state_msg.data = m_CurrentBehavior.state;
+
+    pub_currentState.publish(curr_state_msg);
+
+    CalculateTurnAngle(m_BehaviorGenerator.m_turnWaypoint);
+    m_BehaviorGenerator.m_turnAngle = m_turnAngle;
+
+    std_msgs::Float64 turn_angle_msg;
+    turn_angle_msg.data = m_turnAngle;
+    pub_turnAngle.publish(turn_angle_msg);
+
+    emergency_stop_msg.data = false;
+    if(m_CurrentBehavior.maxVelocity == -1)//Emergency Stop!
+      emergency_stop_msg.data = true;
+    pub_EmergencyStop.publish(emergency_stop_msg);
+
+    SendLocalPlanningTopics(msg);
+    VisualizeLocalPlanner();
+    LogLocalPlanningInfo(dt);
+
+    // Publish turn_marker
+    visualization_msgs::MarkerArray turn_marker;
+    visualization_msgs::Marker marker;
+    marker.header.frame_id = "map";
+    marker.type = 2;
+    marker.pose.position.x = m_BehaviorGenerator.m_turnWaypoint.pos.x;
+    marker.pose.position.y = m_BehaviorGenerator.m_turnWaypoint.pos.y;
+    marker.pose.position.z = m_BehaviorGenerator.m_turnWaypoint.pos.z;
+    marker.scale.x = 3;
+    marker.scale.y = 3;
+    marker.scale.z = 3;
+    marker.color.r = 0.0f;
+    marker.color.g = 1.0f;
+    marker.color.b = 0.0f;
+    marker.color.a = 1.0f;
+    marker.header.stamp = ros::Time::now();
+    marker.header.frame_id = "map";
+    turn_marker.markers.push_back(marker);
+
+    pub_turnMarker.publish(turn_marker);
+  }
+  else
+    sub_GlobalPlannerPaths = nh.subscribe("/lane_waypoints_array",   1,    &BehaviorGen::callbackGetGlobalPlannerPath,   this);
+
+  rubis::stop_task_profiling(rubis::instance_, 0);
 }
 
 void BehaviorGen::callbackGetV2XTrafficLightSignals(const autoware_msgs::RUBISTrafficSignalArray& msg)
@@ -481,7 +617,7 @@ void BehaviorGen::VisualizeLocalPlanner()
 //  pub_SelectedPathRviz.publish(selected_path);
 }
 
-void BehaviorGen::SendLocalPlanningTopics()
+void BehaviorGen::SendLocalPlanningTopics(const rubis_msgs::LaneArrayWithPoseTwistConstPtr& msg)
 {
   //Send Behavior State
   geometry_msgs::Twist t;
@@ -523,13 +659,23 @@ void BehaviorGen::SendLocalPlanningTopics()
   PlannerHNS::RelativeInfo info;
   PlannerHNS::PlanningHelpers::GetRelativeInfo(m_BehaviorGenerator.m_Path, m_BehaviorGenerator.state, info);
   PlannerHNS::ROSHelpers::ConvertFromLocalLaneToAutowareLane(m_BehaviorGenerator.m_Path, m_CurrentTrajectoryToSend, info.iBack);
-  //std::cout << "Path Size: " << m_BehaviorGenerator.m_Path.size() << ", Send Size: " << m_CurrentTrajectoryToSend << std::endl;
+  //std::cout << "Path Size: " << m_BehaviorGenerator.m_Path.size() << ", Send Size: " << m_CurrentTrajectoryToSend << std::endl;  
 
   closest_waypoint.data = 1;
   pub_ClosestIndex.publish(closest_waypoint);
   pub_LocalBasePath.publish(m_CurrentTrajectoryToSend);
+
+  rubis_msgs::LaneWithPoseTwist final_waypoints_with_pose_twist_msg;
+  final_waypoints_with_pose_twist_msg.instance = rubis::instance_;
+  final_waypoints_with_pose_twist_msg.obj_instance = rubis::obj_instance_;
+  final_waypoints_with_pose_twist_msg.lane = m_CurrentTrajectoryToSend;  
+  final_waypoints_with_pose_twist_msg.pose = msg->pose;
+  final_waypoints_with_pose_twist_msg.twist = msg->twist;
+
+  pub_LocalPathWithPosePub.publish(final_waypoints_with_pose_twist_msg);
   pub_LocalPath.publish(m_CurrentTrajectoryToSend);
-  rubis::sched::task_state_ = TASK_STATE_DONE;
+
+  
 }
 
 void BehaviorGen::LogLocalPlanningInfo(double dt)
@@ -606,195 +752,32 @@ void BehaviorGen::MainLoop()
 {
   ros::NodeHandle private_nh("~");
 
-  timespec planningTimer;
-  UtilityHNS::UtilityH::GetTickCount(planningTimer);
-  std_msgs::Bool emergency_stop_msg;
-
-  // Scheduling Setup
-  int task_scheduling_flag;
-  int task_profiling_flag;
-  std::string task_response_time_filename;
-  int rate;
-  double task_minimum_inter_release_time;
-  double task_execution_time;
-  double task_relative_deadline; 
-
   m_BehaviorGenerator.m_turnThreshold = m_turnThreshold;
-
-m_sprintSwitch = false;
-
-  private_nh.param<int>("/op_behavior_selector/task_scheduling_flag", task_scheduling_flag, 0);
-  private_nh.param<int>("/op_behavior_selector/task_profiling_flag", task_profiling_flag, 0);
-  private_nh.param<std::string>("/op_behavior_selector/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/op_behavior_selector.csv");
-  private_nh.param<int>("/op_behavior_selector/rate", rate, 10);
-  private_nh.param("/op_behavior_selector/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
-  private_nh.param("/op_behavior_selector/task_execution_time", task_execution_time, (double)10);
-  private_nh.param("/op_behavior_selector/task_relative_deadline", task_relative_deadline, (double)10);
-
-  /* For Task scheduling */
-  if(task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
-
-  ros::Rate loop_rate(rate);  
-  if(!task_scheduling_flag && !task_profiling_flag) loop_rate = ros::Rate(25);
-
-  struct timespec start_time, end_time;
-
   m_sprintSwitch = false;
 
-  while (ros::ok())
-  {
-    if(task_profiling_flag) rubis::sched::start_task_profiling();
+  // Scheduling & Profiling Setup
+  std::string node_name = ros::this_node::getName();
+  std::string task_response_time_filename;
+  private_nh.param<std::string>(node_name+"/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/op_behavior_selector.csv");
 
-    if(rubis::sched::is_task_ready_ == TASK_READY && rubis::sched::task_state_ == TASK_STATE_READY){
-      if(task_scheduling_flag) rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline); 
-      rubis::sched::task_state_ = TASK_STATE_RUNNING;     
-    }
+  int rate;
+  private_nh.param<int>(node_name+"/rate", rate, 10);
 
-    ros::spinOnce();
+  struct rubis::sched_attr attr;
+  std::string policy;
+  int priority, exec_time ,deadline, period;
+    
+  private_nh.param(node_name+"/task_scheduling_configs/policy", policy, std::string("NONE"));    
+  private_nh.param(node_name+"/task_scheduling_configs/priority", priority, 99);
+  private_nh.param(node_name+"/task_scheduling_configs/exec_time", exec_time, 0);
+  private_nh.param(node_name+"/task_scheduling_configs/deadline", deadline, 0);
+  private_nh.param(node_name+"/task_scheduling_configs/period", period, 0);
+  attr = rubis::create_sched_attr(priority, exec_time, deadline, period);    
+  rubis::init_task_scheduling(policy, attr);
 
-    // Check Pedestrian is Appeared
-    double dt  = UtilityHNS::UtilityH::GetTimeDiffNow(planningTimer);
-    UtilityHNS::UtilityH::GetTickCount(planningTimer);
+  rubis::init_task_profiling(task_response_time_filename);
 
-    if(m_MapType == PlannerHNS::MAP_KML_FILE && !bMap)
-    {
-      bMap = true;
-      PlannerHNS::MappingHelpers::LoadKML(m_MapPath, m_Map);
-    }
-    else if (m_MapType == PlannerHNS::MAP_FOLDER && !bMap)
-    {
-      bMap = true;
-      PlannerHNS::MappingHelpers::ConstructRoadNetworkFromDataFiles(m_MapPath, m_Map, true);
-
-    }
-    else if (m_MapType == PlannerHNS::MAP_AUTOWARE && !bMap)
-    {
-      std::vector<UtilityHNS::AisanDataConnFileReader::DataConn> conn_data;;
-
-      if(m_MapRaw.GetVersion()==2)
-      {
-        PlannerHNS::MappingHelpers::ConstructRoadNetworkFromROSMessageV2(m_MapRaw.pLanes->m_data_list, m_MapRaw.pPoints->m_data_list,
-            m_MapRaw.pCenterLines->m_data_list, m_MapRaw.pIntersections->m_data_list,m_MapRaw.pAreas->m_data_list,
-            m_MapRaw.pLines->m_data_list, m_MapRaw.pStopLines->m_data_list,  m_MapRaw.pSignals->m_data_list,
-            m_MapRaw.pVectors->m_data_list, m_MapRaw.pCurbs->m_data_list, m_MapRaw.pRoadedges->m_data_list, m_MapRaw.pWayAreas->m_data_list,
-            m_MapRaw.pCrossWalks->m_data_list, m_MapRaw.pNodes->m_data_list, conn_data,
-            m_MapRaw.pLanes, m_MapRaw.pPoints, m_MapRaw.pNodes, m_MapRaw.pLines, PlannerHNS::GPSPoint(), m_Map, true, m_PlanningParams.enableLaneChange, false);
-
-        try{
-          // Add Traffic Signal Info from yaml file
-          XmlRpc::XmlRpcValue traffic_light_list;
-          nh.getParam("/op_behavior_selector/traffic_light_list", traffic_light_list);
-
-          // Add Stop Line Info from yaml file
-          XmlRpc::XmlRpcValue stop_line_list;
-          nh.getParam("/op_behavior_selector/stop_line_list", stop_line_list);
-
-          // Add Crossing Info from yaml file
-          // XmlRpc::XmlRpcValue intersection_list;
-          // nh.getParam("/op_behavior_selector/intersection_list", intersection_list);
-
-          PlannerHNS::MappingHelpers::ConstructRoadNetwork_RUBIS(m_Map, traffic_light_list, stop_line_list);
-        }
-        catch(XmlRpc::XmlRpcException& e){
-          ROS_ERROR("[XmlRpc Error] %s", e.getMessage().c_str());
-          exit(1);
-        }
-
-        m_BehaviorGenerator.m_Map = m_Map;
-
-        if(m_Map.roadSegments.size() > 0)
-        {
-          bMap = true;
-          std::cout << " ******* Map V2 Is Loaded successfully from the Behavior Selector !! " << std::endl;
-        }
-      }
-      else if(m_MapRaw.GetVersion()==1)
-      {
-        PlannerHNS::MappingHelpers::ConstructRoadNetworkFromROSMessage(m_MapRaw.pLanes->m_data_list, m_MapRaw.pPoints->m_data_list,
-            m_MapRaw.pCenterLines->m_data_list, m_MapRaw.pIntersections->m_data_list,m_MapRaw.pAreas->m_data_list,
-            m_MapRaw.pLines->m_data_list, m_MapRaw.pStopLines->m_data_list,  m_MapRaw.pSignals->m_data_list,
-            m_MapRaw.pVectors->m_data_list, m_MapRaw.pCurbs->m_data_list, m_MapRaw.pRoadedges->m_data_list, m_MapRaw.pWayAreas->m_data_list,
-            m_MapRaw.pCrossWalks->m_data_list, m_MapRaw.pNodes->m_data_list, conn_data,  PlannerHNS::GPSPoint(), m_Map, true, m_PlanningParams.enableLaneChange, false);
-
-        if(m_Map.roadSegments.size() > 0)
-        {
-          bMap = true;
-          std::cout << " ******* Map V1 Is Loaded successfully from the Behavior Selector !! " << std::endl;
-        }
-      }
-    }
-
-    if(bNewCurrentPos && m_GlobalPaths.size()>0)
-    {
-      if(bNewLightSignal)
-      {
-        m_PrevTrafficLight = m_CurrTrafficLight;
-        bNewLightSignal = false;
-      }
-
-      if(bNewLightStatus)
-      {
-        bNewLightStatus = false;
-        for(unsigned int itls = 0 ; itls < m_PrevTrafficLight.size() ; itls++)
-          m_PrevTrafficLight.at(itls).lightState = m_CurrLightStatus;
-      }
-      
-      m_BehaviorGenerator.m_sprintSwitch = m_sprintSwitch;
-      m_CurrentBehavior = m_BehaviorGenerator.DoOneStep(dt, m_CurrentPos, m_VehicleStatus, 1, m_CurrTrafficLight, m_TrajectoryBestCost, 0);
-      std_msgs::Int32 curr_state_msg;
-      curr_state_msg.data = m_CurrentBehavior.state;
-
-      pub_currentState.publish(curr_state_msg);
-
-      CalculateTurnAngle(m_BehaviorGenerator.m_turnWaypoint);
-      m_BehaviorGenerator.m_turnAngle = m_turnAngle;
-
-      std_msgs::Float64 turn_angle_msg;
-      turn_angle_msg.data = m_turnAngle;
-      pub_turnAngle.publish(turn_angle_msg);
-
-      emergency_stop_msg.data = false;
-      if(m_CurrentBehavior.maxVelocity == -1)//Emergency Stop!
-        emergency_stop_msg.data = true;
-      pub_EmergencyStop.publish(emergency_stop_msg);
-
-      SendLocalPlanningTopics();
-      VisualizeLocalPlanner();
-      LogLocalPlanningInfo(dt);
-
-      // Publish turn_marker
-      visualization_msgs::MarkerArray turn_marker;
-      visualization_msgs::Marker marker;
-      marker.header.frame_id = "map";
-      marker.type = 2;
-      marker.pose.position.x = m_BehaviorGenerator.m_turnWaypoint.pos.x;
-      marker.pose.position.y = m_BehaviorGenerator.m_turnWaypoint.pos.y;
-      marker.pose.position.z = m_BehaviorGenerator.m_turnWaypoint.pos.z;
-      marker.scale.x = 3;
-      marker.scale.y = 3;
-      marker.scale.z = 3;
-      marker.color.r = 0.0f;
-      marker.color.g = 1.0f;
-      marker.color.b = 0.0f;
-      marker.color.a = 1.0f;
-      marker.header.stamp = ros::Time::now();
-      marker.header.frame_id = "map";
-      turn_marker.markers.push_back(marker);
-
-      pub_turnMarker.publish(turn_marker);
-    }
-    else
-      sub_GlobalPlannerPaths = nh.subscribe("/lane_waypoints_array",   1,    &BehaviorGen::callbackGetGlobalPlannerPath,   this);
-
-    if(task_profiling_flag) rubis::sched::stop_task_profiling(0, rubis::sched::task_state_);
-
-    if(rubis::sched::is_task_ready_ == TASK_READY && rubis::sched::task_state_ == TASK_STATE_DONE){
-      if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
-      rubis::sched::task_state_ = TASK_STATE_READY;
-    }
-
-    loop_rate.sleep();
-  }
+  ros::spin();
 }
 
 bool BehaviorGen::GetBaseMapTF(){

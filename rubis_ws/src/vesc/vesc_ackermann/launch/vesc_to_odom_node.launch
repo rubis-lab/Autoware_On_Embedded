@@ -8,7 +8,7 @@
 
   <!-- VESC to Odom node -->
   <node pkg="vesc_ackermann" type="vesc_to_odom_node" name="vesc_to_odom_node"
-        output="screen" launch-prefix="$(arg launch_prefix)" >
+        launch-prefix="$(arg launch_prefix)" >
   </node>
 
 </launch>

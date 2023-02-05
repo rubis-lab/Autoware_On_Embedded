@@ -55,7 +55,6 @@
 #define TASK_READY 1
 
 namespace rubis {
-namespace sched {
 
 // contains thread-specific arguments
 struct thr_arg {
@@ -91,61 +90,31 @@ struct sched_attr {
 	__u64 sched_period;
 };
 
-// GPU 
-typedef struct  gpuSchedInfo{
-    int pid;
-    unsigned long deadline;
-    int state; // NONE = 0, WAIT = 1, RUN = 2
-    int scheduling_flag;
-} GPUSchedInfo;
-
 extern int key_id_;
 extern int is_scheduled_;
-extern int gpu_scheduling_flag_;
-extern GPUSchedInfo* gpu_sched_info_;
-extern int gpu_scheduler_pid_;
 extern std::string task_filename_;
-extern std::string gpu_deadline_filename_;
-// extern unsigned long gpu_deadline_list_[1024];
-extern unsigned long* gpu_deadline_list_;
-extern unsigned int max_gpu_id_;
-extern unsigned int gpu_seg_id_;
-extern unsigned int cpu_seg_id_;
-extern int task_state_;
-extern int is_task_ready_;
-extern int was_in_loop_;
-extern int loop_cnt_;
-extern int gpu_seg_cnt_in_loop_;
 
-// Task scheduling
 int sched_setattr(pid_t pid, const struct sched_attr *attr, unsigned int flags);
 int sched_getattr(pid_t pid, struct sched_attr *attr, unsigned int size, unsigned int flags);
-bool set_sched_deadline(int _tid, __u64 _exec_time, __u64 _deadline, __u64 _period);
-void request_task_scheduling(double task_minimum_inter_release_time, double task_execution_time, double task_relative_deadline);
-void yield_task_scheduling();
-void init_task();
-void disable_task();
 
-// GPU scheduling
-void init_gpu_scheduling(std::string task_filename, std::string gpu_deadline_filename, int key_id);
-void get_deadline_list();
+bool set_sched_deadline(int pid, unsigned int exec_time, unsigned int deadline, unsigned int period);
+bool set_sched_fifo(int pid, int priority);
+bool set_sched_fifo(int pid, int priority, int child_priority);
+bool set_sched_rr(int pid, int priority);
+bool set_sched_rr(int pid, int priority, int child_priority);
+
+bool init_task_scheduling(std::string policy, struct sched_attr attr);
+void yield_task_scheduling();
+struct sched_attr create_sched_attr(int priority, int exec_time, int deadline, int period);
+
 void sig_handler(int signum);
 void termination();
 unsigned long get_current_time_us();
 
+std::string get_cmd_output(const char* cmd);
+std::vector<int> get_child_pids(int pid);
+std::vector<std::string> tokenize_string(std::string s, std::string delimiter);
 
-void start_job();
-void finish_job();
-
-void request_gpu();
-void request_gpu_in_loop(int flag);
-
-void yield_gpu(std::string remark = "");
-void yield_gpu_in_loop(int flag, std::string remark = "");
-void print_loop_info(std::string tag);
-void print_gpu_deadline_list();
-
-} // namespace sched
 } // namespace rubis
 
 #endif

@@ -27,6 +27,7 @@
 #include <geometry_msgs/Point.h>
 #include <rubis_msgs/PoseStamped.h>
 #include <rubis_msgs/TwistStamped.h>
+#include <rubis_msgs/PoseTwistStamped.h>
 
 #include <ros/ros.h>
 #include <std_msgs/Float32.h>
@@ -39,12 +40,12 @@
 #include <pure_pursuit/pure_pursuit.h>
 #include <pure_pursuit/pure_pursuit_viz.h>
 
-#include <autoware_health_checker/health_checker/health_checker.h>
-
 #include <vector>
 #include <memory>
 
 #include <XmlRpcException.h>
+
+#include "rubis_msgs/LaneWithPoseTwist.h"
 
 #ifdef IONIC
 #include <can_data_msgs/Car_ctrl_output.h>
@@ -91,8 +92,6 @@ private:
   ros::NodeHandle nh_;
   ros::NodeHandle private_nh_;
 
-  std::shared_ptr<autoware_health_checker::HealthChecker> health_checker_ptr_;
-
   // class
   PurePursuit pp_;
 
@@ -101,7 +100,7 @@ private:
     pub11_, pub12_, pub13_, pub14_, pub15_, pub16_, pub17_, pub18_;
 
   // subscriber
-  ros::Subscriber sub1_, pose_sub_, rubis_pose_sub_, sub3_, velocity_sub_, car_ctrl_output_sub;
+  ros::Subscriber sub1_, sub3_, pose_twist_sub_, final_waypoints_with_pose_twist_sub, car_ctrl_output_sub;
 
   // constant
   const int LOOP_RATE_;  // processing frequency
@@ -129,17 +128,14 @@ private:
   // Added by PHY
   bool dynamic_param_flag_;
   std::vector<DynamicParams> dynamic_params;
+  autoware_msgs::Lane lane_;
 
   // callbacks
-  void callbackFromConfig(
-    const autoware_config_msgs::ConfigWaypointFollowerConstPtr& config);
-  void callbackFromCurrentPose(const geometry_msgs::PoseStampedConstPtr& msg);
-  void callbackFromRubisCurrentPose(const rubis_msgs::PoseStampedConstPtr& _msg);
+  void callbackFromConfig(const autoware_config_msgs::ConfigWaypointFollowerConstPtr& config);
   void callbackFromWayPoints(const autoware_msgs::LaneConstPtr& msg);
-
-  #ifdef SVL
-  void callbackFromCurrentVelocity(const geometry_msgs::TwistStampedConstPtr& msg);
-  #endif
+  void CallbackTwistPose(const rubis_msgs::PoseTwistStampedConstPtr& msg);
+  void CallbackFinalWaypointsWithPoseTwist(const rubis_msgs::LaneWithPoseTwistConstPtr& msg);
+  void _CallbackFinalWaypointsWithPoseTwist();
 
   #ifdef IONIC
   void callbackCtrlOutput(const can_data_msgs::Car_ctrl_output::ConstPtr &msg);
@@ -164,7 +160,7 @@ private:
     const std::vector<autoware_msgs::Waypoint>& waypoints) const;
   void connectVirtualLastWaypoints(
     autoware_msgs::Lane* expand_lane, LaneDirection direction);
-  inline void updateCurrentPose(const geometry_msgs::PoseStampedConstPtr& msg);
+  inline void updateCurrentPose(geometry_msgs::PoseStampedConstPtr& msg);
   
   // Added by PHY
   void setLookaheadParamsByVel();

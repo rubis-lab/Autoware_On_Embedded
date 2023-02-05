@@ -1,6 +1,6 @@
 <launch>
     <arg name="input_topic" default="/image_raw_origin"/>
-    <node pkg="rubis_pkg" type="camera_republisher" name="camera_republisher" output="screen">
+    <node pkg="rubis_pkg" type="camera_republisher" name="camera_republisher">
         <param name="/input_topic" value="$(arg input_topic)" />
     </node>
 </launch>

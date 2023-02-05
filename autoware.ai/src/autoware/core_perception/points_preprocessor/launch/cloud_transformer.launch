@@ -6,7 +6,7 @@
         <arg name="target_frame" default="base_link" /> <!-- target_frame, coordinate frame system target -->
 
         <!-- rosrun points_preprocessor ray_ground_filter -->
-        <node pkg="points_preprocessor" type="cloud_transformer" name="cloud_transformer" output="screen">
+        <node pkg="points_preprocessor" type="cloud_transformer" name="cloud_transformer">
                 <param name="input_point_topic" value="$(arg input_point_topic)" />
                 <param name="output_point_topic" value="$(arg output_point_topic)" />
                 <param name="target_frame" value="$(arg target_frame)" />

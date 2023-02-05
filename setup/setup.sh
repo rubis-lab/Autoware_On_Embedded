@@ -42,21 +42,6 @@ if [ ! -d ~/Documents/profiling/response_time ]; then
     printf "~/Documents/profiling/response_time is created.\n"
 fi
 
-if [ ! -d ~/Documents/gpu_profiling ]; then
-    mkdir ~/Documents/gpu_profiling
-    printf "~/Documents/gpu_profiling is created.\n"
-fi
-
-if [ ! -d ~/Documents/gpu_profiling ]; then
-    mkdir ~/Documents/gpu_profiling
-    printf "~/Documents/gpu_profiling is created.\n"
-fi
-
-if [ ! -d ~/Documents/gpu_deadline ]; then
-    mkdir ~/Documents/gpu_deadline
-    printf "~/Documents/gpu_deadline is created.\n"
-fi
-
 echo "Necessary directory paths are created to /home/${1}/Documents"
 
 sudo ./setup_bashrc.sh $1

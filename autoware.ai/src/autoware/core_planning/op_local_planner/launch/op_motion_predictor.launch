@@ -12,7 +12,7 @@
   <arg name="object_tf_list" default="[/velodyne]" />
   
   
-  <node pkg="op_local_planner" type="op_motion_predictor" name="op_motion_predictor" output="screen">    
+  <node pkg="op_local_planner" type="op_motion_predictor" name="op_motion_predictor" output="screen" >
     <param name="max_distance_to_lane"     value="$(arg max_distance_to_lane)"/>
     <param name="prediction_distance"     value="$(arg prediction_distance)"/>
     <param name="enableGenrateBranches"   value="$(arg enableGenrateBranches)"/>
@@ -26,7 +26,7 @@
   </node>
 
   <node pkg="detected_objects_visualizer" type="visualize_detected_objects" name="predicted_objects_visualizer"
-        output="screen">
+       >
     <param name="objects_src_topic" value="/predicted_objects"/>
     <param name="label" value="total" />
   </node>

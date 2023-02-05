@@ -4,6 +4,6 @@
 
   <param name="/carla/maps_path" value="$(arg maps_path)" />
 
-  <node pkg="carla_points_map_loader" type="carla_points_map_loader" name="carla_points_map_loader" output="screen"/>
+  <node pkg="carla_points_map_loader" type="carla_points_map_loader" name="carla_points_map_loader"/>
 </launch>
 

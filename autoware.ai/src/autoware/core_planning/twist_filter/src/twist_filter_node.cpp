@@ -18,7 +18,7 @@
 
 namespace twist_filter_node
 {
-TwistFilterNode::TwistFilterNode() : nh_(), private_nh_("~"), health_checker_(nh_, private_nh_)
+TwistFilterNode::TwistFilterNode() : nh_(), private_nh_("~")
 {
   // Parameters
   twist_filter::Configuration twist_filter_config;
@@ -29,30 +29,19 @@ TwistFilterNode::TwistFilterNode() : nh_(), private_nh_("~"), health_checker_(nh
   nh_.param("twist_filter/lowpass_gain_angular_z", twist_filter_config.lowpass_gain_angular_z, 0.0);
   nh_.param("twist_filter/lowpass_gain_steering_angle", twist_filter_config.lowpass_gain_steering_angle, 0.0);
   nh_.param("twist_filter/max_stop_count", max_stop_count_, 30);
-  nh_.param("twist_filter/instance_mode", rubis::instance_mode_, 0);
   twist_filter_ptr_ = std::make_shared<twist_filter::TwistFilter>(twist_filter_config);
   emergency_stop_ = false;
   current_stop_count_ = 0;
 
-  // Enable health checker
-  health_checker_.ENABLE();
-
   // Subscribe
-  if(rubis::instance_mode_) rubis_twist_sub_ = nh_.subscribe("rubis_twist_raw", 1, &TwistFilterNode::rubisTwistCmdCallback, this);
-  else twist_sub_ = nh_.subscribe("twist_raw", 1, &TwistFilterNode::twistCmdCallback, this);
+  rubis_twist_sub_ = nh_.subscribe("rubis_twist_raw", 1, &TwistFilterNode::rubisTwistCmdCallback, this);
   ctrl_sub_ = nh_.subscribe("ctrl_raw", 1, &TwistFilterNode::ctrlCmdCallback, this);
   config_sub_ = nh_.subscribe("config/twist_filter", 10, &TwistFilterNode::configCallback, this);
   emergency_stop_sub_ = nh_.subscribe("emergency_stop", 1 ,&TwistFilterNode::emergencyStopCallback, this);
 
-  /*  RT Scheduling setup  */
-  // twist_sub_ = nh_.subscribe("twist_raw", 1, &TwistFilterNode::twistCmdCallback, this);
-  // ctrl_sub_ = nh_.subscribe("ctrl_raw", 1, &TwistFilterNode::ctrlCmdCallback, this);
-  // config_sub_ = nh_.subscribe("config/twist_filter", 1, &TwistFilterNode::configCallback, this); //origin 10
-  // emergency_stop_sub_ = nh_.subscribe("emergency_stop", 1 ,&TwistFilterNode::emergencyStopCallback, this);
-
   // Publish
   twist_pub_ = nh_.advertise<geometry_msgs::TwistStamped>("twist_cmd", 5);
-  if(rubis::instance_mode_) rubis_twist_pub_ = nh_.advertise<rubis_msgs::TwistStamped>("rubis_twist_cmd", 5);
+  rubis_twist_pub_ = nh_.advertise<rubis_msgs::TwistStamped>("rubis_twist_cmd", 5);
   ctrl_pub_ = nh_.advertise<autoware_msgs::ControlCommandStamped>("ctrl_cmd", 5);
   twist_lacc_limit_debug_pub_ = private_nh_.advertise<std_msgs::Float32>("limitation_debug/twist/lateral_accel", 5);
   twist_ljerk_limit_debug_pub_ = private_nh_.advertise<std_msgs::Float32>("limitation_debug/twist/lateral_jerk", 5);
@@ -84,9 +73,6 @@ inline void TwistFilterNode::publishTwist(const geometry_msgs::TwistStampedConst
   static twist_filter::Twist twist_prev = twist;
 
   double time_elapsed = (current_time - last_callback_time).toSec();
-
-  health_checker_.NODE_ACTIVATE();
-  checkTwist(twist, twist_prev, time_elapsed);
 
   twist_filter::Twist twist_out = twist;
 
@@ -127,15 +113,11 @@ inline void TwistFilterNode::publishTwist(const geometry_msgs::TwistStampedConst
     out_msg.twist.angular.z = 0;
   }
   twist_pub_.publish(out_msg);
-  if(rubis::instance_mode_ && rubis::instance_ != RUBIS_NO_INSTANCE){
-    rubis_msgs::TwistStamped rubis_out_msg;
-    rubis_out_msg.instance = rubis::instance_;
-    rubis_out_msg.msg = out_msg;
-    rubis_twist_pub_.publish(rubis_out_msg);
-  }
-
-  if(rubis::sched::is_task_ready_ == TASK_NOT_READY) rubis::sched::init_task();
-  rubis::sched::task_state_ = TASK_STATE_DONE;
+  rubis_msgs::TwistStamped rubis_out_msg;
+  rubis_out_msg.instance = rubis::instance_;
+  rubis_out_msg.obj_instance = rubis::obj_instance_;
+  rubis_out_msg.msg = out_msg;
+  rubis_twist_pub_.publish(rubis_out_msg);
 
   // Publish lateral accel and jerk after smoothing
   auto lacc_smoothed_result = twist_filter_ptr_->calcLaccWithAngularZ(twist_out);
@@ -159,20 +141,37 @@ inline void TwistFilterNode::publishTwist(const geometry_msgs::TwistStampedConst
 }
 
 void TwistFilterNode::rubisTwistCmdCallback(const rubis_msgs::TwistStampedConstPtr& _msg){
+  // Before spin
+  rubis::start_task_profiling();
+
+  // Callback
+  _emergencyStopCallback();
+  _ctrlCmdCallback(ctrl_cmd_ptr_);
+
   geometry_msgs::TwistStampedConstPtr msg = boost::make_shared<const geometry_msgs::TwistStamped>(_msg-> msg);
   rubis::instance_ = _msg->instance;
+  rubis::obj_instance_ = _msg->obj_instance;
   publishTwist(msg);
+
+  // After spin
+  rubis::stop_task_profiling(rubis::instance_, 0);
 }
 
 
 void TwistFilterNode::twistCmdCallback(const geometry_msgs::TwistStampedConstPtr& msg)
 {
-  rubis::instance_ = RUBIS_NO_INSTANCE;
+  rubis::instance_ = 0;
   publishTwist(msg);
 }
 
 void TwistFilterNode::ctrlCmdCallback(const autoware_msgs::ControlCommandStampedConstPtr& msg)
 {
+  ctrl_cmd_ptr_ = boost::make_shared<autoware_msgs::ControlCommandStamped const>(*msg);
+}
+
+void TwistFilterNode::_ctrlCmdCallback(const autoware_msgs::ControlCommandStampedConstPtr& msg)
+{
+  if(ctrl_cmd_ptr_ == NULL) return;
   const twist_filter::Ctrl ctrl = { msg->cmd.linear_velocity, msg->cmd.steering_angle };
   ros::Time current_time = ros::Time::now();
 
@@ -181,7 +180,6 @@ void TwistFilterNode::ctrlCmdCallback(const autoware_msgs::ControlCommandStamped
 
   double time_elapsed = (current_time - last_callback_time).toSec();
 
-  health_checker_.NODE_ACTIVATE();
   checkCtrl(ctrl, ctrl_prev, time_elapsed);
 
   twist_filter::Ctrl ctrl_out = ctrl;
@@ -243,15 +241,19 @@ void TwistFilterNode::ctrlCmdCallback(const autoware_msgs::ControlCommandStamped
 }
 
 void TwistFilterNode::emergencyStopCallback(const std_msgs::Bool& msg){
-  bool current_emergency_stop = msg.data;
+  current_emergency_stop_ = msg.data;
+  return;
+}
+
+void TwistFilterNode::_emergencyStopCallback(){
   static std::string state("none");
   
-  if(current_emergency_stop == true){
+  if(current_emergency_stop_ == true){
     state = std::string("object is detected");
     emergency_stop_ = true;
     current_stop_count_ = max_stop_count_;
   }
-  else if(current_emergency_stop == false && emergency_stop_ == true){ // Emergency Stop event is finished or wait
+  else if(current_emergency_stop_ == false && emergency_stop_ == true){ // Emergency Stop event is finished or wait
     current_stop_count_--;
     if(current_stop_count_ > 0){
       state = std::string("Wait for go");
@@ -260,7 +262,7 @@ void TwistFilterNode::emergencyStopCallback(const std_msgs::Bool& msg){
     else
       emergency_stop_ = false;
   }
-  else if(current_emergency_stop == false && emergency_stop_ == false){ // No event
+  else if(current_emergency_stop_ == false && emergency_stop_ == false){ // No event
     state = std::string("No object");
     emergency_stop_ = false;
     current_stop_count_ = 0;
@@ -275,18 +277,6 @@ void TwistFilterNode::checkTwist(const twist_filter::Twist twist, const twist_fi
 
   const twist_filter::Configuration& config = twist_filter_ptr_->getConfiguration();
 
-  if (lacc)
-  {
-    health_checker_.CHECK_MAX_VALUE("twist_lateral_accel_high", lacc.get(), config.lateral_accel_limit,
-                                    2 * config.lateral_accel_limit, DBL_MAX,
-                                    "lateral_accel is too high in twist filtering");
-  }
-  if (ljerk)
-  {
-    health_checker_.CHECK_MAX_VALUE("twist_lateral_jerk_high", lacc.get(), config.lateral_jerk_limit,
-                                    2 * config.lateral_jerk_limit, DBL_MAX,
-                                    "lateral_jerk is too high in twist filtering");
-  }
 }
 
 void TwistFilterNode::checkCtrl(const twist_filter::Ctrl ctrl, const twist_filter::Ctrl ctrl_prev, const double& dt)
@@ -296,18 +286,6 @@ void TwistFilterNode::checkCtrl(const twist_filter::Ctrl ctrl, const twist_filte
 
   const twist_filter::Configuration& config = twist_filter_ptr_->getConfiguration();
 
-  if (lacc)
-  {
-    health_checker_.CHECK_MAX_VALUE("ctrl_lateral_accel_high", lacc.get(), config.lateral_accel_limit,
-                                    3 * config.lateral_accel_limit, DBL_MAX,
-                                    "lateral_accel is too high in ctrl filtering");
-  }
-  if (ljerk)
-  {
-    health_checker_.CHECK_MAX_VALUE("ctrl_lateral_jerk_high", lacc.get(), config.lateral_jerk_limit,
-                                    3 * config.lateral_jerk_limit, DBL_MAX,
-                                    "lateral_jerk is too high in ctrl filtering");
-  }
 }
 
 }  // namespace twist_filter_node

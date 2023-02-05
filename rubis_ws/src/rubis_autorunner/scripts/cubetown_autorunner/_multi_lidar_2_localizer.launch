@@ -15,7 +15,6 @@
   <arg name="output_log" default="false" />
   <arg name="leaf_size" default="0.1" />
   <arg name="measurement_range" default="200" />
-  <arg name="instance_mode" default="0"/>
 
   <arg name="method_type" default="0"/>
   <arg name="max_iter" default="10"/>
@@ -33,7 +32,6 @@
     <param name="leaf_size" value="$(arg leaf_size)" />
     <param name="measurement_range" value="$(arg measurement_range)" />
     <param name="output_log" value="$(arg output_log)" />
-    <param name="instance_mode" value="$(arg instance_mode)" />
   </node>
 
   <node pkg="lidar_localizer" type="modular_ndt_matching" name="modular_ndt_matching_FL">
@@ -78,10 +76,9 @@
     <param name="leaf_size" value="$(arg leaf_size)" />
     <param name="measurement_range" value="$(arg measurement_range)" />
     <param name="output_log" value="$(arg output_log)" />
-    <param name="instance_mode" value="$(arg instance_mode)" />
   </node>
 
-  <node pkg="lidar_localizer" type="modular_ndt_matching" name="modular_ndt_matching_FR" output="screen">
+  <node pkg="lidar_localizer" type="modular_ndt_matching" name="modular_ndt_matching_FR">
     <!-- pcl_generic=0, pcl_anh=1, pcl_anh_gpu=2, pcl_openmp=3 -->
     <param name="method_type" value="$(arg method_type)" />
 
@@ -123,7 +120,6 @@
     <param name="leaf_size" value="$(arg leaf_size)" />
     <param name="measurement_range" value="$(arg measurement_range)" />
     <param name="output_log" value="$(arg output_log)" />
-    <param name="instance_mode" value="$(arg instance_mode)" />
   </node>
 
   <node pkg="lidar_localizer" type="modular_ndt_matching" name="modular_ndt_matching_B">
@@ -161,7 +157,7 @@
     <param name="ndt_time_topic" value="ndt_time_B" />
   </node>
 
-  <node pkg="lidar_localizer" type="multi_ndt_combiner" name="multi_ndt_combiner" output="screen">
+  <node pkg="lidar_localizer" type="multi_ndt_combiner" name="multi_ndt_combiner">
     <rosparam param="pose_topics">["ndt_pose_FL", "ndt_pose_FR", "ndt_pose_B"]</rosparam>
     <rosparam param="stat_topics">["ndt_stat_FL", "ndt_stat_FR", "ndt_stat_B"]</rosparam>
     <param name="baselink_frame" value="base_link" />

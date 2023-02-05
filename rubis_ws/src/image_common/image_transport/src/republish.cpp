@@ -54,23 +54,19 @@ int main(int argc, char** argv)
 
   // scheduling
   ros::NodeHandle pnh("~");
-  int task_scheduling_flag = 0;
-  int task_profiling_flag = 0;
   std::string task_response_time_filename;
   int rate = 0;
   double task_minimum_inter_release_time = 0;
   double task_execution_time = 0;
   double task_relative_deadline = 0;
 
-  pnh.param<int>("/republish/task_scheduling_flag", task_scheduling_flag, 0);
-  pnh.param<int>("/republish/task_profiling_flag", task_profiling_flag, 0);
   pnh.param<std::string>("/republish/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/republish.csv");
   pnh.param<int>("/republish/rate", rate, 10);
   pnh.param("/republish/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)100000000);
   pnh.param("/republish/task_execution_time", task_execution_time, (double)100000000);
   pnh.param("/republish/task_relative_deadline", task_relative_deadline, (double)100000000);
   
-  if(task_profiling_flag) rubis::sched::init_task_profiling(task_response_time_filename);
+  rubis::init_task_profiling(task_response_time_filename);
 
   if (argc < 3) {
     // Use all available transports for output
@@ -81,34 +77,17 @@ int main(int argc, char** argv)
     PublishMemFn pub_mem_fn = &image_transport::Publisher::publish;
     sub = it.subscribe(in_topic, 1, boost::bind(pub_mem_fn, &pub, _1), ros::VoidPtr(), in_transport);
 
-    rubis::sched::task_state_ = TASK_STATE_READY;
+    ros::Rate r(rate);
+    // Executing task
+    while(ros::ok()){
+      rubis::start_task_profiling();
 
-    if(!task_scheduling_flag && !task_profiling_flag){
-      ros::spin();
-    }
-    else{
-      ros::Rate r(rate);
-      // Executing task
-      while(ros::ok()){
-        if(task_profiling_flag) rubis::sched::start_task_profiling();
+      ros::spinOnce();
+      
 
-        if(rubis::sched::task_state_ == TASK_STATE_READY){          
-          if(task_scheduling_flag) rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline); 
-          rubis::sched::task_state_ = TASK_STATE_RUNNING;     
-        }
+      rubis::stop_task_profiling(0, 0);
 
-        ros::spinOnce();
-        rubis::sched::task_state_ = TASK_STATE_DONE;
-
-        if(task_profiling_flag) rubis::sched::stop_task_profiling(0, rubis::sched::task_state_);
-
-        if(rubis::sched::task_state_ == TASK_STATE_DONE){          
-          if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
-          rubis::sched::task_state_ = TASK_STATE_READY;
-        }
-        
-        r.sleep();
-      }
+      r.sleep();
     }
   }
   else {
@@ -128,32 +107,14 @@ int main(int argc, char** argv)
     PublishMemFn pub_mem_fn = &Plugin::publish;
     sub = it.subscribe(in_topic, 1, boost::bind(pub_mem_fn, pub.get(), _1), pub, in_transport);
 
-    if(!task_scheduling_flag && !task_profiling_flag){
-      ros::spin();
-    }
-    else{      
-      ros::Rate r(rate);
-      // Executing task      
-      while(ros::ok()){
-        if(task_profiling_flag) rubis::sched::start_task_profiling();
-
-        if(rubis::sched::task_state_ == TASK_STATE_READY){          
-          if(task_scheduling_flag) rubis::sched::request_task_scheduling(task_minimum_inter_release_time, task_execution_time, task_relative_deadline); 
-          rubis::sched::task_state_ = TASK_STATE_RUNNING;     
-        }
-
-        ros::spinOnce();
-        rubis::sched::task_state_ = TASK_STATE_DONE;
-
-        if(task_profiling_flag) rubis::sched::stop_task_profiling(0, rubis::sched::task_state_);
-
-        if(rubis::sched::task_state_ == TASK_STATE_DONE){          
-          if(task_scheduling_flag) rubis::sched::yield_task_scheduling();
-          rubis::sched::task_state_ = TASK_STATE_READY;
-        }
-        
-        r.sleep();
-      }
+    ros::Rate r(rate);
+    // Executing task      
+    while(ros::ok()){
+      rubis::start_task_profiling();
+      ros::spinOnce();
+      
+      rubis::stop_task_profiling(0, 0);
+      r.sleep();
     }
   }
 
