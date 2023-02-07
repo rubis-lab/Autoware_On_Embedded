@@ -106,10 +106,10 @@ bool init_task_scheduling(std::string policy, struct sched_attr attr){
     return true;
   }
   else if(policy.compare(std::string("SCHED_FIFO")) == 0){
-    return set_sched_fifo(getpid(), attr.sched_priority, 10);
+    return set_sched_fifo(getpid(), attr.sched_priority, 99);
   }
   else if(policy.compare(std::string("SCHED_RR")) == 0){
-    return set_sched_rr(getpid(), attr.sched_priority, 10);
+    return set_sched_rr(getpid(), attr.sched_priority, 99);
   }
   else if(policy.compare(std::string("SCHED_DEADLINE")) == 0){
     return set_sched_deadline(getpid(), attr.sched_runtime, attr.sched_deadline, attr.sched_period);

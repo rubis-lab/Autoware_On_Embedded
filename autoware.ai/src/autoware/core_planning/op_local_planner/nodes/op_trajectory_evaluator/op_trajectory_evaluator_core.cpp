@@ -214,6 +214,7 @@ void TrajectoryEval::callbackGetGlobalPlannerPath(const autoware_msgs::LaneArray
 
 void TrajectoryEval::callbackGetLocalPlannerPath(const rubis_msgs::LaneArrayWithPoseTwistConstPtr& msg)
 {
+  rubis::start_task_profiling();
   // Before spin
   UpdateMyParams();
   UpdateTf();
@@ -374,7 +375,7 @@ void TrajectoryEval::callbackGetLocalPlannerPath(const rubis_msgs::LaneArrayWith
     sub_GlobalPlannerPaths = nh.subscribe("/lane_waypoints_array",   1,    &TrajectoryEval::callbackGetGlobalPlannerPath,   this);
 
 
-  rubis::stop_task_profiling(0, 0);  
+  rubis::stop_task_profiling(rubis::instance_, 0);  
 }
 
 void TrajectoryEval::callbackGetPredictedObjects(const rubis_msgs::DetectedObjectArrayConstPtr& msg)
