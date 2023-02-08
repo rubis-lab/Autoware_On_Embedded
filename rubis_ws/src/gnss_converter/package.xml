@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>gnss_converter</name>
+  <version>0.0.0</version>
+  <description>The gnss_converter package</description>
+
+  <maintainer email="sunhokim@todo.todo">sunhokim</maintainer>
+
+  <license>Apache 2</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_export_depend>roscpp</build_export_depend>
+  <build_export_depend>std_msgs</build_export_depend>
+  <exec_depend>roscpp</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <depend>inertiallabs_msgs</depend>
+  <depend>message_filters</depend>
+  <depend>tf</depend>
+  <depend>eigen</depend>
+  <depend>libopencv-dev</depend>
+</package>
