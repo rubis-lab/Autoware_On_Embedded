@@ -90,6 +90,9 @@ private:
   ros::Subscriber config_sub_;
   std::map<std::string, ros::Subscriber> auto_cmd_sub_stdmap_;
   ros::Timer timer_;
+  ros::Time current_time_;
+
+  bool is_current_time_changed_;
 
   vehicle_cmd_msg_t twist_gate_msg_;
   rubis_msgs::VehicleCmd rubis_twist_gate_msg_;

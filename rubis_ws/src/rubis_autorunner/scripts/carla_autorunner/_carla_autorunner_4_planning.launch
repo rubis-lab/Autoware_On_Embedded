@@ -18,6 +18,13 @@
     <arg name="goal_ori_y"            value="0.0" />
     <arg name="goal_ori_z"            value="0.99" />
     <arg name="goal_ori_w"            value="0.02" />
+    <!-- <arg name="goal_pose_x"           value="257.937" />
+    <arg name="goal_pose_y"           value="310.282" />
+    <arg name="goal_pose_z"           value="0.0" />
+    <arg name="goal_ori_x"            value="0.0" />
+    <arg name="goal_ori_y"            value="0.0" />
+    <arg name="goal_ori_z"            value="0.724" />
+    <arg name="goal_ori_w"            value="0.689" /> -->
   </include>
 
   <!-- op_common_params  -->
@@ -53,7 +60,9 @@
     <arg name="minVelocity"                     default="0.1" />  
     <arg name="speedProfileFactor"              default="1.2"  />
     <arg name="smoothingDataWeight"             default="0.45"  />
-    <arg name="smoothingSmoothWeight"           default="0.4"  />  
+    <arg name="smoothingSmoothWeight"           default="0.4"  />
+    <arg name="enableSlowDownOnCurve"           default="true" />
+    <arg name="curveVelocityRatio"           default="0.4" />
   </include>
 
   <!-- op_trajectory_generator -->

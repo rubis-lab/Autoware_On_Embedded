@@ -105,6 +105,8 @@ inline void TwistFilterNode::publishTwist(const geometry_msgs::TwistStampedConst
   // Smoothed value publish
   geometry_msgs::TwistStamped out_msg = *msg;
   if(emergency_stop_ == false){
+    // out_msg.twist.linear.x = twist_out.lx;
+    // out_msg.twist.angular.z = twist_out.az;
     out_msg.twist.linear.x = twist_out.lx;
     out_msg.twist.angular.z = twist_out.az;
   }

@@ -12,6 +12,7 @@
   <!-- lr du height roll pitch yaw  -->
   
   <arg name="spawn_point" default="258.5, 208.2, 0.3, 0, 0, 90"/>
+  <!-- <arg name="spawn_point" default="258.5, 127.05, 0.3, 0, 0, 90"/> -->
   <arg name='role_name_obstacle' default='obstacle'/>
   <!-- <arg name="spawn_point_obstacle" default="324.4, 346.1, 0.3, 0, 0, -32"/> -->
   <arg name="spawn_point_obstacle" default="-10, 214, 0.3, 0, 0, -90"/>

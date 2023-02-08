@@ -46,6 +46,8 @@ TwistGate::TwistGate(const ros::NodeHandle& nh, const ros::NodeHandle& private_n
   , command_mode_(CommandMode::AUTO)
   , previous_command_mode_(CommandMode::AUTO)
   , rubis_twist_cmd_ptr_(NULL)
+  , current_time_(0)
+  , is_current_time_changed_(false)
 {
   private_nh_.param<double>("loop_rate", loop_rate_, 30.0);
   private_nh_.param<bool>("use_decision_maker", use_decision_maker_, false);
@@ -198,6 +200,10 @@ void TwistGate::autoCmdTwistCmdCallback(const geometry_msgs::TwistStamped::Const
 void TwistGate::_autoCmdRubisTwistCmdCallback(const rubis_msgs::TwistStamped::ConstPtr& input_msg)
 {
   if(rubis_twist_cmd_ptr_ == NULL) return;
+  if(!is_current_time_changed_){
+    current_time_ = input_msg->msg.header.stamp;  
+    is_current_time_changed_ = true;
+  }
   rubis::instance_ = input_msg->instance;  
   rubis::obj_instance_ = input_msg->obj_instance;  
   geometry_msgs::TwistStamped::ConstPtr _input_msg = boost::make_shared<const geometry_msgs::TwistStamped>(input_msg->msg);
@@ -349,17 +355,43 @@ void TwistGate::emergencyCmdCallback(const vehicle_cmd_msg_t::ConstPtr& input_ms
 void TwistGate::timerCallback(const ros::TimerEvent& e)
 {
   rubis::start_task_profiling();
+  if(rubis_twist_cmd_ptr_ == NULL){
+    rubis::stop_task_profiling(rubis::instance_, 0);
+    return;
+  }
   
+
+  static ros::Time previous_time = ros::Time::now(); 
+  static double previous_target_velocity = 0.0;
+  static double previous_target_accel = 0.0;
+
   // Callback
-  _autoCmdRubisTwistCmdCallback(rubis_twist_cmd_ptr_);
+  _autoCmdRubisTwistCmdCallback(rubis_twist_cmd_ptr_);  
+
+  double diff_time = (current_time_ - previous_time).toSec();
+  double current_target_velocity = 0.0, current_target_accel = 0.0;
+
+  current_target_velocity = rubis_twist_cmd_ptr_->msg.twist.linear.x;
+  current_target_accel = (diff_time > 0) ? ((current_target_velocity - previous_target_velocity) / diff_time) : previous_target_accel;
+  std::cout<< current_target_accel << std::endl;
   
   if(zero_flag_ == 1)
     resetVehicleCmdMsg();
+  twist_gate_msg_.ctrl_cmd.linear_acceleration = current_target_accel;
+  twist_gate_msg_.ctrl_cmd.linear_velocity = current_target_velocity;
 
   vehicle_cmd_pub_.publish(twist_gate_msg_);
   rubis_twist_gate_msg_.msg = twist_gate_msg_;
   rubis_vehicle_cmd_pub_.publish(rubis_twist_gate_msg_);
   
+  
+  
+  if(is_current_time_changed_){
+    previous_time = current_time_;
+    previous_target_velocity = current_target_velocity;
+    previous_target_accel = current_target_accel;
+    is_current_time_changed_ = false;    
+  }
 
   rubis::stop_task_profiling(rubis::instance_, 0);
 }

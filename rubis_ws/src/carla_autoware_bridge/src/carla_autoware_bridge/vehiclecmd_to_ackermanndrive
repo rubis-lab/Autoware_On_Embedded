@@ -34,9 +34,10 @@ def callback(data):
     """
     global wheelbase
     msg = AckermannDrive()
-    msg.speed = data.twist_cmd.twist.linear.x
+    msg.speed = data.ctrl_cmd.linear_velocity
     msg.steering_angle = convert_trans_rot_vel_to_steering_angle(
         msg.speed, data.twist_cmd.twist.angular.z, wheelbase)
+    msg.acceleration = data.ctrl_cmd.linear_acceleration
     pub.publish(msg)
 
 def twist_to_ackermanndrive():
