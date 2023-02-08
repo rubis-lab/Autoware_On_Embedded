@@ -180,44 +180,10 @@ int main(int argc, char **argv)
     pnh.param<double>("monitor_rate", monitor_rate, 1.0);
     monitor_timer = n.createTimer(ros::Duration(monitor_rate), &timer_cb);
   }
-  
-
-  // scheduling
-  std::string task_response_time_filename;
-  int rate = 0;
-  double task_minimum_inter_release_time = 0;
-  double task_execution_time = 0;
-  double task_relative_deadline = 0;
-
-  if(g_output_topic == std::string("/current_velocity")){
-    pnh.param<std::string>("/vel_relay/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/vel_relay.csv");
-    pnh.param<int>("/vel_relay/rate", rate, 10);
-    pnh.param("/vel_relay/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)100000000);
-    pnh.param("/vel_relay/task_execution_time", task_execution_time, (double)100000000);
-    pnh.param("/vel_relay/task_relative_deadline", task_relative_deadline, (double)100000000);
-  }
-  else if (g_output_topic == std::string("/current_pose")){
-    pnh.param<std::string>("/pose_relay/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/pose_relay.csv");
-    pnh.param<int>("/pose_relay/rate", rate, 10);
-    pnh.param("/pose_relay/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)100000000);
-    pnh.param("/pose_relay/task_execution_time", task_execution_time, (double)100000000);
-    pnh.param("/pose_relay/task_relative_deadline", task_relative_deadline, (double)100000000);
-  }
-
-  rubis::init_task_profiling(task_response_time_filename);
 
   subscribe();
 
-  ros::Rate r(rate);
-  while(ros::ok()){
-    rubis::start_task_profiling();
-
-    ros::spinOnce();
-
-    rubis::stop_task_profiling(0, 0);
-
-    r.sleep();
-  }
+  ros::spin();
 
   return 0;
 }
