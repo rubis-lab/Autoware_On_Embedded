@@ -15,4 +15,4 @@ carla_ackermann_control:
     # at more or less constant speed.
     # If the absolute value of the ackermann drive target acceleration exceeds this value,
     # directly the input acceleration is controlled 
-    min_accel: 0.01
+    min_accel: 0.005

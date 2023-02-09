@@ -8,16 +8,26 @@
 	<!-- <include file="$(env USER_HOME)/autoware.ai/autoware_files/data/tf/tf.launch" /> -->
   
   <!-- Vector Map Loader -->
-	<node pkg="map_file" type="vector_map_loader" name="vector_map_loader" args="
+  <!-- Default -->
+	<!-- <node pkg="map_file" type="vector_map_loader" name="vector_map_loader" args="
 	    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/220824_carla_town04/dtlane.csv 
 	    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/220824_carla_town04/lane.csv 
 	    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/220824_carla_town04/node.csv 
-	    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/220824_carla_town04/point.csv"/>
+	    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/220824_carla_town04/point.csv"/> -->
+
+  <!-- carla town04 straight -->
   <!-- <node pkg="map_file" type="vector_map_loader" name="vector_map_loader" args="
-    $(env USER_HOME)/Downloads/dtlane.csv 
-    $(env USER_HOME)/Downloads/lane.csv 
-    $(env USER_HOME)/Downloads/node.csv 
-    $(env USER_HOME)/Downloads/point.csv"/> -->
+    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/230209_carla_town04_straight/dtlane.csv 
+    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/230209_carla_town04_straight/lane.csv 
+    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/230209_carla_town04_straight/node.csv 
+    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/230209_carla_town04_straight/point.csv"/> -->
+  
+  <!-- carla town04 circle(not connected) -->
+  <node pkg="map_file" type="vector_map_loader" name="vector_map_loader" args="
+    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/230209_carla_town04_circle_not_connected/dtlane.csv 
+    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/230209_carla_town04_circle_not_connected/lane.csv 
+    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/230209_carla_town04_circle_not_connected/node.csv 
+    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/230209_carla_town04_circle_not_connected/point.csv"/>
 
   <!-- Point Map Loader -->
 	<include file="$(find map_file)/launch/points_map_loader.launch">
@@ -32,11 +42,5 @@
     <arg name="input_topic" value="$(arg lidar_input_topic)" />
     <arg name="output_topic" value="$(arg lidar_output_topic)" />
   </include>
-
-  <!-- gnss localizer -->
-  <arg name="plane" default="0"/>
-  <node pkg="rubis_pkg" type="gnss_localizer" name="gnss_localizer" output="screen">
-    <param name="plane" value="$(arg plane)"/>
-  </node>
 
 </launch>

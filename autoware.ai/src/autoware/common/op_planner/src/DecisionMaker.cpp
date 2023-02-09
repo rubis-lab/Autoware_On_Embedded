@@ -667,7 +667,7 @@ bool DecisionMaker::SelectSafeTrajectory()
         desiredVelocity = m_params.maxSpeed;
       }
 
-      if(desiredVelocity < m_params.maxSpeed * m_params.curveVelocityRatio){ // minimum of target velocity is max_speed / 2
+      if(desiredVelocity < m_params.maxSpeed * m_params.curveVelocityRatio){ // minimum of target velocity is max_speed * curveVelocityRatio
         desiredVelocity = m_params.maxSpeed * m_params.curveVelocityRatio; 
       }
       previous_velocity = desiredVelocity;
@@ -739,6 +739,7 @@ bool DecisionMaker::SelectSafeTrajectory()
     const TrajectoryCost& tc,
     const bool& bEmergencyStop)
 {
+  static double prev_max_velocity = 0.0;
 
    PlannerHNS::BehaviorState beh;
    state = currPose;
@@ -766,7 +767,7 @@ bool DecisionMaker::SelectSafeTrajectory()
   beh.bNewPlan = SelectSafeTrajectory();
 
   beh.maxVelocity = UpdateVelocityDirectlyToTrajectory(beh, vehicleState, dt);
-  
+
   //std::cout << "Eval_i: " << tc.index << ", Curr_i: " <<  m_pCurrentBehaviorState->GetCalcParams()->iCurrSafeTrajectory << ", Prev_i: " << m_pCurrentBehaviorState->GetCalcParams()->iPrevSafeTrajectory << std::endl;
 
   return beh;
