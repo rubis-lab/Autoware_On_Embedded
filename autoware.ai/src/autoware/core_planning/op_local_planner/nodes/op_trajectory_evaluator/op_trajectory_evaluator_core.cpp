@@ -513,6 +513,11 @@ void TrajectoryEval::UpdateMyParams()
   _nh.getParam("/op_trajectory_evaluator/weightLong", m_PlanningParams.weightLong);
   _nh.getParam("/op_trajectory_evaluator/weightLat", m_PlanningParams.weightLat);
   _nh.getParam("/op_trajectory_evaluator/LateralSkipDistance", m_PlanningParams.LateralSkipDistance);
+
+  _nh.getParam("/op_trajectory_evaluator/lateralBlockingThreshold", m_PlanningParams.lateralBlockingThreshold);
+  _nh.getParam("/op_trajectory_evaluator/frontLongitudinalBlockingThreshold", m_PlanningParams.frontLongitudinalBlockingThreshold);
+  _nh.getParam("/op_trajectory_evaluator/rearLongitudinalBlockingThreshold", m_PlanningParams.rearLongitudinalBlockingThreshold);
+  _nh.getParam("/op_trajectory_evaluator/enableDebug", m_PlanningParams.enableDebug);
 }
 
 bool TrajectoryEval::UpdateTf()

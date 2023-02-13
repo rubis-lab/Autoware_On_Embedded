@@ -207,7 +207,7 @@ TrajectoryCost TrajectoryDynamicCosts::DoOneStepStatic(const vector<vector<WayPo
   }
 
   CalculateLateralAndLongitudinalCostsStatic(m_TrajectoryCosts, rollOuts, totalPaths, currState, m_AllContourPoints, params, carInfo, vehicleState);
-  NormalizeCosts(m_TrajectoryCosts);
+  NormalizeCosts(m_TrajectoryCosts, params.enableDebug);
 
   int smallestIndex = -1;
   double smallestCost = DBL_MAX;
@@ -227,9 +227,7 @@ TrajectoryCost TrajectoryDynamicCosts::DoOneStepStatic(const vector<vector<WayPo
   {
     if(!m_TrajectoryCosts.at(ic).bBlocked && m_TrajectoryCosts.at(ic).cost < smallestCost)
     {      
-      #ifdef DEBUG_ENABLE
-      std::cout << "smallestIndex is Updated" << std::endl;
-      #endif
+      if(params.enableDebug) std::cout << "smallestIndex is Updated" << std::endl;      
       smallestCost = m_TrajectoryCosts.at(ic).cost;
       smallestIndex = ic;
     }
@@ -261,25 +259,25 @@ TrajectoryCost TrajectoryDynamicCosts::DoOneStepStatic(const vector<vector<WayPo
 
   m_PrevIndex = currIndex;
 
-  #ifdef DEBUG_ENABLE
-  for(unsigned int ic=0; ic<rollOuts.size(); ic++){
-    std::cout << "Index: " << ic
-           << ", Priority: " << m_TrajectoryCosts.at(ic).priority_cost
-           << ", Transition: " << m_TrajectoryCosts.at(ic).transition_cost
-           << ", Lat: " << m_TrajectoryCosts.at(ic).lateral_cost
-           << ", Long: " << m_TrajectoryCosts.at(ic).longitudinal_cost
-           << ", Change: " << m_TrajectoryCosts.at(ic).lane_change_cost
-           << ", Avg: " << m_TrajectoryCosts.at(ic).cost
-           << ", Blocked : " << m_TrajectoryCosts.at(ic).bBlocked
-           << std::endl;
+  if(params.enableDebug){
+    for(unsigned int ic=0; ic<rollOuts.size(); ic++){
+      std::cout << "Index: " << ic
+             << ", Priority: " << m_TrajectoryCosts.at(ic).priority_cost
+             << ", Transition: " << m_TrajectoryCosts.at(ic).transition_cost
+             << ", Lat: " << m_TrajectoryCosts.at(ic).lateral_cost
+             << ", Long: " << m_TrajectoryCosts.at(ic).longitudinal_cost
+             << ", Change: " << m_TrajectoryCosts.at(ic).lane_change_cost
+             << ", Avg: " << m_TrajectoryCosts.at(ic).cost
+             << ", Blocked : " << m_TrajectoryCosts.at(ic).bBlocked
+             << std::endl;
+    }
+    std::cout << "---------------------------------------" << std::endl;
+    std::cout << "leftLnId : " << car_info.perp_point.LeftLnId << ", RightLnId : " << car_info.perp_point.RightLnId << std::endl;
+    std::cout << "start_idx : " << m_startTrajIdx << ", end_idx : " << m_endTrajIdx << std::endl;
+    std::cout << "current_idx : " << currIndex << ", selected one : " << smallestIndex << std::endl;
+    std::cout << "---------------------------------------" << std::endl;
   }
-  std::cout << "---------------------------------------" << std::endl;
-  std::cout << "leftLnId : " << car_info.perp_point.LeftLnId << ", RightLnId : " << car_info.perp_point.RightLnId << std::endl;
-  std::cout << "start_idx : " << m_startTrajIdx << ", end_idx : " << m_endTrajIdx << std::endl;
-  std::cout << "current_idx : " << currIndex << ", selected one : " << smallestIndex << std::endl;
-  std::cout << "---------------------------------------" << std::endl;
 
-  #endif
   return bestTrajectory;
 }
 
@@ -288,7 +286,6 @@ TrajectoryCost TrajectoryDynamicCosts::DoOneStep(const vector<vector<vector<WayP
     const int& currLaneIndex,
     const PlanningParams& params, const CAR_BASIC_INFO& carInfo, const VehicleState& vehicleState,
     const std::vector<PlannerHNS::DetectedObject>& obj_list)
-
 {
   TrajectoryCost bestTrajectory;
   bestTrajectory.bBlocked = true;
@@ -331,7 +328,7 @@ TrajectoryCost TrajectoryDynamicCosts::DoOneStep(const vector<vector<vector<WayP
 
   CalculateLateralAndLongitudinalCosts(m_TrajectoryCosts, rollOuts, totalPaths, currState, m_AllContourPoints, params, carInfo, vehicleState);
 
-  NormalizeCosts(m_TrajectoryCosts);
+  NormalizeCosts(m_TrajectoryCosts, params.enableDebug);
 
   int smallestIndex = -1;
   double smallestCost = DBL_MAX;
@@ -423,9 +420,8 @@ void TrajectoryDynamicCosts::CalculateLateralAndLongitudinalCostsStatic(vector<T
   m_SafetyBorder.points.push_back(top_left) ;
   m_SafetyBorder.points.push_back(top_left_car);
 
-  #ifdef DEBUG_ENABLE
-    std::cout << "points num : " << contourPoints.size() << std::endl;
-  #endif
+  if(params.enableDebug) std::cout << "points num : " << contourPoints.size() << std::endl;
+  
 
   int iCostIndex = 0;
   if(rollOuts.size() > 0 && rollOuts.at(0).size()>0)
@@ -435,9 +431,7 @@ void TrajectoryDynamicCosts::CalculateLateralAndLongitudinalCostsStatic(vector<T
 
     for(unsigned int it=0; it< rollOuts.size(); it++)
     {
-      #ifdef DEBUG_ENABLE
-      int unskipped = 0;
-      #endif
+      // int unskipped = 0;
 
       int skip_id = -1;
       for(unsigned int icon = 0; icon < contourPoints.size(); icon++)
@@ -481,9 +475,7 @@ void TrajectoryDynamicCosts::CalculateLateralAndLongitudinalCostsStatic(vector<T
           continue;
         }
 
-        #ifdef DEBUG_ENABLE
-        unskipped++;
-        #endif
+        // if(params.enableDebug) unskipped++;
 
         // Original
         // if(longitudinalDist < -carInfo.length || longitudinalDist > params.minFollowingDistance || lateralDist > m_LateralSkipDistance)
@@ -495,7 +487,9 @@ void TrajectoryDynamicCosts::CalculateLateralAndLongitudinalCostsStatic(vector<T
           trajectoryCosts.at(iCostIndex).bBlocked = true;
         }
 
-        if(lateralDist <= 0.0 && longitudinalDist >= -5 && longitudinalDist < 30){
+        if( lateralDist <= params.lateralBlockingThreshold
+         && longitudinalDist < params.frontLongitudinalBlockingThreshold
+         && longitudinalDist >= params.rearLongitudinalBlockingThreshold){
           trajectoryCosts.at(it).bBlocked = true;
         }
 
@@ -518,17 +512,15 @@ void TrajectoryDynamicCosts::CalculateLateralAndLongitudinalCostsStatic(vector<T
         }
       }
 
-      #ifdef DEBUG_ENABLE
-      // std::cout << trajectoryCosts.at(iCostIndex).longitudinal_cost << " " << trajectoryCosts.at(iCostIndex).lateral_cost << ", ";
-      std::cout << unskipped << " ";
-      #endif
+      // if(params.enableDebug){
+      //   std::cout << trajectoryCosts.at(iCostIndex).longitudinal_cost << " " << trajectoryCosts.at(iCostIndex).lateral_cost << ", ";
+      //   std::cout << unskipped << " ";
+      // }
 
       // Calculate lateral/logitudinal cost, disdtance and velocity
       iCostIndex++;
     }
-    #ifdef DEBUG_ENABLE
-    std::cout << std::endl;
-    #endif
+    if(params.enableDebug) std::cout << std::endl;
   }
 }
 
@@ -661,7 +653,7 @@ void TrajectoryDynamicCosts::CalculateLateralAndLongitudinalCosts(vector<Traject
   }
 }
 
-void TrajectoryDynamicCosts::NormalizeCosts(vector<TrajectoryCost>& trajectoryCosts)
+void TrajectoryDynamicCosts::NormalizeCosts(vector<TrajectoryCost>& trajectoryCosts, int enableDebug)
 {
   //Normalize costs
   double totalPriorities = 0;
@@ -713,22 +705,19 @@ void TrajectoryDynamicCosts::NormalizeCosts(vector<TrajectoryCost>& trajectoryCo
 
     trajectoryCosts.at(ic).cost = (m_WeightPriority*trajectoryCosts.at(ic).priority_cost + m_WeightTransition*trajectoryCosts.at(ic).transition_cost + m_WeightLat*trajectoryCosts.at(ic).lateral_cost + m_WeightLong*trajectoryCosts.at(ic).longitudinal_cost)/4.0;
 
-  #ifdef DEBUG_ENABLE
-   std::cout << "Index: " << ic
-           << ", Priority: " << trajectoryCosts.at(ic).priority_cost
-           << ", Transition: " << trajectoryCosts.at(ic).transition_cost
-           << ", Lat: " << trajectoryCosts.at(ic).lateral_cost
-           << ", Long: " << trajectoryCosts.at(ic).longitudinal_cost
-           << ", Change: " << trajectoryCosts.at(ic).lane_change_cost
-           << ", Avg: " << trajectoryCosts.at(ic).cost
-           << ", Blocked : " << trajectoryCosts.at(ic).bBlocked
-           << std::endl;
-  #endif
+    if(enableDebug){
+    std::cout << "Index: " << ic
+            << ", Priority: " << trajectoryCosts.at(ic).priority_cost
+            << ", Transition: " << trajectoryCosts.at(ic).transition_cost
+            << ", Lat: " << trajectoryCosts.at(ic).lateral_cost
+            << ", Long: " << trajectoryCosts.at(ic).longitudinal_cost
+            << ", Change: " << trajectoryCosts.at(ic).lane_change_cost
+            << ", Avg: " << trajectoryCosts.at(ic).cost
+            << ", Blocked : " << trajectoryCosts.at(ic).bBlocked
+            << std::endl;
+    }    
   }
-
-  #ifdef DEBUG_ENABLE
-  std::cout << "------------------------ " << std::endl;
-  #endif
+  if(enableDebug) std::cout << "------------------------ " << std::endl;
 }
 
 vector<TrajectoryCost> TrajectoryDynamicCosts::CalculatePriorityAndLaneChangeCosts(const vector<vector<WayPoint> >& laneRollOuts,
