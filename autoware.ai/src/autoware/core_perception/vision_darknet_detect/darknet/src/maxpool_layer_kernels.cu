@@ -93,7 +93,6 @@ extern "C" void forward_maxpool_layer_gpu(maxpool_layer layer, network net)
     size_t n = h*w*c*layer.batch;
 
         forward_maxpool_layer_kernel<<<cuda_gridsize(n), BLOCK>>>(n, layer.h, layer.w, layer.c, layer.stride, layer.size, layer.pad, net.input_gpu, layer.output_gpu, layer.indexes_gpu);
-    yield_gpu_with_remark("im2col_gpu_kernel");
 
     check_error(cudaPeekAtLastError());
 }
@@ -103,7 +102,6 @@ extern "C" void backward_maxpool_layer_gpu(maxpool_layer layer, network net)
     size_t n = layer.h*layer.w*layer.c*layer.batch;
 
         backward_maxpool_layer_kernel<<<cuda_gridsize(n), BLOCK>>>(n, layer.h, layer.w, layer.c, layer.stride, layer.size, layer.pad, layer.delta_gpu, net.delta_gpu, layer.indexes_gpu);
-    yield_gpu_with_remark("im2col_gpu_kernel");
 
     check_error(cudaPeekAtLastError());
 }

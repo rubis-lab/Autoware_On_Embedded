@@ -59,5 +59,4 @@ void im2col_gpu(float *im,
                 num_kernels, im, height, width, ksize, pad,
                 stride, height_col,
                 width_col, data_col);
-    yield_gpu_with_remark("im2col_gpu_kernel");
 }

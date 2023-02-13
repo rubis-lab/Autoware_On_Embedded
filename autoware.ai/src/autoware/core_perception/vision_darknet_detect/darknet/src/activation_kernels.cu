@@ -172,7 +172,6 @@ __global__ void binary_activate_array_kernel(float *x, int n, int s, BINARY_ACTI
 extern "C" void binary_activate_array_gpu(float *x, int n, int size, BINARY_ACTIVATION a, float *y) 
 {
         binary_activate_array_kernel<<<cuda_gridsize(n/2), BLOCK>>>(x, n/2, size, a, y);
-    yield_gpu_with_remark("binary_activate_array_kernel");
     check_error(cudaPeekAtLastError());
 }
 
@@ -191,13 +190,11 @@ __global__ void gradient_array_kernel(float *x, int n, ACTIVATION a, float *delt
 extern "C" void activate_array_gpu(float *x, int n, ACTIVATION a) 
 {
         activate_array_kernel<<<cuda_gridsize(n), BLOCK>>>(x, n, a);
-    yield_gpu_with_remark("activate_array_kernel");
     check_error(cudaPeekAtLastError());
 }
 
 extern "C" void gradient_array_gpu(float *x, int n, ACTIVATION a, float *delta) 
 {
         gradient_array_kernel<<<cuda_gridsize(n), BLOCK>>>(x, n, a, delta);
-    yield_gpu_with_remark("gradient_array_kernel");
     check_error(cudaPeekAtLastError());
 }

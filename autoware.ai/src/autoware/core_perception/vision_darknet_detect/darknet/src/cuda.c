@@ -93,12 +93,10 @@ float *cuda_make_array(float *x, size_t n)
     size_t size = sizeof(float)*n;
     
         cudaError_t status = cudaMalloc((void **)&x_gpu, size);
-    yield_gpu_with_remark("cudaMalloc");
 
     check_error(status);
     if(x){
                 status = cudaMemcpy(x_gpu, x, size, cudaMemcpyHostToDevice);
-        yield_gpu_with_remark("cuda_make_array");
         check_error(status);
     } else {
         fill_gpu(n, 0, x_gpu, 1);
@@ -113,20 +111,16 @@ void cuda_random(float *x_gpu, size_t n)
     static int init[16] = {0};
 
         int i = cuda_get_device();
-    yield_gpu_with_remark("cuda_get_device");
 
     if(!init[i]){
                 curandCreateGenerator(&gen[i], CURAND_RNG_PSEUDO_DEFAULT);
-        yield_gpu_with_remark("curandCreateGenerator");
 
                 curandSetPseudoRandomGeneratorSeed(gen[i], time(0));
-        yield_gpu_with_remark("curandSetPseudoRandomGeneratorSeed");
 
         init[i] = 1;
     }
 
         curandGenerateUniform(gen[i], x_gpu, n);
-    yield_gpu_with_remark("curandGenerateUniform");
 
     check_error(cudaPeekAtLastError());
 }
@@ -150,12 +144,10 @@ int *cuda_make_int_array(int *x, size_t n)
     size_t size = sizeof(int)*n;
 
         cudaError_t status = cudaMalloc((void **)&x_gpu, size);
-    yield_gpu_with_remark("cudaMalloc");
 
     check_error(status);
     if(x){
                 status = cudaMemcpy(x_gpu, x, size, cudaMemcpyHostToDevice);
-        yield_gpu_with_remark("cuda_make_int_array");
 
         check_error(status);
     }
@@ -166,7 +158,6 @@ int *cuda_make_int_array(int *x, size_t n)
 void cuda_free(float *x_gpu)
 {
         cudaError_t status = cudaFree(x_gpu);
-    yield_gpu_with_remark("free");
 
     check_error(status);
 }
@@ -175,7 +166,6 @@ void cuda_push_array(float *x_gpu, float *x, size_t n)
 {
     size_t size = sizeof(float)*n;
         cudaError_t status = cudaMemcpy(x_gpu, x, size, cudaMemcpyHostToDevice);
-    yield_gpu_with_remark("cuda_push_array");
 
     check_error(status);
 }
@@ -185,7 +175,6 @@ void cuda_pull_array(float *x_gpu, float *x, size_t n)
     size_t size = sizeof(float)*n;
 
         cudaError_t status = cudaMemcpy(x, x_gpu, size, cudaMemcpyDeviceToHost);
-    yield_gpu_with_remark("cuda_pull_array");
 
     check_error(status);
 }
