@@ -138,8 +138,8 @@ op_trajectory_evaluator:
 
   weightPriority: 1
   weightTransition: 0.5
-  weightLong: 10
-  weightLat: 10
+  weightLong: 1
+  weightLat: 1
   ImageWidth: 1920
   ImageHeight: 1080
   SprintDecisionTime: 9999999.0

@@ -288,6 +288,7 @@ TrajectoryCost TrajectoryDynamicCosts::DoOneStep(const vector<vector<vector<WayP
     const int& currLaneIndex,
     const PlanningParams& params, const CAR_BASIC_INFO& carInfo, const VehicleState& vehicleState,
     const std::vector<PlannerHNS::DetectedObject>& obj_list)
+
 {
   TrajectoryCost bestTrajectory;
   bestTrajectory.bBlocked = true;
@@ -494,7 +495,7 @@ void TrajectoryDynamicCosts::CalculateLateralAndLongitudinalCostsStatic(vector<T
           trajectoryCosts.at(iCostIndex).bBlocked = true;
         }
 
-        if(lateralDist <= 1.5 && longitudinalDist >= -5 && longitudinalDist < 30){
+        if(lateralDist <= 0.0 && longitudinalDist >= -5 && longitudinalDist < 30){
           trajectoryCosts.at(it).bBlocked = true;
         }
 

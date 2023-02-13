@@ -373,7 +373,6 @@ void TwistGate::timerCallback(const ros::TimerEvent& e)
 
   current_target_velocity = rubis_twist_cmd_ptr_->msg.twist.linear.x;
   current_target_accel = (diff_time > 0) ? ((current_target_velocity - previous_target_velocity) / diff_time) : previous_target_accel;
-  std::cout<< current_target_accel << std::endl;
   
   if(zero_flag_ == 1)
     resetVehicleCmdMsg();
