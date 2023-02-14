@@ -1,1 +1,0 @@
-rosnode kill /desktop_lane_keeping
