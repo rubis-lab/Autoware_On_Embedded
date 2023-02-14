@@ -3,7 +3,7 @@
 void CarlaAutorunner::Run(){
     register_subscribers();             // Register subscribers that shoud check can go next or not
     ros_autorunner_.init(nh_, sub_v_);   // Initialize the ROS-Autorunner
-    ros::Rate rate(10);                  // Rate can be changed
+    ros::Rate rate(1);                  // Rate can be changed
     while(ros::ok()){               
         if(!ros_autorunner_.Run()) break;           // Run Autorunner
         ros::spinOnce();
@@ -51,6 +51,10 @@ void CarlaAutorunner::register_subscribers(){
 
     if(failure_cnt > 10){        
         std::cout<<"# Refresh inital pose"<<std::endl;
+        std::cout<<msg.pose.position.x - pos_x <<" "<<msg.pose.position.y - pos_y <<" "
+                 <<msg.pose.orientation.x - ori_x<<" "<<msg.pose.orientation.y - ori_y<<" "
+                 <<msg.pose.orientation.z - ori_z<<" "<<msg.pose.orientation.w - ori_w<<" "<<std::endl;
+        
         geometry_msgs::PoseWithCovarianceStamped initial_pose_msg;
         initial_pose_msg.header = msg.header;
         initial_pose_msg.pose.pose.position.x = pos_x;
@@ -64,8 +68,12 @@ void CarlaAutorunner::register_subscribers(){
         failure_cnt = 0;          
     }
 
-    if( msg.pose.position.x <= pos_x + 1.0 && msg.pose.position.x >= pos_x - 1.0 &&        
-        msg.pose.position.y <= pos_y + 1.0 && msg.pose.position.y >= pos_y - 1.0 &&
+    if( msg.pose.position.x <= pos_x + 1.5 && msg.pose.position.x >= pos_x - 1.5 &&        
+        msg.pose.position.y <= pos_y + 1.5 && msg.pose.position.y >= pos_y - 1.5 &&
+        msg.pose.orientation.x <= ori_x + 0.01 && msg.pose.orientation.x >= ori_x - 0.01 &&
+        msg.pose.orientation.y <= ori_y + 0.01 && msg.pose.orientation.y >= ori_y - 0.01 &&
+        msg.pose.orientation.z <= ori_z + 0.01 && msg.pose.orientation.z >= ori_z - 0.01 &&
+        msg.pose.orientation.w <= ori_w + 0.01 && msg.pose.orientation.w >= ori_w - 0.01 &&
         !ros_autorunner_.step_info_list_[STEP(3)].is_prepared){
         success_cnt++;
         if(success_cnt < 3) return;
