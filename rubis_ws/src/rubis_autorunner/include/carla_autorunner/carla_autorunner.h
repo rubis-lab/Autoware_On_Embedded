@@ -25,6 +25,7 @@ private:
 public:
     Sub_v               sub_v_;
     ros::Publisher      initial_pose_pub_;
+    ros::Publisher      goal_pub_;
 public:
     CarlaAutorunner() {}
     CarlaAutorunner(ros::NodeHandle nh) : nh_(nh){}
