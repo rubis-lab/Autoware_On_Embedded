@@ -26,6 +26,17 @@
     <arg name="measurement_range" value="100" />
   </include>
 
+  <!-- <arg name="leaf_size" default="1.0" />
+  <arg name="measurement_range" default="200" />
+
+  <node pkg="points_downsampler" name="voxel_grid_filter" type="voxel_grid_filter">
+    <param name="input_topic_name" value="points_raw" />
+    <param name="output_topic_name" value="filtered_points" />
+    <param name="leaf_size" value="$(arg leaf_size)" />
+    <param name="measurement_range" value="$(arg measurement_range)" />
+  </node> -->
+
+
   <!-- ndt matching kalman filter parameters -->
   <rosparam command="load" file="$(env USER_HOME)/rubis_ws/src/rubis_autorunner/cfg/cubetown_autorunner/kalman_filter.yaml" />
 

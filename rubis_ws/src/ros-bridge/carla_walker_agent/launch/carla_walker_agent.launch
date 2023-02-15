@@ -2,19 +2,21 @@
 <launch>
   <arg name="role_name" default="walker"/>
   <arg name="mode" default="vehicle"/>
-  <arg name="walker_point1" default=""/>
+  <arg name="spawn_points_file" default='$(find rubis_autorunner)/cfg/carla_autorunner/carla_spawn_points.yaml'/>
+  <!-- <arg name="walker_point1" default=""/>
   <arg name="walker_point2" default=""/>
   <arg name="walker_point3" default=""/>
-  <arg name="walker_target_speed" default=""/>
+  <arg name="walker_target_speed" default=""/> -->
 
 
   <node pkg="carla_walker_agent" type="carla_walker_agent.py" name="carla_walker_agent_$(arg role_name)">
     <param name="role_name" value="$(arg role_name)" />
     <param name="mode" value="$(arg mode)" />
-    <param name="walker_point1" value="$(arg walker_point1)"/>
+    <param name="spawn_points_file" value='$(arg spawn_points_file)'/>
+    <!-- <param name="walker_point1" value="$(arg walker_point1)"/>
     <param name="walker_point2" value="$(arg walker_point2)"/>
     <param name="walker_point3" value="$(arg walker_point3)"/>
-    <param name="walker_target_speed" value="$(arg walker_target_speed)"/>
+    <param name="walker_target_speed" value="$(arg walker_target_speed)"/> -->
   </node>
 </launch>
 
