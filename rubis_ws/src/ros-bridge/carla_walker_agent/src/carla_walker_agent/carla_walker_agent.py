@@ -95,9 +95,9 @@ class CarlaWalkerAgent(CompatibleNode):
             # else:
             #     waypoint_iter = 0
 
-        print("==================================================")
-        print(self._waypoint_params)
-        print("==================================================")
+        # print("==================================================")
+        # print(self._waypoint_params)
+        # print("==================================================")
 
 
         
