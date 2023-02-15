@@ -22,8 +22,8 @@
 
   <!-- points downsampler -->
   <include file="$(find points_downsampler)/launch/voxel_grid_filter_params.launch">
-    <arg name="leaf_size" default="0.5" />
-    <arg name="measurement_range" default="100" />
+    <arg name="leaf_size" value="0.5" />
+    <arg name="measurement_range" value="100" />
   </include>
 
   <!-- ndt matching kalman filter parameters -->
