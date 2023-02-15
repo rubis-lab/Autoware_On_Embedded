@@ -21,7 +21,10 @@
   <!-- <arg name="topic_twist_stamped" default="/odom_twist" /> -->
 
   <!-- points downsampler -->
-  <include file="$(find points_downsampler)/launch/voxel_grid_filter_params.launch" />
+  <include file="$(find points_downsampler)/launch/voxel_grid_filter_params.launch">
+    <arg name="leaf_size" default="0.5" />
+    <arg name="measurement_range" default="100" />
+  </include>
 
   <!-- ndt matching kalman filter parameters -->
   <rosparam command="load" file="$(env USER_HOME)/rubis_ws/src/rubis_autorunner/cfg/cubetown_autorunner/kalman_filter.yaml" />
