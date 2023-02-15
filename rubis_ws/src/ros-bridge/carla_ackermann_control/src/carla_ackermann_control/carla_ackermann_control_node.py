@@ -442,6 +442,7 @@ class CarlaAckermannControl(CompatibleNode):
         else:
             if self.info.status.speed_control_activation_count > 0:
                 self.info.status.speed_control_activation_count -= 1
+        
         # set the auto_mode of the controller accordingly
         self.speed_controller.auto_mode = self.info.status.speed_control_activation_count >= 5
 

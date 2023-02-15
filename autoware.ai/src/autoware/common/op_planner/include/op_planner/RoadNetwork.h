@@ -908,6 +908,14 @@ public:
   double   smoothingSmoothWeight;
   double   smoothingToleranceError;
 
+  // Added by HYP
+  int enableDebug;
+
+  // Added by HYP for blocking the trajectories
+  double lateralBlockingThreshold;
+  double frontLongitudinalBlockingThreshold;
+  double rearLongitudinalBlockingThreshold;
+
   // Added by HJW for make traj eval parameter
   double weightPriority;
   double weightTransition;
@@ -975,11 +983,17 @@ public:
     smoothingSmoothWeight      = 0.2;
     smoothingToleranceError      = 0.05;
 
-    double weightPriority     = 1;
-    double weightTransition   = 1;
-    double weightLong         = 1.2;
-    double weightLat          = 1;
-    double LateralSkipDistance = 5;
+    enableDebug = 0;
+ 
+    lateralBlockingThreshold             = 1.5;
+    frontLongitudinalBlockingThreshold   = 30.0;
+    rearLongitudinalBlockingThreshold    = -5.0;
+
+    weightPriority     = 1;
+    weightTransition   = 1;
+    weightLong         = 1.2;
+    weightLat          = 1;
+    LateralSkipDistance = 5;
 
     stopSignStopTime         = 2.0;
 

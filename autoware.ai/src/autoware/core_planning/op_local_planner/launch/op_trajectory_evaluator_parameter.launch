@@ -1,10 +1,15 @@
 <launch>
   <!-- Trajectory Evaluation Specific Parameters -->
+  <arg name="enableDebug"      default="0" />
   
   <arg name="enablePrediction"       default="false" />                
   <arg name="horizontalSafetyDistance"   default="1.2" />
   <arg name="verticalSafetyDistance"     default="0.8" />
   <arg name="LateralSkipDistance"   default="5.0" />
+
+  <arg name="lateralBlockingThreshold"           default="1.5" />
+  <arg name="frontLongitudinalBlockingThreshold"      default="30" />
+  <arg name="rearLongitudinalBlockingThreshold"      default="-5" />
 
   <arg name="SprintDecisionTime" default="9999.0" /> 
 
@@ -16,7 +21,11 @@
     <param name="enablePrediction"       value="$(arg enablePrediction)" />            
     <param name="horizontalSafetyDistance"   value="$(arg horizontalSafetyDistance)" />
     <param name="verticalSafetyDistance"   value="$(arg verticalSafetyDistance)" />    
-    <param name="LateralSkipDistance"       value="$(arg LateralSkipDistance)" />                
+    <param name="LateralSkipDistance"       value="$(arg LateralSkipDistance)" />     
+
+    <param name="lateralBlockingThreshold"   value="$(arg lateralBlockingThreshold)" />
+    <param name="frontLongitudinalBlockingThreshold"   value="$(arg frontLongitudinalBlockingThreshold)" />    
+    <param name="rearLongitudinalBlockingThreshold"       value="$(arg rearLongitudinalBlockingThreshold)" />             
 
     <!-- For detecting person and vehicle -->
     <param name="SprintDecisionTime" value="$(arg SprintDecisionTime)" />

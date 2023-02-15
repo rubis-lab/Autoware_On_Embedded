@@ -117,7 +117,7 @@ inline void TwistFilterNode::publishTwist(const geometry_msgs::TwistStampedConst
     out_msg.twist.angular.z = twist_out.az;
   }
   else{
-    out_msg.twist.linear.x = -1000;
+    out_msg.twist.linear.x = 0;
     out_msg.twist.angular.z = 0;
   }
   twist_pub_.publish(out_msg);
