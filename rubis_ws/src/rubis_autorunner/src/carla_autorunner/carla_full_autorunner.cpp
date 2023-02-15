@@ -7,6 +7,18 @@ void CarlaAutorunner::Run(){
     while(ros::ok()){               
         if(!ros_autorunner_.Run()) break;           // Run Autorunner
         ros::spinOnce();
+        geometry_msgs::PoseStamped goal_msg;
+        goal_msg.header.stamp = ros::Time::now();
+        goal_msg.header.frame_id = "world";
+        goal_msg.pose.position.x = 302.250;
+        goal_msg.pose.position.y = 118.089;
+        goal_msg.pose.position.z = 0.0;
+        goal_msg.pose.orientation.x = 0.0;
+        goal_msg.pose.orientation.y = 0.0;
+        goal_msg.pose.orientation.z = -0.015;
+        goal_msg.pose.orientation.w = 1.000;
+
+        goal_pub_.publish(goal_msg);
         rate.sleep();
     }    
 }
@@ -26,6 +38,7 @@ void CarlaAutorunner::register_subscribers(){
     sub_v_[STEP(4)] = nh_.subscribe("/behavior_state", 1, &CarlaAutorunner::behavior_state_cb, this);
 
     initial_pose_pub_ = nh_.advertise< geometry_msgs::PoseWithCovarianceStamped>("initialpose", 1);
+    goal_pub_ = nh_.advertise<geometry_msgs::PoseStamped>("/move_base_simple/goal", 1);
 }
 
  void CarlaAutorunner::points_raw_cb(const sensor_msgs::PointCloud2& msg){
@@ -98,6 +111,7 @@ void CarlaAutorunner::detection_cb(const autoware_msgs::DetectedObjectArray& msg
 
  void CarlaAutorunner::behavior_state_cb(const visualization_msgs::MarkerArray& msg){
     std::string state = msg.markers.front().text;    
+
     if(!msg.markers.empty() && state.find(std::string("Forward"))!=std::string::npos){
         ROS_WARN("[STEP 4] Global & local planning success");
         ros_autorunner_.step_info_list_[STEP(5)].is_prepared = true;

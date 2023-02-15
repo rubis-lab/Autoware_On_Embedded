@@ -20,7 +20,7 @@
     <arg name="goal_ori_w"            value="0.02" /> -->
 
     <!-- Town04 circle -->
-    <arg name="use_static_goal"       value="true" />
+    <arg name="use_static_goal"       value="false" />
     <arg name="goal_pose_x"           value="302.250" />
     <arg name="goal_pose_y"           value="118.089" />
     <arg name="goal_pose_z"           value="0.0" />
