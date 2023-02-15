@@ -59,6 +59,6 @@
     <arg name="nms_threshold" value="0.45"/>
     <arg name="names_file" value="$(find vision_darknet_detect)/darknet/cfg/coco.names"/>
     <arg name="camera_id" value="/"/>
-    <arg name="image_src" value="/image_raw"/>    
+    <arg name="image_src" value="/image_raw_origin"/>    
   </include>
 </launch>
