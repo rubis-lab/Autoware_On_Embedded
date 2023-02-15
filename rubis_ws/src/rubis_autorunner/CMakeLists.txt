@@ -48,6 +48,18 @@ add_executable(minicar_lane_keeping
   src/minicar_lane_keeping/minicar_lane_keeping.cpp
 )
   
+add_executable(carla_lkas_autorunner
+  include/carla_autorunner/carla_autorunner.h
+  src/carla_autorunner/carla_lkas_autorunner_node.cpp
+  src/carla_autorunner/carla_lkas_autorunner.cpp
+)
+
+add_executable(carla_full_autorunner
+  include/carla_autorunner/carla_autorunner.h
+  src/carla_autorunner/carla_full_autorunner_node.cpp
+  src/carla_autorunner/carla_full_autorunner.cpp
+)
+
 add_executable(cubetown_lkas_autorunner
   include/cubetown_autorunner/cubetown_autorunner.h
   src/cubetown_autorunner/cubetown_lkas_autorunner_node.cpp
@@ -101,6 +113,19 @@ target_link_libraries(cubetown_full_autorunner
   ${catkin_LIBRARIES}
   ros_autorunner_lib
 )
+
+add_dependencies(carla_lkas_autorunner ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(carla_lkas_autorunner
+  ${catkin_LIBRARIES}
+  ros_autorunner_lib
+)
+
+add_dependencies(carla_full_autorunner ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(carla_full_autorunner
+  ${catkin_LIBRARIES}
+  ros_autorunner_lib
+)
+
 
 add_dependencies(tutorial_autorunner ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(tutorial_autorunner

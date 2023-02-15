@@ -14,7 +14,6 @@
   <arg name="output_log" default="false" />
   <arg name="leaf_size" default="0.5" />
   <arg name="measurement_range" default="200" />
-  <!-- <arg name="instance_mode" default="0"/> -->
 
   <arg name="method_type" default="0"/>
   <arg name="max_iter" default="10"/>
@@ -32,7 +31,6 @@
     <param name="leaf_size" value="$(arg leaf_size)" />
     <param name="measurement_range" value="$(arg measurement_range)" />
     <param name="output_log" value="$(arg output_log)" />
-    <!-- <param name="instance_mode" value="$(arg instance_mode)" /> -->
   </node>
 
   <node pkg="lidar_localizer" type="modular_ndt_matching" name="modular_ndt_matching_FR">

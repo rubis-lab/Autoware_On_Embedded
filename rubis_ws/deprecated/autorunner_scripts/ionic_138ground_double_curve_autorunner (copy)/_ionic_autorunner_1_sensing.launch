@@ -1,0 +1,58 @@
+<launch>
+  <rosparam command="load" file="$(env USER_HOME)/rubis_ws/src/rubis_autorunner/cfg/ionic_autorunner/ionic_autorunner_params.yaml" />
+
+  <arg name="lidar_input_topic" default="/points_raw_origin"/>
+  <arg name="lidar_output_topic" default="/points_raw"/>
+
+  <!-- Map TF Publisher -->	
+	<include file="$(env USER_HOME)/autoware.ai/autoware_files/data/tf/tf.launch" />
+  
+  <!-- Vector Map Loader -->
+	<node pkg="map_file" type="vector_map_loader" name="vector_map_loader" args="
+	    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/220118_138ground/double_curve/dtlane.csv 
+	    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/220118_138ground/double_curve/idx.csv 
+	    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/220118_138ground/double_curve/lane.csv 
+	    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/220118_138ground/double_curve/node.csv 
+	    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/220118_138ground/double_curve/point.csv"/>
+
+  <!-- Point Map Loader -->
+	<include file="$(find map_file)/launch/points_map_loader.launch">
+    <arg name="scene_num" value="noupdate" />
+    <arg name="path_pcd" value="$(env USER_HOME)/autoware.ai/autoware_files/points_map/220111_138ground_leaf1.pcd"/>
+  </include>
+
+  <!-- Re-publishing simulator/camera_node/image/compressed topic to /image_raw as expected by Autoware -->
+  <!-- <node name="republish" type="republish" pkg="image_transport" output="screen" args="compressed in:=/simulator/camera_node/image raw out:=/image_raw"  /> -->
+
+<!-- Lidar Launch File -->
+  <include file="$(find runtime_manager)/launch_files/velodyne_vlp16_hires.launch" />
+  
+  <!-- <include file="$(find rubis_pkg)/launch/lidar_republisher_params.launch">
+    <arg name="input_topic" value="$(arg lidar_input_topic)" />
+    <arg name="output_topic" value="$(arg lidar_output_topic)" />
+  </include> -->
+
+<!-- TF -->
+  <node pkg="tf" type="static_transform_publisher" name="base_link_to_velodyne" args="3.3 -0.8 0.09 -0.53 0 0 base_link velodyne 10"/>
+  <!-- <node pkg="tf" type="static_transform_publisher" name="gps_to_base_link" args="0 0 0 0 0 0 gps base_link 10"/> -->
+  <!-- <node pkg="tf" type="static_transform_publisher" name="lidar_to_camera" args="0.029 -0.574 -1.820 4.712 0.009 -1.883 velodyne camera 10" /> -->
+
+  <!-- gnss localizer -->
+  <!-- <arg name="plane" default="0"/>
+  <node pkg="rubis_pkg" type="gnss_localizer" name="gnss_localizer" output="screen">
+    <param name="plane" value="$(arg plane)"/>
+  </node> -->
+
+  <!-- CAN Interface -->
+  <include file="$(find can_translate)/launch/can_translate.launch" />
+
+  <!-- INS-D Sensor -->
+  <!-- <include file="$(find inertiallabs_ins)/launch/ins.launch" />   -->
+
+  <!-- INS twist generator -->
+  <include file="$(find ins_twist_generator)/launch/ins_twist_generator.launch">
+    <arg name="yaw_offset" value="-115.139" />
+  </include>
+
+</launch>
+
