@@ -82,7 +82,7 @@ bool RayGroundFilter::TransformPointCloud(const std::string& in_target_frame,
   return true;
 }
 
-void RayGroundFilter::publish_cloud(const ros::Publisher& in_publisher,
+void RayGroundFilter::publish_rubis_cloud(const ros::Publisher& in_publisher,
                                     const pcl::PointCloud<pcl::PointXYZI>::Ptr in_cloud_to_publish_ptr,
                                     const std_msgs::Header& in_header)
 {
@@ -102,6 +102,28 @@ void RayGroundFilter::publish_cloud(const ros::Publisher& in_publisher,
   rubis_msgs::PointCloud2 msg;
   msg.instance = rubis::instance_;
   msg.msg = *trans_cloud_msg_ptr;
+  in_publisher.publish(msg);
+}
+
+void RayGroundFilter::publish_cloud(const ros::Publisher& in_publisher,
+                                    const pcl::PointCloud<pcl::PointXYZI>::Ptr in_cloud_to_publish_ptr,
+                                    const std_msgs::Header& in_header)
+{
+  sensor_msgs::PointCloud2::Ptr cloud_msg_ptr(new sensor_msgs::PointCloud2);
+  sensor_msgs::PointCloud2::Ptr trans_cloud_msg_ptr(new sensor_msgs::PointCloud2);
+  pcl::toROSMsg(*in_cloud_to_publish_ptr, *cloud_msg_ptr);
+  cloud_msg_ptr->header.frame_id = base_frame_;
+  cloud_msg_ptr->header.stamp = in_header.stamp;
+  const bool succeeded = TransformPointCloud(in_header.frame_id, cloud_msg_ptr, trans_cloud_msg_ptr);
+  if (!succeeded)
+  {
+    ROS_ERROR_STREAM_THROTTLE(10, "Failed transform from " << cloud_msg_ptr->header.frame_id << " to "
+                                                           << in_header.frame_id);
+    return;
+  }
+
+  sensor_msgs::PointCloud2 msg;
+  msg = *trans_cloud_msg_ptr;
   in_publisher.publish(msg);
 }
 
@@ -376,8 +398,8 @@ inline void RayGroundFilter::PublishFilteredClouds(const sensor_msgs::PointCloud
 
   ExtractPointsIndices(filtered_cloud_ptr, *ground_indices, ground_cloud_ptr, no_ground_cloud_ptr);
 
-  publish_cloud(ground_points_pub_, ground_cloud_ptr, in_sensor_cloud->header);
-  publish_cloud(groundless_points_pub_, no_ground_cloud_ptr, in_sensor_cloud->header);
+  publish_cloud(debug_groundless_points_pub_, no_ground_cloud_ptr, in_sensor_cloud->header);
+  publish_rubis_cloud(groundless_points_pub_, no_ground_cloud_ptr, in_sensor_cloud->header);
 
 }
 
@@ -458,7 +480,7 @@ void RayGroundFilter::Run()
       node_handle_.subscribe("/config/ray_ground_filter", 1, &RayGroundFilter::update_config_params, this);
 
   groundless_points_pub_ = node_handle_.advertise<rubis_msgs::PointCloud2>(no_ground_topic, 2);
-  ground_points_pub_ = node_handle_.advertise<sensor_msgs::PointCloud2>(ground_topic, 2);
+  debug_groundless_points_pub_ = node_handle_.advertise<sensor_msgs::PointCloud2>("/debug_points_no_ground", 2);
   
   // Scheduling & Profiling Setup
   std::string node_name = ros::this_node::getName();

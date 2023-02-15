@@ -20,7 +20,7 @@ ego_vehicle:
     yaw: 90
 
 obstacle:
-  enable: False
+  enable: True
   spawn_points:
     x: 315.8
     y: 192.664

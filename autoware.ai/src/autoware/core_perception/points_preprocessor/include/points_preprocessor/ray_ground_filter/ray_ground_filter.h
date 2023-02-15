@@ -54,7 +54,7 @@ private:
   ros::Subscriber points_node_sub_;
   ros::Subscriber config_node_sub_;
   ros::Publisher groundless_points_pub_;
-  ros::Publisher ground_points_pub_;
+  ros::Publisher debug_groundless_points_pub_;
 
   tf2_ros::Buffer tf_buffer_;
   tf2_ros::TransformListener tf_listener_;
@@ -108,6 +108,10 @@ private:
    */
   bool TransformPointCloud(const std::string& in_target_frame, const sensor_msgs::PointCloud2::ConstPtr& in_cloud_ptr,
                            const sensor_msgs::PointCloud2::Ptr& out_cloud_ptr);
+
+  void publish_rubis_cloud(const ros::Publisher& in_publisher,
+                     const pcl::PointCloud<pcl::PointXYZI>::Ptr in_cloud_to_publish_ptr,
+                     const std_msgs::Header& in_header);
 
   void publish_cloud(const ros::Publisher& in_publisher,
                      const pcl::PointCloud<pcl::PointXYZI>::Ptr in_cloud_to_publish_ptr,

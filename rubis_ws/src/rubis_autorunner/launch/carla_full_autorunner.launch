@@ -1,4 +1,4 @@
 <launch>
     <rosparam command="load" file="$(env USER_HOME)/rubis_ws/src/rubis_autorunner/cfg/carla_autorunner/carla_full_autorunner.yaml" />
-    <node pkg="rubis_autorunner" type="carla_full_autorunner" name="carla_full_autorunner"/>
+    <node pkg="rubis_autorunner" type="carla_full_autorunner" name="carla_full_autorunner" output="screen"/>
 </launch>

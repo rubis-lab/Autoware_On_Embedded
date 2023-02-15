@@ -47,6 +47,7 @@ def on_press(key):
     # print('Key %s pressed' % current_pressed)
 
     if keyboard.KeyCode(char='w') in current_pressed:
+        reverse_toggle = 0
         current_thr = THR_MAX
 
     if keyboard.KeyCode(char='s') in current_pressed:
@@ -61,6 +62,10 @@ def on_press(key):
     if keyboard.KeyCode(char='f') in current_pressed:
         current_steer = 0
         current_thr = 0
+
+    if keyboard.KeyCode(char='x') in current_pressed:
+        reverse_toggle = 1
+        current_thr = -1 * THR_MAX
 
 def keyboard_routine():
     print('W, A, S, D : Move, F : Stop')

@@ -71,7 +71,7 @@
   <!-- op_trajectory_generator -->
   <include file="$(find op_local_planner)/launch/op_trajectory_generator.launch">
     <arg name="samplingTipMargin"               default="4"  />       <!-- Tip Margin -->
-    <arg name="samplingOutMargin"               default="8" />        <!-- Roll In Margin -->
+    <arg name="samplingOutMargin"               default="20" />        <!-- Roll In Margin -->
     <arg name="samplingSpeedFactor"             default="0.25" />    
     <arg name="enableHeadingSmoothing"          default="false" />
   </include>
@@ -102,7 +102,7 @@
     <arg name="LateralSkipDistance"             default="5.0" />  
 
     <!-- Trajectory blocking threshold  -->
-    <arg name="lateralBlockingThreshold"           default="0.0" />
+    <arg name="lateralBlockingThreshold"           default="0.5" />
     <arg name="frontLongitudinalBlockingThreshold"      default="30" />
     <arg name="rearLongitudinalBlockingThreshold"      default="-5" />
 

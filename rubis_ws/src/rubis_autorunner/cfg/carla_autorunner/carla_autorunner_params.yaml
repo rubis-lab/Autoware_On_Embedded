@@ -118,7 +118,7 @@ op_common_params:
   maxDeceleration: -8.0
 
 op_trajectory_generator:
-  rate: 100 #100
+  rate: 20 #100
   task_scheduling_configs:
     policy: "NONE"
     priority: 20
