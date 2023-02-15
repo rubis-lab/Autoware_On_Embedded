@@ -14,7 +14,7 @@ Looks for an initial spawn point first in the launchfile, then in the config fil
 finally ask for a random one to the spawn service.
 
 """
-
+import yaml
 import json
 import math
 import os
@@ -47,6 +47,7 @@ class CarlaSpawnObjects(CompatibleNode):
         super(CarlaSpawnObjects, self).__init__('carla_spawn_objects')
 
         self.objects_definition_file = self.get_param('objects_definition_file', '')
+        self.spawn_points_file = self.get_param('spawn_points_file','')
         self.spawn_sensors_only = self.get_param('spawn_sensors_only', False)
 
         self.players = []
@@ -139,7 +140,46 @@ class CarlaSpawnObjects(CompatibleNode):
                 spawn_point = None
 
                 # check if there's a spawn_point corresponding to this vehicle
-                spawn_point_param = self.get_param("spawn_point_" + vehicle["id"], None)
+
+                #Read points from file
+                if not self.spawn_points_file or not os.path.exists(self.spawn_points_file):
+                    raise RuntimeError(
+                        "Could not read spawn points from {}".format(self.spawn_points_file))
+                with open(self.spawn_points_file) as handle:
+                    loaded = yaml.load(handle, Loader=yaml.FullLoader)
+
+                print("==========================================================")
+                print("==========================================================")
+                print("==========================================================")
+                print(loaded)
+                print("==========================================================")
+                print("==========================================================")
+                print("==========================================================")
+
+                print("==========================================================")
+                print("==========================================================")
+                print("==========================================================")
+                print(vehicle["id"])
+                print("==========================================================")
+                print("==========================================================")
+                print("==========================================================")
+                if loaded[vehicle["id"]].has_key("spawn_points"):
+                    spawn_point_param = str(loaded[vehicle["id"]]["spawn_points"]["x"])+","+ \
+                                        str(loaded[vehicle["id"]]["spawn_points"]["y"])+","+ \
+                                        str(loaded[vehicle["id"]]["spawn_points"]["z"])+","+ \
+                                        str(loaded[vehicle["id"]]["spawn_points"]["roll"])+","+ \
+                                        str(loaded[vehicle["id"]]["spawn_points"]["pitch"])+","+ \
+                                        str(loaded[vehicle["id"]]["spawn_points"]["yaw"])
+                #Never
+                else:
+                    spawn_point_param = self.get_param("spawn_point_" + vehicle["id"], None)
+                # print("==========================================================")
+                # print("==========================================================")
+                # print("==========================================================")
+                # print(spawn_point_param)
+                # print("==========================================================")
+                # print("==========================================================")
+                # print("==========================================================")
                 spawn_param_used = False
                 if (spawn_point_param is not None):
                     # try to use spawn_point from parameters
