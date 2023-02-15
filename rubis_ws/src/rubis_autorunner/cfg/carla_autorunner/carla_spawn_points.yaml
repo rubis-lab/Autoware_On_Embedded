@@ -20,6 +20,7 @@ ego_vehicle:
     yaw: 90
 
 obstacle:
+  enable: False
   spawn_points:
     x: 315.8
     y: 192.664
@@ -35,7 +36,7 @@ obstacle:
   # <arg name="walker_point3" default="198.0, 297.0, 0.3, 0, 0, 180"/>
 
 walker:
-  # Default
+  enable: False
   spawn_points:
     x: 196.0
     y: 260.0
@@ -65,33 +66,3 @@ walker:
     pitch: 0
     yaw: 0
   walker_target_speed: 2
-  # Remove pedestrian
-  # spawn_points:
-  #   x: 400.0
-  #   y: 260.0
-  #   z: 1.0
-  #   roll: 0
-  #   pitch: 0
-  #   yaw: 0
-  # walker_point1:
-  #   x: 400.0
-  #   y: 260.0
-  #   z: 0.3
-  #   roll: 0
-  #   pitch: 0
-  #   yaw: 0
-  # walker_point2:
-  #   x: 400.0
-  #   y: 260.0
-  #   z: 0.3
-  #   roll: 0
-  #   pitch: 0
-  #   yaw: 0
-  # walker_point3:
-  #   x: 400.0
-  #   y: 260.0
-  #   z: 0.3
-  #   roll: 0
-  #   pitch: 0
-  #   yaw: 0
-  # walker_target_speed: 2

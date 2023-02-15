@@ -57,6 +57,9 @@ class CarlaSpawnObjects(CompatibleNode):
         self.spawn_object_service = self.new_client(SpawnObject, "/carla/spawn_object")
         self.destroy_object_service = self.new_client(DestroyObject, "/carla/destroy_object")
 
+        self.enable_walker = False
+        self.enable_obstacle = False
+
     def spawn_object(self, spawn_object_request):
         response_id = -1
         response = self.call_service(self.spawn_object_service, spawn_object_request, spin_until_response_received=True)
@@ -88,7 +91,7 @@ class CarlaSpawnObjects(CompatibleNode):
         global_sensors = []
         vehicles = []
         found_sensor_actor_list = False
-
+        
         for actor in json_actors["objects"]:
             actor_type = actor["type"].split('.')[0]
             if actor["type"] == "sensor.pseudo.actor_list" and self.spawn_sensors_only:
@@ -147,7 +150,16 @@ class CarlaSpawnObjects(CompatibleNode):
                         "Could not read spawn points from {}".format(self.spawn_points_file))
                 with open(self.spawn_points_file) as handle:
                     loaded = yaml.load(handle, Loader=yaml.FullLoader)
+                
+                if loaded['obstacle']['enable']: self.enable_obstacle = True
+                if loaded['walker']['enable']: self.enable_walker = True
 
+                if vehicle['id'] == 'walker':
+                    if not self.enable_walker: continue
+                if vehicle['id'] == 'obstacle':
+                    if not self.enable_obstacle: continue
+
+                
                 # print("==========================================================")
                 # print("==========================================================")
                 # print("==========================================================")
