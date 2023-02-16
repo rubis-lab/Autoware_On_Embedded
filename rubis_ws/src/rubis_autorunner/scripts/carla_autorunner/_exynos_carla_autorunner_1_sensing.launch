@@ -35,9 +35,6 @@
     <arg name="path_pcd" value="$(env USER_HOME)/autoware.ai/autoware_files/points_map/Town04_Carla.pcd"/>
   </include>
 
-  <!-- Re-publishing simulator/camera_node/image/compressed topic to /image_raw as expected by Autoware -->
-  <node name="republish" type="republish" pkg="image_transport" output="screen" args="compressed in:=/image_raw_origin out:=/image_raw"  />
-
   <include file="$(find rubis_pkg)/launch/lidar_republisher_params.launch">
     <arg name="input_topic" value="$(arg lidar_input_topic)" />
     <arg name="output_topic" value="$(arg lidar_output_topic)" />

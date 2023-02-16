@@ -93,10 +93,6 @@ lidar_euclidean_cluster_detect:
     period: 0 # ns
   task_response_time_filename: "~/Documents/profiling/response_time/lidar_euclidean_cluster_detect.csv"
 
-vision_darknet_detect:
-  network_definition_file: "~/autoware.ai/autoware_files/vision/yolov3-320.cfg"
-  pretrained_model_file: "~/autoware.ai/autoware_files/vision/yolov3.weights"
-
 # Planning
 op_global_planner:
   rate: 25 #25
