@@ -304,7 +304,7 @@ class CarlaAckermannControl(CompatibleNode):
         set target sterring angle
         """
         # hardcoding
-        self.info.target.steering_angle = -1.15*target_steering_angle
+        self.info.target.steering_angle = -1.0*target_steering_angle
         if abs(self.info.target.steering_angle) > self.info.restrictions.max_steering_angle:
             self.logerr("Max steering angle reached, clipping value")
             self.info.target.steering_angle = numpy.clip(
