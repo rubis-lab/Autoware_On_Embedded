@@ -154,19 +154,8 @@ TrajectoryCost TrajectoryDynamicCosts::DoOneStepStatic(const vector<vector<WayPo
 
   double minDistanceToRollOut = 0;
   int currIndex = 0;
+  currIndex = GetCurrentRollOutIndex(totalPaths, currState, params);
 
-  for(int i=0; i<rollOuts.size(); i++){
-    const PlannerHNS::WayPoint rollout_start_waypoint = rollOuts.at(i).at(std::min(3, int(rollOuts.at(i).size()))-1);
-
-    double direct_distance = hypot(rollout_start_waypoint.pos.y - currState.pos.y, rollout_start_waypoint.pos.x - currState.pos.x);
-
-    if(minDistanceToRollOut == 0 || minDistanceToRollOut > direct_distance){
-      minDistanceToRollOut = direct_distance;
-      currIndex = i;
-      break;
-    }
-  }
-    
   // Calculate lane change cost: Scoring the cost by the distance between current path and candidate path
   int centralIndex = params.rollOutNumber/2;    
   if(rollOuts.size() % 2 == 0) centralIndex--;
@@ -816,9 +805,13 @@ void TrajectoryDynamicCosts::CalculateIntersectionVelocities(const std::vector<P
 
 int TrajectoryDynamicCosts::GetCurrentRollOutIndex(const std::vector<WayPoint>& path, const WayPoint& currState, const PlanningParams& params)
 {
-  RelativeInfo obj_info;
-  PlanningHelpers::GetRelativeInfo(path, currState, obj_info);
-  int currIndex = params.rollOutNumber/2 + floor(obj_info.perp_distance/params.rollOutDensity);
+  RelativeInfo cur_pose_to_center_line;
+  PlanningHelpers::GetRelativeInfo(path, currState, cur_pose_to_center_line);
+
+  int currIndex = floor(double(params.rollOutNumber)/2.0 // Center index
+                  + cur_pose_to_center_line.perp_distance/params.rollOutDensity // Normalized distance
+                  + 0.5); 
+  
   if(currIndex < 0)
     currIndex = 0;
   else if(currIndex > params.rollOutNumber)
