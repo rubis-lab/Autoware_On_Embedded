@@ -1,0 +1,4 @@
+<launch>
+    <rosparam command="load" file="$(find rubis_autorunner)cfg/carla_autorunner/exynos_carla_lkas_autorunner.yaml" />
+    <node pkg="rubis_autorunner" type="exynos_carla_lkas_autorunner" name="exynos_carla_lkas_autorunner" output="screen" />
+</launch>
