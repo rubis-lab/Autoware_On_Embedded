@@ -109,7 +109,7 @@
             ]
         },
         {
-            "type": "vehicle.tesla.cybertruck",
+            "type": "vehicle.toyota.prius",
             "id": "obstacle",
             "sensors": 
             [

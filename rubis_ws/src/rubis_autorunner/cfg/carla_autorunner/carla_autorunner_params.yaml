@@ -137,13 +137,16 @@ op_trajectory_evaluator:
     period: 0 # ns
   task_response_time_filename: "~/Documents/profiling/response_time/op_trajectory_evaluator.csv"
 
-  weightPriority: 1
-  weightTransition: 0.5
-  weightLong: 1
-  weightLat: 1
-  ImageWidth: 1920
-  ImageHeight: 1080
   SprintDecisionTime: 9999999.0
+  weightPriority: 0
+  weightTransition: 5
+  weightLong: 4
+  weightLat: 4
+  ImageWidth: 400
+  ImageHeight: 400
+  SprintDecisionTime: 9999999.0
+  PedestrianStopImgHeightThreshold: 20
+  PedestrianImageDetectionRange: 0.4
 
 op_behavior_selector:
   rate: 100 #100

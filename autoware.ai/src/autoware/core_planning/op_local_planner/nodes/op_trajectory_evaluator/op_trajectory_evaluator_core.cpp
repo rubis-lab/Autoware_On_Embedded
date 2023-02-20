@@ -65,6 +65,7 @@ TrajectoryEval::TrajectoryEval()
 
   sub_GlobalPlannerPaths = nh.subscribe("/lane_waypoints_array", 1, &TrajectoryEval::callbackGetGlobalPlannerPath, this);
   sub_LocalPlannerPaths = nh.subscribe("/local_trajectories_with_pose_twist", 1, &TrajectoryEval::callbackGetLocalPlannerPath, this);
+  // sub_predicted_objects = nh.subscribe("/predicted_objects", 1, &TrajectoryEval::callbackGetPredictedObjects, this);
   sub_predicted_objects = nh.subscribe("/rubis_predicted_objects", 1, &TrajectoryEval::callbackGetPredictedObjects, this);
   sub_current_behavior = nh.subscribe("/current_behavior", 1, &TrajectoryEval::callbackGetBehaviorState, this);
 
@@ -214,10 +215,7 @@ void TrajectoryEval::callbackGetGlobalPlannerPath(const autoware_msgs::LaneArray
 
 void TrajectoryEval::callbackGetLocalPlannerPath(const rubis_msgs::LaneArrayWithPoseTwistConstPtr& msg)
 {
-  rubis::start_task_profiling();
-  // Before spin
-  UpdateMyParams();
-  UpdateTf();
+  rubis::start_task_profiling();r
 
   // callback for objects
   if(is_objects_updated_){
@@ -234,10 +232,7 @@ void TrajectoryEval::callbackGetLocalPlannerPath(const rubis_msgs::LaneArrayWith
     prev_x = msg->pose.pose.position.x;
     prev_y = msg->pose.pose.position.y;
   }
-
-  // callback for vehicle status
-  if(prev_speed != msg->twist.twist.linear.x){
-    m_VehicleStatus.speed = msg->twist.twist.linear.x;
+r
     m_CurrentPos.v = m_VehicleStatus.speed;
     if(fabs(msg->twist.twist.linear.x) > 0.25)
       m_VehicleStatus.steer = atan(m_CarInfo.wheel_base * msg->twist.twist.angular.z/msg->twist.twist.linear.x);
@@ -269,10 +264,7 @@ void TrajectoryEval::callbackGetLocalPlannerPath(const rubis_msgs::LaneArrayWith
 
       if(globalPathId_roll_outs == globalPathId)
       {
-        bWayGlobalPath = false;
-        m_GlobalPathsToUse = m_GlobalPaths;
-        std::cout << "Synchronization At Trajectory Evaluator: GlobalID: " <<  globalPathId << ", LocalID: " << globalPathId_roll_outs << std::endl;
-      }
+        bWayGlobalPath = false;r
     }
 
     bRollOuts = true;
@@ -334,12 +326,7 @@ void TrajectoryEval::callbackGetLocalPlannerPath(const rubis_msgs::LaneArrayWith
       {
         autoware_msgs::Lane lane;
         PlannerHNS::ROSHelpers::ConvertFromLocalLaneToAutowareLane(m_GeneratedRollOuts.at(i), lane);
-        lane.closest_object_distance = m_TrajectoryCostsCalculator.m_TrajectoryCosts.at(i).closest_obj_distance;
-        lane.closest_object_velocity = m_TrajectoryCostsCalculator.m_TrajectoryCosts.at(i).closest_obj_velocity;
-        lane.cost = m_TrajectoryCostsCalculator.m_TrajectoryCosts.at(i).cost;
-        lane.is_blocked = m_TrajectoryCostsCalculator.m_TrajectoryCosts.at(i).bBlocked;
-        lane.lane_index = i;
-        local_lanes.lane_array.lanes.push_back(lane);
+        lane.closest_object_distance = m_TrajectoryCostsCalculator.mr
       }
 
       rubis::instance_ = msg->instance;      
@@ -383,17 +370,18 @@ void TrajectoryEval::callbackGetPredictedObjects(const rubis_msgs::DetectedObjec
   object_msg_ = msg->object_array;
   rubis::obj_instance_ = msg->obj_instance;
   is_objects_updated_ = true;
+  // _callbackGetPredictedObjects(object_msg_);
 }
 
 void TrajectoryEval::_callbackGetPredictedObjects(const autoware_msgs::DetectedObjectArray& objects_msg){
   m_PredictedObjects.clear();
+  ROS_WARN("callbackGetPredictedObjects Called");
   bPredictedObjects = true;
   double distance_to_pedestrian = 1000;
   int image_person_detection_range_left = m_ImageWidth/2 - m_ImageWidth*m_PedestrianImageDetectionRange/2;
   int image_person_detection_range_right = m_ImageWidth/2 + m_ImageWidth*m_PedestrianImageDetectionRange/2;
   int image_vehicle_detection_range_left = m_ImageWidth/2 - m_ImageWidth*m_VehicleImageDetectionRange/2;
-  int image_vehicle_detection_range_right = m_ImageWidth/2 + m_ImageWidth*m_VehicleImageDetectionRange/2;
-  int vehicle_cnt = 0;
+  int image_vehicle_detection_range_right = m_ImageWidth/2 + m_Imager
 
   PlannerHNS::DetectedObject obj;  
   for(unsigned int i = 0 ; i <objects_msg.objects.size(); i++)
@@ -426,14 +414,7 @@ void TrajectoryEval::_callbackGetPredictedObjects(const autoware_msgs::DetectedO
       }
     }
     // msg_obj.header.frame_id = "map";
-    obj.center.pos.x = pose_in_map.pose.position.x;
-    obj.center.pos.y = pose_in_map.pose.position.y;
-    obj.center.pos.z = pose_in_map.pose.position.z;
-
-    // transform contour into map frame
-    for(unsigned int j = 0; j < msg_obj.convex_hull.polygon.points.size(); j++){
-      geometry_msgs::PoseStamped contour_point_in_map;
-      contour_point_in_map.header = msg_obj.header;
+    obj.center.pos.x = pose_in_map.pose.position.x;r
       contour_point_in_map.pose.position.x = msg_obj.convex_hull.polygon.points.at(j).x;
       contour_point_in_map.pose.position.y = msg_obj.convex_hull.polygon.points.at(j).y;
       contour_point_in_map.pose.position.z = msg_obj.convex_hull.polygon.points.at(j).z;
@@ -464,17 +445,22 @@ void TrajectoryEval::_callbackGetPredictedObjects(const autoware_msgs::DetectedO
     int image_obj_center_x = msg_obj.x+msg_obj.width/2;
     int image_obj_center_y = msg_obj.y+msg_obj.height/2;
     if (msg_obj.label == "person"){// If person is detected only in image
-      
+      ROS_WARN("==========================================");
+      ROS_WARN("person detected!");
+      ROS_WARN("==========================================");
       if(image_obj_center_x >= image_person_detection_range_left && image_obj_center_x <= image_person_detection_range_right){ 
         double temp_x_distance = 1000;
         if(msg_obj.height >= m_pedestrian_stop_img_height_threshold) temp_x_distance = 10;
         if(abs(temp_x_distance) < abs(distance_to_pedestrian)) distance_to_pedestrian = temp_x_distance;
       }
+      ROS_WARN("==========================================");
+      ROS_WARN("distance_to_pedestrian: %lf", distance_to_pedestrian);
+      ROS_WARN("==========================================");
     }
   }
 
   // Publish Sprint Switch
-  std_msgs::Bool sprint_switch_msg;
+  std_msgs::Bool sprint_switch_msg;r
 
   if(vehicle_cnt != 0){
     m_noVehicleCnt = 0;

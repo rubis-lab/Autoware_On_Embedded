@@ -5,7 +5,7 @@
 
   <arg name="names_file" default="$(find vision_darknet_detect)/darknet/cfg/coco.names"/>
   <arg name="camera_id" default="/"/>
-  <arg name="image_src" default="/image_raw_origin"/>  
+  <arg name="image_src" default="/image_raw"/>  
 
   <node pkg="vision_darknet_detect" name="vision_darknet_detect" type="vision_darknet_detect">
     <param name="score_threshold" type="double" value="$(arg score_threshold)"/>
