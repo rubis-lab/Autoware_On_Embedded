@@ -215,7 +215,10 @@ void TrajectoryEval::callbackGetGlobalPlannerPath(const autoware_msgs::LaneArray
 
 void TrajectoryEval::callbackGetLocalPlannerPath(const rubis_msgs::LaneArrayWithPoseTwistConstPtr& msg)
 {
-  rubis::start_task_profiling();r
+  rubis::start_task_profiling();
+  // Before spin
+  UpdateMyParams();
+  UpdateTf();
 
   // callback for objects
   if(is_objects_updated_){
@@ -232,7 +235,10 @@ void TrajectoryEval::callbackGetLocalPlannerPath(const rubis_msgs::LaneArrayWith
     prev_x = msg->pose.pose.position.x;
     prev_y = msg->pose.pose.position.y;
   }
-r
+
+  // callback for vehicle status
+  if(prev_speed != msg->twist.twist.linear.x){
+    m_VehicleStatus.speed = msg->twist.twist.linear.x;
     m_CurrentPos.v = m_VehicleStatus.speed;
     if(fabs(msg->twist.twist.linear.x) > 0.25)
       m_VehicleStatus.steer = atan(m_CarInfo.wheel_base * msg->twist.twist.angular.z/msg->twist.twist.linear.x);
@@ -264,7 +270,10 @@ r
 
       if(globalPathId_roll_outs == globalPathId)
       {
-        bWayGlobalPath = false;r
+        bWayGlobalPath = false;
+        m_GlobalPathsToUse = m_GlobalPaths;
+        std::cout << "Synchronization At Trajectory Evaluator: GlobalID: " <<  globalPathId << ", LocalID: " << globalPathId_roll_outs << std::endl;
+      }
     }
 
     bRollOuts = true;
@@ -326,7 +335,12 @@ r
       {
         autoware_msgs::Lane lane;
         PlannerHNS::ROSHelpers::ConvertFromLocalLaneToAutowareLane(m_GeneratedRollOuts.at(i), lane);
-        lane.closest_object_distance = m_TrajectoryCostsCalculator.mr
+        lane.closest_object_distance = m_TrajectoryCostsCalculator.m_TrajectoryCosts.at(i).closest_obj_distance;
+        lane.closest_object_velocity = m_TrajectoryCostsCalculator.m_TrajectoryCosts.at(i).closest_obj_velocity;
+        lane.cost = m_TrajectoryCostsCalculator.m_TrajectoryCosts.at(i).cost;
+        lane.is_blocked = m_TrajectoryCostsCalculator.m_TrajectoryCosts.at(i).bBlocked;
+        lane.lane_index = i;
+        local_lanes.lane_array.lanes.push_back(lane);
       }
 
       rubis::instance_ = msg->instance;      
@@ -375,13 +389,14 @@ void TrajectoryEval::callbackGetPredictedObjects(const rubis_msgs::DetectedObjec
 
 void TrajectoryEval::_callbackGetPredictedObjects(const autoware_msgs::DetectedObjectArray& objects_msg){
   m_PredictedObjects.clear();
-  ROS_WARN("callbackGetPredictedObjects Called");
+  // ROS_WARN("callbackGetPredictedObjects Called");
   bPredictedObjects = true;
   double distance_to_pedestrian = 1000;
   int image_person_detection_range_left = m_ImageWidth/2 - m_ImageWidth*m_PedestrianImageDetectionRange/2;
   int image_person_detection_range_right = m_ImageWidth/2 + m_ImageWidth*m_PedestrianImageDetectionRange/2;
   int image_vehicle_detection_range_left = m_ImageWidth/2 - m_ImageWidth*m_VehicleImageDetectionRange/2;
-  int image_vehicle_detection_range_right = m_ImageWidth/2 + m_Imager
+  int image_vehicle_detection_range_right = m_ImageWidth/2 + m_ImageWidth*m_VehicleImageDetectionRange/2;
+  int vehicle_cnt = 0;
 
   PlannerHNS::DetectedObject obj;  
   for(unsigned int i = 0 ; i <objects_msg.objects.size(); i++)
@@ -414,7 +429,14 @@ void TrajectoryEval::_callbackGetPredictedObjects(const autoware_msgs::DetectedO
       }
     }
     // msg_obj.header.frame_id = "map";
-    obj.center.pos.x = pose_in_map.pose.position.x;r
+    obj.center.pos.x = pose_in_map.pose.position.x;
+    obj.center.pos.y = pose_in_map.pose.position.y;
+    obj.center.pos.z = pose_in_map.pose.position.z;
+
+    // transform contour into map frame
+    for(unsigned int j = 0; j < msg_obj.convex_hull.polygon.points.size(); j++){
+      geometry_msgs::PoseStamped contour_point_in_map;
+      contour_point_in_map.header = msg_obj.header;
       contour_point_in_map.pose.position.x = msg_obj.convex_hull.polygon.points.at(j).x;
       contour_point_in_map.pose.position.y = msg_obj.convex_hull.polygon.points.at(j).y;
       contour_point_in_map.pose.position.z = msg_obj.convex_hull.polygon.points.at(j).z;
@@ -460,7 +482,7 @@ void TrajectoryEval::_callbackGetPredictedObjects(const autoware_msgs::DetectedO
   }
 
   // Publish Sprint Switch
-  std_msgs::Bool sprint_switch_msg;r
+  std_msgs::Bool sprint_switch_msg;
 
   if(vehicle_cnt != 0){
     m_noVehicleCnt = 0;

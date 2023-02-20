@@ -312,7 +312,7 @@ autoware_msgs::DetectedObjectArray MotionPrediction::TrasformObjAryToVeldoyne(co
 
 void MotionPrediction::callbackGetTrackedObjects(const autoware_msgs::DetectedObjectArrayConstPtr& in_msg)
 {
-  std::cout<<"ERROR non rubis"<<std::endl;
+  // std::cout<<"ERROR non rubis"<<std::endl;
   UtilityHNS::UtilityH::GetTickCount(m_SensingTimer);
   m_TrackedObjects.clear();
   bTrackedObjects = true;

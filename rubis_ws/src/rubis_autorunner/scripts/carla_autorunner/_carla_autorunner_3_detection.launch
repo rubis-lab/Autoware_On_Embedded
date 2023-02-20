@@ -65,8 +65,8 @@
   <!-- imm_ukf_pda_track -->
   <!-- <include file="$(find imm_ukf_pda_track)/launch/imm_ukf_pda_track.launch">
     <arg name="namespace" default="/detection/object_tracker"/>
-    <arg name="tracker_input_topic" default="/detection/lidar_detector/objects_center" />
-    <arg name="tracker_output_topic" default="/detection/object_tracker/objects_center" />
+    <arg name="tracker_input_topic" default="/detection/lidar_detector/rubis_objects_center" />
+    <arg name="tracker_output_topic" default="/detection/object_tracker/rubis_objects_center" />
     <arg name="tracking_frame" default="/world" />
     <arg name="gating_threshold" default="9.22" />
     <arg name="gate_probability" default="0.99" />

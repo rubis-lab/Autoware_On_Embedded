@@ -65,7 +65,7 @@
     <arg name="smoothingDataWeight"             default="0.45"  />
     <arg name="smoothingSmoothWeight"           default="0.4"  />
     <arg name="enableSlowDownOnCurve"           default="true" />
-    <arg name="curveVelocityRatio"           default="0.4" />
+    <arg name="curveVelocityRatio"           default="0.7" />
   </include>
 
   <!-- op_trajectory_generator -->
@@ -94,7 +94,7 @@
 
   <!-- op_trajectory_evaluator -->
   <include file="$(find op_local_planner)/launch/op_trajectory_evaluator_parameter.launch">
-    <arg name="enableDebug"      default="0" />
+    <arg name="enableDebug"      default="1" />
 
     <arg name="enablePrediction"                default="false" />                
     <arg name="horizontalSafetyDistance"        default="1.2" />
@@ -102,7 +102,7 @@
     <arg name="LateralSkipDistance"             default="5.0" />  
 
     <!-- Trajectory blocking threshold  -->
-    <arg name="lateralBlockingThreshold"           default="0.5" />
+    <arg name="lateralBlockingThreshold"           default="1.0" />
     <arg name="frontLongitudinalBlockingThreshold"      default="30" />
     <arg name="rearLongitudinalBlockingThreshold"      default="-5" />
 

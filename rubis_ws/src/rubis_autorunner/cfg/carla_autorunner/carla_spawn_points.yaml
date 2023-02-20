@@ -66,7 +66,7 @@ walker:
     pitch: 0
     yaw: 0
   walker_point3:
-    x: 210.0
+    x: 220.0
     y: 260.0
     z: 0.3
     roll: 0
