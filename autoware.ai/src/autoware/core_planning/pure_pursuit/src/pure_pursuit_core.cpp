@@ -142,6 +142,8 @@ void PurePursuitNode::initForROS()
   nh_.param("vehicle_info/wheel_base", wheel_base_, 2.7);
 
   private_nh_.param("/pure_pursuit/dynamic_params_flag", dynamic_param_flag_, false);
+  private_nh_.param("/pure_pursuit/wait_until_reaching_max_velocity", wait_until_reaching_max_velocity_, false);
+  private_nh_.param("/op_common_params/maxVelocity", max_velocity_, 10.0);
   
   if(dynamic_param_flag_){
     XmlRpc::XmlRpcValue xml_list;
@@ -225,10 +227,23 @@ void PurePursuitNode::run()
 void PurePursuitNode::publishTwistStamped(
   const bool& can_get_curvature, const double& kappa) const
 {
+  static bool is_started = false;
   geometry_msgs::TwistStamped ts;
   ts.header.stamp = ros::Time::now();
   ts.twist.linear.x = can_get_curvature ? computeCommandVelocity() : 0;
   ts.twist.angular.z = can_get_curvature ? kappa * ts.twist.linear.x : 0;
+  
+  // Wait until velocity is fast enough
+  if(!is_started){
+    if(wait_until_reaching_max_velocity_ && ts.twist.linear.x < max_velocity_){
+      ts.twist.linear.x = 0.0;    
+      return;
+    }
+    else{
+      is_started = true;
+    }
+  }
+
   twist_pub_.publish(ts);
 
   rubis_msgs::TwistStamped rubis_ts;

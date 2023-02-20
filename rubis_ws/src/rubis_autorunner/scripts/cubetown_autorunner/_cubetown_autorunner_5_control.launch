@@ -13,6 +13,7 @@
     <arg name="is_linear_interpolation"       value="True"/>
     <arg name="publishes_for_steering_robot"  value="True"/>
     <arg name="add_virtual_end_waypoints"     value="False"/>
+    <arg name="wait_until_reaching_max_velocity" value="True" /> 
   </include>
 
   <!-- twist_filter -->

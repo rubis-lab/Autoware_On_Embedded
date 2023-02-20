@@ -7,6 +7,7 @@
   <arg name="const_velocity" default="5.0"/>
   <arg name="lookahead_ratio" default="2.0"/>
   <arg name="minimum_lookahead_distance" default="6.0"/>
+  <arg name="wait_until_getting_velocity_10" default="False" /> 
 
 
   <!-- 0 = waypoints, 1 = provided constant velocity -->
@@ -22,5 +23,6 @@
     <param name="lookahead_ratio" value="$(arg lookahead_ratio)"/>
     <param name="minimum_lookahead_distance" value="$(arg minimum_lookahead_distance)"/>
     <param name="velocity_source" value="$(arg velocity_source)"/>
+    <param name="wait_until_getting_velocity_10" value="$(arg wait_until_getting_velocity_10)" /> 
   </node>
 </launch>

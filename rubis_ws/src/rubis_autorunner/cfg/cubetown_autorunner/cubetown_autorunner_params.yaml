@@ -112,12 +112,12 @@ op_global_planner:
 op_common_params:
   rollOutDensity: 4
   rollOutsNumber: 2
-  maxVelocity: 10.0
-  maxAcceleration: 10.0
-  maxDeceleration: -10.0
+  maxVelocity: 13.0
+  maxAcceleration: 13.0
+  maxDeceleration: -13.0
 
 op_trajectory_generator:
-  rate: 100 #100
+  rate: 20 #100
   task_scheduling_configs:
     policy: "NONE"
     priority: 20

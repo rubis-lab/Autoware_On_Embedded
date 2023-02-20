@@ -126,7 +126,8 @@ private:
   double minimum_lookahead_distance_from_param;
 
   // Added by PHY
-  bool dynamic_param_flag_;
+  bool dynamic_param_flag_, wait_until_reaching_max_velocity_;
+  double max_velocity_;
   std::vector<DynamicParams> dynamic_params;
   autoware_msgs::Lane lane_;
 

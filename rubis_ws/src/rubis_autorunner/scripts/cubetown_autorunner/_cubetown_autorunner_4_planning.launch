@@ -54,6 +54,8 @@
     <arg name="speedProfileFactor"              default="1.2"  />
     <arg name="smoothingDataWeight"             default="0.45"  />
     <arg name="smoothingSmoothWeight"           default="0.4"  />  
+    <arg name="enableSlowDownOnCurve"           default="false" />
+    <arg name="curveVelocityRatio"           default="1.0" />
   </include>
 
   <!-- op_trajectory_generator -->
@@ -82,7 +84,7 @@
 
   <!-- op_trajectory_evaluator -->
   <include file="$(find op_local_planner)/launch/op_trajectory_evaluator_parameter.launch">
-    <arg name="enableDebug"      default="1" />
+    <arg name="enableDebug"      default="0" />
 
     <arg name="enablePrediction"                default="false" />                
     <arg name="horizontalSafetyDistance"        default="1.2" />
