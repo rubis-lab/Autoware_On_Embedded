@@ -55,7 +55,7 @@ void CubetownAutorunner::register_subscribers(){
     }
 
     if(msg.pose.position.x <= 57.0 && msg.pose.position.x >= 55.0 &&        
-        msg.pose.position.y >= -0.20 && msg.pose.position.y <= 0.00 &&
+        msg.pose.position.y >= -1.0 && msg.pose.position.y <= 1.00 &&
         !ros_autorunner_.step_info_list_[STEP(3)].is_prepared){
         success_cnt++;
         if(success_cnt < 3) return;

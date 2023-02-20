@@ -154,19 +154,8 @@ TrajectoryCost TrajectoryDynamicCosts::DoOneStepStatic(const vector<vector<WayPo
 
   double minDistanceToRollOut = 0;
   int currIndex = 0;
+  currIndex = GetCurrentRollOutIndex(totalPaths, currState, params);
 
-  for(int i=0; i<rollOuts.size(); i++){
-    const PlannerHNS::WayPoint rollout_start_waypoint = rollOuts.at(i).at(std::min(3, int(rollOuts.at(i).size()))-1);
-
-    double direct_distance = hypot(rollout_start_waypoint.pos.y - currState.pos.y, rollout_start_waypoint.pos.x - currState.pos.x);
-
-    if(minDistanceToRollOut == 0 || minDistanceToRollOut > direct_distance){
-      minDistanceToRollOut = direct_distance;
-      currIndex = i;
-      break;
-    }
-  }
-    
   // Calculate lane change cost: Scoring the cost by the distance between current path and candidate path
   int centralIndex = params.rollOutNumber/2;    
   if(rollOuts.size() % 2 == 0) centralIndex--;
@@ -223,6 +212,8 @@ TrajectoryCost TrajectoryDynamicCosts::DoOneStepStatic(const vector<vector<WayPo
   // for(unsigned int ic = std::max(currIndex - 1, m_startTrajIdx); ic <= std::min(currIndex + 1, m_endTrajIdx); ic++)
   // for(unsigned int ic = m_startTrajIdx; ic <= m_endTrajIdx; ic++)
   
+  bool is_current_path_blocked = false;
+
   for(unsigned int ic = 0; ic < rollOuts.size(); ic++)
   {
     if(!m_TrajectoryCosts.at(ic).bBlocked && m_TrajectoryCosts.at(ic).cost < smallestCost)
@@ -238,26 +229,39 @@ TrajectoryCost TrajectoryDynamicCosts::DoOneStepStatic(const vector<vector<WayPo
       velo_of_next = m_TrajectoryCosts.at(ic).closest_obj_velocity;
     }
 
+    if(ic == currIndex && m_TrajectoryCosts.at(ic).bBlocked == true)
+      is_current_path_blocked = true;
+
     if(m_TrajectoryCosts.at(ic).lateral_cost > 0){
       bAllFree = false;
     }
   }
 
-  if(smallestIndex == -1)
-  {
-    bestTrajectory.bBlocked = true;
-    bestTrajectory.lane_index = m_PrevSelectedIndex;
-    bestTrajectory.index = m_PrevSelectedIndex;
-    bestTrajectory.closest_obj_distance = smallestDistance;
-    bestTrajectory.closest_obj_velocity = velo_of_next;
+  static int path_keeping_cnt = 20, cur_path_blocking_cnt = 20;
+  if(m_PrevIndex == currIndex){
+    path_keeping_cnt--;
+    if(path_keeping_cnt < 0) path_keeping_cnt = 0;
   }
-  else if(smallestIndex >= 0)
-  {
-    bestTrajectory = m_TrajectoryCosts.at(smallestIndex);
-    m_PrevSelectedIndex = smallestIndex;
-  }
+  else path_keeping_cnt = 20;
 
-  m_PrevIndex = currIndex;
+  // Change lane if current path is blocked or current path is not center and the ego keeps lane 1 sceonds(When rate is 20)
+  if((is_current_path_blocked) || (smallestIndex != params.rollOutNumber/2 && path_keeping_cnt == 0)){
+    if(smallestIndex == -1)
+    {
+      bestTrajectory.bBlocked = true;
+      bestTrajectory.lane_index = m_PrevSelectedIndex;
+      bestTrajectory.index = m_PrevSelectedIndex;
+      bestTrajectory.closest_obj_distance = smallestDistance;
+      bestTrajectory.closest_obj_velocity = velo_of_next;
+    }
+    else if(smallestIndex >= 0)
+    {
+      bestTrajectory = m_TrajectoryCosts.at(smallestIndex);
+      m_PrevSelectedIndex = smallestIndex;
+    }
+  }
+  
+  m_PrevIndex = currIndex;  
 
   if(params.enableDebug){
     for(unsigned int ic=0; ic<rollOuts.size(); ic++){
@@ -274,9 +278,11 @@ TrajectoryCost TrajectoryDynamicCosts::DoOneStepStatic(const vector<vector<WayPo
     std::cout << "---------------------------------------" << std::endl;
     std::cout << "leftLnId : " << car_info.perp_point.LeftLnId << ", RightLnId : " << car_info.perp_point.RightLnId << std::endl;
     std::cout << "start_idx : " << m_startTrajIdx << ", end_idx : " << m_endTrajIdx << std::endl;
-    std::cout << "current_idx : " << currIndex << ", selected one : " << smallestIndex << std::endl;
+    std::cout << "Path keeping cnt: " << path_keeping_cnt << "prev_idx : " << m_PrevIndex << ", current_idx : " << currIndex << ", selected one : " << smallestIndex << std::endl;
     std::cout << "---------------------------------------" << std::endl;
   }
+
+
 
   return bestTrajectory;
 }
@@ -287,6 +293,7 @@ TrajectoryCost TrajectoryDynamicCosts::DoOneStep(const vector<vector<vector<WayP
     const PlanningParams& params, const CAR_BASIC_INFO& carInfo, const VehicleState& vehicleState,
     const std::vector<PlannerHNS::DetectedObject>& obj_list)
 {
+  /*
   TrajectoryCost bestTrajectory;
   bestTrajectory.bBlocked = true;
   bestTrajectory.closest_obj_distance = params.horizonDistance;
@@ -367,6 +374,7 @@ TrajectoryCost TrajectoryDynamicCosts::DoOneStep(const vector<vector<vector<WayP
   m_PrevCostIndex = smallestIndex;
 
   return bestTrajectory;
+  */
 }
 
 void TrajectoryDynamicCosts::CalculateLateralAndLongitudinalCostsStatic(vector<TrajectoryCost>& trajectoryCosts,
@@ -816,9 +824,13 @@ void TrajectoryDynamicCosts::CalculateIntersectionVelocities(const std::vector<P
 
 int TrajectoryDynamicCosts::GetCurrentRollOutIndex(const std::vector<WayPoint>& path, const WayPoint& currState, const PlanningParams& params)
 {
-  RelativeInfo obj_info;
-  PlanningHelpers::GetRelativeInfo(path, currState, obj_info);
-  int currIndex = params.rollOutNumber/2 + floor(obj_info.perp_distance/params.rollOutDensity);
+  RelativeInfo cur_pose_to_center_line;
+  PlanningHelpers::GetRelativeInfo(path, currState, cur_pose_to_center_line);
+
+  int currIndex = floor(double(params.rollOutNumber)/2.0 // Center index
+                  + cur_pose_to_center_line.perp_distance/params.rollOutDensity // Normalized distance
+                  + 0.5); 
+  
   if(currIndex < 0)
     currIndex = 0;
   else if(currIndex > params.rollOutNumber)
