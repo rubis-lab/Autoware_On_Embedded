@@ -23,7 +23,7 @@
   </node>
 
   <!-- pcl_generic=0, pcl_anh=1, pcl_anh_gpu=2, pcl_openmp=3 -->
-  <arg name="method_type" default="0"/>
+  <arg name="method_type" default="1"/>
   <arg name="max_iter" default="30"/>
   <arg name="resolution" default="4.0"/>
   <arg name="step_size" default="0.05"/>
