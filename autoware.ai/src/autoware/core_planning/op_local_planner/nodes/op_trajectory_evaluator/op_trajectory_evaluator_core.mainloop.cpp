@@ -518,7 +518,7 @@ void TrajectoryEval::MainLoop()
         l.closest_object_velocity = tc.closest_obj_velocity;
         l.cost = tc.cost;
         l.is_blocked = tc.bBlocked;
-        l.lane_index = tc.index;
+        l.lane_index = tc.index;`
         pub_TrajectoryCost.publish(l);
 
         // hjw added : Check if ego is on intersection and obstacles are in risky area 

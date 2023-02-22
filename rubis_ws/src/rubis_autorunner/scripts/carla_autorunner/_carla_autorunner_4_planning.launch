@@ -102,9 +102,9 @@
     <arg name="LateralSkipDistance"             default="5.0" />  
 
     <!-- Trajectory blocking threshold  -->
-    <arg name="lateralBlockingThreshold"           default="1.0" />
+    <arg name="lateralBlockingThreshold"           default="0.5" />
     <arg name="frontLongitudinalBlockingThreshold"      default="30" />
-    <arg name="rearLongitudinalBlockingThreshold"      default="-5" />
+    <arg name="rearLongitudinalBlockingThreshold"      default="0" />
 
     <arg name="intersectionFile"                default="crossing_test/crossing_intersection.yaml" />
   </include>

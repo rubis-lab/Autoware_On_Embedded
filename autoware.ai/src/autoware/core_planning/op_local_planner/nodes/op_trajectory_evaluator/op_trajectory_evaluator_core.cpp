@@ -65,7 +65,7 @@ TrajectoryEval::TrajectoryEval()
 
   sub_GlobalPlannerPaths = nh.subscribe("/lane_waypoints_array", 1, &TrajectoryEval::callbackGetGlobalPlannerPath, this);
   sub_LocalPlannerPaths = nh.subscribe("/local_trajectories_with_pose_twist", 1, &TrajectoryEval::callbackGetLocalPlannerPath, this);
-  // sub_predicted_objects = nh.subscribe("/predicted_objects", 1, &TrajectoryEval::callbackGetPredictedObjects, this);
+  sub_predicted_objects = nh.subscribe("/predicted_objects", 1, &TrajectoryEval::_callbackGetPredictedObjects, this);
   sub_predicted_objects = nh.subscribe("/rubis_predicted_objects", 1, &TrajectoryEval::callbackGetPredictedObjects, this);
   sub_current_behavior = nh.subscribe("/current_behavior", 1, &TrajectoryEval::callbackGetBehaviorState, this);
 

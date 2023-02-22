@@ -218,7 +218,7 @@ class CarlaWalkerAgent(CompatibleNode):
     def run_step(self):
         dist=math.sqrt((self._ego_current_pose.position.x-self._current_pose.position.x)**2+(self._ego_current_pose.position.y-self._current_pose.position.y)**2)
         # rospy.logwarn('dist: '+str(dist))
-        if 30<dist<40 and self.walker_waypoint_ready==False:
+        if 20<dist<30 and self.walker_waypoint_ready==False:
             self.set_waypoints()
             # rospy.logwarn('dist: '+str(dist))
             # waypoints = Path()

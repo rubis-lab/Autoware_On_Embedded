@@ -138,15 +138,15 @@ op_trajectory_evaluator:
   task_response_time_filename: "~/Documents/profiling/response_time/op_trajectory_evaluator.csv"
 
   SprintDecisionTime: 9999999.0
-  weightPriority: 0
-  weightTransition: 5
-  weightLong: 4
-  weightLat: 4
+  weightPriority: 1
+  weightTransition: 0.5
+  weightLong: 1
+  weightLat: 1
   ImageWidth: 400
   ImageHeight: 400
   SprintDecisionTime: 9999999.0
   PedestrianStopImgHeightThreshold: 20
-  PedestrianImageDetectionRange: 0.4
+  PedestrianImageDetectionRange: 0.3
 
 op_behavior_selector:
   rate: 100 #100

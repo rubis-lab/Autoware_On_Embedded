@@ -263,7 +263,12 @@ void MotionPrediction::callbackGetRobotOdom(const nav_msgs::OdometryConstPtr& ms
   bVehicleStatus = true;
 }
 
+// transform frame_id to velodyne except object from image(camera)
 autoware_msgs::DetectedObject MotionPrediction::TransformObjToVeldoyne(const autoware_msgs::DetectedObject& in_obj, tf::StampedTransform &transform){
+  //image(camera) skip
+  if(in_obj.header.frame_id == "ego_vehicle/rgb_front" || in_obj.header.frame_id == "camera") {
+    return in_obj;
+  }
   autoware_msgs::DetectedObject out_obj;
   out_obj = in_obj;
   // Transform pose
@@ -298,6 +303,7 @@ autoware_msgs::DetectedObject MotionPrediction::TransformObjToVeldoyne(const aut
   return out_obj;
 }
 
+// transform frame_id to velodyne except object from image(camera)
 autoware_msgs::DetectedObjectArray MotionPrediction::TrasformObjAryToVeldoyne(const autoware_msgs::DetectedObjectArray& in_obj, tf::StampedTransform &transform){ 
   autoware_msgs::DetectedObjectArray out_obj = in_obj;
   out_obj.objects.clear();
@@ -325,7 +331,7 @@ void MotionPrediction::callbackGetTrackedObjects(const autoware_msgs::DetectedOb
     ROS_ERROR("Cannot find index by frame id");      
     exit(0);
   }  
-
+  // && target_frame != "ego_vehicle/rgb_front" && target_frame != "camera"
   autoware_msgs::DetectedObjectArray msg; 
   if(target_frame != "velodyne"){
     msg = TrasformObjAryToVeldoyne(*in_msg, transform_list_[obj_idx]);  
@@ -365,7 +371,7 @@ void MotionPrediction::callbackGetTrackedObjects(const autoware_msgs::DetectedOb
       PlannerHNS::ROSHelpers::ConvertFromOpenPlannerDetectedObjectToAutowareDetectedObject(m_PredictBeh.m_ParticleInfo_II.at(i)->obj, false, pred_obj);
       if(m_PredictBeh.m_ParticleInfo_II.at(i)->best_beh_track)
         pred_obj.behavior_state = m_PredictBeh.m_ParticleInfo_II.at(i)->best_beh_track->best_beh;
-      // pred_obj = TransformObjToVeldoyne(pred_obj, transform_list_[obj_idx]);
+      pred_obj = TransformObjToVeldoyne(pred_obj, transform_list_[obj_idx]);
       object_msg_list_[obj_idx].objects.push_back(pred_obj);
     }
     
@@ -377,7 +383,7 @@ void MotionPrediction::callbackGetTrackedObjects(const autoware_msgs::DetectedOb
       for(unsigned int i = 0 ; i <curr_curbs_obstacles.size(); i++)
       {
         PlannerHNS::ROSHelpers::ConvertFromOpenPlannerDetectedObjectToAutowareDetectedObject(curr_curbs_obstacles.at(i), false, pred_obj);
-        // pred_obj = TransformObjToVeldoyne(pred_obj, transform_list_[obj_idx]);
+        pred_obj = TransformObjToVeldoyne(pred_obj, transform_list_[obj_idx]);
         object_msg_list_[obj_idx].objects.push_back(pred_obj);
       }
     }
@@ -397,7 +403,7 @@ void MotionPrediction::callbackGetTrackedObjects(const autoware_msgs::DetectedOb
     }
 
     m_PredictedResultsResults.header.stamp = ros::Time().now();
-    m_PredictedResultsResults.header.frame_id = "velodyne";
+    // m_PredictedResultsResults.header.frame_id = "velodyne";
     
     pub_predicted_objects_trajectories.publish(m_PredictedResultsResults);
   }
@@ -482,7 +488,7 @@ void MotionPrediction::_callbackGetRubisTrackedObjects(rubis_msgs::DetectedObjec
   }  
 
   autoware_msgs::DetectedObjectArray msg; 
-  if(target_frame != "velodyne"){
+  if(target_frame != "velodyne" && target_frame != "ego_vehicle/rgb_front" && target_frame != "camera"){
     msg = TrasformObjAryToVeldoyne(objects_msg.object_array, transform_list_[obj_idx]);  
   }
   else{
@@ -543,15 +549,15 @@ void MotionPrediction::_callbackGetRubisTrackedObjects(rubis_msgs::DetectedObjec
       auto object_msg_entry = *it1;
       for(auto it2 = object_msg_entry.objects.begin(); it2 != object_msg_entry.objects.end(); ++it2){
         auto object_entry = *it2;
-        object_entry.header.frame_id = "velodyne";
-        object_entry.convex_hull.header.frame_id = "velodyne";
+        // object_entry.header.frame_id = "velodyne";
+        // object_entry.convex_hull.header.frame_id = "velodyne";
         object_entry.valid=true;
         m_PredictedResultsResults.objects.push_back(object_entry);
       }
     }
 
     m_PredictedResultsResults.header.stamp = ros::Time().now();
-    m_PredictedResultsResults.header.frame_id = "velodyne";
+    // m_PredictedResultsResults.header.frame_id = "velodyne";
 
     rubis_msgs::DetectedObjectArray output_msg;
     output_msg.instance = rubis::instance_;
