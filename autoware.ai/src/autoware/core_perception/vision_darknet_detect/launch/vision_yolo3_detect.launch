@@ -7,7 +7,7 @@
   <arg name="pretrained_model_file" default="$(find vision_darknet_detect)/darknet/data/yolov3.weights"/>
   <arg name="names_file" default="$(find vision_darknet_detect)/darknet/cfg/coco.names"/>
   <arg name="camera_id" default="/"/>
-  <arg name="image_src" default="/image_raw"/>  
+  <arg name="image_src" default="/rubis_image_raw"/>  
 
   <node pkg="vision_darknet_detect" name="vision_darknet_detect" type="vision_darknet_detect">
     <param name="network_definition_file" type="str" value="$(arg network_definition_file)"/>

@@ -20,6 +20,16 @@ lidar_republisher:
     period: 2_000_000
   task_response_time_filename: "~/Documents/profiling/response_time/lidar_republisher.csv"  
 
+camera_republisher:
+  rate: 10
+  task_scheduling_configs:
+    policy: "NONE"
+    priority: 99
+    exec_time: 1_000_000
+    deadline: 2_000_000
+    period: 2_000_000
+  task_response_time_filename: "~/Documents/profiling/response_time/camera_republisher.csv"  
+
 voxel_grid_filter:
   rate: 10
   task_scheduling_configs:
@@ -94,6 +104,13 @@ lidar_euclidean_cluster_detect:
   task_response_time_filename: "~/Documents/profiling/response_time/lidar_euclidean_cluster_detect.csv"
 
 vision_darknet_detect:
+  rate: 10
+  task_scheduling_configs:
+    policy: "NONE"
+    priority: 20
+    exec_time: 0 # ns
+    deadline: 0 # ns
+    period: 0 # ns
   network_definition_file: "~/autoware.ai/autoware_files/vision/yolov3-320.cfg"
   pretrained_model_file: "~/autoware.ai/autoware_files/vision/yolov3.weights"
 
@@ -113,7 +130,7 @@ op_global_planner:
 op_common_params:
   rollOutDensity: 4
   rollOutsNumber: 2
-  maxVelocity: 8.0
+  maxVelocity: 12.0
   maxAcceleration: 8.0
   maxDeceleration: -8.0
 

@@ -42,6 +42,15 @@ include_directories(
 # ${catkin_INCLUDE_DIRS}
 )
 
+add_executable(camera_republisher
+  src/camera_republisher.cpp
+)
+add_dependencies(camera_republisher ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(camera_republisher
+  ${catkin_LIBRARIES}
+)
+
+
 add_executable(lidar_republisher
   src/lidar_republisher.cpp
 )
@@ -50,9 +59,6 @@ target_link_libraries(lidar_republisher
   ${catkin_LIBRARIES}
 )
 
-add_executable(camera_republisher
-  src/camera_republisher.cpp
-)
 add_dependencies(camera_republisher ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(camera_republisher
   ${catkin_LIBRARIES}

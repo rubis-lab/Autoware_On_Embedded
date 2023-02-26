@@ -25,6 +25,11 @@
 #include <sys/syscall.h>
 #include "../darknet/src/cuda.h"
 
+#include "rubis_msgs/Image.h"
+#include "rubis_msgs/DetectedObjectArray.h"
+#include "autoware_msgs/DetectedObject.h"
+#include "autoware_msgs/DetectedObjectArray.h"
+
 #define SPIN_PROFILING
 
 #if (CV_MAJOR_VERSION <= 2)
@@ -51,7 +56,6 @@ namespace darknet
         darknet_network_ = parse_network_cfg(&in_model_file[0]);
         load_weights(darknet_network_, &in_trained_file[0]);
         set_batch_network(darknet_network_, 1);
-
         layer output_layer = darknet_network_->layers[darknet_network_->n - 1];
         darknet_boxes_.resize(output_layer.w * output_layer.h * output_layer.n);
     }
@@ -103,7 +107,7 @@ namespace darknet
     {
         float * in_data = in_darknet_image.data;
         
-        double time = what_time_is_it_now();
+        // double time = what_time_is_it_now();
         
         float *prediction = network_predict(darknet_network_, in_data);
 
@@ -154,6 +158,50 @@ namespace darknet
 }  // namespace darknet
 
 ///////////////////
+
+void Yolo3DetectorNode::rubis_convert_rect_to_image_obj(std::vector< RectClassScore<float> >& in_objects, rubis_msgs::DetectedObjectArray& out_message)
+{
+    for (unsigned int i = 0; i < in_objects.size(); ++i)
+    {
+        {
+            autoware_msgs::DetectedObject obj;
+
+            obj.x = (in_objects[i].x /image_ratio_) - image_left_right_border_/image_ratio_;
+            obj.y = (in_objects[i].y /image_ratio_) - image_top_bottom_border_/image_ratio_;
+            obj.width = in_objects[i].w /image_ratio_;
+            obj.height = in_objects[i].h /image_ratio_;
+            if (in_objects[i].x < 0)
+                obj.x = 0;
+            if (in_objects[i].y < 0)
+                obj.y = 0;
+            if (in_objects[i].w < 0)
+                obj.width = 0;
+            if (in_objects[i].h < 0)
+                obj.height = 0;
+
+            obj.score = in_objects[i].score;
+            if (use_coco_names_)
+            {
+                obj.label = in_objects[i].GetClassString();
+            }
+            else
+            {
+                if (in_objects[i].class_type < custom_names_.size())
+                    obj.label = custom_names_[in_objects[i].class_type];
+                else
+                    obj.label = "unknown";
+            }
+            obj.valid = true;
+
+            obj.pose.orientation.x = 1;
+            obj.pose.orientation.y = 0;
+            obj.pose.orientation.z = 0;
+            obj.pose.orientation.w = 0;
+            
+            out_message.object_array.objects.push_back(obj);            
+        }
+    }
+}
 
 void Yolo3DetectorNode::convert_rect_to_image_obj(std::vector< RectClassScore<float> >& in_objects, autoware_msgs::DetectedObjectArray& out_message)
 {
@@ -263,11 +311,42 @@ image Yolo3DetectorNode::convert_ipl_to_image(const sensor_msgs::ImageConstPtr& 
     return darknet_image;
 }
 
-void Yolo3DetectorNode::image_callback(const sensor_msgs::ImageConstPtr& in_image_message)
+// BUGS
+void Yolo3DetectorNode::rubis_image_callback(const rubis_msgs::ImageConstPtr& in_image_message)
 {
+    rubis::start_task_profiling();        
+    rubis::instance_ = in_image_message->instance;
+    rubis::obj_instance_ = in_image_message->instance;
+
+    // sensor_msgs::Image image_test;
+    // rubis_msgs::Image rubis_msg = *in_image_message;
+    // const sensor_msgs::ImageConstPtr& msgPtr = &rubis_msg.msg;
+    sensor_msgs::Image::ConstPtr in_image_msg_origin = boost::make_shared<const sensor_msgs::Image>(in_image_message->msg);
+
     std::vector< RectClassScore<float> > detections;
 
+    darknet_image_ = convert_ipl_to_image(in_image_msg_origin);
+    detections = yolo_detector_.detect(darknet_image_);
+    //Prepare Output message
+    rubis_msgs::DetectedObjectArray output_message;
+    output_message.object_array.header = in_image_msg_origin->header;
+
     
+    rubis_convert_rect_to_image_obj(detections, output_message);
+
+    publisher_rubis_objects_.publish(output_message);
+
+    free(darknet_image_.data);
+
+    rubis::stop_task_profiling(rubis::instance_, 0);
+}
+
+void Yolo3DetectorNode::image_callback(const sensor_msgs::ImageConstPtr& in_image_message)
+{
+    rubis::start_task_profiling();  
+
+    std::vector< RectClassScore<float> > detections;
+
     darknet_image_ = convert_ipl_to_image(in_image_message);
 
     detections = yolo_detector_.detect(darknet_image_);
@@ -281,7 +360,8 @@ void Yolo3DetectorNode::image_callback(const sensor_msgs::ImageConstPtr& in_imag
     publisher_objects_.publish(output_message);
 
     free(darknet_image_.data);
-    
+
+    rubis::stop_task_profiling(rubis::instance_, 0);
 }
 
 void Yolo3DetectorNode::config_cb(const autoware_config_msgs::ConfigSSD::ConstPtr& param)
@@ -318,24 +398,45 @@ void Yolo3DetectorNode::Run()
     //ROS STUFF
     ros::NodeHandle private_node_handle("~");//to receive args   
 
-    int key_id = 2;
+    // int key_id = 2;
 
     // Scheduling Setup
-    std::string task_response_time_filename_str;
+    // std::string task_response_time_filename_str;
+    // int rate;
+    // double task_minimum_inter_release_time;
+    // double task_execution_time;
+    // double task_relative_deadline;
+
+    // private_node_handle.param<std::string>("/vision_darknet_detect/task_response_time_filename", task_response_time_filename_str, "~/Documents/profiling/response_time/vision_darknet_detect.csv");
+    // private_node_handle.param<int>("/vision_darknet_detect/rate", rate, 10);
+    // private_node_handle.param("/vision_darknet_detect/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
+    // private_node_handle.param("/vision_darknet_detect/task_execution_time", task_execution_time, (double)10);
+    // private_node_handle.param("/vision_darknet_detect/task_relative_deadline", task_relative_deadline, (double)10);
+
+
+    std::string node_name = ros::this_node::getName();
+    std::string task_response_time_filename;
+    private_node_handle.param<std::string>(node_name+"/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/lidar_euclidean_cluster_detect.csv");
+
     int rate;
-    double task_minimum_inter_release_time;
-    double task_execution_time;
-    double task_relative_deadline;
+    private_node_handle.param<int>(node_name+"/rate", rate, 10);
 
-    private_node_handle.param<std::string>("/vision_darknet_detect/task_response_time_filename", task_response_time_filename_str, "~/Documents/profiling/response_time/vision_darknet_detect.csv");
-    private_node_handle.param<int>("/vision_darknet_detect/rate", rate, 10);
-    private_node_handle.param("/vision_darknet_detect/task_minimum_inter_release_time", task_minimum_inter_release_time, (double)10);
-    private_node_handle.param("/vision_darknet_detect/task_execution_time", task_execution_time, (double)10);
-    private_node_handle.param("/vision_darknet_detect/task_relative_deadline", task_relative_deadline, (double)10);
+    struct rubis::sched_attr attr;
+    std::string policy;
+    int priority, exec_time ,deadline, period;
+
+    private_node_handle.param(node_name+"/task_scheduling_configs/policy", policy, std::string("NONE"));    
+    private_node_handle.param(node_name+"/task_scheduling_configs/priority", priority, 99);
+    private_node_handle.param(node_name+"/task_scheduling_configs/exec_time", exec_time, 0);
+    private_node_handle.param(node_name+"/task_scheduling_configs/deadline", deadline, 0);
+    private_node_handle.param(node_name+"/task_scheduling_configs/period", period, 0);
+
+    rubis::init_task_scheduling(policy, attr);
+    rubis::init_task_profiling(task_response_time_filename);
+
     
-    char* task_response_time_filename = strdup(task_response_time_filename_str.c_str());
+    // char* task_response_time_filename = strdup(task_response_time_filename_str.c_str());
 
-    init_task_profiling(task_response_time_filename);
 
     //RECEIVE IMAGE TOPIC NAME
     std::string image_raw_topic_str;
@@ -394,6 +495,7 @@ void Yolo3DetectorNode::Run()
     std::string _network_definition_file = convert_to_absolute_path(network_definition_file);
     std::string _pretrained_model_file = convert_to_absolute_path(pretrained_model_file);
 
+    
     yolo_detector_.load(_network_definition_file, _pretrained_model_file, score_threshold_, nms_threshold_);
     ROS_INFO("Initialization complete.");
 
@@ -403,10 +505,18 @@ void Yolo3DetectorNode::Run()
         generateColors(colors_, 80);
     #endif
 
-    publisher_objects_ = node_handle_.advertise<autoware_msgs::DetectedObjectArray>("/detection/image_detector/objects", 1);
 
     ROS_INFO("Subscribing to... %s", image_raw_topic_str.c_str());
-    subscriber_image_raw_ = node_handle_.subscribe(image_raw_topic_str, 1, &Yolo3DetectorNode::image_callback, this);    
+
+    if(image_raw_topic_str.find(std::string("rubis")) != std::string::npos){ // For rubis topic
+      subscriber_image_raw_ = node_handle_.subscribe(image_raw_topic_str, 1, &Yolo3DetectorNode::rubis_image_callback, this);  
+      publisher_objects_ = node_handle_.advertise<rubis_msgs::DetectedObjectArray>("/detection/image_detector/rubis_objects", 1);
+    }
+    else{// For normal topic      
+      subscriber_image_raw_ = node_handle_.subscribe(image_raw_topic_str, 1, &Yolo3DetectorNode::image_callback, this);  
+      publisher_objects_ = node_handle_.advertise<autoware_msgs::DetectedObjectArray>("/detection/image_detector/objects", 1);
+    }
+
     std::string config_topic("/config");
     config_topic += "/Yolo3";
     subscriber_yolo_config_ = node_handle_.subscribe(config_topic, 1, &Yolo3DetectorNode::config_cb, this);
@@ -416,15 +526,16 @@ void Yolo3DetectorNode::Run()
     ros::Rate r(rate);
 
     // Executing task
-    while(ros::ok()){
-        start_task_profiling();          
+    // while(ros::ok()){
+    //     start_task_profiling();          
 
-        ros::spinOnce();
+    //     ros::spinOnce();
 
-        stop_task_profiling(0, 0);
+    //     stop_task_profiling(0, 0);
 
-        r.sleep();
-    }
+    //     r.sleep();
+    // }
+    ros::spin();
+
     ROS_INFO("END Yolo");
-
 }

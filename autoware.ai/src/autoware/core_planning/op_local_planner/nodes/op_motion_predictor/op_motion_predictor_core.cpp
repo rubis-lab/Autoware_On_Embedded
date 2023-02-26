@@ -266,9 +266,6 @@ void MotionPrediction::callbackGetRobotOdom(const nav_msgs::OdometryConstPtr& ms
 // transform frame_id to velodyne except object from image(camera)
 autoware_msgs::DetectedObject MotionPrediction::TransformObjToVeldoyne(const autoware_msgs::DetectedObject& in_obj, tf::StampedTransform &transform){
   //image(camera) skip
-  if(in_obj.header.frame_id == "ego_vehicle/rgb_front" || in_obj.header.frame_id == "camera") {
-    return in_obj;
-  }
   autoware_msgs::DetectedObject out_obj;
   out_obj = in_obj;
   // Transform pose
@@ -296,8 +293,12 @@ autoware_msgs::DetectedObject MotionPrediction::TransformObjToVeldoyne(const aut
     out_obj.convex_hull.polygon.points.at(j).y = (float)contour_point.pose.position.y;
     out_obj.convex_hull.polygon.points.at(j).z = (float)contour_point.pose.position.z;
   }
-  out_obj.header.frame_id = "velodyne";
-  out_obj.convex_hull.header.frame_id = "velodyne";    
+
+  if(in_obj.header.frame_id != "ego_vehicle/rgb_front" && in_obj.header.frame_id != "camera") {
+    out_obj.header.frame_id = "velodyne";
+    out_obj.convex_hull.header.frame_id = "velodyne";    
+  }
+  
   out_obj.valid = true;   
 
   return out_obj;

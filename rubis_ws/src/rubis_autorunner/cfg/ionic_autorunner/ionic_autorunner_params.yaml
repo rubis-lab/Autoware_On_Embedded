@@ -204,6 +204,16 @@ lidar_republisher:
   task_execution_time: 70_000_000
   task_relative_deadline: 100_000_000
 
+lidar_republisher:
+  rate: 10
+  task_scheduling_configs:
+    policy: "NONE"
+    priority: 99
+    exec_time: 1_000_000
+    deadline: 2_000_000
+    period: 2_000_000
+  task_response_time_filename: "~/Documents/profiling/response_time/lidar_republisher.csv"  
+
 vel_relay:
   task_scheduling_flag: 0
   

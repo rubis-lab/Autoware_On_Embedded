@@ -41,7 +41,7 @@
   <!-- <node name="republish" type="republish" pkg="image_transport" output="screen" args="compressed in:=/image_raw_origin out:=/image_raw"  /> -->
   <include file="$(find rubis_pkg)/launch/camera_republisher.launch">
     <arg name="input_topic" value="$(arg image_input_topic)" />
-    <!-- <arg name="output_topic" value="$(arg image_output_topic)" /> -->
+    <arg name="output_topic" value="$(arg image_output_topic)" />
   </include>
 
   <include file="$(find rubis_pkg)/launch/lidar_republisher_params.launch">

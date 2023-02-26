@@ -94,7 +94,7 @@
 
   <!-- op_trajectory_evaluator -->
   <include file="$(find op_local_planner)/launch/op_trajectory_evaluator_parameter.launch">
-    <arg name="enableDebug"      default="1" />
+    <arg name="enableDebug"      default="0" />
 
     <arg name="enablePrediction"                default="false" />                
     <arg name="horizontalSafetyDistance"        default="1.2" />

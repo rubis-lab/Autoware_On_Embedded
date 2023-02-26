@@ -16,6 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   std_msgs
   rubis_lib
+  rubis_msgs
 )
 
 find_package(CUDA)

@@ -38,6 +38,10 @@
 #include <autoware_config_msgs/ConfigSSD.h>
 #include <autoware_msgs/DetectedObject.h>
 #include <autoware_msgs/DetectedObjectArray.h>
+#include <sensor_msgs/Image.h>
+#include <rubis_msgs/Image.h>
+#include <rubis_msgs/DetectedObjectArray.h>
+#include <rubis_lib/sched.hpp>
 
 #include <rect_class_score.h>
 
@@ -55,7 +59,6 @@ extern "C"
 #include "utils.h"
 #include "image.h"
 #include "../darknet/src/cuda.h"
-#include "rubis_lib/sched_c.h"
 #define __cplusplus
 }
 
@@ -88,8 +91,10 @@ namespace darknet {
 
 class Yolo3DetectorNode {
     ros::Subscriber                 subscriber_image_raw_;
+    ros::Subscriber                 subscriber_rubis_image_raw_;
     ros::Subscriber                 subscriber_yolo_config_;
     ros::Publisher                  publisher_objects_;
+    ros::Publisher                  publisher_rubis_objects_;
     ros::NodeHandle                 node_handle_;
 
     darknet::Yolo3Detector          yolo_detector_;
@@ -111,9 +116,12 @@ class Yolo3DetectorNode {
 
     void                            convert_rect_to_image_obj(std::vector< RectClassScore<float> >& in_objects,
                                       autoware_msgs::DetectedObjectArray& out_message);
+    void                            rubis_convert_rect_to_image_obj(std::vector< RectClassScore<float> >& in_objects,
+                                      rubis_msgs::DetectedObjectArray& out_message);
     void                            rgbgr_image(image& im);
     image                           convert_ipl_to_image(const sensor_msgs::ImageConstPtr& msg);
     void                            image_callback(const sensor_msgs::ImageConstPtr& in_image_message);
+    void                            rubis_image_callback(const rubis_msgs::ImageConstPtr& in_image_message);
     void                            config_cb(const autoware_config_msgs::ConfigSSD::ConstPtr& param);
     std::vector<std::string>        read_custom_names_file(const std::string& in_path);
     std::string                     convert_to_absolute_path(std::string relative_path);
