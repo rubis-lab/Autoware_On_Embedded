@@ -174,7 +174,7 @@ void PurePursuitNode::initForROS()
     &PurePursuitNode::callbackFromWayPoints, this);
 
   if(rubis::instance_mode_) rubis_pose_sub_ = nh_.subscribe("rubis_current_pose", 10, &PurePursuitNode::callbackFromRubisCurrentPose, this);
-  else pose_sub_ = nh_.subscribe("current_pose", 10, &PurePursuitNode::callbackFromCurrentPose, this);
+  pose_sub_ = nh_.subscribe("current_pose", 10, &PurePursuitNode::callbackFromCurrentPose, this);
 
   sub3_ = nh_.subscribe("config/waypoint_follower", 10,
     &PurePursuitNode::callbackFromConfig, this);

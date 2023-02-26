@@ -11,18 +11,28 @@
   <!-- walker mission coordinate reference point 205.0, 297.0, 0.3, 0, 0, 87 -->
   <!-- lr du height roll pitch yaw  -->
   
-  <arg name="spawn_point" default="258.5, 208.2, 0.3, 0, 0, 90"/>
+  <!-- default -->
+  <!-- <arg name="spawn_point" default="258.5, 208.2, 0.3, 0, 0, 90"/> -->
+  <!-- Straight -->
+  <!-- <arg name="spawn_point" default="258.5, 127.05, 0.3, 0, 0, 90"/> -->
+
+
+  <arg name="objects_definition_file" default='$(find carla_spawn_objects)/config/objects.json'/>
+  <arg name="spawn_points_file" default='$(find rubis_autorunner)/cfg/carla_autorunner/carla_spawn_points.yaml'/>
+
   <arg name='role_name_obstacle' default='obstacle'/>
+  <!-- new -->
+  <!-- <arg name="spawn_point" default="314.065, 129.676, 0.3, 0, 0, 90"/> -->
   <!-- <arg name="spawn_point_obstacle" default="324.4, 346.1, 0.3, 0, 0, -32"/> -->
-  <arg name="spawn_point_obstacle" default="-10, 214, 0.3, 0, 0, -90"/>
+  <!-- <arg name="spawn_point_obstacle" default="315, 192, 0.3, 0, 0, 90"/> -->
 
 
   <!-- <arg name="spawn_point_walker" default="212.0, 297.0, 0.3, 0, 0, 180"/> -->
-  <arg name="spawn_point_walker" default="-10, 214, 5, 0, 0, -90"/>
+  <!-- <arg name="spawn_point_walker" default="-10, 214, 5, 0, 0, -90"/>
   <arg name="walker_point1" default="206.0, 297.0, 0.3, 0, 0, 180"/>
   <arg name="walker_point2" default="204.0, 297.0, 0.3, 0, 0, 180"/>
   <arg name="walker_point3" default="198.0, 297.0, 0.3, 0, 0, 180"/>
-  <arg name="walker_target_speed" default="2"/>
+  <arg name="walker_target_speed" default="2"/> -->
   
   <!-- walker default spawn point 210.0, 297.0, 0.3, 0, 0, 180 -->
   <!-- walker collision point 206.0 - 204.0, 297.0, 0.3, 0, 0, 180 -->
@@ -35,15 +45,17 @@
     <arg name='host' value='$(arg host)'/>
     <arg name='port' value='$(arg port)'/>
     <arg name='town' value='$(arg town)'/>
+    <arg name="objects_definition_file" value='$(arg objects_definition_file)'/>
+    <arg name="spawn_points_file" value='$(arg spawn_points_file)'/>
     <arg name='role_name' value='$(arg role_name)'/>
-    <arg name="spawn_point" value="$(arg spawn_point)"/>
     <arg name='role_name_obstacle' value='$(arg role_name_obstacle)'/>
+    <!-- <arg name="spawn_point" value="$(arg spawn_point)"/>
     <arg name="spawn_point_obstacle" value="$(arg spawn_point_obstacle)"/>     
     <arg name="spawn_point_walker" value="$(arg spawn_point_walker)"/>
     <arg name="walker_point1" value="$(arg walker_point1)"/>
     <arg name="walker_point2" value="$(arg walker_point2)"/>
     <arg name="walker_point3" value="$(arg walker_point3)"/>
-    <arg name="walker_target_speed" value="$(arg walker_target_speed)"/>
+    <arg name="walker_target_speed" value="$(arg walker_target_speed)"/> -->
 
     <arg name='spawn_sensors_only' value='$(arg spawn_sensors_only)'/>
   </include>

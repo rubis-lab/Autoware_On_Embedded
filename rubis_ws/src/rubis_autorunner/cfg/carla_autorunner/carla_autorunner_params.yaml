@@ -10,6 +10,16 @@
 # other time unut = ns
 
 # Sensing
+lidar_republisher:
+  instance_mode: 1
+  task_scheduling_flag: 0
+  task_profiling_flag: 1
+  task_response_time_filename: "~/Documents/profiling/response_time/lidar_republisher.csv"
+  rate: 40
+  task_minimum_inter_release_time: 100_000_000
+  task_execution_time: 70_000_000
+  task_relative_deadline: 100_000_000
+
 ray_ground_filter:
   task_scheduling_flag: 0
   task_profiling_flag: 1
@@ -21,6 +31,8 @@ ray_ground_filter:
   
 # Localization
 voxel_grid_filter:
+  instance_mode: 1
+
   task_scheduling_flag: 0
   task_profiling_flag: 1
   task_response_time_filename: "~/Documents/profiling/response_time/voxel_grid_filter.csv"
@@ -30,6 +42,7 @@ voxel_grid_filter:
   task_relative_deadline: 100000000
 
 ndt_matching:
+  instance_mode: 1
   localizer: "velodyne"
 
   task_scheduling_flag: 0
@@ -46,6 +59,7 @@ ndt_matching:
   gpu_deadline_filename: "~/Documents/gpu_deadline/ndt_matching_gpu_deadline.csv"
 
 logger_brake_dist:
+  instance_mode: 1
   rate: 10
   dist_filename: "~/Documents/profiling/response_time/dist.csv"
 
@@ -116,9 +130,9 @@ op_global_planner:
 op_common_params:
   rollOutDensity: 4
   rollOutsNumber: 2
-  maxVelocity: 10.0
-  maxAcceleration: 10.0
-  maxDeceleration: -10.0
+  maxVelocity: 5.0
+  maxAcceleration: 8.0
+  maxDeceleration: -8.0
 
 op_trajectory_generator:
   task_scheduling_flag: 0
@@ -176,6 +190,7 @@ op_motion_predictor:
 
 # Control
 pure_pursuit:
+  instance_mode: 1
   task_scheduling_flag: 0
   task_profiling_flag: 1
   task_response_time_filename: "~/Documents/profiling/response_time/pure_pursuit.csv"
@@ -187,6 +202,7 @@ pure_pursuit:
   dynamic_params_path: "~/autoware.ai/autoware_files/lgsvl_file/parameter/lgsvl_pure_pursuit.yaml"
 
 twist_filter:
+  instance_mode: 1
   task_scheduling_flag: 0
   task_profiling_flag: 1
   task_response_time_filename: "~/Documents/profiling/response_time/twist_filter.csv"
@@ -196,6 +212,7 @@ twist_filter:
   task_relative_deadline: 100000000
 
 twist_gate:
+  instance_mode: 1
   task_scheduling_flag: 0
   task_profiling_flag: 1
   task_response_time_filename: "~/Documents/profiling/response_time/twist_gate.csv"
@@ -204,3 +221,31 @@ twist_gate:
   task_execution_time: 100000000
   task_relative_deadline: 100000000
   zero_flag: 0
+
+vel_relay:
+  task_scheduling_flag: 0
+  task_profiling_flag: 1
+  task_response_time_filename: "~/Documents/profiling/response_time/vel_relay.csv"
+  rate: 10
+  task_minimum_inter_release_time: 100_000_000
+  task_execution_time: 300_000
+  task_relative_deadline: 100_000_000
+
+pose_relay:
+  instance_mode: 1
+  task_scheduling_flag: 0
+  task_profiling_flag: 1
+  task_response_time_filename: "~/Documents/profiling/response_time/pose_relay.csv"
+  rate: 10
+  task_minimum_inter_release_time: 100_000_000
+  task_execution_time: 300_000
+  task_relative_deadline: 100_000_000
+
+republish:
+  task_scheduling_flag: 0
+  task_profiling_flag: 1
+  task_response_time_filename: "~/Documents/profiling/response_time/republish.csv"
+  rate: 10
+  task_minimum_inter_release_time: 100_000_000
+  task_execution_time: 35_000_000
+  task_relative_deadline: 100_000_000

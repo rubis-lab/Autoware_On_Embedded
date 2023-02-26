@@ -5,16 +5,16 @@
   <arg name='town' default=''/>
   <arg name='role_name' default='ego_vehicle'/>
   <!-- use comma separated format "x,y,z,roll,pitch,yaw" -->
-  <arg name='spawn_point' default=''/>
-
-
   <arg name='role_name_obstacle' default='obstacle'/>
+  <arg name="objects_definition_file" default='$(find carla_spawn_objects)/config/objects.json'/>
+  <arg name="spawn_points_file" default='$(find rubis_autorunner)/config/carla_spawn_points.yaml'/>
+  <!-- <arg name='spawn_point' default=''/>
   <arg name="spawn_point_obstacle" default=""/>
   <arg name="spawn_point_walker" default=""/>
   <arg name="walker_point1" default=""/>
   <arg name="walker_point2" default=""/>
   <arg name="walker_point3" default=""/>
-  <arg name="walker_target_speed" default=""/>
+  <arg name="walker_target_speed" default=""/> -->
 
   <arg name="spawn_sensors_only" default="false"/>
 
@@ -29,17 +29,18 @@
     <arg name='port' value='$(arg port)'/>
     <arg name='town' value='$(arg town)'/>
     <arg name='role_name' value='$(arg role_name)'/>
-    <arg name='spawn_point' value='$(arg spawn_point)'/>
     <arg name='role_name_obstacle' value='$(arg role_name_obstacle)'/>
+    <arg name="objects_definition_file" value='$(arg objects_definition_file)'/>
+    <arg name="spawn_points_file" value='$(arg spawn_points_file)'/>
+    <!-- <arg name='spawn_point' value='$(arg spawn_point)'/>
     <arg name='spawn_point_obstacle' value='$(arg spawn_point_obstacle)'/>
     <arg name="spawn_point_walker" value="$(arg spawn_point_walker)"/>
     <arg name="walker_point1" value="$(arg walker_point1)"/>
     <arg name="walker_point2" value="$(arg walker_point2)"/>
     <arg name="walker_point3" value="$(arg walker_point3)"/>
-    <arg name="walker_target_speed" value="$(arg walker_target_speed)"/>
+    <arg name="walker_target_speed" value="$(arg walker_target_speed)"/> -->
 
     <arg name='spawn_sensors_only' value='$(arg spawn_sensors_only)'/>
   </include>
 
 </launch>
-

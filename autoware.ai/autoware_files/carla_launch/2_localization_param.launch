@@ -17,7 +17,7 @@
   <arg name="instance_mode" default="0"/>
 
   <node pkg="points_downsampler" name="voxel_grid_filter" type="voxel_grid_filter">
-    <param name="input_topic_name" value="points_raw" />
+    <param name="input_topic_name" value="points_raw" />z
     <param name="output_topic_name" value="filtered_points" />
     <param name="leaf_size" value="$(arg leaf_size)" />
     <param name="measurement_range" value="$(arg measurement_range)" />

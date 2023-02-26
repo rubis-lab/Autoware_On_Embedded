@@ -1,7 +1,7 @@
 lane_info_list:
   -
     id : 1
-    start_idx : 1
+    start_idx : 0
     end_idx : 2
     left_turn : 0
     right_turn : 0

@@ -1,0 +1,75 @@
+# Unit of rate: hz
+# Unit of scheduling params: ns
+
+# 1s  : 1_000_000_000
+# 1ms : 1_000_000
+# 1us : 1_000
+# 1ns : 1
+
+#rate = hz
+# other time unut = ns
+
+# Lane Keeping
+ego_vehicle:
+  spawn_points:
+    x: 314.065
+    y: 129.676
+    z: 0.3
+    roll: 0
+    pitch: 0
+    yaw: 90
+  # spawn_points:
+  #   x: 200.9
+  #   y: 250.5
+  #   z: 0.3
+  #   roll: 0
+  #   pitch: 0
+  #   yaw: 120
+
+obstacle:
+  enable: False
+  spawn_points:
+    x: 315.8
+    y: 192.664
+    z: 0.3
+    roll: 0
+    pitch: 0
+    yaw: 270
+
+  # <!-- <arg name="spawn_point_walker" default="212.0, 297.0, 0.3, 0, 0, 180"/> -->
+  # <!-- <arg name="spawn_point_walker" default="-10, 214, 5, 0, 0, -90"/>
+  # <arg name="walker_point1" default="206.0, 297.0, 0.3, 0, 0, 180"/>
+  # <arg name="walker_point2" default="204.0, 297.0, 0.3, 0, 0, 180"/>
+  # <arg name="walker_point3" default="198.0, 297.0, 0.3, 0, 0, 180"/>
+
+walker:
+  enable: False
+  spawn_points:
+    x: 196.0
+    y: 260.0
+    z: 1.0
+    roll: 0
+    pitch: 0
+    yaw: 0
+  walker_point1:
+    x: 200.0
+    y: 260.0
+    z: 0.3
+    roll: 0
+    pitch: 0
+    yaw: 0
+  walker_point2:
+    x: 202.0
+    y: 260.0
+    z: 0.3
+    roll: 0
+    pitch: 0
+    yaw: 0
+  walker_point3:
+    x: 220.0
+    y: 260.0
+    z: 0.3
+    roll: 0
+    pitch: 0
+    yaw: 0
+  walker_target_speed: 2

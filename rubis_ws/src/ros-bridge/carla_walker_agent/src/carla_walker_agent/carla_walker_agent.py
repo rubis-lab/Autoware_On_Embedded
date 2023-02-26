@@ -10,6 +10,8 @@ Agent for Walker
 """
 
 import math
+import yaml
+import os
 
 import ros_compatibility as roscomp
 from ros_compatibility.exceptions import ROSInterruptException
@@ -38,24 +40,65 @@ class CarlaWalkerAgent(CompatibleNode):
         super(CarlaWalkerAgent, self).__init__('carla_walker_agent')
 
         role_name = self.get_param("role_name", "walker")
-        self._walker_target_speed = float(self.get_param("walker_target_speed", 2.0))
+        # self._walker_target_speed = float(self.get_param("walker_target_speed", 2.0))
         # self._fisrt_waypoint_x = self.get_param("fisrt_waypoint_x", 205.4)
         # self._fisrt_waypoint_y = self.get_param("fisrt_waypoint_y", 311.1)
         # self._second_waypoint_x = self.get_param("second_waypoint_x", 190.4)
         # self._second_waypoint_y = self.get_param("second_waypoint_y", 311.1)
         # self._third_waypoint_x = self.get_param("third_waypoint_x", 190.4)
         # self._third_waypoint_y = self.get_param("third_waypoint_y", 311.1)
+        self.spawn_points_file = self.get_param('spawn_points_file','')
+        # print("==================================================")
+        # print(self.spawn_points_file)
+        # print(os.path.exists(self.spawn_points_file))
+        # print("==================================================")
         self._waypoint_params = []
         self._waypoints = []
         
+        # Read points from file
+        if not self.spawn_points_file or not os.path.exists(self.spawn_points_file):
+            raise RuntimeError(
+                "Could not read spawn points from {}".format(self.spawn_points_file))
+        with open(self.spawn_points_file) as handle:
+            loaded = yaml.load(handle, Loader=yaml.FullLoader)
+            # print("==================================================")
+            # print(loaded)
+            # print("==================================================")
+        
+        self._walker_target_speed = float(loaded["walker"]["walker_target_speed"])
+        # not Use
+        # self._fisrt_waypoint_x = float(loaded["walker"]["walker_point1"]["x"])
+        # self._fisrt_waypoint_y = float(loaded["walker"]["walker_point1"]["y"])
+        # self._fisrt_waypoint_x = float(loaded["walker"]["walker_point2"]["x"])
+        # self._fisrt_waypoint_y = float(loaded["walker"]["walker_point2"]["y"])
+        # self._fisrt_waypoint_x = float(loaded["walker"]["walker_point3"]["x"])
+        # self._fisrt_waypoint_y = float(loaded["walker"]["walker_point3"]["y"])
+
         waypoint_iter=1
         while waypoint_iter is not 0:
-            waypoint_param=self.get_param("walker_point"+str(waypoint_iter))
-            if waypoint_param:
+            # waypoint_param=self.get_param("walker_point"+str(waypoint_iter))
+            if loaded["walker"].has_key("walker_point"+str(waypoint_iter)):
+                waypoint_param = str(loaded["walker"]["walker_point"+str(waypoint_iter)]["x"])+","+ \
+                    str(loaded["walker"]["walker_point"+str(waypoint_iter)]["y"])+","+ \
+                    str(loaded["walker"]["walker_point"+str(waypoint_iter)]["z"])+","+ \
+                    str(loaded["walker"]["walker_point"+str(waypoint_iter)]["roll"])+","+ \
+                    str(loaded["walker"]["walker_point"+str(waypoint_iter)]["pitch"])+","+ \
+                    str(loaded["walker"]["walker_point"+str(waypoint_iter)]["yaw"])
+                
                 self._waypoint_params.append(waypoint_param)
                 waypoint_iter += 1
             else:
                 waypoint_iter = 0
+            # if waypoint_param:
+            #     self._waypoint_params.append(waypoint_param)
+            #     waypoint_iter += 1
+            # else:
+            #     waypoint_iter = 0
+
+        # print("==================================================")
+        # print(self._waypoint_params)
+        # print("==================================================")
+
 
         
         rospy.logwarn(self._waypoint_params)
@@ -175,7 +218,7 @@ class CarlaWalkerAgent(CompatibleNode):
     def run_step(self):
         dist=math.sqrt((self._ego_current_pose.position.x-self._current_pose.position.x)**2+(self._ego_current_pose.position.y-self._current_pose.position.y)**2)
         # rospy.logwarn('dist: '+str(dist))
-        if 30<dist<40 and self.walker_waypoint_ready==False:
+        if 20<dist<30 and self.walker_waypoint_ready==False:
             self.set_waypoints()
             # rospy.logwarn('dist: '+str(dist))
             # waypoints = Path()
