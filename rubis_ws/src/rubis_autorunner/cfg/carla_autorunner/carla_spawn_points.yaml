@@ -29,7 +29,7 @@ ego_vehicle:
 obstacle:
   enable: False
   spawn_points:
-    x: 315.8
+    x: 314.8
     y: 192.664
     z: 0.3
     roll: 0

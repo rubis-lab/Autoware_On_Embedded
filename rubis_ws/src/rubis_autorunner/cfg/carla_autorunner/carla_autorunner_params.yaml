@@ -130,7 +130,7 @@ op_global_planner:
 op_common_params:
   rollOutDensity: 4
   rollOutsNumber: 2
-  maxVelocity: 12.0
+  maxVelocity: 5.0
   maxAcceleration: 8.0
   maxDeceleration: -8.0
 
@@ -156,14 +156,14 @@ op_trajectory_evaluator:
 
   SprintDecisionTime: 9999999.0
   weightPriority: 1
-  weightTransition: 0.5
+  weightTransition: 1
   weightLong: 1
   weightLat: 1
   ImageWidth: 400
   ImageHeight: 400
   SprintDecisionTime: 9999999.0
   PedestrianStopImgHeightThreshold: 20
-  PedestrianImageDetectionRange: 0.3
+  PedestrianImageDetectionRange: 0.4
 
 op_behavior_selector:
   rate: 100 #100

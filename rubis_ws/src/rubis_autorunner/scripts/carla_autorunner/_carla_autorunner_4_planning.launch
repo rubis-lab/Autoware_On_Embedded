@@ -103,7 +103,7 @@
 
     <!-- Trajectory blocking threshold  -->
     <arg name="lateralBlockingThreshold"           default="0.5" />
-    <arg name="frontLongitudinalBlockingThreshold"      default="30" />
+    <arg name="frontLongitudinalBlockingThreshold"      default="40" />
     <arg name="rearLongitudinalBlockingThreshold"      default="0" />
 
     <arg name="intersectionFile"                default="crossing_test/crossing_intersection.yaml" />
