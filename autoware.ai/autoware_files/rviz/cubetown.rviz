@@ -10,8 +10,6 @@ Panels:
         - /System1/TF1/Frames1
         - /Map1
         - /Map1/Vector Map1
-        - /Sensing1
-        - /Sensing1/Points Raw1
         - /Perception1
         - /Perception1/Tracked Objects1
         - /Planning1
@@ -82,8 +80,6 @@ Visualization Manager:
               Value: true
             camera:
               Value: false
-            gnss:
-              Value: true
             map:
               Value: true
             mobility:
@@ -104,8 +100,6 @@ Visualization Manager:
                   velodyne:
                     camera:
                       {}
-                gnss:
-                  {}
                 mobility:
                   {}
           Update Interval: 0
@@ -374,7 +368,7 @@ Visualization Manager:
           Position Transformer: XYZ
           Queue Size: 10
           Selectable: true
-          Size (Pixels): 5
+          Size (Pixels): 2
           Size (m): 0.009999999776482582
           Style: Points
           Topic: /points_raw
@@ -695,11 +689,11 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 8.73194694519043
+      Scale: 9.120298385620117
       Target Frame: map
       Value: TopDownOrtho (rviz)
-      X: 33.7357292175293
-      Y: -10.314461708068848
+      X: 15.534561157226562
+      Y: 22.798494338989258
     Saved: ~
 Window Geometry:
   DecisionMakerPanel:
@@ -721,5 +715,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 2711
-  X: 758
-  Y: 688
+  X: 4416
+  Y: 645

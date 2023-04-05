@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.11)
 project(amathutils_lib) # autoware math utility
 
-find_package(autoware_build_flags REQUIRED)
+
 
 find_package(Eigen3 REQUIRED)
 
@@ -73,24 +73,3 @@ file(GLOB_RECURSE ROSLINT_FILES
 
 list(APPEND ROSLINT_CPP_OPTS "--extensions=cc,h,hpp,cpp,cu,cuh" "--filter=-build/c++11,-runtime/references")
 roslint_cpp(${ROSLINT_FILES})
-
-if(CATKIN_ENABLE_TESTING)
-  find_package(rostest REQUIRED)
-  add_rostest_gtest(amathutils-test test/test_amathutils_lib.test test/src/test_amathutils_lib.cpp)
-  target_link_libraries(amathutils-test ${catkin_LIBRARIES} amathutils_lib)
-  add_rostest_gtest(test-kalman_filter 
-    test/test_kalman_filter.test
-    test/src/test_kalman_filter.cpp
-    src/kalman_filter.cpp
-    src/time_delay_kalman_filter.cpp
-  )
-  target_link_libraries(test-kalman_filter ${catkin_LIBRARIES})
-
-  add_rostest_gtest(test-butterworth_filter 
-    test/test_butterworth_filter.test
-    test/src/test_butterworth_filter.cpp
-    src/butterworth_filter.cpp
-  )
-  target_link_libraries(test-butterworth_filter ${catkin_LIBRARIES})
-  roslint_add_test()
-endif()

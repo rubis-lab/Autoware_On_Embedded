@@ -9,7 +9,7 @@
   <arg name="init_pitch" default="0.0" />  
   <arg name="init_yaw" default="0.0" />  
   
-  <node pkg="lidar_localizer" type="ndt_mapping_tku" name="ndt_mapping_tku">
+  <node pkg="lidar_localizer" type="ndt_mapping_tku" name="ndt_mapping_tku" output="screen">
     <param name="init_x" value="$(arg init_x)" />
     <param name="init_y" value="$(arg init_y)" />
     <param name="init_z" value="$(arg init_z)" />

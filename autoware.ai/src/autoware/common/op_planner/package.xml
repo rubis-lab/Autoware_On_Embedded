@@ -7,7 +7,6 @@
   <author email="hatem.darweesh@g.sp.m.is.nagoya-u.ac.jp">Hatem Darweesh</author>
   <license>Apache 2</license>
 
-  <buildtool_depend>autoware_build_flags</buildtool_depend>
   <buildtool_depend>catkin</buildtool_depend>
 
   <depend>cmake_modules</depend>

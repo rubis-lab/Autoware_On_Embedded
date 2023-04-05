@@ -1,6 +1,8 @@
 build
 install
+devel
 log
 build/*
+devel/*
 install/*
 log/*

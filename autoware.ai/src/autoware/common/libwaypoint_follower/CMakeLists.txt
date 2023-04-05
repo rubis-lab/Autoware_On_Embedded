@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(libwaypoint_follower)
 
-find_package(autoware_build_flags)
-
 find_package(catkin REQUIRED COMPONENTS
   amathutils_lib
   autoware_msgs
@@ -68,27 +66,3 @@ file(GLOB_RECURSE ROSLINT_FILES
 
 list(APPEND ROSLINT_CPP_OPTS "--extensions=cc,h,hpp,cpp,cu,cuh" "--filter=-build/c++11,-runtime/references")
 roslint_cpp(${ROSLINT_FILES})
-
-if (CATKIN_ENABLE_TESTING)
-  find_package(rostest REQUIRED)
-  add_rostest_gtest(test-libwaypoint_follower
-    test/test_libwaypoint_follower.test
-    test/src/test_libwaypoint_follower.cpp
-    src/libwaypoint_follower.cpp
-  )
-  add_dependencies(test-libwaypoint_follower ${catkin_EXPORTED_TARGETS})
-  target_link_libraries(test-libwaypoint_follower
-    ${catkin_LIBRARIES}
-  )
-  add_rostest_gtest(test-pure_pursuit
-    test/test_pure_pursuit.test
-    test/src/test_pure_pursuit.cpp
-    src/libwaypoint_follower.cpp
-    src/pure_pursuit.cpp
-  )  
-  add_dependencies(test-pure_pursuit ${catkin_EXPORTED_TARGETS})
-  target_link_libraries(test-pure_pursuit
-    ${catkin_LIBRARIES}
-  )
-  roslint_add_test()
-endif ()

@@ -6,7 +6,6 @@
   <maintainer email="h_ohta@ertl.jp">h_ohta</maintainer>
   <license>Apache 2</license>
 
-  <buildtool_depend>autoware_build_flags</buildtool_depend>
   <buildtool_depend>catkin</buildtool_depend>
 
   <depend>autoware_can_msgs</depend>

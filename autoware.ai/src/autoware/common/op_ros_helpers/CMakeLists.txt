@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 
 project(op_ros_helpers)
 
-find_package(autoware_build_flags REQUIRED)
+
 
 find_package(catkin REQUIRED COMPONENTS
   autoware_msgs
@@ -11,7 +11,6 @@ find_package(catkin REQUIRED COMPONENTS
   libwaypoint_follower
   map_file
   op_planner
-  op_simu
   op_utility
   pcl_conversions
   pcl_ros

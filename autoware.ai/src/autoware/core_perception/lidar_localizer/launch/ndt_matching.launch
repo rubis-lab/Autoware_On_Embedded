@@ -24,7 +24,7 @@
 
   <rosparam command="load" file="$(arg kalman_filter_cfg)" />
 
-  <node pkg="lidar_localizer" type="ndt_matching" name="ndt_matching">
+  <node pkg="lidar_localizer" type="ndt_matching" name="ndt_matching" output="screen">
     <param name="method_type" value="$(arg method_type)" />
     <param name="use_gnss" value="$(arg use_gnss)" />
     <param name="use_odom" value="$(arg use_odom)" />

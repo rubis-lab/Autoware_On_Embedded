@@ -10,6 +10,8 @@ find_package(catkin REQUIRED)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   autoware_msgs
+  visualization_msgs
+  nmea_msgs
 )
 
 catkin_package(
@@ -30,24 +32,25 @@ add_library(ros_autorunner_lib
   src/ros_autorunner_lib/ros_autorunner.cpp
 )
 
-add_executable(lgsvl_triple_lidar_autorunner
-  include/lgsvl_triple_lidar_autorunner/lgsvl_triple_lidar_autorunner.h
-  src/lgsvl_triple_lidar_autorunner/lgsvl_triple_lidar_autorunner_node.cpp
-  src/lgsvl_triple_lidar_autorunner/lgsvl_triple_lidar_autorunner.cpp
+add_executable(cubetown_lkas_autorunner
+  include/cubetown_autorunner/cubetown_autorunner.h
+  src/cubetown_autorunner/cubetown_lkas_autorunner_node.cpp
+  src/cubetown_autorunner/cubetown_lkas_autorunner.cpp
 )
 
-add_executable(desktop_lane_keeping
-  include/desktop_lane_keeping/desktop_lane_keeping.h
-  src/desktop_lane_keeping/desktop_lane_keeping_node.cpp
-  src/desktop_lane_keeping/desktop_lane_keeping.cpp
+add_executable(cubetown_full_autorunner
+  include/cubetown_autorunner/cubetown_autorunner.h
+  src/cubetown_autorunner/cubetown_full_autorunner_node.cpp
+  src/cubetown_autorunner/cubetown_full_autorunner.cpp
 )
 
-add_executable(minicar_lane_keeping
-  include/minicar_lane_keeping/minicar_lane_keeping.h
-  src/minicar_lane_keeping/minicar_lane_keeping_node.cpp
-  src/minicar_lane_keeping/minicar_lane_keeping.cpp
+
+add_executable(rubis_testbed_autorunner
+  include/rubis_testbed_autorunner/rubis_testbed_autorunner.h
+  src/rubis_testbed_autorunner/rubis_testbed_autorunner_node.cpp
+  src/rubis_testbed_autorunner/rubis_testbed_autorunner.cpp
 )
-  
+
 add_executable(carla_lkas_autorunner
   include/carla_autorunner/carla_autorunner.h
   src/carla_autorunner/carla_lkas_autorunner_node.cpp
@@ -72,47 +75,6 @@ add_executable(exynos_carla_full_autorunner
   src/carla_autorunner/exynos_carla_full_autorunner.cpp
 )
 
-add_executable(cubetown_lkas_autorunner
-  include/cubetown_autorunner/cubetown_autorunner.h
-  src/cubetown_autorunner/cubetown_lkas_autorunner_node.cpp
-  src/cubetown_autorunner/cubetown_lkas_autorunner.cpp
-)
-
-add_executable(cubetown_full_autorunner
-  include/cubetown_autorunner/cubetown_autorunner.h
-  src/cubetown_autorunner/cubetown_full_autorunner_node.cpp
-  src/cubetown_autorunner/cubetown_full_autorunner.cpp
-)
-
-add_executable(tutorial_autorunner
-  include/tutorial_autorunner/tutorial_autorunner.h
-  src/tutorial_autorunner/tutorial_autorunner_node.cpp
-  src/tutorial_autorunner/tutorial_autorunner.cpp
-)
-
-add_executable(rubis_testbed_autorunner
-  include/rubis_testbed_autorunner/rubis_testbed_autorunner.h
-  src/rubis_testbed_autorunner/rubis_testbed_autorunner_node.cpp
-  src/rubis_testbed_autorunner/rubis_testbed_autorunner.cpp
-)
-
-add_dependencies(lgsvl_triple_lidar_autorunner ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(lgsvl_triple_lidar_autorunner
-  ${catkin_LIBRARIES}
-  ros_autorunner_lib
-)
-
-add_dependencies(desktop_lane_keeping ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(desktop_lane_keeping
-  ${catkin_LIBRARIES}
-  ros_autorunner_lib
-)
-
-add_dependencies(minicar_lane_keeping ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(minicar_lane_keeping
-  ${catkin_LIBRARIES}
-  ros_autorunner_lib
-)
 
 add_dependencies(cubetown_lkas_autorunner ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(cubetown_lkas_autorunner
@@ -122,6 +84,12 @@ target_link_libraries(cubetown_lkas_autorunner
 
 add_dependencies(cubetown_full_autorunner ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(cubetown_full_autorunner
+  ${catkin_LIBRARIES}
+  ros_autorunner_lib
+)
+
+add_dependencies(rubis_testbed_autorunner ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(rubis_testbed_autorunner
   ${catkin_LIBRARIES}
   ros_autorunner_lib
 )
@@ -150,16 +118,34 @@ target_link_libraries(exynos_carla_full_autorunner
   ros_autorunner_lib
 )
 
-
-
-add_dependencies(tutorial_autorunner ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(tutorial_autorunner
-  ${catkin_LIBRARIES}
-  ros_autorunner_lib
+install(
+  TARGETS
+    ros_autorunner_lib
+    carla_lkas_autorunner
+    carla_full_autorunner
+    exynos_carla_lkas_autorunner
+    exynos_carla_full_autorunner
+    cubetown_lkas_autorunner
+    cubetown_full_autorunner
+    rubis_testbed_autorunner
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
-add_dependencies(rubis_testbed_autorunner ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(rubis_testbed_autorunner
-  ${catkin_LIBRARIES}
-  ros_autorunner_lib
+install(DIRECTORY include/
+  DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}
+  PATTERN ".svn" EXCLUDE
+)
+install(DIRECTORY launch/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
+  PATTERN ".svn" EXCLUDE
+)
+
+install(DIRECTORY cfg/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/cfg
+)
+
+install(DIRECTORY scripts/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/scripts
 )

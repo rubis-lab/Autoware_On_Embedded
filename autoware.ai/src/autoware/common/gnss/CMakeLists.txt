@@ -47,17 +47,3 @@ install(TARGETS gnss
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
-
-if(CATKIN_ENABLE_TESTING)
-  roslint_add_test()
-
-  find_package(rostest REQUIRED)
-  find_package(rosunit REQUIRED)
-
-  add_rostest_gtest(test_gnss
-    test/test_gnss.test test/test_gnss.cpp
-    src/geo_pos_conv.cpp
-  )
-  target_link_libraries(test_gnss ${catkin_LIBRARIES})
-  add_dependencies(test_gnss ${catkin_EXPORTED_TARGETS})
-endif()

@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 2.8.3)
 project(autoware_connector)
 
 find_package(catkin REQUIRED COMPONENTS
-  autoware_build_flags
   autoware_can_msgs
   autoware_msgs
   geometry_msgs

@@ -20,7 +20,7 @@ find_package(catkin REQUIRED COMPONENTS
   gnss
   rubis_lib
   rubis_msgs
-  geometry_msgs
+  visualization_msgs
 )
 
 catkin_package(
@@ -42,15 +42,6 @@ include_directories(
 # ${catkin_INCLUDE_DIRS}
 )
 
-add_executable(camera_republisher
-  src/camera_republisher.cpp
-)
-add_dependencies(camera_republisher ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(camera_republisher
-  ${catkin_LIBRARIES}
-)
-
-
 add_executable(lidar_republisher
   src/lidar_republisher.cpp
 )
@@ -59,6 +50,9 @@ target_link_libraries(lidar_republisher
   ${catkin_LIBRARIES}
 )
 
+add_executable(camera_republisher
+  src/camera_republisher.cpp
+)
 add_dependencies(camera_republisher ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(camera_republisher
   ${catkin_LIBRARIES}
@@ -106,4 +100,31 @@ add_dependencies(rubis_pose_relay ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_E
 
 target_link_libraries(rubis_pose_relay
   ${catkin_LIBRARIES}
+)
+
+install(
+  TARGETS
+    lidar_republisher
+    camera_republisher
+    gnss_republisher
+    gnss_localizer
+    fake_current_pose
+    fake_traffic_signal_generator
+    rubis_pose_relay
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+install(DIRECTORY include/
+  DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}
+  PATTERN ".svn" EXCLUDE
+)
+install(DIRECTORY launch/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
+  PATTERN ".svn" EXCLUDE
+)
+
+install(DIRECTORY cfg/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/cfg
 )

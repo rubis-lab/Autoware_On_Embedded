@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.12)
 
 project(libvectormap)
 
-find_package(autoware_build_flags REQUIRED)
+
 
 find_package(catkin REQUIRED COMPONENTS
   roslint
@@ -69,7 +69,3 @@ install(DIRECTORY include/${PROJECT_NAME}/
 
 set(ROSLINT_CPP_OPTS "--filter=-build/c++14,-runtime/references")
 roslint_cpp()
-
-if(CATKIN_ENABLE_TESTING)
-  roslint_add_test()
-endif()

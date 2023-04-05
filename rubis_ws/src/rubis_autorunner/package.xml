@@ -6,7 +6,7 @@
 
   <maintainer email="jwhan@todo.todo">jwhan</maintainer>
 
-  <license>TODO</license>
+  <license>Apache 2</license>
 
 
   <buildtool_depend>catkin</buildtool_depend>
@@ -19,6 +19,8 @@
   <exec_depend>autoware_msgs</exec_depend>
   <exec_depend>roscpp</exec_depend>
   <exec_depend>std_msgs</exec_depend>
+  <depend>visualization_msgs</depend>
+  <depend>nmea_msgs</depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->

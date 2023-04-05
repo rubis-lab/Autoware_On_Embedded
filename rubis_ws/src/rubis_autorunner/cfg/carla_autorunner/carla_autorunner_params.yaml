@@ -20,16 +20,6 @@ lidar_republisher:
     period: 2_000_000
   task_response_time_filename: "~/Documents/profiling/response_time/lidar_republisher.csv"  
 
-camera_republisher:
-  rate: 10
-  task_scheduling_configs:
-    policy: "NONE"
-    priority: 99
-    exec_time: 1_000_000
-    deadline: 2_000_000
-    period: 2_000_000
-  task_response_time_filename: "~/Documents/profiling/response_time/camera_republisher.csv"  
-
 voxel_grid_filter:
   rate: 10
   task_scheduling_configs:
@@ -103,16 +93,8 @@ lidar_euclidean_cluster_detect:
     period: 0 # ns
   task_response_time_filename: "~/Documents/profiling/response_time/lidar_euclidean_cluster_detect.csv"
 
-vision_darknet_detect:
-  rate: 10
-  task_scheduling_configs:
-    policy: "NONE"
-    priority: 20
-    exec_time: 0 # ns
-    deadline: 0 # ns
-    period: 0 # ns
   network_definition_file: "~/autoware.ai/autoware_files/vision/yolov3-320.cfg"
-  pretrained_model_file: "~/autoware.ai/autoware_files/vision/yolov3.weights"
+  pretrained_model_file: "~/autoware.ai/autoware_files/vision/yolov3-320.weights"
 
 # Planning
 op_global_planner:
@@ -130,12 +112,12 @@ op_global_planner:
 op_common_params:
   rollOutDensity: 4
   rollOutsNumber: 2
-  maxVelocity: 5.0
-  maxAcceleration: 8.0
-  maxDeceleration: -8.0
+  maxVelocity: 10.0
+  maxAcceleration: 10.0
+  maxDeceleration: -10.0
 
 op_trajectory_generator:
-  rate: 20 #100
+  rate: 100 #100
   task_scheduling_configs:
     policy: "NONE"
     priority: 20
@@ -154,16 +136,13 @@ op_trajectory_evaluator:
     period: 0 # ns
   task_response_time_filename: "~/Documents/profiling/response_time/op_trajectory_evaluator.csv"
 
-  SprintDecisionTime: 9999999.0
   weightPriority: 1
-  weightTransition: 1
+  weightTransition: 0.5
   weightLong: 1
   weightLat: 1
-  ImageWidth: 400
-  ImageHeight: 400
+  ImageWidth: 1920
+  ImageHeight: 1080
   SprintDecisionTime: 9999999.0
-  PedestrianStopImgHeightThreshold: 20
-  PedestrianImageDetectionRange: 0.4
 
 op_behavior_selector:
   rate: 100 #100

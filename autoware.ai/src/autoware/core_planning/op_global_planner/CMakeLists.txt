@@ -5,7 +5,7 @@ if("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "aarch64")
   add_definitions(-D__aarch64__)
 endif()
 
-find_package(autoware_build_flags REQUIRED)
+
 
 find_package(
   catkin REQUIRED COMPONENTS
@@ -15,7 +15,6 @@ find_package(
     libwaypoint_follower
     op_planner
     op_ros_helpers
-    op_simu
     op_utility
     pcl_conversions
     pcl_ros
@@ -24,6 +23,7 @@ find_package(
     tf
     vector_map_msgs
     rubis_lib
+    nav_msgs
 )
 
 catkin_package(

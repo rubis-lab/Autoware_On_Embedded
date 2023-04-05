@@ -5,11 +5,10 @@ if("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "aarch64")
   add_definitions(-D__aarch64__)
 endif()
 
-find_package(autoware_build_flags REQUIRED)
+
 find_package(
   catkin REQUIRED COMPONENTS
     autoware_config_msgs
-    autoware_health_checker
     autoware_msgs
     geometry_msgs
     ros_observer

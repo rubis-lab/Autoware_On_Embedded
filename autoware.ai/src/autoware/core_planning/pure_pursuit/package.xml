@@ -6,17 +6,15 @@
   <maintainer email="h_ohta@ertl.jp">h_ohta</maintainer>
   <license>Apache 2</license>
 
-  <buildtool_depend>autoware_build_flags</buildtool_depend>
+
   <buildtool_depend>catkin</buildtool_depend>
 
   <depend>amathutils_lib</depend>
   <depend>autoware_config_msgs</depend>
-  <depend>autoware_health_checker</depend>
   <depend>autoware_msgs</depend>
   <depend>geometry_msgs</depend>
   <depend>libwaypoint_follower</depend>
   <depend>roscpp</depend>
-  <depend>rostest</depend>
   <depend>rosunit</depend>
   <depend>std_msgs</depend>
   <depend>tf2</depend>
@@ -25,5 +23,6 @@
   <depend>rubis_lib</depend>
   <depend>rubis_msgs</depend>
   <depend>can_data_msgs</depend>
+  <depend>visualization_msgs</depend>
 
 </package>

@@ -24,7 +24,7 @@
     <arg name="lowpass_gain_linear_x" default="0.0" />
     <arg name="lowpass_gain_angular_z" default="0.0" />
     <arg name="lowpass_gain_steering_angle" default="0.0" />
-    <arg name="max_stop_count" default="1" /> <!-- 10 = 1 second -->  
+    <arg name="max_stop_count" default="40" /> <!-- 10 = 1 second -->  
     <!-- For twist_gate -->
     <arg name="loop_rate" default="30.0" />
     <arg name="use_decision_maker" default="false" />

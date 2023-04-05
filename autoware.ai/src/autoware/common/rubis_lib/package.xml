@@ -6,7 +6,6 @@
   
   <maintainer email="kite9240@gmail.com">hypark</maintainer>
   <license>MIT</license>
-  <buildtool_depend>autoware_build_flags</buildtool_depend>
   <buildtool_depend>catkin</buildtool_depend>
 
   <depend>pcl_conversions</depend>

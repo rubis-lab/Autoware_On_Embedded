@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(map_tools)
 
-find_package(autoware_build_flags REQUIRED)
+
 find_package(catkin REQUIRED COMPONENTS
   pcl_conversions
   pcl_ros

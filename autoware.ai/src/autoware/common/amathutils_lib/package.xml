@@ -7,7 +7,6 @@
   <author email="yusuke.fujii@tier4.jp">Yusuke FUJII</author>
   <license>Apache 2</license>
 
-  <buildtool_depend>autoware_build_flags</buildtool_depend>
   <buildtool_depend>catkin</buildtool_depend>
   <test_depend>rostest</test_depend>
 
@@ -17,4 +16,5 @@
   <depend>tf2</depend>
   <depend>tf</depend>
   <depend>eigen</depend>
+  <depend>tf2_geometry_msgs</depend>
 </package>

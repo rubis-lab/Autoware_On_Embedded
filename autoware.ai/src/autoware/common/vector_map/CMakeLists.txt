@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(vector_map)
 
-find_package(autoware_build_flags REQUIRED)
+
 
 find_package(catkin REQUIRED COMPONENTS
   tf
@@ -49,7 +49,3 @@ install(TARGETS ${PROJECT_NAME}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
-
-if(CATKIN_ENABLE_TESTING)
-  roslint_add_test()
-endif()

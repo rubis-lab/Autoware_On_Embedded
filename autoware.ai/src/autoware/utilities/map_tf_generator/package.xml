@@ -6,7 +6,7 @@
   <maintainer email="azumi.suzuki@tier4.jp">azumi-suzuki</maintainer>
   <license>Apache 2</license>
 
-  <buildtool_depend>autoware_build_flags</buildtool_depend>
+
   <buildtool_depend>catkin</buildtool_depend>
 
   <depend>roscpp</depend>
