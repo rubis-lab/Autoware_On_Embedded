@@ -8,12 +8,18 @@
   <arg name="init_yaw" value="1.54" /> -->
 
   <!-- carla town04 circle-->
-  <arg name="init_x" value="314.065" />
-  <arg name="init_y" value="129.676" />
+  <arg name="init_x" value="314.8" />
+  <arg name="init_y" value="230.0" />
   <arg name="init_z" value="0.0" />
   <arg name="init_roll" value="0.0" />
   <arg name="init_pitch" value="0.0" />
   <arg name="init_yaw" value="1.54" />
+  <!-- <arg name="init_x" value="314.065" />
+  <arg name="init_y" value="129.676" />
+  <arg name="init_z" value="0.0" />
+  <arg name="init_roll" value="0.0" />
+  <arg name="init_pitch" value="0.0" />
+  <arg name="init_yaw" value="1.54" /> -->
 
   <!-- vel/pose connect -->
   <arg name="topic_pose_stamped" default="/ndt_pose" />
