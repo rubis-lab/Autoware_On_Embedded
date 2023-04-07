@@ -967,6 +967,7 @@ static void imu_callback(const sensor_msgs::Imu::Ptr& input)
 
 static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
 { 
+  // std::cout<<"@@@@ "<<input->data.size()<<std::endl;
   static int match_cnt = 10;
 
   if (map_loaded != 1 || init_pos_set != 1) return;
@@ -1713,6 +1714,7 @@ static void rubis_points_callback(const rubis_msgs::PointCloud2::ConstPtr& _inpu
   sensor_msgs::PointCloud2::ConstPtr input = boost::make_shared<const sensor_msgs::PointCloud2>(_input->msg);
   rubis::instance_ = _input->instance;
   ndt_matching(input);
+  std::cout<<"Finish ndt_matching"<<std::endl;
 
   rubis::stop_task_profiling(rubis::instance_, 0);
 }

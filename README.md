@@ -76,16 +76,16 @@ in below three files (`sudo` required)
 ### Autoware Build
 ```
 # If you have CUDA
-AUTOWARE_COMPILE_WITH_CUDA=1 catkin_make
+AUTOWARE_COMPILE_WITH_CUDA=1 catkin_make --cmake-args -DCMAKE_BUILD_TYPE=Release
 
 # Build only some package
-AUTOWARE_COMPILE_WITH_CUDA=1 catkin_make --only-pkg-with-deps $(package name)
+AUTOWARE_COMPILE_WITH_CUDA=1 catkin_make --cmake-args -DCMAKE_BUILD_TYPE=Release --pkg $(package name)
 
 # Build without some package
-AUTOWARE_COMPILE_WITH_CUDA=1 catkin_make -DCATKIN_BLACKLIST_PACKAGES=$(package name)
+AUTOWARE_COMPILE_WITH_CUDA=1 catkin_make --cmake-args -DCMAKE_BUILD_TYPE=Release -DCATKIN_BLACKLIST_PACKAGES=$(package name)
 
 # If you don't have CUDA
-catkin_make
+catkin_make --cmake-args -DCMAKE_BUILD_TYPE=Release
 ```
 
 <!-- Since Autoware recommend to use directory name 'autoware.ai', you should make soft link with autoware.ai to this repository

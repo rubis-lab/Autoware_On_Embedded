@@ -1,10 +1,10 @@
 <launch>
   <arg name="sync" default="false" />
-  <arg name="leaf_size" default="0.1" />
+  <arg name="leaf_size" default="0.5" />
   <arg name="node_name" default="voxel_grid_filter" />
   <arg name="points_topic" default="points_raw" />
   <arg name="output_log" default="false" />
-  <arg name="measurement_range" default="200" />
+  <arg name="measurement_range" default="100" />
 
   <node pkg="points_downsampler" name="$(arg node_name)" type="$(arg node_name)">
     <param name="input_topic_name" value="points_raw" />
