@@ -1714,7 +1714,7 @@ static void rubis_points_callback(const rubis_msgs::PointCloud2::ConstPtr& _inpu
   sensor_msgs::PointCloud2::ConstPtr input = boost::make_shared<const sensor_msgs::PointCloud2>(_input->msg);
   rubis::instance_ = _input->instance;
   ndt_matching(input);
-  std::cout<<"Finish ndt_matching"<<std::endl;
+  // std::cout<<"Finish ndt_matching"<<std::endl;
 
   rubis::stop_task_profiling(rubis::instance_, 0);
 }
