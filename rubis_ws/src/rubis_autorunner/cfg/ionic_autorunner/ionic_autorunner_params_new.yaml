@@ -1,0 +1,268 @@
+# Unit of rate: hz
+# Unit of scheduling params: ns
+
+# 1s  : 1_000_000_000
+# 1ms : 1_000_000
+# 1us : 1_000
+# 1ns : 1
+
+#rate = hz
+# other time unut = ns
+
+# Vision
+camera_image:
+  rate: 10
+  task_scheduling_configs:
+    policy: "NONE"
+    priority: 99
+    exec_time: 1_600_000 # ns
+    deadline: 100_000_000 # ns
+    period: 100_000_000 # ns
+  task_response_time_filename: "~/Documents/profiling/response_time/camera_image.csv" 
+  camera_id: 0
+
+# Lane Keeping
+lidar_republisher:
+  rate: 10
+  task_scheduling_configs:
+    policy: "NONE"
+    priority: 99
+    exec_time: 70_000_000
+    deadline: 100_000_000
+    period: 100_000_000
+  task_response_time_filename: "~/Documents/profiling/response_time/lidar_republisher.csv"  
+
+camera_republisher:
+  rate: 10
+  task_scheduling_configs:
+    policy: "NONE"
+    priority: 99
+    exec_time: 70_000_000
+    deadline: 100_000_000
+    period: 100_000_000
+  task_response_time_filename: "~/Documents/profiling/response_time/camera_republisher.csv"  
+
+# vel_relay:
+#   rate: 10
+#   task_scheduling_configs:
+#     policy: "NONE"
+#     priority: 99
+#     exec_time: 300_000
+#     deadline: 100_000_000
+#     period: 100_000_000
+#   task_response_time_filename: "~/Documents/profiling/response_time/vel_relay.csv"
+
+# pose_relay:
+#   rate: 10
+#   task_scheduling_configs:
+#     policy: "NONE"
+#     priority: 99
+#     exec_time: 300_000
+#     deadline: 100_000_000
+#     period: 100_000_000
+#   task_response_time_filename: "~/Documents/profiling/response_time/pose_relay.csv"
+
+# republish:
+#   rate: 10
+#   task_scheduling_configs:
+#     policy: "NONE"
+#     priority: 99
+#     exec_time: 35_000_000
+#     deadline: 100_000_000
+#     period: 100_000_000
+#   task_response_time_filename: "~/Documents/profiling/response_time/republish.csv"
+
+voxel_grid_filter:
+  rate: 10
+  task_scheduling_configs:
+    policy: "NONE"
+    priority: 99
+    exec_time: 1_600_000 # ns
+    deadline: 100_000_000 # ns
+    period: 100_000_000 # ns
+  task_response_time_filename: "~/Documents/profiling/response_time/voxel_grid_filter.csv"  
+
+modular_ndt_matching_FR:
+  rate: 10
+  task_scheduling_configs:
+    policy: "NONE"
+    priority: 20
+    exec_time: 80_000_000 # ns
+    deadline: 80_000_000 # ns
+    period: 100_000_000 # ns
+  task_response_time_filename: "~/Documents/profiling/response_time/ndt_matching.csv"
+  use_kalman_filter: False
+  tf_x: 3.3
+  tf_y: -0.8
+  tf_z: 0.09
+  tf_roll: 0
+  tf_pitch: 0
+  tf_yaw: 0
+  localizer: "velodyne"
+
+ndt_matching:
+  rate: 10
+  task_scheduling_configs:
+    policy: "NONE"
+    priority: 20
+    exec_time: 80_000_000 # ns
+    deadline: 80_000_000 # ns
+    period: 100_000_000 # ns
+  task_response_time_filename: "~/Documents/profiling/response_time/ndt_matching.csv"
+  use_kalman_filter: False
+  tf_x: 3.3
+  tf_y: -0.8
+  tf_z: 0.09
+  tf_roll: 0
+  tf_pitch: 0
+  tf_yaw: 0
+  localizer: "velodyne"
+
+# Detection
+ray_ground_filter_center:
+  rate: 10 
+  task_scheduling_configs:
+    policy: "NONE"
+    priority: 20
+    exec_time: 100_000_000 # ns
+    deadline: 100_000_000 # ns
+    period: 100_000_000 # ns
+  task_response_time_filename: "~/Documents/profiling/response_time/ray_ground_filter.csv"
+
+lidar_euclidean_cluster_detect:
+  rate: 10
+  task_scheduling_configs:
+    policy: "NONE"
+    priority: 20
+    exec_time: 50_000_000 # ns
+    deadline: 200_000_000 # ns
+    period: 200_000_000 # ns
+  task_response_time_filename: "~/Documents/profiling/response_time/lidar_euclidean_cluster_detect.csv"
+
+vision_darknet_detect:
+  rate: 10
+  task_scheduling_configs:
+    policy: "NONE"
+    priority: 20
+    exec_time: 100_000_000 # ns
+    deadline: 100_000_000 # ns
+    period: 100_000_000 # ns
+  task_response_time_filename: "~/Documents/profiling/response_time/vision_darknet_detect.csv"
+  network_definition_file: "~/autoware.ai/autoware_files/vision/yolov3-320.cfg"
+  pretrained_model_file: "~/autoware.ai/autoware_files/vision/yolov3.weights"
+
+# Planning
+op_global_planner:
+  rate: 25 #25
+  task_scheduling_configs:
+    policy: "NONE"
+    priority: 20
+    exec_time: 45_000_000 # ns
+    deadline: 100_000_000 # ns
+    period: 100_000_000 # ns
+  task_response_time_filename: "~/Documents/profiling/response_time/op_global_planner.csv"
+
+  multilap_flag: 1
+
+op_common_params:
+  rollOutDensity: 3.5
+  rollOutsNumber: 2
+  maxVelocity: 7.0
+  maxAcceleration: 10.0
+  maxDeceleration: -10.0
+
+op_trajectory_generator:
+  rate: 20 #100
+  task_scheduling_configs:
+    policy: "NONE"
+    priority: 20
+    exec_time: 2_900_000 # ns
+    deadline: 100_000_000 # ns
+    period: 100_000_000 # ns
+  task_response_time_filename: "~/Documents/profiling/response_time/op_trajectory_generator.csv"
+
+op_trajectory_evaluator:
+  rate: 100 #100
+  task_scheduling_configs:
+    policy: "NONE"
+    priority: 20
+    exec_time: 3_600_000 # ns
+    deadline: 100_000_000 # ns
+    period: 100_000_000 # ns
+  task_response_time_filename: "~/Documents/profiling/response_time/op_trajectory_evaluator.csv"
+
+  # weightPriority: 0
+  # weightTransition: 5
+  # weightLong: 4
+  # weightLat: 4
+  weightPriority: 1
+  weightTransition: 1
+  weightLong: 1
+  weightLat: 1
+  
+  ImageWidth: 1280
+  ImageHeight: 720
+  SprintDecisionTime: 9999999.0
+  PedestrianStopImgHeightThreshold: 80
+  # 40 increase needed
+  PedestrianImageDetectionRange: 0.4
+
+op_behavior_selector:
+  rate: 100 #100
+  task_scheduling_configs:
+    policy: "NONE"
+    priority: 20
+    exec_time: 20_800_000 # ns
+    deadline: 100_000_000 # ns
+    period: 100_000_000 # ns
+  task_response_time_filename: "~/Documents/profiling/response_time/op_behavior_selector.csv"
+  distanceToPedestrianThreshold: 15.0
+  sprintSpeed: 10.0
+  obstacleWaitingTimeinIntersection: 2.0
+  turnThreshold: 30.0
+
+op_motion_predictor:
+  rate: 25 #25
+  task_scheduling_configs:
+    policy: "NONE"
+    priority: 20
+    exec_time: 3_800_000 # ns
+    deadline: 100_000_000 # ns
+    period: 100_000_000 # ns  
+  task_response_time_filename: "~/Documents/profiling/response_time/op_motion_predictor.csv"
+
+# Control
+twist_filter:
+  rate: 10
+  task_scheduling_configs:
+    policy: "NONE"
+    priority: 20
+    exec_time: 100_000_000 # ns
+    deadline: 2_000_000 # ns
+    period: 100_000_000 # ns
+  task_response_time_filename: "~/Documents/profiling/response_time/twist_filter.csv"
+
+pure_pursuit:
+  rate: 10
+  task_scheduling_configs:
+    policy: "NONE"
+    priority: 20
+    exec_time: 100_000_000 # ns
+    deadline: 3_000_000 # ns
+    period: 100_000_000 # ns
+  task_response_time_filename: "~/Documents/profiling/response_time/twist_gate.csv"
+  dynamic_params_flag: False
+  dynamic_params_path: "~/autoware.ai/autoware_files/lgsvl_file/parameter/lgsvl_pure_pursuit.yaml"
+
+# Independent
+twist_gate:
+  rate: 10
+  task_scheduling_configs:
+    policy: "NONE"
+    priority: 20
+    exec_time: 100_000_000 # ns
+    deadline: 2_000_000 # ns
+    period: 100_000_000 # ns
+  task_response_time_filename: "~/Documents/profiling/response_time/twist_gate.csv"
+
+  zero_flag: 0 ## Publish target velocity as 0
