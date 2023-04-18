@@ -1,11 +1,17 @@
 <launch>
   <!-- Town04 -->
-  <arg name="init_x" value="314.8" />
+  <!-- <arg name="init_x" value="314.8" />
   <arg name="init_y" value="230.0" />
   <arg name="init_z" value="0.3" />
   <arg name="init_roll" value="0.0" />
   <arg name="init_pitch" value="0.0" />
-  <arg name="init_yaw" value="1.54" />
+  <arg name="init_yaw" value="1.54" /> -->
+  <arg name="init_x" value="257.6" />
+  <arg name="init_y" value="310.8" />
+  <arg name="init_z" value="0.3" />
+  <arg name="init_roll" value="0.0" />
+  <arg name="init_pitch" value="0.0" />
+  <arg name="init_yaw" value="0.0" />
 
   <!-- vel/pose connect -->
   <arg name="topic_pose_stamped" default="/ndt_pose" />
