@@ -112,9 +112,9 @@ op_global_planner:
 op_common_params:
   rollOutDensity: 4
   rollOutsNumber: 2
-  maxVelocity: 13.0
-  maxAcceleration: 13.0
-  maxDeceleration: -13.0
+  maxVelocity: 7.5
+  maxAcceleration: 7.5
+  maxDeceleration: -7.5
 
 op_trajectory_generator:
   rate: 20 #100
