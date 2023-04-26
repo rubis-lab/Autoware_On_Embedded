@@ -138,19 +138,18 @@ TrajectoryCost TrajectoryDynamicCosts::DoOneStepStatic(const vector<vector<WayPo
   RelativeInfo car_info;
   PlanningHelpers::GetRelativeInfo(totalPaths, currState, car_info);
 
-  // M
-  // if(car_info.perp_point.LeftLnId == 100){
-  //   m_startTrajIdx = rollOuts.size() / 2;
-  //   m_endTrajIdx = rollOuts.size() / 2;
-  // }
-  // else if(car_info.perp_point.LeftLnId > car_info.perp_point.RightLnId){
-  //   m_endTrajIdx = min(car_info.perp_point.LeftLnId, int(rollOuts.size())-1);
-  //   m_startTrajIdx = min(car_info.perp_point.RightLnId, int(rollOuts.size())-1);
-  // }
-  // else{
-  //   m_startTrajIdx = min(car_info.perp_point.LeftLnId, int(rollOuts.size())-1);
-  //   m_endTrajIdx = min(car_info.perp_point.RightLnId, int(rollOuts.size())-1);
-  // }
+  if(car_info.perp_point.LeftLnId == 100){
+    m_startTrajIdx = rollOuts.size() / 2;
+    m_endTrajIdx = rollOuts.size() / 2;
+  }
+  else if(car_info.perp_point.LeftLnId > car_info.perp_point.RightLnId){
+    m_endTrajIdx = min(car_info.perp_point.LeftLnId, int(rollOuts.size())-1);
+    m_startTrajIdx = min(car_info.perp_point.RightLnId, int(rollOuts.size())-1);
+  }
+  else{
+    m_startTrajIdx = min(car_info.perp_point.LeftLnId, int(rollOuts.size())-1);
+    m_endTrajIdx = min(car_info.perp_point.RightLnId, int(rollOuts.size())-1);
+  }
 
   double minDistanceToRollOut = 0;
   int currIndex = 0;
@@ -206,8 +205,8 @@ TrajectoryCost TrajectoryDynamicCosts::DoOneStepStatic(const vector<vector<WayPo
   bool bAllFree = true;
 
   // M
-  // for(int ic = 0; ic < m_startTrajIdx; ic++) m_TrajectoryCosts.at(ic).bBlocked = true;
-  // for(int ic = rollOuts.size() - 1; ic > m_endTrajIdx; ic--) m_TrajectoryCosts.at(ic).bBlocked = true;
+  for(int ic = 0; ic < m_startTrajIdx; ic++) m_TrajectoryCosts.at(ic).bBlocked = true;
+  for(int ic = rollOuts.size() - 1; ic > m_endTrajIdx; ic--) m_TrajectoryCosts.at(ic).bBlocked = true;
 
   // for(unsigned int ic = std::max(currIndex - 1, m_startTrajIdx); ic <= std::min(currIndex + 1, m_endTrajIdx); ic++)
   // for(unsigned int ic = m_startTrajIdx; ic <= m_endTrajIdx; ic++)
@@ -237,14 +236,15 @@ TrajectoryCost TrajectoryDynamicCosts::DoOneStepStatic(const vector<vector<WayPo
     }
   }
 
-  static int path_keeping_cnt = 20, cur_path_blocking_cnt = 20;
-  if(m_PrevIndex == currIndex){
-    path_keeping_cnt--;
-    if(path_keeping_cnt < 0) path_keeping_cnt = 0;
-  }
-  else path_keeping_cnt = 20;
+  // static int path_keeping_cnt = 20, cur_path_blocking_cnt = 20;
+  // if(m_PrevIndex == currIndex){
+  //   path_keeping_cnt--;
+  //   if(path_keeping_cnt < 0) path_keeping_cnt = 0;
+  // }
+  // else path_keeping_cnt = 20;
 
   // Change lane if current path is blocked or current path is not center and the ego keeps lane 1 sceonds(When rate is 20)
+  
   if((is_current_path_blocked) || (smallestIndex != params.rollOutNumber/2 && path_keeping_cnt == 0)){
     if(smallestIndex == -1)
     {
