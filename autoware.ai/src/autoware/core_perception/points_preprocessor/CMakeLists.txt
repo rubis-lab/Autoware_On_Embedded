@@ -5,12 +5,11 @@ if("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "aarch64")
   add_definitions(-D__aarch64__)
 endif()
 
-find_package(autoware_build_flags REQUIRED)
+
 
 find_package(catkin REQUIRED COMPONENTS
   autoware_msgs
   autoware_config_msgs
-  autoware_health_checker
   cv_bridge
   pcl_conversions
   pcl_ros
@@ -36,7 +35,6 @@ roslint_cpp(
   include/points_preprocessor/ray_ground_filter/ray_ground_filter.h
 )
 
-find_package(Qt5Core REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(PCL 1.7 REQUIRED)
 find_package(OpenMP)
@@ -57,36 +55,6 @@ include_directories(
 SET(CMAKE_CXX_FLAGS "-O2 -g -Wall ${CMAKE_CXX_FLAGS}")
 
 link_directories(${PCL_LIBRARY_DIRS})
-
-# Space Filter
-add_executable(space_filter
-  nodes/space_filter/space_filter.cpp
-)
-target_link_libraries(space_filter
-  ${catkin_LIBRARIES}
-  ${PCL_LIBRARIES}
-)
-
-add_dependencies(space_filter ${catkin_EXPORTED_TARGETS})
-
-# Ring Ground Filter
-add_definitions(${PCL_DEFINITIONS})
-
-add_executable(ring_ground_filter
-  nodes/ring_ground_filter/ring_ground_filter.cpp
-)
-
-target_include_directories(ring_ground_filter PRIVATE
-  ${PCL_INCLUDE_DIRS}
-)
-
-target_link_libraries(ring_ground_filter
-  ${catkin_LIBRARIES}
-  ${PCL_LIBRARIES}
-  ${Qt5Core_LIBRARIES}
-)
-
-add_dependencies(ring_ground_filter ${catkin_EXPORTED_TARGETS})
 
 # Ray Ground Filter
 add_library(ray_ground_filter_lib SHARED
@@ -109,7 +77,6 @@ target_link_libraries(ray_ground_filter_lib
   ${catkin_LIBRARIES}
   ${PCL_LIBRARIES}
   ${OpenCV_LIBRARIES}
-  ${Qt5Core_LIBRARIES}
 )
 
 add_dependencies(ray_ground_filter_lib ${catkin_EXPORTED_TARGETS})
@@ -119,39 +86,6 @@ add_executable(ray_ground_filter
 )
 target_link_libraries(ray_ground_filter ray_ground_filter_lib)
 add_dependencies(ray_ground_filter ${catkin_EXPORTED_TARGETS})
-
-# Points Concat filter
-add_executable(points_concat_filter
-  nodes/points_concat_filter/points_concat_filter.cpp
-)
-
-target_include_directories(points_concat_filter PRIVATE
-  ${PCL_INCLUDE_DIRS}
-)
-
-target_link_libraries(points_concat_filter
-  ${catkin_LIBRARIES}
-  ${PCL_LIBRARIES}
-  ${YAML_CPP_LIBRARIES}
-)
-
-add_dependencies(points_concat_filter ${catkin_EXPORTED_TARGETS})
-
-#Cloud Transformer
-add_executable(cloud_transformer
-  nodes/cloud_transformer/cloud_transformer_node.cpp
-)
-
-target_include_directories(cloud_transformer PRIVATE
-  ${PCL_INCLUDE_DIRS}
-)
-
-target_link_libraries(cloud_transformer
-  ${catkin_LIBRARIES}
-  ${PCL_LIBRARIES}
-  ${Qt5Core_LIBRARIES}
-)
-add_dependencies(cloud_transformer ${catkin_EXPORTED_TARGETS})
 
 #Compare Map Filter
 add_executable(compare_map_filter
@@ -165,34 +99,14 @@ target_include_directories(compare_map_filter PRIVATE
 target_link_libraries(compare_map_filter
   ${catkin_LIBRARIES}
   ${PCL_LIBRARIES}
-  ${Qt5Core_LIBRARIES}
 )
 add_dependencies(compare_map_filter ${catkin_EXPORTED_TARGETS})
 
-### Unit Tests ###
-#if (CATKIN_ENABLE_TESTING)
-#    find_package(rostest REQUIRED)
-#    find_package(roslaunch REQUIRED)
-
-#    add_rostest_gtest(test_points_preprocessor
-#      test/test_points_preprocessor.test
-#      test/src/test_points_preprocessor.cpp)
-#   target_include_directories(test_points_preprocessor PRIVATE
-#          nodes/ray_ground_filter/include
-#            test/include)
-#    target_link_libraries(test_points_preprocessor
-#            ray_ground_filter_lib
-#            ${catkin_LIBRARIES})
-#endif ()
 
 install(
   TARGETS
-    cloud_transformer
-    points_concat_filter
     ray_ground_filter_lib
     ray_ground_filter
-    ring_ground_filter
-    space_filter
     compare_map_filter
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
@@ -207,7 +121,3 @@ install(DIRECTORY launch/
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
   PATTERN ".svn" EXCLUDE
 )
-
-if (CATKIN_ENABLE_TESTING)
-  roslint_add_test()
-endif()

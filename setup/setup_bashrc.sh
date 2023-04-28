@@ -31,8 +31,21 @@ rubis_ws_path="$(cd -P /home/${1}/rubis_ws && pwd)"
 
 user_bash_rubis_pkg=`cat /home/${1}/.bashrc | grep "source ${rubis_ws_path}/devel/setup.bash" | head -1`
 root_bash_rubis_pkg=`cat /root/.bashrc | grep "source ${rubis_ws_path}/devel/setup.bash" | head -1`
-user_bash_AUTWOARE=`cat /home/${1}/.bashrc | grep "source ${autoware_path}/install/setup.bash" | head -1`
-root_bash_AUTWOARE=`cat /root/.bashrc | grep "source ${autoware_path}/install/setup.bash" | head -1`
+user_bash_AUTWOARE=`cat /home/${1}/.bashrc | grep "source ${autoware_path}/devel/setup.bash" | head -1`
+root_bash_AUTWOARE=`cat /root/.bashrc | grep "source ${autoware_path}/devel/setup.bash" | head -1`
+
+if [ "$user_bash_AUTWOARE" != "source ${autoware_path}/devel/setup.bash" ]
+  then echo "source ${autoware_path}/devel/setup.bash"  >> /home/${1}/.bashrc
+  echo "AUTOWAER variable setup is updated to /home/${1}/.bashrc"
+  change_flag="True"
+fi
+
+if [ "$root_bash_AUTWOARE" != "source ${autoware_path}/devel/setup.bash" ]
+  then echo "source ${autoware_path}/devel/setup.bash" >> /root/.bashrc
+  echo "AUTOWAER variable setup is updated to /root/.bashrc"
+  change_flag="True"
+fi
+
 
 if [ "$user_bash_rubis_pkg" != "source ${rubis_ws_path}/devel/setup.bash" ]
   then echo "source ${rubis_ws_path}/devel/setup.bash" >> /home/${1}/.bashrc
@@ -43,19 +56,6 @@ fi
 if [ "$root_bash_rubis_pkg" != "source ${rubis_ws_path}/devel/setup.bash" ]
   then echo "source ${rubis_ws_path}/devel/setup.bash" >> /root/.bashrc
   echo "rubis_pkg variable setup is updated to /root/.bashrc"
-  change_flag="True"
-fi
-
-
-if [ "$user_bash_AUTWOARE" != "source ${autoware_path}/install/setup.bash" ]
-  then echo "source ${autoware_path}/install/setup.bash"  >> /home/${1}/.bashrc
-  echo "AUTOWAER variable setup is updated to /home/${1}/.bashrc"
-  change_flag="True"
-fi
-
-if [ "$root_bash_AUTWOARE" != "source ${autoware_path}/install/setup.bash" ]
-  then echo "source ${autoware_path}/install/setup.bash" >> /root/.bashrc
-  echo "AUTOWAER variable setup is updated to /root/.bashrc"
   change_flag="True"
 fi
 
@@ -72,7 +72,7 @@ alias_user_gb="alias gb='gedit /home/${1}/.bashrc'"
 alias_user_sb="alias sb='source /home/${1}/.bashrc'"
 alias_root_gb="alias gb='gedit /root/.bashrc'"
 alias_root_sb="alias sb='source /root/.bashrc'"
-alias_sa="alias sa='source ${autoware_path}/install/setup.bash'"
+alias_sa="alias sa='source ${autoware_path}/devel/setup.bash'"
 alias_sr="alias sa='source ${rubis_ws_path}/devel/setup.bash'"
 alias_lglaunch="alias lglaunch='cd /home/${1}/autoware.ai/autoware_files/lgsvl_file/launch/${lglaunch_dir_name}'"
 

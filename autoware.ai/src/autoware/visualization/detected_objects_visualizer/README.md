@@ -48,7 +48,7 @@ If you need to use it manually, be sure to add the `ROS_NAMESPACE` if using `ros
 For launch files, add the following line to your launch file:
 ```xml
 <node pkg="detected_objects_visualizer" type="visualize_detected_objects" name="AN_INSTANCENAME_01"
-          ns="ROS_NAMESPACE"/>
+          output="screen" ns="ROS_NAMESPACE"/>
 ```
 
 i.e. to visualize the output of the `lidar tracker` use `ROS_NAMESPACE=/detection/lidar_tracker` in rosrun or

@@ -3,7 +3,7 @@ project(map_tf_generator)
 
 add_compile_options(-std=c++11)
 
-find_package(autoware_build_flags REQUIRED)
+
 find_package(catkin REQUIRED COMPONENTS
   pcl_ros
   roscpp

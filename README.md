@@ -76,16 +76,16 @@ in below three files (`sudo` required)
 ### Autoware Build
 ```
 # If you have CUDA
-AUTOWARE_COMPILE_WITH_CUDA=1 colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release
+AUTOWARE_COMPILE_WITH_CUDA=1 catkin_make --cmake-args -DCMAKE_BUILD_TYPE=Release
 
 # Build only some package
-AUTOWARE_COMPILE_WITH_CUDA=1 colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release --packages-select $(pakcage name)
+AUTOWARE_COMPILE_WITH_CUDA=1 catkin_make --cmake-args -DCMAKE_BUILD_TYPE=Release --pkg $(package name)
 
 # Build without some package
-AUTOWARE_COMPILE_WITH_CUDA=1 colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release --packages-skip $(pakcage name)
+AUTOWARE_COMPILE_WITH_CUDA=1 catkin_make --cmake-args -DCMAKE_BUILD_TYPE=Release -DCATKIN_BLACKLIST_PACKAGES=$(package name)
 
 # If you don't have CUDA
-colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release
+catkin_make --cmake-args -DCMAKE_BUILD_TYPE=Release
 ```
 
 <!-- Since Autoware recommend to use directory name 'autoware.ai', you should make soft link with autoware.ai to this repository
@@ -96,7 +96,7 @@ ln -s ${WORKSPACE_DIR}/RUBIS-SelfDriving ~/autoware.ai
 
 And it is recommned to add below sourcing command in your `~/.bashrc` file.
 ```
-source ~/autoware.ai/install/setup.bash
+source ~/autoware.ai/devel/setup.bash
 ``` -->
 
 ## How to build package in rubis_ws

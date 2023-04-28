@@ -138,7 +138,6 @@ TrajectoryCost TrajectoryDynamicCosts::DoOneStepStatic(const vector<vector<WayPo
   RelativeInfo car_info;
   PlanningHelpers::GetRelativeInfo(totalPaths, currState, car_info);
 
-
   // M
   if(car_info.perp_point.LeftLnId == 100){
     m_startTrajIdx = rollOuts.size() / 2;
@@ -157,21 +156,9 @@ TrajectoryCost TrajectoryDynamicCosts::DoOneStepStatic(const vector<vector<WayPo
   int currIndex = 0;
   currIndex = GetCurrentRollOutIndex(totalPaths, currState, params);
 
-  // int currIndex = 0;
-
-  // for(int i=0; i<rollOuts.size(); i++){
-  //   const PlannerHNS::WayPoint rollout_start_waypoint = rollOuts.at(i).at(std::min(3, int(rollOuts.at(i).size()))-1);
-
-  //   double direct_distance = hypot(rollout_start_waypoint.pos.y - currState.pos.y, rollout_start_waypoint.pos.x - currState.pos.x);
-
-  //   if(minDistanceToRollOut == 0 || minDistanceToRollOut > direct_distance){
-  //     minDistanceToRollOut = direct_distance;
-  //     currIndex = i;
-  //   }
-  // }
   // Calculate lane change cost: Scoring the cost by the distance between current path and candidate path
   int centralIndex = params.rollOutNumber/2;    
-  // if(rollOuts.size() % 2 == 0) centralIndex--;
+  if(rollOuts.size() % 2 == 0) centralIndex--;
 
   m_TrajectoryCosts.clear();  
   for(unsigned int it=0; it< rollOuts.size(); it++)
@@ -188,31 +175,24 @@ TrajectoryCost TrajectoryDynamicCosts::DoOneStepStatic(const vector<vector<WayPo
     m_TrajectoryCosts.push_back(tc);
   }
 
-  CalculateTransitionCosts(m_TrajectoryCosts, currIndex, params);
-  // if(m_PrevSelectedIndex == -1){
-  //   CalculateTransitionCosts(m_TrajectoryCosts, currIndex, params);
-  // }
-  // else{
-  //   CalculateTransitionCosts(m_TrajectoryCosts, m_PrevSelectedIndex, params);
-  // }
+
+  if(m_PrevSelectedIndex == -1){
+    CalculateTransitionCosts(m_TrajectoryCosts, centralIndex, params);
+  }
+  else{
+    CalculateTransitionCosts(m_TrajectoryCosts, m_PrevSelectedIndex, params);
+  }
 
   // Calculate trajectory cost with object
   WayPoint p;
   m_AllContourPoints.clear();
   for(unsigned int io=0; io<obj_list.size(); io++) // Object in object list
   {
-    if(obj_list.at(io).header.frame_id != "ego_vehicle/rgb_front" && obj_list.at(io).header.frame_id != "camera") {
-      // Only add centroid
-      p.pos = obj_list.at(io).center.pos;
-      p.v = obj_list.at(io).center.v;
-      p.id = io;
-      m_AllContourPoints.push_back(p);
-    }
     // Only add centroid
-    // p.pos = obj_list.at(io).center.pos;
-    // p.v = obj_list.at(io).center.v;
-    // p.id = io;
-    // m_AllContourPoints.push_back(p);
+    p.pos = obj_list.at(io).center.pos;
+    p.v = obj_list.at(io).center.v;
+    p.id = io;
+    m_AllContourPoints.push_back(p);
   }
 
   CalculateLateralAndLongitudinalCostsStatic(m_TrajectoryCosts, rollOuts, totalPaths, currState, m_AllContourPoints, params, carInfo, vehicleState);

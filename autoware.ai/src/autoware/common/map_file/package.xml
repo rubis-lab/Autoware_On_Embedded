@@ -6,7 +6,6 @@
   <maintainer email="kondoh@axe-inc.co.jp">Masao KONDOH</maintainer>
   <license>Apache 2</license>
 
-  <buildtool_depend>autoware_build_flags</buildtool_depend>
   <buildtool_depend>catkin</buildtool_depend>
 
   <depend>autoware_msgs</depend>
@@ -21,6 +20,4 @@
   <depend>tf</depend>
   <depend>vector_map</depend>
   <depend>visualization_msgs</depend>
-  <depend>libboost-filesystem-dev</depend>
-  
 </package>

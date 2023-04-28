@@ -6,7 +6,6 @@
   <maintainer email="h_ohta@ertl.jp">h_ohta</maintainer>
   <license>Apache 2</license>
 
-  <buildtool_depend>autoware_build_flags</buildtool_depend>
   <buildtool_depend>catkin</buildtool_depend>
   <test_depend>rostest</test_depend>
 
@@ -18,4 +17,5 @@
   <depend>rosunit</depend>
   <depend>std_msgs</depend>
   <depend>eigen</depend>
+  <depend>tf2_eigen</depend>
 </package>

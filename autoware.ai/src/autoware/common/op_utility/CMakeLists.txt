@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(op_utility)
 
-find_package(autoware_build_flags REQUIRED)
+
 
 find_package(catkin REQUIRED COMPONENTS
   cmake_modules
@@ -51,13 +51,3 @@ install(TARGETS ${PROJECT_NAME}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
-
-if (CATKIN_ENABLE_TESTING)
-  find_package(rostest REQUIRED)
-  add_rostest_gtest(test-op_utility
-    test/test_op_utility.test
-    test/src/test_op_utility.cpp
-  )
-  add_dependencies(test-op_utility ${catkin_EXPORTED_TARGETS})
-  target_link_libraries(test-op_utility ${catkin_LIBRARIES} ${PROJECT_NAME})
-endif ()

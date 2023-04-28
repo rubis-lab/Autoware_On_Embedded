@@ -7,7 +7,7 @@
     <arg name="mirror_horizontal" default="false" />
 
     <!-- rosrun image_processor image_rotator -->
-    <node pkg="image_processor" type="image_rotator" name="image_rotator">
+    <node pkg="image_processor" type="image_rotator" name="image_rotator" output="screen">
         <param name="image_src" value="$(arg image_src)" />
         <param name="rotation_angle" value="$(arg rotation_angle)" />
         <param name="mirror_vertical" value="$(arg mirror_vertical)" />

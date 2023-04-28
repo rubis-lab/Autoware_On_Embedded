@@ -25,7 +25,7 @@
   <arg name="vectormap_frame" default="/map" />
 
   <!-- rosrun lidar_tracker euclidean_cluster _points_node:="" -->
-  <node pkg="imm_ukf_pda_track" type="imm_ukf_pda" name="imm_ukf_pda_$(arg label)">
+  <node pkg="imm_ukf_pda_track" type="imm_ukf_pda" name="imm_ukf_pda_$(arg label)" output="screen">
     <param name="tracker_input_topic" value="$(arg tracker_input_topic)" />
     <param name="tracker_output_topic" value="$(arg tracker_output_topic)" />
     <param name="tracker_input_rubis_topic" value="$(arg tracker_input_rubis_topic)" />
@@ -44,18 +44,15 @@
     <param name="use_sukf" value="$(arg use_sukf)" />
     <param name="use_vectormap" value="$(arg use_map_info)" />
     <param name="merge_distance_threshold" value="$(arg merge_distance_threshold)" />
-
-    <!-- <remap from="detection/fusion_tools/objects_$(arg label)" to="$(arg tracker_input_topic)_$(arg label)" />
-    <remap from="detection/objects_$(arg label)" to="$(arg tracker_output_topic)_$(arg label)" /> -->
   </node>
 
   <node pkg="detected_objects_visualizer" type="visualize_detected_objects" name="ukf_track_visualization_$(arg label)"
-        ns="$(arg namespace)">
+        output="screen" ns="$(arg namespace)">
     <param name="objects_src_topic" value="/objects_$(arg label)"/>
     <param name="label" value="$(arg label)" />
   </node>
   
   <!-- <node pkg="topic_tools" type="relay" name="ukf_track_relay_$(arg label)"
-        args="$(arg namespace)/objects_$(arg label) /detection/objects_$(arg label)"/> -->
+        output="screen" args="$(arg namespace)/objects_$(arg label) /detection/objects_$(arg label)"/> -->
 
 </launch>

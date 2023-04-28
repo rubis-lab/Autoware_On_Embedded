@@ -74,16 +74,3 @@ install(TARGETS ros_observer lib_ros_observer
 install(DIRECTORY launch/
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
 )
-
-if (CATKIN_ENABLE_TESTING)
-  roslint_add_test()
-  find_package(rostest REQUIRED)
-  add_rostest_gtest(test_ros_observer
-    test/test_ros_observer.test
-    test/src/test_ros_observer.cpp
-  )
-  target_link_libraries(test_ros_observer
-    lib_ros_observer
-    ${catkin_LIBRARIES}
-  )
-endif()

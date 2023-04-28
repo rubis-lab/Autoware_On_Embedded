@@ -6,7 +6,7 @@
   <maintainer email="yuki@ertl.jp">Yuki KITSUKAWA</maintainer>
   <license>Apache 2</license>
 
-  <buildtool_depend>autoware_build_flags</buildtool_depend>
+
   <buildtool_depend>catkin</buildtool_depend>
 
   <build_depend>message_generation</build_depend>

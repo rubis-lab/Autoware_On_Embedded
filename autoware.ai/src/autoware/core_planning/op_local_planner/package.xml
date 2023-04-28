@@ -7,7 +7,7 @@
   <author email="hatem.darweesh@g.sp.m.is.nagoya-u.ac.jp">Hatem Darweesh</author>
   <license>Apache 2</license>
 
-  <buildtool_depend>autoware_build_flags</buildtool_depend>
+
   <buildtool_depend>catkin</buildtool_depend>
   
   <depend>autoware_can_msgs</depend>
@@ -16,7 +16,6 @@
   <depend>map_file</depend>
   <depend>op_planner</depend>
   <depend>op_ros_helpers</depend>
-  <depend>op_simu</depend>
   <depend>op_utility</depend>
   <depend>pcl_conversions</depend>
   <depend>pcl_ros</depend>
@@ -26,5 +25,6 @@
   <depend>libwaypoint_follower</depend>
   <depend>yaml-cpp</depend>
   <depend>rubis_lib</depend>
+  <depend>nav_msgs</depend>
   <depend>rubis_msgs</depend>
 </package>
