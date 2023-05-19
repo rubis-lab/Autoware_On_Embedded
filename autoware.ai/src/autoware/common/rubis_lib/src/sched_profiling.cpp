@@ -30,11 +30,11 @@ namespace rubis{
   }
 
   void start_task_profiling(){
-    clock_gettime(CLOCK_MONOTONIC, &task_start_time_);
+    clock_gettime(CLOCK_REALTIME, &task_start_time_);
   }
 
   void stop_task_profiling(unsigned long instance, int state){
-    clock_gettime(CLOCK_MONOTONIC, &task_end_time_);
+    clock_gettime(CLOCK_REALTIME, &task_end_time_);
     fprintf(task_response_time_fp_, "%d,%d,%lld.%.9ld,%lld.%.9ld,%lu,%lu\n",iter_++, getpid(), (long long)task_start_time_.tv_sec, task_start_time_.tv_nsec, (long long)task_end_time_.tv_sec, task_end_time_.tv_nsec, instance, obj_instance_);
     fflush(task_response_time_fp_);
   }
