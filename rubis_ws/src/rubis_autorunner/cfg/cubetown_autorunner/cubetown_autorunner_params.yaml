@@ -13,8 +13,8 @@
 lidar_republisher:
   rate: 10
   task_scheduling_configs:
-    policy: "NONE"
-    priority: 99
+    policy: "SCHED_FIFO"
+    priority: 94
     exec_time: 1_000_000
     deadline: 2_000_000
     period: 2_000_000
@@ -23,8 +23,8 @@ lidar_republisher:
 voxel_grid_filter:
   rate: 10
   task_scheduling_configs:
-    policy: "NONE"
-    priority: 99
+    policy: "SCHED_FIFO"
+    priority: 95
     exec_time: 0 # ns
     deadline: 0 # ns
     period: 0 # ns
@@ -33,8 +33,8 @@ voxel_grid_filter:
 ndt_matching:
   rate: 10
   task_scheduling_configs:
-    policy: "NONE"
-    priority: 20
+    policy: "SCHED_FIFO"
+    priority: 96
     exec_time: 0 # ns
     deadline: 0 # ns
     period: 0 # ns
@@ -52,8 +52,8 @@ ndt_matching:
 pure_pursuit:
   rate: 30 #30
   task_scheduling_configs:
-    policy: "NONE"
-    priority: 20
+    policy: "SCHED_FIFO"
+    priority: 97
     exec_time: 0 # ns
     deadline: 0 # ns
     period: 0 # ns  
@@ -65,8 +65,8 @@ pure_pursuit:
 twist_filter:
   rate: 10
   task_scheduling_configs:
-    policy: "NONE"
-    priority: 20
+    policy: "SCHED_FIFO"
+    priority: 98
     exec_time: 0 # ns
     deadline: 0 # ns
     period: 0 # ns
@@ -76,8 +76,8 @@ twist_filter:
 ray_ground_filter_center:
   rate: 10 
   task_scheduling_configs:
-    policy: "NONE"
-    priority: 20
+    policy: "SCHED_FIFO"
+    priority: 95
     exec_time: 0 # ns
     deadline: 0 # ns
     period: 0 # ns
@@ -86,8 +86,8 @@ ray_ground_filter_center:
 lidar_euclidean_cluster_detect:
   rate: 10
   task_scheduling_configs:
-    policy: "NONE"
-    priority: 20
+    policy: "SCHED_FIFO"
+    priority: 96
     exec_time: 0 # ns
     deadline: 0 # ns
     period: 0 # ns
@@ -100,8 +100,8 @@ lidar_euclidean_cluster_detect:
 op_global_planner:
   rate: 25 #25
   task_scheduling_configs:
-    policy: "NONE"
-    priority: 20
+    policy: "SCHED_FIFO"
+    priority: 94
     exec_time: 0 # ns
     deadline: 0 # ns
     period: 0 # ns
@@ -119,8 +119,8 @@ op_common_params:
 op_trajectory_generator:
   rate: 10 #100
   task_scheduling_configs:
-    policy: "NONE"
-    priority: 20
+    policy: "SCHED_FIFO"
+    priority: 94
     exec_time: 0 # ns
     deadline: 0 # ns
     period: 0 # ns
@@ -129,8 +129,8 @@ op_trajectory_generator:
 op_trajectory_evaluator:
   rate: 100 #100
   task_scheduling_configs:
-    policy: "NONE"
-    priority: 20
+    policy: "SCHED_FIFO"
+    priority: 95
     exec_time: 0 # ns
     deadline: 0 # ns
     period: 0 # ns
@@ -147,8 +147,8 @@ op_trajectory_evaluator:
 op_behavior_selector:
   rate: 100 #100
   task_scheduling_configs:
-    policy: "NONE"
-    priority: 20
+    policy: "SCHED_FIFO"
+    priority: 96
     exec_time: 0 # ns
     deadline: 0 # ns
     period: 0 # ns
@@ -162,8 +162,8 @@ op_behavior_selector:
 op_motion_predictor:
   rate: 25 #25
   task_scheduling_configs:
-    policy: "NONE"
-    priority: 20
+    policy: "SCHED_FIFO"
+    priority: 97
     exec_time: 0 # ns
     deadline: 0 # ns
     period: 0 # ns  
@@ -173,8 +173,8 @@ op_motion_predictor:
 twist_gate:
   rate: 10
   task_scheduling_configs:
-    policy: "NONE"
-    priority: 20
+    policy: "SCHED_FIFO"
+    priority: 99
     exec_time: 0 # ns
     deadline: 0 # ns
     period: 0 # ns
