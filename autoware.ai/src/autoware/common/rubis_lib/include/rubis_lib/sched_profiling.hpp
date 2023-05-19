@@ -21,6 +21,7 @@ namespace rubis {
 
   void init_task_profiling(std::string task_reponse_time_filename);
   void start_task_profiling();
+  void start_task_profiling_for_lidar_republisher(long long tp_time_sec, long long tp_time_nsec);
   void stop_task_profiling(unsigned long instance, int state);
   unsigned long get_current_time_ns();
 }
