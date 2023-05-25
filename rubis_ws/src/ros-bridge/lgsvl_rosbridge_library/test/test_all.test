@@ -1,0 +1,5 @@
+<launch>
+  <include file="$(find lgsvl_rosbridge_library)/test/capabilities/test_capabilities.test" />
+  <include file="$(find lgsvl_rosbridge_library)/test/internal/test_internal.test" />
+</launch>
+

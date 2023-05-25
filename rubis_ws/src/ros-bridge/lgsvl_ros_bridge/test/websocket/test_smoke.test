@@ -1,0 +1,8 @@
+<launch>
+  <env name="PROTOCOL" value="ws" />
+  <node name="rosbridge_websocket" pkg="lgsvl_ros_bridge" type="rosbridge_websocket.py">
+    <param name="port" value="0" />
+  </node>
+  <test test-name="test_smoke" pkg="lgsvl_ros_bridge" type="test_smoke.py" />
+  <test test-name="test_cbor_raw" pkg="lgsvl_ros_bridge" type="test_cbor_raw.py" />
+</launch>
