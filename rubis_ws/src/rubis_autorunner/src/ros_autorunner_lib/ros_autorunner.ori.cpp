@@ -139,12 +139,6 @@ std::string ROSAutorunner::create_run_string(std::string pkg_name, std::string n
 }
 
 std::string ROSAutorunner::create_launch_string(std::string pkg_name, std::string launch_name){
-    if (launch_name == "_cubetown_autorunner_1_sensing.launch"){
-        return "taskset -c 7-7 roslaunch " + pkg_name + " " + launch_name;
-    }
-    else {
-        return "taskset -c 4-6 roslaunch " + pkg_name + " " + launch_name;
-    }
     return "roslaunch " + pkg_name + " " + launch_name;
 }
 
