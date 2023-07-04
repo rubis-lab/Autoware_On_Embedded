@@ -245,7 +245,7 @@ TrajectoryCost TrajectoryDynamicCosts::DoOneStepStatic(const vector<vector<WayPo
   else path_keeping_cnt = 20;
 
   // Change lane if current path is blocked or current path is not center and the ego keeps lane 1 sceonds(When rate is 20)
-  if((is_current_path_blocked) || (smallestIndex != params.rollOutNumber/2 && path_keeping_cnt == 0)){
+  if((is_current_path_blocked) || (smallestIndex != params.rollOutNumber/2 && path_keeping_cnt == 0)){ // TODO: remove last condition
     if(smallestIndex == -1)
     {
       bestTrajectory.bBlocked = true;
