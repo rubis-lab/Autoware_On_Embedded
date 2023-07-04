@@ -216,7 +216,7 @@ TrajectoryCost TrajectoryDynamicCosts::DoOneStepStatic(const vector<vector<WayPo
 
   for(unsigned int ic = 0; ic < rollOuts.size(); ic++)
   {
-    if(!m_TrajectoryCosts.at(ic).bBlocked && m_TrajectoryCosts.at(ic).cost < smallestCost)
+    if(!m_TrajectoryCosts.at(ic).bBlocked && m_TrajectoryCosts.at(ic).cost < smallestCost && ic != m_endTrajIndx)
     {      
       if(params.enableDebug) std::cout << "smallestIndex is Updated" << std::endl;      
       smallestCost = m_TrajectoryCosts.at(ic).cost;
