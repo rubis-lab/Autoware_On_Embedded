@@ -216,7 +216,7 @@ TrajectoryCost TrajectoryDynamicCosts::DoOneStepStatic(const vector<vector<WayPo
 
   for(unsigned int ic = 0; ic < rollOuts.size(); ic++)
   {
-    if(!m_TrajectoryCosts.at(ic).bBlocked && m_TrajectoryCosts.at(ic).cost < smallestCost && ic != 2) // TODO: Remove right condition
+    if(!m_TrajectoryCosts.at(ic).bBlocked && m_TrajectoryCosts.at(ic).cost < smallestCost)
     {      
       if(params.enableDebug) std::cout << "smallestIndex is Updated" << std::endl;      
       smallestCost = m_TrajectoryCosts.at(ic).cost;
@@ -245,7 +245,7 @@ TrajectoryCost TrajectoryDynamicCosts::DoOneStepStatic(const vector<vector<WayPo
   else path_keeping_cnt = 20;
 
   // Change lane if current path is blocked or current path is not center and the ego keeps lane 1 sceonds(When rate is 20)
-  if((is_current_path_blocked) || (smallestIndex != params.rollOutNumber/2 && path_keeping_cnt == 0)){ // TODO: remove last condition
+  if((is_current_path_blocked) || (smallestIndex != params.rollOutNumber/2 && path_keeping_cnt == 0)){
     if(smallestIndex == -1)
     {
       bestTrajectory.bBlocked = true;
