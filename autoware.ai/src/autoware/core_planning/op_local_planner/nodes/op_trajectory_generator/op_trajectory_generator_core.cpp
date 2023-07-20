@@ -318,9 +318,8 @@ void TrajectoryGen::MainLoop()
       visualization_msgs::MarkerArray all_rollOuts;
       PlannerHNS::ROSHelpers::TrajectoriesToMarkers(m_RollOuts, all_rollOuts);
       pub_LocalTrajectoriesRviz.publish(all_rollOuts);
-
-      rubis::stop_task_profiling(0, 0);
     }
+    rubis::stop_task_profiling(0, 0);
 
     r.sleep();
   }
