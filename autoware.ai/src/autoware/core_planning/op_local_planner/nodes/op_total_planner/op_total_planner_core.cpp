@@ -114,7 +114,7 @@ TotalPlanner::TotalPlanner()
   while(1){
     if(UpdateTf() == true)
       break;
-  }
+  }  
 }
 
 TotalPlanner::~TotalPlanner()
@@ -449,7 +449,7 @@ void TotalPlanner::MainLoop()
 
   // Add Crossing Info from yaml file
   XmlRpc::XmlRpcValue intersection_xml;  
-  nh.getParam("/op_trajectory_evaluator/intersection_list", intersection_xml);
+  nh.getParam("/op_total_planner/intersection_list", intersection_xml);
   PlannerHNS::MappingHelpers::ConstructIntersection_RUBIS(intersection_list_, intersection_xml);
 
   ros::spin();

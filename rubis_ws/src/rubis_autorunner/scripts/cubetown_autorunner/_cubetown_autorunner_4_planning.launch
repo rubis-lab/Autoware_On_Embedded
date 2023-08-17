@@ -79,13 +79,6 @@
     <arg name="intersectionFile"                default="crossing_test/crossing_intersection.yaml" />
   </include>
 
-  <!-- op_behavior_selector -->
-  <include file="$(find op_local_planner)/launch/op_behavior_selector_parameter.launch">
-    <arg name="evidence_tust_number"            default="25"/>
-    <arg name="trafficLightFile"                default="crossing_test/crossing_traffic_light.yaml" />
-    <arg name="stopLineFile"                    default="crossing_test/crossing_stop_line.yaml" />
-  </include>
-
   <!-- op_motion_predictor -->
   <include file="$(find op_local_planner)/launch/op_motion_predictor.launch">
     <!-- <arg name="input_object_list"               default="[/detection/fusion_tools/objects_center]" /> -->
