@@ -43,8 +43,6 @@
 #include "op_planner/TrajectoryDynamicCosts.h"
 #include "rubis_msgs/DetectedObjectArray.h"
 
-
-
 namespace TrajectoryEvaluatorNS
 {
 

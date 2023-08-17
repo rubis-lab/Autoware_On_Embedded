@@ -382,7 +382,7 @@ void DecisionMaker::SetNewGlobalPath(const std::vector<std::vector<WayPoint> >& 
   if(m_pCurrentBehaviorState)
   {
     m_pCurrentBehaviorState->GetCalcParams()->bNewGlobalPath = true;
-    m_TotalOriginalPath = globalPath;
+    m_TotalOriginalPath = globalPath;    
   }
  }
 
@@ -738,19 +738,19 @@ bool DecisionMaker::SelectSafeTrajectory()
     const std::vector<TrafficLight>& trafficLight,
     const TrajectoryCost& tc,
     const bool& bEmergencyStop)
-{
+{  
   static double prev_max_velocity = 0.0;
 
-   PlannerHNS::BehaviorState beh;
-   state = currPose;
-   m_TotalPath.clear();
+  PlannerHNS::BehaviorState beh;
+  state = currPose;
+  m_TotalPath.clear();
+   
   for(unsigned int i = 0; i < m_TotalOriginalPath.size(); i++)
   {
     t_centerTrajectorySmoothed.clear();
     PlannerHNS::PlanningHelpers::ExtractPartFromPointToDistanceDirectionFast(m_TotalOriginalPath.at(i), state, m_params.horizonDistance ,  m_params.pathDensity , t_centerTrajectorySmoothed);
     m_TotalPath.push_back(t_centerTrajectorySmoothed);
-  }
-
+  }  
   if(m_TotalPath.size()==0) return beh;
 
   UpdateCurrentLane(m_MaxLaneSearchDistance);

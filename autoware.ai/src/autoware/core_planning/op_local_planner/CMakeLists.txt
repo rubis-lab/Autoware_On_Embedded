@@ -81,12 +81,21 @@ add_executable(
 
 target_link_libraries(op_motion_predictor ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${YAML_CPP_INCLUDE_DIRS})
 
+add_executable(
+  op_total_planner
+  nodes/op_total_planner/op_total_planner.cpp
+  nodes/op_total_planner/op_total_planner_core.cpp
+)
+
+target_link_libraries(op_total_planner ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${YAML_CPP_INCLUDE_DIRS})
+
 add_dependencies(
   op_common_params
   op_trajectory_generator
   op_trajectory_evaluator
   op_behavior_selector
   op_motion_predictor
+  op_total_planner
   ${catkin_EXPORTED_TARGETS}
 )
 
@@ -97,6 +106,7 @@ install(
     op_trajectory_evaluator
     op_behavior_selector
     op_motion_predictor
+    op_total_planner
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

@@ -41,8 +41,7 @@ TrajectoryEval::TrajectoryEval()
   m_OriginPos.position.y  = transform.getOrigin().y();
   m_OriginPos.position.z  = transform.getOrigin().z();
 
-  pub_CollisionPointsRviz = nh.advertise<visualization_msgs::MarkerArray>("dynamic_collision_points_rviz", 1);
-  pub_LocalWeightedTrajectoriesRviz = nh.advertise<visualization_msgs::MarkerArray>("local_trajectories_eval_rviz", 1);
+  pub_CollisionPointsRviz = nh.advertise<visualization_msgs::MarkerArray>("dynamic_collision_points_rviz", 1);  
   // pub_LocalWeightedTrajectories = nh.advertise<rubis_msgs::LaneArrayWithPoseTwist>("local_weighted_trajectories", 1);
   pub_LocalWeightedTrajectoriesWithPoseTwist = nh.advertise<rubis_msgs::LaneArrayWithPoseTwist>("local_weighted_trajectories_with_pose_twist", 1);
   pub_TrajectoryCost = nh.advertise<autoware_msgs::Lane>("local_trajectory_cost", 1);
@@ -181,6 +180,7 @@ void TrajectoryEval::callbackGetRobotOdom(const nav_msgs::OdometryConstPtr& msg)
 
 void TrajectoryEval::callbackGetGlobalPlannerPath(const autoware_msgs::LaneArrayConstPtr& msg)
 {
+  
   if(msg->lanes.size() > 0)
   {
 

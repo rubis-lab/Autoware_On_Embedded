@@ -263,9 +263,10 @@ BehaviorStateMachine* WaitState::GetNextState()
 }
 
 BehaviorStateMachine* InitState::GetNextState()
-{
-  if(UtilityH::GetTimeDiffNow(m_StateTimer) < decisionMakingTime)
+{  
+  if(UtilityH::GetTimeDiffNow(m_StateTimer) < decisionMakingTime){
     return this;
+  }
 
   PreCalculatedConditions* pCParams = GetCalcParams();
 
@@ -275,8 +276,9 @@ BehaviorStateMachine* InitState::GetNextState()
     return FindBehaviorState(FORWARD_STATE);
   }
 
-  else
+  else{
     return FindBehaviorState(this->m_Behavior); // return and reset
+  }    
 }
 
 BehaviorStateMachine* FollowState::GetNextState()
@@ -431,13 +433,14 @@ BehaviorStateMachine* SwerveStateII::GetNextState()
 }
 
 BehaviorStateMachine* InitStateII::GetNextState()
-{
+{  
   PreCalculatedConditions* pCParams = GetCalcParams();
 
   if(pCParams->currentGoalID > 0)
     return FindBehaviorState(FORWARD_STATE);
-  else
+  else{
     return FindBehaviorState(this->m_Behavior);
+  }
 }
 
 BehaviorStateMachine* GoalStateII::GetNextState()

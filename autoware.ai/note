@@ -1,0 +1,11 @@
+
+Generation 67
+
+Evaluation 303
+
+// pub_LocalWeightedTrajectoriesRviz = nh.advertise<visualization_msgs::MarkerArray>("local_trajectories_eval_rviz", 1);
+// pub_LocalWeightedTrajectoriesWithPoseTwist = nh.advertise<rubis_msgs::LaneArrayWithPoseTwist>("local_weighted_trajectories_with_pose_twist", 1);
+// pub_TrajectoryCost = nh.advertise<autoware_msgs::Lane>("local_trajectory_cost", 1);
+// pub_DistanceToPedestrian = nh.advertise<std_msgs::Float64>("distance_to_pedestrian", 1);
+// pub_IntersectionCondition = nh.advertise<autoware_msgs::IntersectionCondition>("intersection_condition", 1);
+// pub_SprintSwitch = nh.advertise<std_msgs::Bool>("sprint_switch", 1);

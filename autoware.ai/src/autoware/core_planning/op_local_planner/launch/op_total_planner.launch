@@ -1,0 +1,58 @@
+<launch>
+  <!-- Trajectory Generation Specific Parameters -->
+  <arg name="samplingTipMargin"     default="4"  /> 
+  <arg name="samplingOutMargin"     default="16" /> 
+  <arg name="samplingSpeedFactor"   default="0.25" />    
+  <arg name="enableHeadingSmoothing"   default="false" />
+
+  <!-- Trajectory Evaluation Specific Parameters -->
+  <arg name="enableDebug"      default="0" />
+  <arg name="enablePrediction"       default="false" />                
+  <arg name="horizontalSafetyDistance"   default="1.2" />
+  <arg name="verticalSafetyDistance"     default="0.8" />
+  <arg name="LateralSkipDistance"   default="5.0" />
+  <arg name="lateralBlockingThreshold"           default="1.5" />
+  <arg name="frontLongitudinalBlockingThreshold"      default="30" />
+  <arg name="rearLongitudinalBlockingThreshold"      default="-5" />
+  <arg name="SprintDecisionTime" default="9999.0" /> 
+  <arg name="intersectionFile" default="crossing_test/crossing_intersection.yaml" />
+
+  <!-- Behavior Selection Specific Paraeters -->
+  <arg name="evidence_tust_number"   default="25"/>
+  <arg name="trafficLightFile" default="fake_traffic_light.yaml" />
+  <arg name="stopLineFile" default="fake_stop_line.yaml" />
+  <!-- <arg name="intersectionFile" default="crossing_test/crossing_intersection.yaml" /> -->
+      
+  <node pkg="op_local_planner" type="op_total_planner" name="op_total_planner" output="screen">
+    <!-- Trajecotry Generation -->
+    <param name="samplingTipMargin"     value="$(arg samplingTipMargin)"  /> 
+    <param name="samplingOutMargin"     value="$(arg samplingOutMargin)" /> 
+    <param name="samplingSpeedFactor"     value="$(arg samplingSpeedFactor)" />    
+    <param name="enableHeadingSmoothing"   value="$(arg enableHeadingSmoothing)" />
+    
+    <rosparam command="load" file="$(find rubis_pkg)/cfg/$(arg intersectionFile)"/>
+
+    <!-- Trajectory Evaluation -->
+    <param name="enableDebug"       value="$(arg enableDebug)" />
+  
+    <param name="enablePrediction"       value="$(arg enablePrediction)" />            
+    <param name="horizontalSafetyDistance"   value="$(arg horizontalSafetyDistance)" />
+    <param name="verticalSafetyDistance"   value="$(arg verticalSafetyDistance)" />    
+    <param name="LateralSkipDistance"       value="$(arg LateralSkipDistance)" />
+
+    <param name="lateralBlockingThreshold"   value="$(arg lateralBlockingThreshold)" />
+    <param name="frontLongitudinalBlockingThreshold"   value="$(arg frontLongitudinalBlockingThreshold)" />    
+    <param name="rearLongitudinalBlockingThreshold"       value="$(arg rearLongitudinalBlockingThreshold)" />                
+
+        <!-- For detecting person and vehicle -->
+    <param name="SprintDecisionTime" value="$(arg SprintDecisionTime)" />
+
+    <!-- Behavior Selection -->
+    <rosparam command="load" file="$(find rubis_pkg)/cfg/$(arg trafficLightFile)"/>
+    <rosparam command="load" file="$(find rubis_pkg)/cfg/$(arg stopLineFile)"/>
+    <!-- <rosparam command="load" file="$(find rubis_pkg)/cfg/$(arg intersectionFile)"/> -->
+    
+    <param name="evidence_tust_number"   value="$(arg evidence_tust_number)"/>     
+  </node>        
+      
+</launch>
