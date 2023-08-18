@@ -168,7 +168,7 @@ void PurePursuitNode::initForROS()
 
 
   // setup subscriber
-  pose_twist_sub_ = nh_.subscribe("/rubis_current_pose_twist", 1, &PurePursuitNode::CallbackTwistPose, this);
+  // pose_twist_sub_ = nh_.subscribe("/rubis_current_pose_twist", 1, &PurePursuitNode::CallbackTwistPose, this);
   final_waypoints_with_pose_twist_sub = nh_.subscribe("/final_waypoints_with_pose_twist", 1, &PurePursuitNode::CallbackFinalWaypointsWithPoseTwist, this); // Def: 10
 
   sub3_ = nh_.subscribe("config/waypoint_follower", 10,
@@ -441,8 +441,44 @@ double PurePursuitNode::findWayPointVelocity(autoware_msgs::Waypoint msg){
 
 void PurePursuitNode::CallbackTwistPose(const rubis_msgs::PoseTwistStampedConstPtr& msg)
 {
+  
+
+}
+
+void PurePursuitNode::_CallbackFinalWaypointsWithPoseTwist()
+{
+  if(dynamic_param_flag_){
+    setLookaheadParamsByVel();
+  }
+  
+  if (add_virtual_end_waypoints_)
+  {
+    const LaneDirection solved_dir = getLaneDirection(lane_);
+    direction_ = (solved_dir != LaneDirection::Error) ? solved_dir : direction_;
+    autoware_msgs::Lane expanded_lane(lane_);
+    expand_size_ = -expanded_lane.waypoints.size();
+    connectVirtualLastWaypoints(&expanded_lane, direction_);
+    expand_size_ += expanded_lane.waypoints.size();
+
+    pp_.setCurrentWaypoints(expanded_lane.waypoints);
+  }
+  else
+  {
+    pp_.setCurrentWaypoints(lane_.waypoints);
+  }
+  is_waypoint_set_ = true;
+
+#ifdef USE_WAYPOINT_ORIENTATION
+  waypoint_pose_ = lane_.waypoints[0].pose;
+#endif
+}
+
+void PurePursuitNode::CallbackFinalWaypointsWithPoseTwist(const rubis_msgs::LaneWithPoseTwistConstPtr& msg)
+{   
   rubis::start_task_profiling();
   rubis::instance_ = msg->instance;
+  rubis::obj_instance_ = msg->obj_instance;
+  lane_ = msg->lane;
 
   // Update pose
   geometry_msgs::PoseStampedConstPtr pose_ptr(new geometry_msgs::PoseStamped(msg->pose));
@@ -512,42 +548,7 @@ void PurePursuitNode::CallbackTwistPose(const rubis_msgs::PoseTwistStampedConstP
   is_velocity_set_ = false;
   is_waypoint_set_ = false;
 
-  rubis::stop_task_profiling(rubis::instance_, 0);
-
-}
-
-void PurePursuitNode::_CallbackFinalWaypointsWithPoseTwist()
-{
-  if(dynamic_param_flag_){
-    setLookaheadParamsByVel();
-  }
-  
-  if (add_virtual_end_waypoints_)
-  {
-    const LaneDirection solved_dir = getLaneDirection(lane_);
-    direction_ = (solved_dir != LaneDirection::Error) ? solved_dir : direction_;
-    autoware_msgs::Lane expanded_lane(lane_);
-    expand_size_ = -expanded_lane.waypoints.size();
-    connectVirtualLastWaypoints(&expanded_lane, direction_);
-    expand_size_ += expanded_lane.waypoints.size();
-
-    pp_.setCurrentWaypoints(expanded_lane.waypoints);
-  }
-  else
-  {
-    pp_.setCurrentWaypoints(lane_.waypoints);
-  }
-  is_waypoint_set_ = true;
-
-#ifdef USE_WAYPOINT_ORIENTATION
-  waypoint_pose_ = lane_.waypoints[0].pose;
-#endif
-}
-
-void PurePursuitNode::CallbackFinalWaypointsWithPoseTwist(const rubis_msgs::LaneWithPoseTwistConstPtr& msg)
-{   
-  rubis::obj_instance_ = msg->obj_instance;
-  lane_ = msg->lane;
+  rubis::stop_task_profiling(rubis::instance_, 0);  
 }
 
 void PurePursuitNode::connectVirtualLastWaypoints(

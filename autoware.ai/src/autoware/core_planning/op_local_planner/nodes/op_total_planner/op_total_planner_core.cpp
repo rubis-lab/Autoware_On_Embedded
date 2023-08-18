@@ -448,9 +448,14 @@ void TotalPlanner::MainLoop()
   PlannerHNS::WayPoint prevState, state_change;
 
   // Add Crossing Info from yaml file
-  XmlRpc::XmlRpcValue intersection_xml;  
-  nh.getParam("/op_total_planner/intersection_list", intersection_xml);
-  PlannerHNS::MappingHelpers::ConstructIntersection_RUBIS(intersection_list_, intersection_xml);
+  XmlRpc::XmlRpcValue intersection_xml;
+  try{
+    nh.getParam("/op_total_planner/intersection_list", intersection_xml);
+    PlannerHNS::MappingHelpers::ConstructIntersection_RUBIS(intersection_list_, intersection_xml);
+  }
+  catch(...){
+    std::cout<<"No interscetion list."<<std::endl;
+  }
 
   ros::spin();
 
@@ -830,11 +835,11 @@ void TotalPlanner::behaviorSelection(rubis_msgs::LaneArrayWithPoseTwist& weighte
       try{
         // Add Traffic Signal Info from yaml file
         XmlRpc::XmlRpcValue traffic_light_list;
-        nh.getParam("/op_behavior_selector/traffic_light_list", traffic_light_list);
+        nh.getParam("/op_total_planner/traffic_light_list", traffic_light_list);
 
         // Add Stop Line Info from yaml file
         XmlRpc::XmlRpcValue stop_line_list;
-        nh.getParam("/op_behavior_selector/stop_line_list", stop_line_list);
+        nh.getParam("/op_total_planner/stop_line_list", stop_line_list);
 
         // Add Crossing Info from yaml file
         // XmlRpc::XmlRpcValue intersection_list;

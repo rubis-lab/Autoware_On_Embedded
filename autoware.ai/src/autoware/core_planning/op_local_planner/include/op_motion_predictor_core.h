@@ -51,6 +51,7 @@
 #include "op_utility/DataRW.h"
 
 #include "rubis_msgs/DetectedObjectArray.h"
+#include "rubis_msgs/PoseTwistStamped.h"
 
 namespace MotionPredictorNS
 {
@@ -119,9 +120,10 @@ protected:
 
   // define subscribers.
   std::vector<ros::Subscriber> objects_subs_    ;
-  ros::Subscriber sub_current_pose     ;
-  ros::Subscriber sub_current_velocity  ;
-  ros::Subscriber sub_robot_odom      ;
+  // ros::Subscriber sub_current_pose     ;
+  // ros::Subscriber sub_current_velocity  ;
+  // ros::Subscriber sub_robot_odom      ;
+  ros::Subscriber sub_pose_twist;
   ros::Subscriber sub_can_info      ;
   ros::Subscriber sub_StepSignal;
 
@@ -131,11 +133,12 @@ protected:
   void callbackGetTrackedObjects(const autoware_msgs::DetectedObjectArrayConstPtr& msg);
   void callbackGetRubisTrackedObjects(const rubis_msgs::DetectedObjectArrayConstPtr& msg);
   void _callbackGetRubisTrackedObjects(rubis_msgs::DetectedObjectArray& objects_msg);
-  void callbackGetCurrentPose(const geometry_msgs::PoseStampedConstPtr& msg);
-  void callbackGetVehicleStatus(const geometry_msgs::TwistStampedConstPtr& msg);
-  void callbackGetCANInfo(const autoware_can_msgs::CANInfoConstPtr &msg);
-  void callbackGetRobotOdom(const nav_msgs::OdometryConstPtr& msg);
+  // void callbackGetCurrentPose(const geometry_msgs::PoseStampedConstPtr& msg);
+  // void callbackGetVehicleStatus(const geometry_msgs::TwistStampedConstPtr& msg);
+  // void callbackGetCANInfo(const autoware_can_msgs::CANInfoConstPtr &msg);
+  // void callbackGetRobotOdom(const nav_msgs::OdometryConstPtr& msg);
   void callbackGetStepForwardSignals(const geometry_msgs::TwistStampedConstPtr& msg);
+  void callbackGetCurrentPoseTwist(const rubis_msgs::PoseTwistStampedPtr& msg);
 
   //Helper functions
   void VisualizePrediction();

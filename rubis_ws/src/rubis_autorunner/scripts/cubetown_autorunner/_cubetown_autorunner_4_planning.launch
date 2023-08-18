@@ -58,7 +58,7 @@
     <arg name="curveVelocityRatio"           default="1.0" />
   </include>
 
-  <!-- op_trajectory_generator -->
+  <!-- op_total_planner -->
   <include file="$(find op_local_planner)/launch/op_total_planner.launch">
     <arg name="enableDebug"      default="0" />
     <arg name="samplingTipMargin"               default="4"  />       <!-- Tip Margin -->

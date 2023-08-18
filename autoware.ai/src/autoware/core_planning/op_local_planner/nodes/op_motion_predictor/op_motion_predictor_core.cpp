@@ -76,16 +76,19 @@ MotionPrediction::MotionPrediction()
     object_msg_list_.push_back(msg);
   }
   
-  sub_current_pose   = nh.subscribe("/current_pose", 1,  &MotionPrediction::callbackGetCurrentPose,     this); // Def: 1
 
-  int bVelSource = 1;
-  _nh.getParam("/op_motion_predictor/velocitySource", bVelSource);
-  if(bVelSource == 0)
-    sub_robot_odom = nh.subscribe("/odom", 1, &MotionPrediction::callbackGetRobotOdom, this); // Def: 1
-  else if(bVelSource == 1)
-    sub_current_velocity = nh.subscribe("/current_velocity", 1, &MotionPrediction::callbackGetVehicleStatus, this); // Def: 1
-  else if(bVelSource == 2)
-    sub_can_info = nh.subscribe("/can_info", 1, &MotionPrediction::callbackGetCANInfo, this); // Def: 1
+  sub_pose_twist = nh.subscribe("/rubis_current_pose_twist", 1, &MotionPrediction::callbackGetCurrentPoseTwist, this); // Def: 10
+  // sub_current_pose   = nh.subscribe("/current_pose", 1,  &MotionPrediction::callbackGetCurrentPose,     this); // Def: 1
+
+  // int bVelSource = 1;
+  // _nh.getParam("/op_motion_predictor/velocitySource", bVelSource);
+  // if(bVelSource == 0)
+  //   sub_robot_odom = nh.subscribe("/odom", 1, &MotionPrediction::callbackGetRobotOdom, this); // Def: 1
+  // else if(bVelSource == 1)
+  //   sub_current_velocity = nh.subscribe("/current_velocity", 1, &MotionPrediction::callbackGetVehicleStatus, this); // Def: 1
+  // else if(bVelSource == 2)
+  //   sub_can_info = nh.subscribe("/can_info", 1, &MotionPrediction::callbackGetCANInfo, this); // Def: 1
+
   
   UtilityHNS::UtilityH::GetTickCount(m_VisualizationTimer);
   PlannerHNS::ROSHelpers::InitPredMarkers(100, m_PredictedTrajectoriesDummy);
@@ -231,37 +234,50 @@ void MotionPrediction::callbackGetStepForwardSignals(const geometry_msgs::TwistS
     m_bGoNextStep = false;
 }
 
-void MotionPrediction::callbackGetCurrentPose(const geometry_msgs::PoseStampedConstPtr& msg)
-{
-  m_CurrentPos = PlannerHNS::WayPoint(msg->pose.position.x, msg->pose.position.y, msg->pose.position.z, tf::getYaw(msg->pose.orientation));
+void MotionPrediction::callbackGetCurrentPoseTwist(const rubis_msgs::PoseTwistStampedPtr& msg){
+  rubis::instance_ = msg->instance;
+  m_CurrentPos = PlannerHNS::WayPoint(msg->pose.pose.position.x, msg->pose.pose.position.y, msg->pose.pose.position.z, tf::getYaw(msg->pose.pose.orientation));
   bNewCurrentPos = true;
-}
 
-void MotionPrediction::callbackGetVehicleStatus(const geometry_msgs::TwistStampedConstPtr& msg)
-{
-  m_VehicleStatus.speed = msg->twist.linear.x;
-  m_CurrentPos.v = m_VehicleStatus.speed;
-  if(fabs(msg->twist.linear.x) > 0.25)
-    m_VehicleStatus.steer = atan(m_CarInfo.wheel_base * msg->twist.angular.z/msg->twist.linear.x);
-  UtilityHNS::UtilityH::GetTickCount(m_VehicleStatus.tStamp);
-  bVehicleStatus = true;
-}
-
-void MotionPrediction::callbackGetCANInfo(const autoware_can_msgs::CANInfoConstPtr &msg)
-{
-  m_VehicleStatus.speed = msg->speed/3.6;
-  m_VehicleStatus.steer = msg->angle * m_CarInfo.max_steer_angle / m_CarInfo.max_steer_value;
-  UtilityHNS::UtilityH::GetTickCount(m_VehicleStatus.tStamp);
-  bVehicleStatus = true;
-}
-
-void MotionPrediction::callbackGetRobotOdom(const nav_msgs::OdometryConstPtr& msg)
-{
   m_VehicleStatus.speed = msg->twist.twist.linear.x;
-  m_VehicleStatus.steer += atan(m_CarInfo.wheel_base * msg->twist.twist.angular.z/msg->twist.twist.linear.x);
+  m_CurrentPos.v = m_VehicleStatus.speed;
+  if(fabs(msg->twist.twist.linear.x) > 0.25)
+    m_VehicleStatus.steer = atan(m_CarInfo.wheel_base * msg->twist.twist.angular.z/msg->twist.twist.linear.x);
   UtilityHNS::UtilityH::GetTickCount(m_VehicleStatus.tStamp);
   bVehicleStatus = true;
 }
+
+// void MotionPrediction::callbackGetCurrentPose(const geometry_msgs::PoseStampedConstPtr& msg)
+// {
+//   m_CurrentPos = PlannerHNS::WayPoint(msg->pose.position.x, msg->pose.position.y, msg->pose.position.z, tf::getYaw(msg->pose.orientation));
+//   bNewCurrentPos = true;
+// }
+
+// void MotionPrediction::callbackGetVehicleStatus(const geometry_msgs::TwistStampedConstPtr& msg)
+// {
+//   m_VehicleStatus.speed = msg->twist.linear.x;
+//   m_CurrentPos.v = m_VehicleStatus.speed;
+//   if(fabs(msg->twist.linear.x) > 0.25)
+//     m_VehicleStatus.steer = atan(m_CarInfo.wheel_base * msg->twist.angular.z/msg->twist.linear.x);
+//   UtilityHNS::UtilityH::GetTickCount(m_VehicleStatus.tStamp);
+//   bVehicleStatus = true;
+// }
+
+// void MotionPrediction::callbackGetCANInfo(const autoware_can_msgs::CANInfoConstPtr &msg)
+// {
+//   m_VehicleStatus.speed = msg->speed/3.6;
+//   m_VehicleStatus.steer = msg->angle * m_CarInfo.max_steer_angle / m_CarInfo.max_steer_value;
+//   UtilityHNS::UtilityH::GetTickCount(m_VehicleStatus.tStamp);
+//   bVehicleStatus = true;
+// }
+
+// void MotionPrediction::callbackGetRobotOdom(const nav_msgs::OdometryConstPtr& msg)
+// {
+//   m_VehicleStatus.speed = msg->twist.twist.linear.x;
+//   m_VehicleStatus.steer += atan(m_CarInfo.wheel_base * msg->twist.twist.angular.z/msg->twist.twist.linear.x);
+//   UtilityHNS::UtilityH::GetTickCount(m_VehicleStatus.tStamp);
+//   bVehicleStatus = true;
+// }
 
 autoware_msgs::DetectedObject MotionPrediction::TransformObjToVeldoyne(const autoware_msgs::DetectedObject& in_obj, tf::StampedTransform &transform){
   autoware_msgs::DetectedObject out_obj;
