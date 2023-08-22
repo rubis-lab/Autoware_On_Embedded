@@ -990,7 +990,7 @@ static void imu_callback(const sensor_msgs::Imu::Ptr& input)
 }
 
 static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
-{ 
+{   
   /* BLOCK1: Check initial matching */
   static int match_cnt = 10;
 
@@ -1009,6 +1009,8 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
       #endif
     }
   }
+
+  
 
   matching_start = std::chrono::system_clock::now();
 

@@ -38,7 +38,7 @@ Panels:
   - Class: autoware_rviz_debug/DecisionMakerPanel
     Name: DecisionMakerPanel
   - Class: integrated_viewer/ImageViewerPlugin
-    Image topic: /image_raw
+    Image topic: -----
     Lane topic: -----
     Name: ImageViewerPlugin
     Point size: 3
@@ -80,6 +80,8 @@ Visualization Manager:
               Value: true
             camera:
               Value: false
+            gnss:
+              Value: true
             map:
               Value: true
             mobility:
@@ -95,13 +97,7 @@ Visualization Manager:
           Show Names: true
           Tree:
             world:
-              map:
-                base_link:
-                  velodyne:
-                    camera:
-                      {}
-                mobility:
-                  {}
+              {}
           Update Interval: 0
           Value: true
         - Alpha: 1
@@ -341,7 +337,7 @@ Visualization Manager:
           Marker Topic: /vector_map_center_lines_rviz
           Name: Vector Map
           Namespaces:
-            road_network_vector_map: true
+            {}
           Queue Size: 100
           Value: true
       Enabled: true
@@ -500,9 +496,7 @@ Visualization Manager:
           Marker Topic: /detection/lidar_detector/objects_markers_center
           Name: Tracked Objects
           Namespaces:
-            /detection/lidar_detector/centroid_markers2: true
-            /detection/lidar_detector/hull_markers2: true
-            /detection/lidar_detector/label_markers2: true
+            {}
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
@@ -522,7 +516,7 @@ Visualization Manager:
           Marker Topic: /local_trajectories_eval_rviz
           Name: Saved Waypoints
           Namespaces:
-            local_lane_array_marker_colored: true
+            {}
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
@@ -556,7 +550,7 @@ Visualization Manager:
               Marker Topic: /safety_border
               Name: Safety Box
               Namespaces:
-                global_lane_array_marker: true
+                {}
               Queue Size: 100
               Value: true
             - Class: jsk_rviz_plugin/BoundingBoxArray
@@ -608,8 +602,7 @@ Visualization Manager:
               Marker Topic: /global_waypoints_rviz
               Name: Global Path
               Namespaces:
-                global_lane_array_marker: true
-                global_lane_waypoint_orientation_marker: true
+                {}
               Queue Size: 100
               Value: true
           Enabled: true
@@ -623,7 +616,7 @@ Visualization Manager:
           Marker Topic: /trajectory_circle_mark
           Name: Pure Pursuit Trajectory
           Namespaces:
-            trajectory_circle_marker: true
+            {}
           Queue Size: 100
           Value: true
         - Class: rviz/Marker
@@ -631,7 +624,7 @@ Visualization Manager:
           Marker Topic: /next_target_mark
           Name: Pure Pursuit Target
           Namespaces:
-            next_target_marker: true
+            {}
           Queue Size: 100
           Value: true
         - Class: rviz/Marker
@@ -689,11 +682,11 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 9.120298385620117
+      Scale: 4.608127117156982
       Target Frame: map
       Value: TopDownOrtho (rviz)
-      X: 15.534561157226562
-      Y: 22.798494338989258
+      X: 59.5871696472168
+      Y: 8.258959770202637
     Saved: ~
 Window Geometry:
   DecisionMakerPanel:
@@ -715,5 +708,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 2711
-  X: 4416
-  Y: 645
+  X: 249
+  Y: 273
