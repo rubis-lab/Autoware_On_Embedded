@@ -21,7 +21,6 @@ lidar_republisher:
   task_response_time_filename: "~/Documents/profiling/response_time/lidar_republisher.csv"  
 
 voxel_grid_filter:
-  rate: 10
   task_scheduling_configs:
     policy: "NONE"
     priority: 99
@@ -31,7 +30,6 @@ voxel_grid_filter:
   task_response_time_filename: "~/Documents/profiling/response_time/voxel_grid_filter.csv"  
 
 ndt_matching:
-  rate: 10
   task_scheduling_configs:
     policy: "NONE"
     priority: 20
@@ -50,7 +48,6 @@ ndt_matching:
   localizer: "velodyne"
 
 pure_pursuit:
-  rate: 30 #30
   task_scheduling_configs:
     policy: "NONE"
     priority: 20
@@ -63,7 +60,6 @@ pure_pursuit:
   dynamic_params_path: "~/autoware.ai/autoware_files/lgsvl_file/parameter/lgsvl_pure_pursuit.yaml"
 
 twist_filter:
-  rate: 10
   task_scheduling_configs:
     policy: "NONE"
     priority: 20
@@ -74,7 +70,6 @@ twist_filter:
 
 # Detection
 ray_ground_filter_center:
-  rate: 10 
   task_scheduling_configs:
     policy: "NONE"
     priority: 20
@@ -84,7 +79,6 @@ ray_ground_filter_center:
   task_response_time_filename: "~/Documents/profiling/response_time/ray_ground_filter.csv"
 
 lidar_euclidean_cluster_detect:
-  rate: 10
   task_scheduling_configs:
     policy: "NONE"
     priority: 20
@@ -117,7 +111,6 @@ op_common_params:
   maxDeceleration: -7.5
 
 op_trajectory_generator:
-  rate: 10 #100
   task_scheduling_configs:
     policy: "NONE"
     priority: 20
@@ -127,7 +120,6 @@ op_trajectory_generator:
   task_response_time_filename: "~/Documents/profiling/response_time/op_trajectory_generator.csv"
 
 op_trajectory_evaluator:
-  rate: 100 #100
   task_scheduling_configs:
     policy: "NONE"
     priority: 20
@@ -145,7 +137,6 @@ op_trajectory_evaluator:
   SprintDecisionTime: 9999999.0
 
 op_behavior_selector:
-  rate: 100 #100
   task_scheduling_configs:
     policy: "NONE"
     priority: 20
@@ -160,7 +151,6 @@ op_behavior_selector:
   turnThreshold: 30.0
 
 op_motion_predictor:
-  rate: 25 #25
   task_scheduling_configs:
     policy: "NONE"
     priority: 20
@@ -171,7 +161,6 @@ op_motion_predictor:
 
 # Independent
 twist_gate:
-  rate: 10
   task_scheduling_configs:
     policy: "NONE"
     priority: 20

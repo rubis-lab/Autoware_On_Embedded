@@ -87,12 +87,7 @@ protected:
 
   // Callback function for subscriber.
   void callbackGetInitPose(const geometry_msgs::PoseWithCovarianceStampedConstPtr &input);
-  // void callbackGetCurrentPose(const geometry_msgs::PoseStampedConstPtr& msg);
-
   void callbackGetCurrentPoseTwist(const rubis_msgs::PoseTwistStampedPtr& msg);
-  void callbackGetVehicleStatus(const geometry_msgs::TwistStampedConstPtr& msg);
-  void callbackGetCANInfo(const autoware_can_msgs::CANInfoConstPtr &msg);
-  void callbackGetRobotOdom(const nav_msgs::OdometryConstPtr& msg);
   void callbackGetGlobalPlannerPath(const autoware_msgs::LaneArrayConstPtr& msg);
 
 

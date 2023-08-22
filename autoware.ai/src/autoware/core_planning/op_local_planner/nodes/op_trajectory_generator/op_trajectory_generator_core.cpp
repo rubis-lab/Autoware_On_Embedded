@@ -47,15 +47,7 @@ TrajectoryGen::TrajectoryGen()
 
   int bVelSource = 1;
   _nh.getParam("/op_trajectory_generator/velocitySource", bVelSource);
-  // if(bVelSource == 0)
-  //   sub_robot_odom = nh.subscribe("/odom", 10,  &TrajectoryGen::callbackGetRobotOdom, this);
-  // else if(bVelSource == 1)
-  //   sub_current_velocity = nh.subscribe("/current_velocity", 10, &TrajectoryGen::callbackGetVehicleStatus, this);
-  // else if(bVelSource == 2)
-  //   sub_can_info = nh.subscribe("/can_info", 10, &TrajectoryGen::callbackGetCANInfo, this);
-
   sub_GlobalPlannerPaths = nh.subscribe("/lane_waypoints_array", 1, &TrajectoryGen::callbackGetGlobalPlannerPath, this);
-  
   sub_pose_twist = nh.subscribe("/rubis_current_pose_twist", 1, &TrajectoryGen::callbackGetCurrentPoseTwist, this); // Def: 10
 }
 
@@ -130,25 +122,9 @@ void TrajectoryGen::callbackGetInitPose(const geometry_msgs::PoseWithCovarianceS
   }
 }
 
-// void TrajectoryGen::callbackGetCurrentPose(const geometry_msgs::PoseStampedConstPtr& msg)
-// {
-//   m_CurrentPos = PlannerHNS::WayPoint(msg->pose.position.x, msg->pose.position.y, msg->pose.position.z, tf::getYaw(msg->pose.orientation));
-//   m_InitPos = m_CurrentPos;
-//   bNewCurrentPos = true;
-//   bInitPos = true;
-// }
-
-// void TrajectoryGen::callbackGetVehicleStatus(const geometry_msgs::TwistStampedConstPtr& msg)
-// {
-//   m_VehicleStatus.speed = msg->twist.linear.x;
-//   m_CurrentPos.v = m_VehicleStatus.speed;
-//   if(fabs(msg->twist.linear.x) > 0.25)
-//     m_VehicleStatus.steer = atan(m_CarInfo.wheel_base * msg->twist.angular.z/msg->twist.linear.x);
-//   UtilityHNS::UtilityH::GetTickCount(m_VehicleStatus.tStamp);
-//   bVehicleStatus = true;
-// }
-
 void TrajectoryGen::callbackGetCurrentPoseTwist(const rubis_msgs::PoseTwistStampedPtr& msg){
+  rubis::start_task_profiling();
+
   // Callback
   rubis::instance_ = msg->instance;
   
@@ -166,23 +142,72 @@ void TrajectoryGen::callbackGetCurrentPoseTwist(const rubis_msgs::PoseTwistStamp
 
   current_pose_ = msg->pose;
   current_twist_ = msg->twist;
-}
 
+  if(bInitPos && m_GlobalPaths.size()>0){
+    m_GlobalPathSections.clear();
 
-void TrajectoryGen::callbackGetCANInfo(const autoware_can_msgs::CANInfoConstPtr &msg)
-{
-  m_VehicleStatus.speed = msg->speed/3.6;
-  m_VehicleStatus.steer = msg->angle * m_CarInfo.max_steer_angle / m_CarInfo.max_steer_value;
-  UtilityHNS::UtilityH::GetTickCount(m_VehicleStatus.tStamp);
-  bVehicleStatus = true;
-}
+    for(unsigned int i = 0; i < m_GlobalPaths.size(); i++)
+    {
+      t_centerTrajectorySmoothed.clear();
+      PlannerHNS::PlanningHelpers::ExtractPartFromPointToDistanceDirectionFast(m_GlobalPaths.at(i), m_CurrentPos, m_PlanningParams.horizonDistance ,
+          m_PlanningParams.pathDensity ,t_centerTrajectorySmoothed);
 
-void TrajectoryGen::callbackGetRobotOdom(const nav_msgs::OdometryConstPtr& msg)
-{
-  m_VehicleStatus.speed = msg->twist.twist.linear.x;
-  m_VehicleStatus.steer += atan(m_CarInfo.wheel_base * msg->twist.twist.angular.z/msg->twist.twist.linear.x);
-  UtilityHNS::UtilityH::GetTickCount(m_VehicleStatus.tStamp);
-  bVehicleStatus = true;
+      m_GlobalPathSections.push_back(t_centerTrajectorySmoothed);
+    }
+
+    std::vector<PlannerHNS::WayPoint> sampledPoints_debug;
+    m_Planner.GenerateRunoffTrajectory(m_GlobalPathSections, m_CurrentPos,
+              m_PlanningParams.enableLaneChange,
+              m_VehicleStatus.speed,
+              m_PlanningParams.microPlanDistance,
+              m_PlanningParams.maxSpeed,
+              m_PlanningParams.minSpeed,
+              m_PlanningParams.carTipMargin,
+              m_PlanningParams.rollInMargin,
+              m_PlanningParams.rollInSpeedFactor,
+              m_PlanningParams.pathDensity,
+              m_PlanningParams.rollOutDensity,
+              m_PlanningParams.rollOutNumber,
+              m_PlanningParams.smoothingDataWeight,
+              m_PlanningParams.smoothingSmoothWeight,
+              m_PlanningParams.smoothingToleranceError,
+              m_PlanningParams.speedProfileFactor,
+              m_PlanningParams.enableHeadingSmoothing,
+              -1 , -1,
+              m_RollOuts, sampledPoints_debug);
+
+    rubis_msgs::LaneArrayWithPoseTwist local_lanes;
+    for(unsigned int i=0; i < m_RollOuts.size(); i++)
+    {
+      for(unsigned int j=0; j < m_RollOuts.at(i).size(); j++)
+      {
+        autoware_msgs::Lane lane;
+        PlannerHNS::PlanningHelpers::PredictConstantTimeCostForTrajectory(m_RollOuts.at(i).at(j), m_CurrentPos, m_PlanningParams.minSpeed, m_PlanningParams.microPlanDistance);
+        PlannerHNS::ROSHelpers::ConvertFromLocalLaneToAutowareLane(m_RollOuts.at(i).at(j), lane);
+        lane.closest_object_distance = 0;
+        lane.closest_object_velocity = 0;
+        lane.cost = 0;
+        lane.is_blocked = false;
+        lane.lane_index = i;
+        local_lanes.lane_array.lanes.push_back(lane);
+      }
+    }
+
+    local_lanes.instance = rubis::instance_;
+    local_lanes.pose = current_pose_;
+    local_lanes.twist = current_twist_;
+
+    pub_LocalTrajectoriesWithPoseTwist.publish(local_lanes);
+  }
+  else{
+    sub_GlobalPlannerPaths = nh.subscribe("/lane_waypoints_array",   1,    &TrajectoryGen::callbackGetGlobalPlannerPath,   this);
+
+    visualization_msgs::MarkerArray all_rollOuts;
+    PlannerHNS::ROSHelpers::TrajectoriesToMarkers(m_RollOuts, all_rollOuts);
+    pub_LocalTrajectoriesRviz.publish(all_rollOuts);
+  }
+  
+  rubis::stop_task_profiling(rubis::instance_, 0);
 }
 
 void TrajectoryGen::callbackGetGlobalPlannerPath(const autoware_msgs::LaneArrayConstPtr& msg)
@@ -244,12 +269,10 @@ void TrajectoryGen::MainLoop()
 
   rubis::init_task_profiling(task_response_time_filename);
 
-  PlannerHNS::WayPoint prevState, state_change;
-
-  ros::Rate r(rate);
+  ros::spin();
 
   while(ros::ok()){
-    rubis::start_task_profiling();
+    
 
     ros::spinOnce();
 
@@ -319,9 +342,6 @@ void TrajectoryGen::MainLoop()
       PlannerHNS::ROSHelpers::TrajectoriesToMarkers(m_RollOuts, all_rollOuts);
       pub_LocalTrajectoriesRviz.publish(all_rollOuts);
     }
-    rubis::stop_task_profiling(0, 0);
-
-    r.sleep();
   }
 }
 
