@@ -198,7 +198,6 @@ static double current_velocity_y = 0.0, previous_velocity_y = 0.0;
 static double current_velocity_z = 0.0, previous_velocity_z = 0.0;
 // static double current_velocity_yaw = 0.0, previous_velocity_yaw = 0.0;
 static double current_velocity_smooth = 0.0;
-static double current_gnss_velocity = 0.0, current_gnss_angular_velocity = 0.0;
 
 static double current_velocity_imu_x = 0.0;
 static double current_velocity_imu_y = 0.0;
@@ -264,7 +263,6 @@ static std_msgs::Float32 ndt_reliability;
 
 static bool _get_height = false;
 static bool _use_local_transform = false;
-static bool _use_gnss_sensor = false;
 static bool _use_imu = false;
 static bool _use_odom = false;
 static bool _use_kalman_filter = false;
@@ -609,8 +607,6 @@ static void map_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
   }
 }
 
-// gnss_callback (legacy)
-/*
 static void gnss_callback(const geometry_msgs::PoseStamped::ConstPtr& input)
 {
   tf::Quaternion gnss_q(input->pose.orientation.x, input->pose.orientation.y, input->pose.orientation.z,
@@ -646,27 +642,7 @@ static void gnss_callback(const geometry_msgs::PoseStamped::ConstPtr& input)
   }
 
   previous_gnss_pose = current_gnss_pose;
-}
-*/
 
-static void gnss_pose_callback(const geometry_msgs::PoseStamped::ConstPtr& input)
-{
-  tf::Quaternion gnss_q(input->pose.orientation.x, input->pose.orientation.y, input->pose.orientation.z,
-                        input->pose.orientation.w);
-  tf::Matrix3x3 gnss_m(gnss_q);
-
-  current_gnss_pose.x = input->pose.position.x;
-  current_gnss_pose.y = input->pose.position.y;
-  current_gnss_pose.z = input->pose.position.z;
-  gnss_m.getRPY(current_gnss_pose.roll, current_gnss_pose.pitch, current_gnss_pose.yaw);
-
-  previous_gnss_pose = current_gnss_pose;
-}
-
-static void gnss_vel_callback(const geometry_msgs::TwistStamped::ConstPtr& input)
-{
-  current_gnss_velocity = input->twist.linear.x;
-  current_gnss_angular_velocity = input->twist.angular.z;
 }
 
 static void initialpose_callback(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& input)
@@ -991,7 +967,7 @@ static void imu_callback(const sensor_msgs::Imu::Ptr& input)
 
 static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
 { 
-  /* BLOCK1: Check initial matching */
+  // std::cout<<"@@@@ "<<input->data.size()<<std::endl;
   static int match_cnt = 10;
 
   if (map_loaded != 1 || init_pos_set != 1) return;
@@ -1014,7 +990,7 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
 
   static tf::TransformBroadcaster br, kalman_br;
   tf::Transform transform, kalman_transform;
-  tf::Quaternion predict_q, ndt_q, current_q, localizer_q, kalman_q, gnss_q;
+  tf::Quaternion predict_q, ndt_q, current_q, localizer_q, kalman_q;
 
   pcl::PointXYZ p;
   pcl::PointCloud<pcl::PointXYZ> filtered_scan;
@@ -1225,11 +1201,7 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
   }
   use_predict_pose = 0;
 
-  if (_use_gnss_sensor){
-    current_pose = current_gnss_pose;
-    ndt_pose = current_gnss_pose;
-  }
-  else if (use_predict_pose == 0)
+  if (use_predict_pose == 0)
   {
     current_pose.x = ndt_pose.x;
     current_pose.y = ndt_pose.y;
@@ -1300,26 +1272,19 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
   current_accel_y = (diff_time > 0) ? ((current_velocity_y - previous_velocity_y) / diff_time) : 0;
   current_accel_z = (diff_time > 0) ? ((current_velocity_z - previous_velocity_z) / diff_time) : 0;
 
-  if(_use_gnss_sensor){
-    current_velocity = current_gnss_velocity;
-    angular_velocity = current_gnss_angular_velocity;
-  }
-  
   estimated_vel_mps.data = current_velocity;
   estimated_vel_kmph.data = current_velocity * 3.6;
-  
+
   estimated_vel_mps_pub.publish(estimated_vel_mps);
   estimated_vel_kmph_pub.publish(estimated_vel_kmph);
 
   // Enable Kalman Filter
-  /*
   if(!_is_kalman_filter_on && _use_kalman_filter && _is_init_match_finished && _is_ins_stat_received){
     _is_kalman_filter_on = true;
     linear_kalman_filter.set_init_pose(current_pose.x, current_pose.y);
   }
-  */
+
   // Run Kalman Filter
-  /*
   if(_is_kalman_filter_on){
     Eigen::Vector2f u_k, z_k;
 
@@ -1377,7 +1342,6 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
       // current_kalman_pose.yaw = _current_ins_stat_yaw*M_PI/180.0;
     }
   }
-  */
 
   // Set values for publishing pose
   predict_q.setRPY(predict_pose.roll, predict_pose.pitch, predict_pose.yaw);
@@ -1453,19 +1417,7 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
     kalman_q.setRPY(current_kalman_pose.roll, current_kalman_pose.pitch, current_kalman_pose.yaw);
   }
   
-  if (_use_gnss_sensor){
-    gnss_q.setRPY(current_gnss_pose.roll, current_gnss_pose.pitch, current_gnss_pose.yaw);
-    ndt_pose_msg.header.frame_id = "/map";
-    ndt_pose_msg.header.stamp = current_scan_time;
-    ndt_pose_msg.pose.position.x = current_gnss_pose.x;
-    ndt_pose_msg.pose.position.y = current_gnss_pose.y;
-    ndt_pose_msg.pose.position.z = current_gnss_pose.z;
-    ndt_pose_msg.pose.orientation.x = gnss_q.x();
-    ndt_pose_msg.pose.orientation.y = gnss_q.y();
-    ndt_pose_msg.pose.orientation.z = gnss_q.z();
-    ndt_pose_msg.pose.orientation.w = gnss_q.w();
-  }
-  else if(_is_matching_failed && _is_kalman_filter_on){
+  if(_is_matching_failed && _is_kalman_filter_on){
     ndt_pose_msg.header.frame_id = "/map";
     ndt_pose_msg.header.stamp = current_scan_time;
     ndt_pose_msg.pose.position.x = current_kalman_pose.x;
@@ -1517,7 +1469,7 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
   */
 
   localizer_q.setRPY(localizer_pose.roll, localizer_pose.pitch, localizer_pose.yaw);
-
+  
   if (_use_local_transform == true)
   {
     tf::Vector3 v(localizer_pose.x, localizer_pose.y, localizer_pose.z);
@@ -1666,12 +1618,7 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
   offset_imu_odom_yaw = 0.0;
 
   // Send TF "/base_link" to "/map"
-  if(_use_gnss_sensor){
-    transform.setOrigin(tf::Vector3(current_gnss_pose.x, current_gnss_pose.y, current_gnss_pose.z));
-    transform.setRotation(gnss_q);
-    br.sendTransform(tf::StampedTransform(transform, current_scan_time, "/map", "/base_link"));
-  }
-  else if(!_is_matching_failed){
+  if(!_is_matching_failed){
     transform.setOrigin(tf::Vector3(current_pose.x, current_pose.y, current_pose.z));
     transform.setRotation(current_q);
     //    br.sendTransform(tf::StampedTransform(transform, current_scan_time, "/map", "/base_link"));
@@ -1717,7 +1664,6 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
 
   previous_estimated_vel_kmph.data = estimated_vel_kmph.data;    
 
-  /*
   if(_is_kalman_filter_on){
     geometry_msgs::Quaternion q;
     ToQuaternion(current_kalman_pose.yaw, current_kalman_pose.pitch, current_kalman_pose.roll, q);
@@ -1750,11 +1696,11 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
     _previous_ins_stat_angular_velocity = _current_ins_stat_angular_velocity;
 
   }
-  
+
   std_msgs::Bool is_kalman_filter_on_msgs;
   is_kalman_filter_on_msgs.data = _is_kalman_filter_on;
   is_kalman_filter_on_pub.publish(is_kalman_filter_on_msgs);
-  */
+  
 }
 
 static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input){
@@ -1835,7 +1781,6 @@ int main(int argc, char** argv)
   private_nh.getParam("get_height", _get_height);
   private_nh.getParam("use_local_transform", _use_local_transform);
   private_nh.getParam("use_kalman_filter", _use_kalman_filter);
-  private_nh.getParam("use_gnss_sensor", _use_gnss_sensor);
   private_nh.getParam("use_odom", _use_odom);
   private_nh.getParam("use_odom", _use_odom);
   private_nh.getParam("imu_upside_down", _imu_upside_down);
@@ -2003,9 +1948,6 @@ int main(int argc, char** argv)
   // Subscribers
   ros::Subscriber param_sub = nh.subscribe("config/ndt", 10, param_callback);
   // ros::Subscriber gnss_sub = nh.subscribe("gnss_pose", 10, gnss_callback);
-  ros::Subscriber gnss_pose_sub = nh.subscribe("gnss_pose", 10, gnss_pose_callback);
-  ros::Subscriber gnss_vel_sub = nh.subscribe("gnss_vel", 10, gnss_vel_callback);
-
   ros::Subscriber map_sub = nh.subscribe("points_map", 1, map_callback);
   ros::Subscriber initialpose_sub = nh.subscribe("initialpose", 10, initialpose_callback); 
 
