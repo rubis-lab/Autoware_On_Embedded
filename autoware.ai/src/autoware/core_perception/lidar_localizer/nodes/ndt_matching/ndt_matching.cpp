@@ -74,6 +74,10 @@
 
 #include <autoware_msgs/NDTStat.h>
 
+#include <message_filters/subscriber.h>
+#include <message_filters/synchronizer.h>
+#include <message_filters/sync_policies/approximate_time.h>
+
 #include <rubis_lib/sched.hpp>
 #include <rubis_msgs/PointCloud2.h>
 #include <rubis_msgs/PoseStamped.h>
@@ -92,6 +96,10 @@
 #define M_PI 3.14159265358979323846
 
 #define DEBUG
+
+typedef message_filters::sync_policies::ApproximateTime<rubis_msgs::PointCloud2, rubis_msgs::PoseTwistStamped> SyncPolicy;
+typedef message_filters::Synchronizer<SyncPolicy> Sync;
+boost::shared_ptr<Sync> sync_;
 
 struct pose
 {
@@ -161,7 +169,6 @@ static geometry_msgs::PoseStamped predict_pose_odom_msg;
 static ros::Publisher predict_pose_imu_odom_pub;
 static geometry_msgs::PoseStamped predict_pose_imu_odom_msg;
 
-static ros::Publisher ndt_pose_pub;
 static geometry_msgs::PoseStamped ndt_pose_msg;
 
 // current_pose is published by vel_pose_mux
@@ -232,10 +239,6 @@ static LKF linear_kalman_filter;
 static double _previous_success_score;
 static bool _is_matching_failed = false;
 
-
-static ros::Publisher estimated_vel_mps_pub, estimated_vel_kmph_pub, estimated_vel_pub;
-static std_msgs::Float32 estimated_vel_mps, estimated_vel_kmph, previous_estimated_vel_kmph;
-
 static std::chrono::time_point<std::chrono::system_clock> matching_start, matching_end;
 
 static ros::Publisher time_ndt_matching_pub;
@@ -259,12 +262,9 @@ static Eigen::Matrix4f tf_btol;
 static std::string _localizer = "velodyne";
 static std::string _offset = "linear";  // linear, zero, quadratic
 
-static ros::Publisher ndt_reliability_pub;
-static std_msgs::Float32 ndt_reliability;
-
 static bool _get_height = false;
 static bool _use_local_transform = false;
-static bool _use_gnss_sensor = false;
+static bool _use_svl_gnss = false;
 static bool _use_imu = false;
 static bool _use_odom = false;
 static bool _use_kalman_filter = false;
@@ -293,6 +293,8 @@ static float _failure_score_diff_threshold = 10.0;
 static float _recovery_score_diff_threshold = 1.0;
 static float _failure_pose_diff_threshold = 4.0;
 static float _recovery_pose_diff_threshold = 1.0;
+
+static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input);
 
 void ToQuaternion(double yaw, double pitch, double roll, geometry_msgs::Quaternion &q)
 {
@@ -669,6 +671,35 @@ static void gnss_vel_callback(const geometry_msgs::TwistStamped::ConstPtr& input
   current_gnss_angular_velocity = input->twist.angular.z;
 }
 
+static void svl_callback(const rubis_msgs::PointCloud2::ConstPtr&points_msg, const rubis_msgs::PoseTwistStamped::ConstPtr& pose_twist_msg)
+{
+  rubis::start_task_profiling();
+
+  rubis::instance_ = points_msg->instance;
+  rubis::obj_instance_ = 0;
+
+  tf::Quaternion gnss_q(pose_twist_msg->pose.pose.orientation.x,
+                        pose_twist_msg->pose.pose.orientation.y,
+                        pose_twist_msg->pose.pose.orientation.z,
+                        pose_twist_msg->pose.pose.orientation.w);
+  tf::Matrix3x3 gnss_m(gnss_q);
+
+  current_gnss_pose.x = pose_twist_msg->pose.pose.position.x;
+  current_gnss_pose.y = pose_twist_msg->pose.pose.position.y;
+  current_gnss_pose.z = pose_twist_msg->pose.pose.position.z;
+  gnss_m.getRPY(current_gnss_pose.roll, current_gnss_pose.pitch, current_gnss_pose.yaw);
+
+  previous_gnss_pose = current_gnss_pose;
+
+  current_gnss_velocity = pose_twist_msg->twist.twist.linear.x;
+  current_gnss_angular_velocity = pose_twist_msg->twist.twist.angular.z;
+
+  sensor_msgs::PointCloud2::ConstPtr input = boost::make_shared<const sensor_msgs::PointCloud2>(points_msg->msg);
+  ndt_matching(input);
+
+  rubis::stop_task_profiling(rubis::instance_, rubis::obj_instance_);
+}
+
 static void initialpose_callback(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& input)
 {
   tf::TransformListener listener;
@@ -905,14 +936,6 @@ static double calcDiffForRadian(const double lhs_rad, const double rhs_rad)
   return diff_rad;
 }
 
-static void odom_callback(const nav_msgs::Odometry::ConstPtr& input)
-{
-  // std::cout << __func__ << std::endl;
-
-  odom = *input;
-  odom_calc(input->header.stamp);
-}
-
 static void imuUpsideDown(const sensor_msgs::Imu::Ptr input)
 {
   double input_roll, input_pitch, input_yaw;
@@ -934,59 +957,6 @@ static void imuUpsideDown(const sensor_msgs::Imu::Ptr input)
   input_yaw *= -1;
 
   input->orientation = tf::createQuaternionMsgFromRollPitchYaw(input_roll, input_pitch, input_yaw);
-}
-
-static void imu_callback(const sensor_msgs::Imu::Ptr& input)
-{
-  // std::cout << __func__ << std::endl;
-
-  if (_imu_upside_down)
-    imuUpsideDown(input);
-
-  const ros::Time current_time = input->header.stamp;
-  static ros::Time previous_time = current_time;
-  const double diff_time = (current_time - previous_time).toSec();
-
-  double imu_roll, imu_pitch, imu_yaw;
-  tf::Quaternion imu_orientation;
-  tf::quaternionMsgToTF(input->orientation, imu_orientation);
-  tf::Matrix3x3(imu_orientation).getRPY(imu_roll, imu_pitch, imu_yaw);
-
-  imu_roll = wrapToPmPi(imu_roll);
-  imu_pitch = wrapToPmPi(imu_pitch);
-  imu_yaw = wrapToPmPi(imu_yaw);
-
-  static double previous_imu_roll = imu_roll, previous_imu_pitch = imu_pitch, previous_imu_yaw = imu_yaw;
-  const double diff_imu_roll = calcDiffForRadian(imu_roll, previous_imu_roll);
-  const double diff_imu_pitch = calcDiffForRadian(imu_pitch, previous_imu_pitch);
-  const double diff_imu_yaw = calcDiffForRadian(imu_yaw, previous_imu_yaw);
-
-  imu.header = input->header;
-  imu.linear_acceleration.x = input->linear_acceleration.x;
-  // imu.linear_acceleration.y = input->linear_acceleration.y;
-  // imu.linear_acceleration.z = input->linear_acceleration.z;
-  imu.linear_acceleration.y = 0;
-  imu.linear_acceleration.z = 0;
-
-  if (diff_time != 0)
-  {
-    imu.angular_velocity.x = diff_imu_roll / diff_time;
-    imu.angular_velocity.y = diff_imu_pitch / diff_time;
-    imu.angular_velocity.z = diff_imu_yaw / diff_time;
-  }
-  else
-  {
-    imu.angular_velocity.x = 0;
-    imu.angular_velocity.y = 0;
-    imu.angular_velocity.z = 0;
-  }
-
-  imu_calc(input->header.stamp);
-
-  previous_time = current_time;
-  previous_imu_roll = imu_roll;
-  previous_imu_pitch = imu_pitch;
-  previous_imu_yaw = imu_yaw;
 }
 
 static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
@@ -1227,7 +1197,7 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
   }
   use_predict_pose = 0;
 
-  if (_use_gnss_sensor){
+  if (_use_svl_gnss){
     current_pose = current_gnss_pose;
     ndt_pose = current_gnss_pose;
   }
@@ -1302,16 +1272,10 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
   current_accel_y = (diff_time > 0) ? ((current_velocity_y - previous_velocity_y) / diff_time) : 0;
   current_accel_z = (diff_time > 0) ? ((current_velocity_z - previous_velocity_z) / diff_time) : 0;
 
-  if(_use_gnss_sensor){
+  if(_use_svl_gnss){
     current_velocity = current_gnss_velocity;
     angular_velocity = current_gnss_angular_velocity;
   }
-  
-  estimated_vel_mps.data = current_velocity;
-  estimated_vel_kmph.data = current_velocity * 3.6;
-  
-  estimated_vel_mps_pub.publish(estimated_vel_mps);
-  estimated_vel_kmph_pub.publish(estimated_vel_kmph);
 
   // Enable Kalman Filter
   /*
@@ -1410,52 +1374,54 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
     predict_pose_msg.pose.orientation.w = predict_q.w();
   }
 
-  tf::Quaternion predict_q_imu;
-  predict_q_imu.setRPY(predict_pose_imu.roll, predict_pose_imu.pitch, predict_pose_imu.yaw);
-  predict_pose_imu_msg.header.frame_id = "map";
-  predict_pose_imu_msg.header.stamp = input->header.stamp;
-  predict_pose_imu_msg.pose.position.x = predict_pose_imu.x;
-  predict_pose_imu_msg.pose.position.y = predict_pose_imu.y;
-  predict_pose_imu_msg.pose.position.z = predict_pose_imu.z;
-  predict_pose_imu_msg.pose.orientation.x = predict_q_imu.x();
-  predict_pose_imu_msg.pose.orientation.y = predict_q_imu.y();
-  predict_pose_imu_msg.pose.orientation.z = predict_q_imu.z();
-  predict_pose_imu_msg.pose.orientation.w = predict_q_imu.w();
-  predict_pose_imu_pub.publish(predict_pose_imu_msg);
+  // tf::Quaternion predict_q_imu;
+  // predict_q_imu.setRPY(predict_pose_imu.roll, predict_pose_imu.pitch, predict_pose_imu.yaw);
+  // predict_pose_imu_msg.header.frame_id = "map";
+  // predict_pose_imu_msg.header.stamp = input->header.stamp;
+  // predict_pose_imu_msg.pose.position.x = predict_pose_imu.x;
+  // predict_pose_imu_msg.pose.position.y = predict_pose_imu.y;
+  // predict_pose_imu_msg.pose.position.z = predict_pose_imu.z;
+  // predict_pose_imu_msg.pose.orientation.x = predict_q_imu.x();
+  // predict_pose_imu_msg.pose.orientation.y = predict_q_imu.y();
+  // predict_pose_imu_msg.pose.orientation.z = predict_q_imu.z();
+  // predict_pose_imu_msg.pose.orientation.w = predict_q_imu.w();
+  // predict_pose_imu_pub.publish(predict_pose_imu_msg);
 
-  tf::Quaternion predict_q_odom;
-  predict_q_odom.setRPY(predict_pose_odom.roll, predict_pose_odom.pitch, predict_pose_odom.yaw);
-  predict_pose_odom_msg.header.frame_id = "map";
-  predict_pose_odom_msg.header.stamp = input->header.stamp;
-  predict_pose_odom_msg.pose.position.x = predict_pose_odom.x;
-  predict_pose_odom_msg.pose.position.y = predict_pose_odom.y;
-  predict_pose_odom_msg.pose.position.z = predict_pose_odom.z;
-  predict_pose_odom_msg.pose.orientation.x = predict_q_odom.x();
-  predict_pose_odom_msg.pose.orientation.y = predict_q_odom.y();
-  predict_pose_odom_msg.pose.orientation.z = predict_q_odom.z();
-  predict_pose_odom_msg.pose.orientation.w = predict_q_odom.w();
-  predict_pose_odom_pub.publish(predict_pose_odom_msg);
+  // tf::Quaternion predict_q_odom;
+  // predict_q_odom.setRPY(predict_pose_odom.roll, predict_pose_odom.pitch, predict_pose_odom.yaw);
+  // predict_pose_odom_msg.header.frame_id = "map";
+  // predict_pose_odom_msg.header.stamp = input->header.stamp;
+  // predict_pose_odom_msg.pose.position.x = predict_pose_odom.x;
+  // predict_pose_odom_msg.pose.position.y = predict_pose_odom.y;
+  // predict_pose_odom_msg.pose.position.z = predict_pose_odom.z;
+  // predict_pose_odom_msg.pose.orientation.x = predict_q_odom.x();
+  // predict_pose_odom_msg.pose.orientation.y = predict_q_odom.y();
+  // predict_pose_odom_msg.pose.orientation.z = predict_q_odom.z();
+  // predict_pose_odom_msg.pose.orientation.w = predict_q_odom.w();
+  // predict_pose_odom_pub.publish(predict_pose_odom_msg);
 
-  tf::Quaternion predict_q_imu_odom;
-  predict_q_imu_odom.setRPY(predict_pose_imu_odom.roll, predict_pose_imu_odom.pitch, predict_pose_imu_odom.yaw);
-  predict_pose_imu_odom_msg.header.frame_id = "map";
-  predict_pose_imu_odom_msg.header.stamp = input->header.stamp;
-  predict_pose_imu_odom_msg.pose.position.x = predict_pose_imu_odom.x;
-  predict_pose_imu_odom_msg.pose.position.y = predict_pose_imu_odom.y;
-  predict_pose_imu_odom_msg.pose.position.z = predict_pose_imu_odom.z;
-  predict_pose_imu_odom_msg.pose.orientation.x = predict_q_imu_odom.x();
-  predict_pose_imu_odom_msg.pose.orientation.y = predict_q_imu_odom.y();
-  predict_pose_imu_odom_msg.pose.orientation.z = predict_q_imu_odom.z();
-  predict_pose_imu_odom_msg.pose.orientation.w = predict_q_imu_odom.w();
-  predict_pose_imu_odom_pub.publish(predict_pose_imu_odom_msg);
+  // tf::Quaternion predict_q_imu_odom;
+  // predict_q_imu_odom.setRPY(predict_pose_imu_odom.roll, predict_pose_imu_odom.pitch, predict_pose_imu_odom.yaw);
+  // predict_pose_imu_odom_msg.header.frame_id = "map";
+  // predict_pose_imu_odom_msg.header.stamp = input->header.stamp;
+  // predict_pose_imu_odom_msg.pose.position.x = predict_pose_imu_odom.x;
+  // predict_pose_imu_odom_msg.pose.position.y = predict_pose_imu_odom.y;
+  // predict_pose_imu_odom_msg.pose.position.z = predict_pose_imu_odom.z;
+  // predict_pose_imu_odom_msg.pose.orientation.x = predict_q_imu_odom.x();
+  // predict_pose_imu_odom_msg.pose.orientation.y = predict_q_imu_odom.y();
+  // predict_pose_imu_odom_msg.pose.orientation.z = predict_q_imu_odom.z();
+  // predict_pose_imu_odom_msg.pose.orientation.w = predict_q_imu_odom.w();
+  // predict_pose_imu_odom_pub.publish(predict_pose_imu_odom_msg);
 
   ndt_q.setRPY(ndt_pose.roll, ndt_pose.pitch, ndt_pose.yaw);
   
+  /*
   if(_is_kalman_filter_on){
     kalman_q.setRPY(current_kalman_pose.roll, current_kalman_pose.pitch, current_kalman_pose.yaw);
   }
+  */
   
-  if (_use_gnss_sensor){
+  if (_use_svl_gnss){
     gnss_q.setRPY(current_gnss_pose.roll, current_gnss_pose.pitch, current_gnss_pose.yaw);
     ndt_pose_msg.header.frame_id = "/map";
     ndt_pose_msg.header.stamp = current_scan_time;
@@ -1547,8 +1513,8 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
     localizer_pose_msg.pose.orientation.w = localizer_q.w();
   }
 
-  predict_pose_pub.publish(predict_pose_msg);
-  ndt_pose_pub.publish(ndt_pose_msg);
+  // predict_pose_pub.publish(predict_pose_msg);
+  // ndt_pose_pub.publish(ndt_pose_msg);
   
 
   // current_pose is published by vel_pose_mux
@@ -1575,7 +1541,6 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
   geometry_msgs::Vector3Stamped estimate_vel_msg;
   estimate_vel_msg.header.stamp = current_scan_time;
   estimate_vel_msg.vector.x = current_velocity;
-  estimated_vel_pub.publish(estimate_vel_msg);
 
   previous_score = fitness_score;
   if(!_is_matching_failed) _previous_success_score = previous_score;
@@ -1595,35 +1560,6 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
   rubis_pose_twist_msg.pose = ndt_pose_msg;
   rubis_pose_twist_msg.twist = estimate_twist_msg;
   rubis_pose_twist_pub.publish(rubis_pose_twist_msg);
-
-  /* Compute NDT_Reliability */
-  ndt_reliability.data = Wa * (exe_time / 100.0) * 100.0 + Wb * (iteration / 10.0) * 100.0 +
-                          Wc * ((2.0 - trans_probability) / 2.0) * 100.0;
-  ndt_reliability_pub.publish(ndt_reliability);
-
-  // Write log
-  if(_output_log_data)
-  {
-    if (!ofs)
-    {
-      std::cerr << "Could not open " << filename << "." << std::endl;
-    }
-    else
-    {
-      ofs << input->header.seq << "," << scan_points_num << "," << step_size << "," << trans_eps << "," << std::fixed
-          << std::setprecision(5) << current_pose.x << "," << std::fixed << std::setprecision(5) << current_pose.y << ","
-          << std::fixed << std::setprecision(5) << current_pose.z << "," << current_pose.roll << "," << current_pose.pitch
-          << "," << current_pose.yaw << "," << predict_pose.x << "," << predict_pose.y << "," << predict_pose.z << ","
-          << predict_pose.roll << "," << predict_pose.pitch << "," << predict_pose.yaw << ","
-          << current_pose.x - predict_pose.x << "," << current_pose.y - predict_pose.y << ","
-          << current_pose.z - predict_pose.z << "," << current_pose.roll - predict_pose.roll << ","
-          << current_pose.pitch - predict_pose.pitch << "," << current_pose.yaw - predict_pose.yaw << ","
-          << predict_pose_error << "," << iteration << "," << fitness_score << "," << trans_probability << ","
-          << ndt_reliability.data << "," << current_velocity << "," << current_velocity_smooth << "," << current_accel
-          << "," << angular_velocity << "," << time_ndt_matching.data << "," << align_time << "," << getFitnessScore_time
-          << std::endl;
-    }
-  }
   
   // std::cout << "-----------------------------------------------------------------" << std::endl;
   // std::cout << "Sequence: " << input->header.seq << std::endl;
@@ -1636,7 +1572,6 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
   // std::cout << "Transformation Probability: " << trans_probability << std::endl;
   // std::cout << "Execution Time: " << exe_time << " ms." << std::endl;
   // std::cout << "Number of Iterations: " << iteration << std::endl;
-  // std::cout << "NDT Reliability: " << ndt_reliability.data << std::endl;
   // std::cout << "(x,y,z,roll,pitch,yaw): " << std::endl;
   // std::cout << "(" << current_pose.x << ", " << current_pose.y << ", " << current_pose.z << ", " << current_pose.roll
   //           << ", " << current_pose.pitch << ", " << current_pose.yaw << ")" << std::endl;
@@ -1668,7 +1603,7 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
   offset_imu_odom_yaw = 0.0;
 
   // Send TF "/base_link" to "/map"
-  if(_use_gnss_sensor){
+  if(_use_svl_gnss){
     transform.setOrigin(tf::Vector3(current_gnss_pose.x, current_gnss_pose.y, current_gnss_pose.z));
     transform.setRotation(gnss_q);
     br.sendTransform(tf::StampedTransform(transform, current_scan_time, "/map", "/base_link"));
@@ -1715,9 +1650,7 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
   previous_velocity_x = current_velocity_x;
   previous_velocity_y = current_velocity_y;
   previous_velocity_z = current_velocity_z;
-  previous_accel = current_accel;
-
-  previous_estimated_vel_kmph.data = estimated_vel_kmph.data;    
+  previous_accel = current_accel;  
 
   /*
   if(_is_kalman_filter_on){
@@ -1775,19 +1708,6 @@ static void rubis_points_callback(const rubis_msgs::PointCloud2::ConstPtr& _inpu
   rubis::stop_task_profiling(rubis::instance_, rubis::obj_instance_);
 }
 
-static void ins_stat_callback(const rubis_msgs::InsStat::ConstPtr& input){
-  _is_ins_stat_received = true;
-  _current_ins_stat_vel_x = input->vel_x;
-  _current_ins_stat_vel_y = input->vel_y;
-  _current_ins_stat_acc_x = input->acc_x;
-  _current_ins_stat_acc_y = input->acc_y;
-  _current_ins_stat_yaw = input->yaw;
-  _current_ins_stat_linear_velocity = input->linear_velocity;
-  _current_ins_stat_linear_acceleration = input->linear_acceleration;
-  _current_ins_stat_angular_velocity = input->angular_velocity;
-  return;
-}
-
 void* thread_func(void* args)
 {
   ros::NodeHandle nh_map;
@@ -1837,7 +1757,7 @@ int main(int argc, char** argv)
   private_nh.getParam("get_height", _get_height);
   private_nh.getParam("use_local_transform", _use_local_transform);
   private_nh.getParam("use_kalman_filter", _use_kalman_filter);
-  private_nh.getParam("use_gnss_sensor", _use_gnss_sensor);
+  private_nh.getParam("use_svl_gnss", _use_svl_gnss);
   private_nh.getParam("use_odom", _use_odom);
   private_nh.getParam("use_odom", _use_odom);
   private_nh.getParam("imu_upside_down", _imu_upside_down);
@@ -1988,37 +1908,35 @@ int main(int argc, char** argv)
   is_kalman_filter_on_pub = nh.advertise<std_msgs::Bool>("/is_kalman_filter_on", 10);
   kalman_filtered_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/kalman_filtered_pose", 10);
 
-  ndt_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/ndt_pose", 10);
   rubis_pose_twist_pub = nh.advertise<rubis_msgs::PoseTwistStamped>("/rubis_current_pose_twist",10);
   
-  localizer_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/current_pose", 10);
-  // localizer_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/localizer_pose", 10);
-  estimate_twist_pub = nh.advertise<geometry_msgs::TwistStamped>("/current_velocity", 10);
+  localizer_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/localizer_pose", 10);
+  estimate_twist_pub = nh.advertise<geometry_msgs::TwistStamped>("/localizer_velocity", 10);
   // estimate_twist_pub = nh.advertise<geometry_msgs::TwistStamped>("/estimate_twist", 10);
-  estimated_vel_mps_pub = nh.advertise<std_msgs::Float32>("/estimated_vel_mps", 10);
-  estimated_vel_kmph_pub = nh.advertise<std_msgs::Float32>("/estimated_vel_kmph", 10);
-  estimated_vel_pub = nh.advertise<geometry_msgs::Vector3Stamped>("/estimated_vel", 10);
   time_ndt_matching_pub = nh.advertise<std_msgs::Float32>("/time_ndt_matching", 10);
   ndt_stat_pub = nh.advertise<autoware_msgs::NDTStat>("/ndt_stat", 10);
-  ndt_reliability_pub = nh.advertise<std_msgs::Float32>("/ndt_reliability", 10);
 
   // Subscribers
   ros::Subscriber param_sub = nh.subscribe("config/ndt", 10, param_callback);
   // ros::Subscriber gnss_sub = nh.subscribe("gnss_pose", 10, gnss_callback);
-  ros::Subscriber gnss_pose_sub = nh.subscribe("gnss_pose", 10, gnss_pose_callback);
-  ros::Subscriber gnss_vel_sub = nh.subscribe("gnss_vel", 10, gnss_vel_callback);
+  // ros::Subscriber gnss_pose_sub = nh.subscribe("gnss_pose", 10, gnss_pose_callback);
+  // ros::Subscriber gnss_vel_sub = nh.subscribe("gnss_vel", 10, gnss_vel_callback);  
 
   ros::Subscriber map_sub = nh.subscribe("points_map", 1, map_callback);
   ros::Subscriber initialpose_sub = nh.subscribe("initialpose", 10, initialpose_callback); 
 
-  ros::Subscriber points_sub;
-  points_sub = nh.subscribe("rubis_filtered_points", 1, rubis_points_callback); // _queue_size = 1000
-  
-  // ros::Subscriber odom_sub = nh.subscribe("/vehicle/odom", _queue_size * 10, odom_callback);
-  // ros::Subscriber imu_sub = nh.subscribe(_imu_topic.c_str(), _queue_size * 10, imu_callback);
+  // ros::Subscriber points_sub;
+  // points_sub = nh.subscribe("rubis_filtered_points", 1, rubis_points_callback);
 
-  // ros::Subscriber ins_stat_sub = nh.subscribe("/ins_stat", 1, ins_stat_callback);
-  
+  message_filters::Subscriber<rubis_msgs::PointCloud2> filtered_points_sub;
+  message_filters::Subscriber<rubis_msgs::PoseTwistStamped> svl_pose_twist_sub;
+  filtered_points_sub.subscribe(nh, "/rubis_filtered_points", 1);
+  svl_pose_twist_sub.subscribe(nh, "/svl_pose_twist", 1);
+
+  typedef message_filters::sync_policies::ApproximateTime<rubis_msgs::PointCloud2, rubis_msgs::PoseTwistStamped> SyncPolicy;
+  sync_.reset(new message_filters::Synchronizer<SyncPolicy>(SyncPolicy(10), filtered_points_sub, svl_pose_twist_sub));
+  sync_->registerCallback(boost::bind(&svl_callback, _1, _2));
+
   pthread_t thread;
   pthread_create(&thread, NULL, thread_func, NULL);
 

@@ -17,7 +17,7 @@
   <include file="$(find lidar_localizer)/launch/ndt_matching_params.launch">
     <arg name="method_type" value="1" /> 
     <arg name="get_height" value="true" /> 
-    <arg name="use_gnss_sensor" value="true"/>
+    <arg name="use_svl_gnss" value="true"/>
   </include>
 
   <!-- ndt config -->

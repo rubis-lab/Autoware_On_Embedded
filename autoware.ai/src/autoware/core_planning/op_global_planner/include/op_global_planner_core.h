@@ -51,6 +51,8 @@
 #include "op_planner/MappingHelpers.h"
 #include "op_planner/PlannerH.h"
 
+#include "rubis_msgs/PoseTwistStamped.h"
+
 namespace GlobalPlanningNS
 {
 

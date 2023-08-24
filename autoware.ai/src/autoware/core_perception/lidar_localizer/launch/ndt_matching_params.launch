@@ -20,7 +20,7 @@
   <arg name="recovery_score_diff_threshold" default="1.0" />  
   <arg name="failure_pose_diff_threshold" default="4.0" />
   <arg name="recovery_pose_diff_threshold" default="1.0" />
-  <arg name="use_gnss_sensor" default="false" />  
+  <arg name="use_svl_gnss" default="false" />  
   <!-- <arg name="kalman_filter_cfg" default="$(find lidar_localizer)/cfg/kalman_filter.yaml"/> -->
 
   <!-- <rosparam command="load" file="$(arg kalman_filter_cfg)" /> -->
@@ -45,7 +45,7 @@
     <param name="recovery_score_diff_threshold" value="$(arg recovery_score_diff_threshold)" />    
     <param name="failure_pose_diff_threshold" value="$(arg failure_pose_diff_threshold)" />    
     <param name="recovery_pose_diff_threshold" value="$(arg recovery_pose_diff_threshold)" />  
-    <param name="use_gnss_sensor" value="$(arg use_gnss_sensor)" />
+    <param name="use_svl_gnss" value="$(arg use_svl_gnss)" />
   </node>
 
 </launch>
