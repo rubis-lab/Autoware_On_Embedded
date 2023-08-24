@@ -1716,7 +1716,7 @@ static void rubis_points_callback(const rubis_msgs::PointCloud2::ConstPtr& _inpu
   ndt_matching(input);
   // std::cout<<"Finish ndt_matching"<<std::endl;
 
-  rubis::stop_task_profiling(rubis::instance_, 0);
+  rubis::stop_task_profiling(rubis::instance_, rubis::obj_instance_);
 }
 
 static void ins_stat_callback(const rubis_msgs::InsStat::ConstPtr& input){

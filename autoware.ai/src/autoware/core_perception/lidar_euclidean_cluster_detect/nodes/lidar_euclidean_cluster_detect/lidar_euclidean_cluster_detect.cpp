@@ -929,7 +929,7 @@ void velodyne_callback(const rubis_msgs::PointCloud2ConstPtr& in_sensor_cloud)
     _using_sensor_cloud = false;
   }
 
-  rubis::stop_task_profiling(rubis::instance_, 0);
+  rubis::stop_task_profiling(rubis::instance_, rubis::obj_instance_);
 }
 
 int main(int argc, char **argv)

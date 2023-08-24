@@ -37,9 +37,9 @@ void start_task_profiling(){
   clock_gettime(CLOCK_MONOTONIC, &task_start_time_);
 }
 
-void stop_task_profiling(unsigned long instance, int state){
+void stop_task_profiling(unsigned long instance, unsigned long obj_instance){
   clock_gettime(CLOCK_MONOTONIC, &task_end_time_);
-  fprintf(task_response_time_fp_, "%d,%d,%lld.%.9ld,%lld.%.9ld,%lu,%lu\n",iter_++, getpid(), (long long)task_start_time_.tv_sec, task_start_time_.tv_nsec, (long long)task_end_time_.tv_sec, task_end_time_.tv_nsec, instance, obj_instance_);
+  fprintf(task_response_time_fp_, "%d,%d,%lld.%.9ld,%lld.%.9ld,%lu,%lu\n",iter_++, getpid(), (long long)task_start_time_.tv_sec, task_start_time_.tv_nsec, (long long)task_end_time_.tv_sec, task_end_time_.tv_nsec, instance, obj_instance);
   fflush(task_response_time_fp_);
 }
 

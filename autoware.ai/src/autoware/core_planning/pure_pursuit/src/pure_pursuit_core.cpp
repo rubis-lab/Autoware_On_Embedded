@@ -512,7 +512,7 @@ void PurePursuitNode::CallbackTwistPose(const rubis_msgs::PoseTwistStampedConstP
   is_velocity_set_ = false;
   is_waypoint_set_ = false;
 
-  rubis::stop_task_profiling(rubis::instance_, 0);
+  rubis::stop_task_profiling(rubis::instance_, rubis::obj_instance_);
 
 }
 

@@ -1,0 +1,5 @@
+<launch>
+  <node pkg="svl_pkg" type="svl_sensing" name="svl_sensing" output="screen">
+  </node>
+
+</launch>

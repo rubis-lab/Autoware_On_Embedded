@@ -114,10 +114,6 @@ protected: //Planning Related variables
   tf::TransformListener m_map_base_listener;
   tf::StampedTransform m_map_base_transform;
 
-  geometry_msgs::TwistStamped m_Twist_raw;
-  geometry_msgs::TwistStamped m_Twist_cmd;
-  autoware_msgs::ControlCommand m_Ctrl_cmd;
-
   //Added by PHY
   double m_distanceToPedestrianThreshold;
   double m_turnAngle;
@@ -149,8 +145,6 @@ protected: //Planning Related variables
   // define subscribers.
   ros::Subscriber sub_current_pose;
   ros::Subscriber sub_current_velocity;
-  ros::Subscriber sub_robot_odom;
-  ros::Subscriber sub_can_info;
   ros::Subscriber sub_GlobalPlannerPaths;
   ros::Subscriber sub_LocalPlannerPaths;
   ros::Subscriber sub_TrafficLightStatus;
@@ -171,8 +165,6 @@ protected: //Planning Related variables
   std_msgs::Bool emergency_stop_msg;
 
   // Callback function for subscriber.
-  void callbackGetCANInfo(const autoware_can_msgs::CANInfoConstPtr &msg);
-  void callbackGetRobotOdom(const nav_msgs::OdometryConstPtr& msg);
   void callbackGetGlobalPlannerPath(const autoware_msgs::LaneArrayConstPtr& msg);
   void callbackGetLocalPlannerPath(const rubis_msgs::LaneArrayWithPoseTwistConstPtr& msg);
   void callbackGetLocalTrajectoryCost(const autoware_msgs::LaneConstPtr& msg);
@@ -181,10 +173,6 @@ protected: //Planning Related variables
   void callbackIntersectionCondition(const autoware_msgs::IntersectionCondition& msg);
 
   void callbackGetV2XTrafficLightSignals(const autoware_msgs::RUBISTrafficSignalArray& msg);
-
-  void callbackGetTwistCMD(const geometry_msgs::TwistStampedConstPtr& msg);
-  void callbackGetTwistRaw(const geometry_msgs::TwistStampedConstPtr& msg);
-  void callbackGetCommandCMD(const autoware_msgs::ControlCommandConstPtr& msg);
   void callbackSprintSwitch(const std_msgs::Bool& msg);
 
   //Helper Functions

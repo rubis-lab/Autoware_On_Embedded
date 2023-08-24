@@ -338,7 +338,7 @@ void Yolo3DetectorNode::rubis_image_callback(const rubis_msgs::ImageConstPtr& in
 
     free(darknet_image_.data);
 
-    rubis::stop_task_profiling(rubis::instance_, 0);
+    rubis::stop_task_profiling(rubis::instance_, rubis::obj_instance_);
 }
 
 void Yolo3DetectorNode::image_callback(const sensor_msgs::ImageConstPtr& in_image_message)
@@ -361,7 +361,7 @@ void Yolo3DetectorNode::image_callback(const sensor_msgs::ImageConstPtr& in_imag
 
     free(darknet_image_.data);
 
-    rubis::stop_task_profiling(rubis::instance_, 0);
+    rubis::stop_task_profiling(rubis::instance_, rubis::obj_instance_);
 }
 
 void Yolo3DetectorNode::config_cb(const autoware_config_msgs::ConfigSSD::ConstPtr& param)

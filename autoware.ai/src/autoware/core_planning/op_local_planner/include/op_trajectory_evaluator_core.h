@@ -120,7 +120,6 @@ protected:
   ros::Subscriber sub_LocalPlannerPaths;
   ros::Subscriber sub_predicted_objects;
   ros::Subscriber sub_rubis_predicted_objects;
-  ros::Subscriber sub_current_behavior;
 
   // HJW added
   ros::Subscriber sub_current_state;

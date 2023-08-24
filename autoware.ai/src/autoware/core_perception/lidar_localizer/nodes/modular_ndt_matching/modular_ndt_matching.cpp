@@ -1134,7 +1134,7 @@ int main(int argc, char** argv)
 
     ros::spinOnce();
 
-    rubis::stop_task_profiling(rubis::instance_, 0);
+    rubis::stop_task_profiling(rubis::instance_, rubis::obj_instance_);
     
     r.sleep();
   }

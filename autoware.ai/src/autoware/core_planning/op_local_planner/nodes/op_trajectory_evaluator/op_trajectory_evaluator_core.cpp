@@ -67,7 +67,6 @@ TrajectoryEval::TrajectoryEval()
   sub_LocalPlannerPaths = nh.subscribe("/local_trajectories_with_pose_twist", 1, &TrajectoryEval::callbackGetLocalPlannerPath, this);
   // sub_predicted_objects = nh.subscribe("/predicted_objects", 1, &TrajectoryEval::callbackGetPredictedObjects, this);
   sub_predicted_objects = nh.subscribe("/rubis_predicted_objects", 1, &TrajectoryEval::callbackGetPredictedObjects, this);
-  sub_current_behavior = nh.subscribe("/current_behavior", 1, &TrajectoryEval::callbackGetBehaviorState, this);
 
   PlannerHNS::ROSHelpers::InitCollisionPointsMarkers(50, m_CollisionsDummy);
 
@@ -294,11 +293,8 @@ void TrajectoryEval::callbackGetLocalPlannerPath(const rubis_msgs::LaneArrayWith
     }
 
     if(m_GlobalPathSections.size()>0)
-    {
-      if(m_bUseMoveingObjectsPrediction)
-        tc = m_TrajectoryCostsCalculator.DoOneStepDynamic(m_GeneratedRollOuts, m_GlobalPathSections.at(0), m_CurrentPos,m_PlanningParams,  m_CarInfo,m_VehicleStatus, m_PredictedObjects, m_CurrentBehavior.iTrajectory);
-      else
-        tc = m_TrajectoryCostsCalculator.DoOneStepStatic(m_GeneratedRollOuts, m_GlobalPathSections.at(0), m_CurrentPos,  m_PlanningParams,  m_CarInfo,m_VehicleStatus, m_PredictedObjects, m_CurrentBehavior.state);
+    {      
+      tc = m_TrajectoryCostsCalculator.DoOneStepStatic(m_GeneratedRollOuts, m_GlobalPathSections.at(0), m_CurrentPos,  m_PlanningParams,  m_CarInfo,m_VehicleStatus, m_PredictedObjects, m_CurrentBehavior.state);
 
       autoware_msgs::Lane l;
       l.closest_object_distance = tc.closest_obj_distance;
@@ -359,9 +355,9 @@ void TrajectoryEval::callbackGetLocalPlannerPath(const rubis_msgs::LaneArrayWith
 
     if(m_TrajectoryCostsCalculator.m_TrajectoryCosts.size()>0)
     {
-      visualization_msgs::MarkerArray all_rollOuts;
-      PlannerHNS::ROSHelpers::TrajectoriesToColoredMarkers(m_GeneratedRollOuts, m_TrajectoryCostsCalculator.m_TrajectoryCosts, m_CurrentBehavior.iTrajectory, all_rollOuts);
-      pub_LocalWeightedTrajectoriesRviz.publish(all_rollOuts);
+      // visualization_msgs::MarkerArray all_rollOuts;
+      // PlannerHNS::ROSHelpers::TrajectoriesToColoredMarkers(m_GeneratedRollOuts, m_TrajectoryCostsCalculator.m_TrajectoryCosts, m_CurrentBehavior.iTrajectory, all_rollOuts);
+      // pub_LocalWeightedTrajectoriesRviz.publish(all_rollOuts);
 
       PlannerHNS::ROSHelpers::ConvertCollisionPointsMarkers(m_TrajectoryCostsCalculator.m_CollisionPoints, m_CollisionsActual, m_CollisionsDummy);
       pub_CollisionPointsRviz.publish(m_CollisionsActual);
@@ -376,7 +372,7 @@ void TrajectoryEval::callbackGetLocalPlannerPath(const rubis_msgs::LaneArrayWith
     sub_GlobalPlannerPaths = nh.subscribe("/lane_waypoints_array",   1,    &TrajectoryEval::callbackGetGlobalPlannerPath,   this);
 
 
-  rubis::stop_task_profiling(rubis::instance_, 0);  
+  rubis::stop_task_profiling(rubis::instance_, rubis::obj_instance_);  
 }
 
 void TrajectoryEval::callbackGetPredictedObjects(const rubis_msgs::DetectedObjectArrayConstPtr& msg)

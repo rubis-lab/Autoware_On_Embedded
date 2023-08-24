@@ -460,7 +460,7 @@ void MotionPrediction::callbackGetRubisTrackedObjects(const rubis_msgs::Detected
     UtilityHNS::UtilityH::GetTickCount(m_VisualizationTimer);
   }
 
-  rubis::stop_task_profiling(rubis::instance_, 0);
+  rubis::stop_task_profiling(rubis::instance_, rubis::obj_instance_);
 }
 
 void MotionPrediction::_callbackGetRubisTrackedObjects(rubis_msgs::DetectedObjectArray& objects_msg)

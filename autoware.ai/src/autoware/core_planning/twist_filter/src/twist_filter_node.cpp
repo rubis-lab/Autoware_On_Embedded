@@ -156,7 +156,7 @@ void TwistFilterNode::rubisTwistCmdCallback(const rubis_msgs::TwistStampedConstP
   publishTwist(msg);
 
   // After spin
-  rubis::stop_task_profiling(rubis::instance_, 0);
+  rubis::stop_task_profiling(rubis::instance_, rubis::obj_instance_);
 }
 
 

@@ -9,7 +9,7 @@ static ros::Publisher pub, pub_rubis;
 int is_topic_ready = 1;
 
 void points_cb(const sensor_msgs::PointCloud2ConstPtr& msg){
-    rubis::start_task_profiling_for_lidar_republisher(msg->header.stamp.sec, msg->header.stamp.nsec);
+    rubis::start_task_profiling_at_initial_node(msg->header.stamp.sec, msg->header.stamp.nsec);
 
     sensor_msgs::PointCloud2 msg_with_intensity = *msg;
     
@@ -23,7 +23,7 @@ void points_cb(const sensor_msgs::PointCloud2ConstPtr& msg){
     rubis_msg_with_intensity.msg = msg_with_intensity;
     pub_rubis.publish(rubis_msg_with_intensity);
 
-    rubis::stop_task_profiling(rubis::instance_, 0);
+    rubis::stop_task_profiling(rubis::instance_, rubis::obj_instance_);
     rubis::instance_ = rubis::instance_+1;
     rubis::obj_instance_ = rubis::obj_instance_+1;
 }

@@ -27,7 +27,7 @@ extern "C"{
 
 void init_task_profiling(char* _task_response_time_filename);
 void start_task_profiling();
-void stop_task_profiling(unsigned long instance, int state);
+void stop_task_profiling(unsigned long instance, unsigned long obj_instance);
 unsigned long get_current_time_ns();
 
 #ifdef __cplusplus

@@ -66,21 +66,12 @@ BehaviorGen::BehaviorGen()
 
   // int bVelSource = 1;
   // _nh.getParam("/op_trajectory_evaluator/velocitySource", bVelSource);
-  // if(bVelSource == 0)
-  //   sub_robot_odom = nh.subscribe("/odom", 10, &BehaviorGen::callbackGetRobotOdom, this);
-  // else if(bVelSource == 2)
-  //   sub_can_info = nh.subscribe("/can_info", 10, &BehaviorGen::callbackGetCANInfo, this);
 
   sub_GlobalPlannerPaths = nh.subscribe("/lane_waypoints_array", 1, &BehaviorGen::callbackGetGlobalPlannerPath, this);
   sub_LocalPlannerPaths = nh.subscribe("/local_weighted_trajectories_with_pose_twist", 1, &BehaviorGen::callbackGetLocalPlannerPath, this);
-  // sub_TrafficLightStatus = nh.subscribe("/light_color", 1, &BehaviorGen::callbackGetTrafficLightStatus, this);
-  // sub_TrafficLightSignals  = nh.subscribe("/roi_signal", 1, &BehaviorGen::callbackGetTrafficLightSignals, this);
   sub_Trajectory_Cost = nh.subscribe("/local_trajectory_cost", 1, &BehaviorGen::callbackGetLocalTrajectoryCost, this);
   // sub_TrafficLightSignals  = nh.subscribe("/v2x_traffic_signal", 1, &BehaviorGen::callbackGetV2XTrafficLightSignals, this);
 
-  sub_twist_raw = nh.subscribe("/twist_raw", 1, &BehaviorGen::callbackGetTwistRaw, this);
-  sub_twist_cmd = nh.subscribe("/twist_cmd", 1, &BehaviorGen::callbackGetTwistCMD, this);
-  //sub_ctrl_cmd = nh.subscribe("/ctrl_cmd", 1, &BehaviorGen::callbackGetCommandCMD, this);
   sub_DistanceToPedestrian = nh.subscribe("/distance_to_pedestrian", 1, &BehaviorGen::callbackDistanceToPedestrian, this);
   sub_IntersectionCondition = nh.subscribe("/intersection_condition", 1, &BehaviorGen::callbackIntersectionCondition, this);
   sub_SprintSwitch = nh.subscribe("/sprint_switch", 1, &BehaviorGen::callbackSprintSwitch, this);
@@ -216,40 +207,6 @@ void BehaviorGen::callbackIntersectionCondition(const autoware_msgs::Intersectio
 
 void BehaviorGen::callbackSprintSwitch(const std_msgs::Bool& msg){
   m_sprintSwitch = msg.data;
-}
-
-void BehaviorGen::callbackGetTwistRaw(const geometry_msgs::TwistStampedConstPtr& msg)
-{
-  m_Twist_raw = *msg;
-}
-
-void BehaviorGen::callbackGetTwistCMD(const geometry_msgs::TwistStampedConstPtr& msg)
-{
-  m_Twist_cmd = *msg;
-}
-
-void BehaviorGen::callbackGetCommandCMD(const autoware_msgs::ControlCommandConstPtr& msg)
-{
-  m_Ctrl_cmd = *msg;
-}
-
-void BehaviorGen::callbackGetCANInfo(const autoware_can_msgs::CANInfoConstPtr &msg)
-{
-  m_VehicleStatus.speed = msg->speed/3.6;
-  m_CurrentPos.v = m_VehicleStatus.speed;
-  m_VehicleStatus.steer = msg->angle * m_CarInfo.max_steer_angle / m_CarInfo.max_steer_value;
-  UtilityHNS::UtilityH::GetTickCount(m_VehicleStatus.tStamp);
-  bVehicleStatus = true;
-}
-
-void BehaviorGen::callbackGetRobotOdom(const nav_msgs::OdometryConstPtr& msg)
-{
-  m_VehicleStatus.speed = msg->twist.twist.linear.x;
-  m_CurrentPos.v = m_VehicleStatus.speed ;
-  if(msg->twist.twist.linear.x != 0)
-    m_VehicleStatus.steer += atan(m_CarInfo.wheel_base * msg->twist.twist.angular.z/msg->twist.twist.linear.x);
-  UtilityHNS::UtilityH::GetTickCount(m_VehicleStatus.tStamp);
-  bVehicleStatus = true;
 }
 
 void BehaviorGen::callbackGetGlobalPlannerPath(const autoware_msgs::LaneArrayConstPtr& msg)
@@ -545,7 +502,7 @@ void BehaviorGen::callbackGetLocalPlannerPath(const rubis_msgs::LaneArrayWithPos
   else
     sub_GlobalPlannerPaths = nh.subscribe("/lane_waypoints_array",   1,    &BehaviorGen::callbackGetGlobalPlannerPath,   this);
 
-  rubis::stop_task_profiling(rubis::instance_, 0);
+  rubis::stop_task_profiling(rubis::instance_, rubis::obj_instance_);
 }
 
 void BehaviorGen::callbackGetV2XTrafficLightSignals(const autoware_msgs::RUBISTrafficSignalArray& msg)
@@ -694,9 +651,6 @@ void BehaviorGen::LogLocalPlanningInfo(double dt)
       m_BehaviorGenerator.m_pCurrentBehaviorState->GetCalcParams()->distanceToNext << "," <<
       m_BehaviorGenerator.m_pCurrentBehaviorState->GetCalcParams()->velocityOfNext << "," <<
       m_CurrentBehavior.maxVelocity << "," <<
-      m_Twist_raw.twist.linear.x << "," <<
-      m_Twist_cmd.twist.linear.x << "," <<
-      m_Ctrl_cmd.linear_velocity << "," <<
       m_VehicleStatus.speed << "," <<
       m_VehicleStatus.steer << "," <<
       m_BehaviorGenerator.state.pos.x << "," << m_BehaviorGenerator.state.pos.y << "," << m_BehaviorGenerator.state.pos.z << "," << UtilityHNS::UtilityH::SplitPositiveAngle(m_BehaviorGenerator.state.pos.a)+M_PI << ",";

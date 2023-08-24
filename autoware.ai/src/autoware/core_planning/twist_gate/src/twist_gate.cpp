@@ -356,7 +356,7 @@ void TwistGate::timerCallback(const ros::TimerEvent& e)
 {
   rubis::start_task_profiling();
   if(rubis_twist_cmd_ptr_ == NULL){
-    rubis::stop_task_profiling(rubis::instance_, 0);
+    rubis::stop_task_profiling(rubis::instance_, rubis::obj_instance_);
     return;
   }
   
@@ -392,7 +392,7 @@ void TwistGate::timerCallback(const ros::TimerEvent& e)
     is_current_time_changed_ = false;    
   }
 
-  rubis::stop_task_profiling(rubis::instance_, 0);
+  rubis::stop_task_profiling(rubis::instance_, rubis::obj_instance_);
 }
 
 void TwistGate::configCallback(const autoware_config_msgs::ConfigTwistFilter& msg)
