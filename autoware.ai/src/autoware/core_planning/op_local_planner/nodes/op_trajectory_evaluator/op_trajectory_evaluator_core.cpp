@@ -51,22 +51,13 @@ TrajectoryEval::TrajectoryEval()
   pub_IntersectionCondition = nh.advertise<autoware_msgs::IntersectionCondition>("intersection_condition", 1);
   pub_SprintSwitch = nh.advertise<std_msgs::Bool>("sprint_switch", 1);
 
-  // sub_current_pose = nh.subscribe("/current_pose", 10, &TrajectoryEval::callbackGetCurrentPose, this);
-  // sub_current_state = nh.subscribe("/current_state", 10, &TrajectoryEval::callbackGetCurrentState, this);
-
-  // int bVelSource = 1;
-  // _nh.getParam("/op_trajectory_evaluator/velocitySource", bVelSource);
-  // if(bVelSource == 0)
-  //   sub_robot_odom = nh.subscribe("/odom", 10, &TrajectoryEval::callbackGetRobotOdom, this);
-  // else if(bVelSource == 1)
-  //   sub_current_velocity = nh.subscribe("/current_velocity", 10, &TrajectoryEval::callbackGetVehicleStatus, this);
-  // else if(bVelSource == 2)
-  //   sub_can_info = nh.subscribe("/can_info", 10, &TrajectoryEval::callbackGetCANInfo, this);
-
+  
   sub_GlobalPlannerPaths = nh.subscribe("/lane_waypoints_array", 1, &TrajectoryEval::callbackGetGlobalPlannerPath, this);
-  sub_LocalPlannerPaths = nh.subscribe("/local_trajectories_with_pose_twist", 1, &TrajectoryEval::callbackGetLocalPlannerPath, this);
-  // sub_predicted_objects = nh.subscribe("/predicted_objects", 1, &TrajectoryEval::callbackGetPredictedObjects, this);
-  sub_predicted_objects = nh.subscribe("/rubis_predicted_objects", 1, &TrajectoryEval::callbackGetPredictedObjects, this);
+
+  trajectories_sub_.subscribe(nh, "/local_trajectories_with_pose_twist", 10);
+	objects_sub_.subscribe(nh, "/rubis_predicted_objects", 10);
+	sync_.reset(new message_filters::Synchronizer<SyncPolicy>(SyncPolicy(10), trajectories_sub_, objects_sub_));
+	sync_->registerCallback(boost::bind(&TrajectoryEval::callback, this, _1, _2));
 
   PlannerHNS::ROSHelpers::InitCollisionPointsMarkers(50, m_CollisionsDummy);
 
@@ -143,41 +134,6 @@ void TrajectoryEval::UpdatePlanningParams(ros::NodeHandle& _nh)
 
 }
 
-// void TrajectoryEval::callbackGetCurrentPose(const geometry_msgs::PoseStampedConstPtr& msg)
-// {
-//   m_CurrentPos = PlannerHNS::WayPoint(msg->pose.position.x, msg->pose.position.y, msg->pose.position.z, tf::getYaw(msg->pose.orientation));
-//   bNewCurrentPos = true;
-// }
-
-// void TrajectoryEval::callbackGetVehicleStatus(const geometry_msgs::TwistStampedConstPtr& msg)
-// {
-//   m_VehicleStatus.speed = msg->twist.linear.x;
-//   m_CurrentPos.v = m_VehicleStatus.speed;
-//   if(fabs(msg->twist.linear.x) > 0.25)
-//     m_VehicleStatus.steer = atan(m_CarInfo.wheel_base * msg->twist.angular.z/msg->twist.linear.x);
-//   UtilityHNS::UtilityH::GetTickCount(m_VehicleStatus.tStamp);
-//   bVehicleStatus = true;
-// }
-
-void TrajectoryEval::callbackGetCANInfo(const autoware_can_msgs::CANInfoConstPtr &msg)
-{
-  m_VehicleStatus.speed = msg->speed/3.6;
-  m_CurrentPos.v = m_VehicleStatus.speed;
-  m_VehicleStatus.steer = msg->angle * m_CarInfo.max_steer_angle / m_CarInfo.max_steer_value;
-  UtilityHNS::UtilityH::GetTickCount(m_VehicleStatus.tStamp);
-  bVehicleStatus = true;
-}
-
-void TrajectoryEval::callbackGetRobotOdom(const nav_msgs::OdometryConstPtr& msg)
-{
-  m_VehicleStatus.speed = msg->twist.twist.linear.x;
-  m_CurrentPos.v = m_VehicleStatus.speed;
-  if(fabs(msg->twist.twist.linear.x) > 0.25)
-    m_VehicleStatus.steer = atan(m_CarInfo.wheel_base * msg->twist.twist.angular.z/msg->twist.twist.linear.x);
-  UtilityHNS::UtilityH::GetTickCount(m_VehicleStatus.tStamp);
-  bVehicleStatus = true;
-}
-
 void TrajectoryEval::callbackGetGlobalPlannerPath(const autoware_msgs::LaneArrayConstPtr& msg)
 {
   if(msg->lanes.size() > 0)
@@ -212,18 +168,11 @@ void TrajectoryEval::callbackGetGlobalPlannerPath(const autoware_msgs::LaneArray
   }
 }
 
-void TrajectoryEval::callbackGetLocalPlannerPath(const rubis_msgs::LaneArrayWithPoseTwistConstPtr& msg)
+void TrajectoryEval::_callbackGetLocalPlannerPath(const rubis_msgs::LaneArrayWithPoseTwistConstPtr& msg)
 {
-  rubis::start_task_profiling();
   // Before spin
   UpdateMyParams();
   UpdateTf();
-
-  // callback for objects
-  if(is_objects_updated_){
-    _callbackGetPredictedObjects(object_msg_);
-    is_objects_updated_ = false;
-  }
 
   static double prev_x = 0.0, prev_y = 0.0, prev_speed = 0.0;
   
@@ -372,7 +321,7 @@ void TrajectoryEval::callbackGetLocalPlannerPath(const rubis_msgs::LaneArrayWith
     sub_GlobalPlannerPaths = nh.subscribe("/lane_waypoints_array",   1,    &TrajectoryEval::callbackGetGlobalPlannerPath,   this);
 
 
-  rubis::stop_task_profiling(rubis::instance_, rubis::obj_instance_);  
+  
 }
 
 void TrajectoryEval::callbackGetPredictedObjects(const rubis_msgs::DetectedObjectArrayConstPtr& msg)
@@ -497,6 +446,20 @@ void TrajectoryEval::_callbackGetPredictedObjects(const autoware_msgs::DetectedO
   std_msgs::Float64 distanceToPedestrianMsg; 
   distanceToPedestrianMsg.data = distance_to_pedestrian;
   pub_DistanceToPedestrian.publish(distanceToPedestrianMsg);
+}
+
+void TrajectoryEval::callback(const rubis_msgs::LaneArrayWithPoseTwist::ConstPtr& trajectories_msg, const rubis_msgs::DetectedObjectArray::ConstPtr& objects_msg){
+  rubis::start_task_profiling();
+
+  rubis::instance_ = trajectories_msg->instance;
+  rubis::obj_instance_ = objects_msg->obj_instance;
+
+  _callbackGetPredictedObjects(objects_msg->object_array);
+
+  rubis_msgs::LaneArrayWithPoseTwist::ConstPtr input = boost::make_shared<const rubis_msgs::LaneArrayWithPoseTwist>(*trajectories_msg);
+  _callbackGetLocalPlannerPath(input);
+
+  rubis::stop_task_profiling(rubis::instance_, rubis::obj_instance_);  
 }
 
 void TrajectoryEval::callbackGetBehaviorState(const geometry_msgs::TwistStampedConstPtr& msg)

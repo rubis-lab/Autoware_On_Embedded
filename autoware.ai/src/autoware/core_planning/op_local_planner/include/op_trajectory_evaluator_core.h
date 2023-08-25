@@ -43,7 +43,13 @@
 #include "op_planner/TrajectoryDynamicCosts.h"
 #include "rubis_msgs/DetectedObjectArray.h"
 
+#include <message_filters/subscriber.h>
+#include <message_filters/synchronizer.h>
+#include <message_filters/sync_policies/approximate_time.h>
 
+
+typedef message_filters::sync_policies::ApproximateTime<rubis_msgs::LaneArrayWithPoseTwist, rubis_msgs::DetectedObjectArray> SyncPolicy;
+typedef message_filters::Synchronizer<SyncPolicy> Sync;
 
 namespace TrajectoryEvaluatorNS
 {
@@ -121,6 +127,10 @@ protected:
   ros::Subscriber sub_predicted_objects;
   ros::Subscriber sub_rubis_predicted_objects;
 
+  message_filters::Subscriber<rubis_msgs::LaneArrayWithPoseTwist> trajectories_sub_;
+  message_filters::Subscriber<rubis_msgs::DetectedObjectArray> objects_sub_;
+  boost::shared_ptr<Sync> sync_; 
+
   // HJW added
   ros::Subscriber sub_current_state;
 
@@ -135,17 +145,14 @@ protected:
   autoware_msgs::DetectedObjectArray object_msg_;
 
   // Callback function for subscriber.
-  void callbackGetCurrentPose(const geometry_msgs::PoseStampedConstPtr& msg);
-  void callbackGetVehicleStatus(const geometry_msgs::TwistStampedConstPtr& msg);
-  void callbackGetCANInfo(const autoware_can_msgs::CANInfoConstPtr &msg);
-  void callbackGetRobotOdom(const nav_msgs::OdometryConstPtr& msg);
   void callbackGetGlobalPlannerPath(const autoware_msgs::LaneArrayConstPtr& msg);
-  void callbackGetLocalPlannerPath(const rubis_msgs::LaneArrayWithPoseTwistConstPtr& msg);
+  void _callbackGetLocalPlannerPath(const rubis_msgs::LaneArrayWithPoseTwistConstPtr& msg);
   void callbackGetPredictedObjects(const rubis_msgs::DetectedObjectArrayConstPtr& msg);
   void _callbackGetPredictedObjects(const autoware_msgs::DetectedObjectArray& objects);
   void callbackGetRubisPredictedObjects(const rubis_msgs::DetectedObjectArrayConstPtr& msg);
   void callbackGetBehaviorState(const geometry_msgs::TwistStampedConstPtr & msg);
   void callbackGetCurrentState(const std_msgs::Int32 & msg);
+  void callback(const rubis_msgs::LaneArrayWithPoseTwist::ConstPtr& trajectories_msg, const rubis_msgs::DetectedObjectArray::ConstPtr& objects_msg);
 
   //Helper Functions
   void UpdatePlanningParams(ros::NodeHandle& _nh);
