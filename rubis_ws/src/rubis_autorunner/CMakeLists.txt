@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   autoware_msgs
   visualization_msgs
   nmea_msgs
+  rubis_msgs
 )
 
 catkin_package(

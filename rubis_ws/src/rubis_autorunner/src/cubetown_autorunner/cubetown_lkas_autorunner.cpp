@@ -27,8 +27,8 @@ void CubetownAutorunner::register_subscribers(){
     initial_pose_pub_ = nh_.advertise< geometry_msgs::PoseWithCovarianceStamped>("initialpose", 1);
 }
 
- void CubetownAutorunner::points_raw_cb(const sensor_msgs::PointCloud2& msg){
-    if(!msg.fields.empty() && !ros_autorunner_.step_info_list_[STEP(2)].is_prepared){
+ void CubetownAutorunner::points_raw_cb(const rubis_msgs::PointCloud2& msg){
+    if(!msg.msg.fields.empty() && !ros_autorunner_.step_info_list_[STEP(2)].is_prepared){
         ROS_WARN("[STEP 1] Map and Sensors are prepared");
     	sleep(SLEEP_PERIOD);
         ros_autorunner_.step_info_list_[STEP(2)].is_prepared = true;
