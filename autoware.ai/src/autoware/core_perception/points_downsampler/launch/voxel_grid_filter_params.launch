@@ -6,7 +6,7 @@
   <arg name="output_log" default="false" />
   <arg name="measurement_range" default="200" />
 
-  <node pkg="points_downsampler" name="$(arg node_name)" type="$(arg node_name)">
+  <node pkg="points_downsampler" name="$(arg node_name)" type="$(arg node_name)" output="screen">
     <param name="input_topic_name" value="points_raw" />
     <param name="output_topic_name" value="filtered_points" />
     <param name="leaf_size" value="$(arg leaf_size)" />

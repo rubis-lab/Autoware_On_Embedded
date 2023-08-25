@@ -1,3 +1,4 @@
+std_msgs/Header header
 uint64 instance
 autoware_msgs/DetectedObjectArray object_array
 uint64 obj_instance

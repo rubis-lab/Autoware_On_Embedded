@@ -62,30 +62,45 @@ MotionPrediction::MotionPrediction()
   _nh.param<std::string>("/op_motion_predictor/input_object_list", input_object_list_str, "[/tracked_objects]");
   std::vector<std::string> input_object_list = ParseInputStr(input_object_list_str);
 
-  for(auto it = input_object_list.begin(); it != input_object_list.end(); ++it){    
-    std::string topic = *it;
-    std::cout<<topic<<std::endl;
-    
-    if(topic.find(std::string("rubis")) != std::string::npos){ // For rubis topic
-      objects_subs_.push_back(nh.subscribe(topic.c_str(), 1, &MotionPrediction::callbackGetRubisTrackedObjects, this));  
-    }
-    else{// For normal topic      
-      objects_subs_.push_back(nh.subscribe(topic.c_str(), 1, &MotionPrediction::callbackGetTrackedObjects, this));      
-    }
+
+  
+  bool use_svl_sensing = false;
+  _nh.param<bool>("/op_motion_predictor/use_svl_sensing", use_svl_sensing, false);
+
+  if(use_svl_sensing){
+    svl_objects_sub_.subscribe(_nh, "/detection/lidar_detector/rubis_objects_center", 10);
+    pose_twist_sub_.subscribe(_nh, "/rubis_current_pose_twist", 10);
+    sync_.reset(new message_filters::Synchronizer<SyncPolicy>(SyncPolicy(10), svl_objects_sub_, pose_twist_sub_));
+	  sync_->registerCallback(boost::bind(&MotionPrediction::callbackSvl, this, _1, _2));
+
     autoware_msgs::DetectedObjectArray msg;    
     object_msg_list_.push_back(msg);
   }
-  
-  sub_current_pose   = nh.subscribe("/current_pose", 1,  &MotionPrediction::callbackGetCurrentPose,     this); // Def: 1
+  else{
+    for(auto it = input_object_list.begin(); it != input_object_list.end(); ++it){    
+      std::string topic = *it;
+      std::cout<<topic<<std::endl;
 
-  int bVelSource = 1;
-  _nh.getParam("/op_motion_predictor/velocitySource", bVelSource);
-  if(bVelSource == 0)
-    sub_robot_odom = nh.subscribe("/odom", 1, &MotionPrediction::callbackGetRobotOdom, this); // Def: 1
-  else if(bVelSource == 1)
-    sub_current_velocity = nh.subscribe("/current_velocity", 1, &MotionPrediction::callbackGetVehicleStatus, this); // Def: 1
-  else if(bVelSource == 2)
-    sub_can_info = nh.subscribe("/can_info", 1, &MotionPrediction::callbackGetCANInfo, this); // Def: 1
+      if(topic.find(std::string("rubis")) != std::string::npos){ // For rubis topic
+        objects_subs_.push_back(nh.subscribe(topic.c_str(), 1, &MotionPrediction::callbackGetRubisTrackedObjects, this));  
+      }
+      else{// For normal topic      
+        objects_subs_.push_back(nh.subscribe(topic.c_str(), 1, &MotionPrediction::callbackGetTrackedObjects, this));      
+      }
+      autoware_msgs::DetectedObjectArray msg;    
+      object_msg_list_.push_back(msg);
+    }
+
+    sub_current_pose   = nh.subscribe("/current_pose", 1,  &MotionPrediction::callbackGetCurrentPose,     this); // Def: 1
+    int bVelSource = 1;
+    _nh.getParam("/op_motion_predictor/velocitySource", bVelSource);
+    if(bVelSource == 0)
+      sub_robot_odom = nh.subscribe("/odom", 1, &MotionPrediction::callbackGetRobotOdom, this); // Def: 1
+    else if(bVelSource == 1)
+      sub_current_velocity = nh.subscribe("/current_velocity", 1, &MotionPrediction::callbackGetVehicleStatus, this); // Def: 1
+    else if(bVelSource == 2)
+      sub_can_info = nh.subscribe("/can_info", 1, &MotionPrediction::callbackGetCANInfo, this); // Def: 1
+  }
   
   UtilityHNS::UtilityH::GetTickCount(m_VisualizationTimer);
   PlannerHNS::ROSHelpers::InitPredMarkers(100, m_PredictedTrajectoriesDummy);
@@ -466,7 +481,7 @@ void MotionPrediction::callbackGetRubisTrackedObjects(const rubis_msgs::Detected
 void MotionPrediction::_callbackGetRubisTrackedObjects(rubis_msgs::DetectedObjectArray& objects_msg)
 {
   rubis::instance_ = objects_msg.instance;
-  rubis::obj_instance_ = objects_msg.instance;
+  rubis::obj_instance_ = objects_msg.obj_instance;
 
   UtilityHNS::UtilityH::GetTickCount(m_SensingTimer);
   m_TrackedObjects.clear();
@@ -488,7 +503,6 @@ void MotionPrediction::_callbackGetRubisTrackedObjects(rubis_msgs::DetectedObjec
   else{
     msg = objects_msg.object_array;
   }
-  
   
   PlannerHNS::DetectedObject obj;
 
@@ -560,7 +574,6 @@ void MotionPrediction::_callbackGetRubisTrackedObjects(rubis_msgs::DetectedObjec
     pub_rubis_predicted_objects_trajectories.publish(output_msg);
     
   }
-
 }
 
 void MotionPrediction::GenerateCurbsObstacles(std::vector<PlannerHNS::DetectedObject>& curb_obstacles)
@@ -889,6 +902,77 @@ void MotionPrediction::callbackGetVMNodes(const vector_map_msgs::NodeArray& msg)
   std::cout << "Received Nodes" << endl;
   if(m_MapRaw.pNodes == nullptr)
     m_MapRaw.pNodes = new UtilityHNS::AisanNodesFileReader(msg);
+}
+
+void MotionPrediction::callbackSvl(const rubis_msgs::DetectedObjectArray::ConstPtr& objects_msg, const rubis_msgs::PoseTwistStamped::ConstPtr& pose_twist_msg){
+  rubis::start_task_profiling();
+
+  // Update pose and velocity
+  m_CurrentPos = PlannerHNS::WayPoint(pose_twist_msg->pose.pose.position.x, pose_twist_msg->pose.pose.position.y, pose_twist_msg->pose.pose.position.z, tf::getYaw(pose_twist_msg->pose.pose.orientation));
+  bNewCurrentPos = true;
+
+  m_VehicleStatus.speed = pose_twist_msg->twist.twist.linear.x;
+  m_CurrentPos.v = m_VehicleStatus.speed;
+  if(fabs(pose_twist_msg->twist.twist.linear.x) > 0.25)
+    m_VehicleStatus.steer = atan(m_CarInfo.wheel_base * pose_twist_msg->twist.twist.angular.z/pose_twist_msg->twist.twist.linear.x);
+  UtilityHNS::UtilityH::GetTickCount(m_VehicleStatus.tStamp);
+  bVehicleStatus = true;
+
+  // Process objects
+  rubis_msgs::DetectedObjectArray msg = *objects_msg;
+  _callbackGetRubisTrackedObjects(msg);
+
+  if(m_MapType == PlannerHNS::MAP_KML_FILE && !bMap)
+  {
+    bMap = true;
+    PlannerHNS::MappingHelpers::LoadKML(m_MapPath, m_Map);
+  }
+  else if (m_MapType == PlannerHNS::MAP_FOLDER && !bMap)
+  {
+    bMap = true;
+    PlannerHNS::MappingHelpers::ConstructRoadNetworkFromDataFiles(m_MapPath, m_Map, true);
+  }
+  else if (m_MapType == PlannerHNS::MAP_AUTOWARE && !bMap)
+  {
+    std::vector<UtilityHNS::AisanDataConnFileReader::DataConn> conn_data;;
+
+    if(m_MapRaw.GetVersion()==2)
+    {
+      PlannerHNS::MappingHelpers::ConstructRoadNetworkFromROSMessageV2(m_MapRaw.pLanes->m_data_list, m_MapRaw.pPoints->m_data_list,
+          m_MapRaw.pCenterLines->m_data_list, m_MapRaw.pIntersections->m_data_list,m_MapRaw.pAreas->m_data_list,
+          m_MapRaw.pLines->m_data_list, m_MapRaw.pStopLines->m_data_list,  m_MapRaw.pSignals->m_data_list,
+          m_MapRaw.pVectors->m_data_list, m_MapRaw.pCurbs->m_data_list, m_MapRaw.pRoadedges->m_data_list, m_MapRaw.pWayAreas->m_data_list,
+          m_MapRaw.pCrossWalks->m_data_list, m_MapRaw.pNodes->m_data_list, conn_data,
+          m_MapRaw.pLanes, m_MapRaw.pPoints, m_MapRaw.pNodes, m_MapRaw.pLines, PlannerHNS::GPSPoint(), m_Map, true, m_PlanningParams.enableLaneChange, true);
+
+      if(m_Map.roadSegments.size() > 0)
+      {
+        bMap = true;
+        std::cout << " ******* Map V2 Is Loaded successfully from the Motion Predictor !! " << std::endl;
+      }
+    }
+    else if(m_MapRaw.GetVersion()==1)
+    {
+      PlannerHNS::MappingHelpers::ConstructRoadNetworkFromROSMessage(m_MapRaw.pLanes->m_data_list, m_MapRaw.pPoints->m_data_list,
+          m_MapRaw.pCenterLines->m_data_list, m_MapRaw.pIntersections->m_data_list,m_MapRaw.pAreas->m_data_list,
+          m_MapRaw.pLines->m_data_list, m_MapRaw.pStopLines->m_data_list,  m_MapRaw.pSignals->m_data_list,
+          m_MapRaw.pVectors->m_data_list, m_MapRaw.pCurbs->m_data_list, m_MapRaw.pRoadedges->m_data_list, m_MapRaw.pWayAreas->m_data_list,
+          m_MapRaw.pCrossWalks->m_data_list, m_MapRaw.pNodes->m_data_list, conn_data,  PlannerHNS::GPSPoint(), m_Map, true);
+
+      if(m_Map.roadSegments.size() > 0)
+      {
+        bMap = true;
+        std::cout << " ******* Map V1 Is Loaded successfully from the Motion Predictor !! " << std::endl;
+      }
+    }
+  }
+
+  if(UtilityHNS::UtilityH::GetTimeDiffNow(m_VisualizationTimer) > m_VisualizationTime)
+  {
+    VisualizePrediction();
+    UtilityHNS::UtilityH::GetTickCount(m_VisualizationTimer);
+  }
+  rubis::stop_task_profiling(rubis::instance_, rubis::obj_instance_);
 }
 
 }

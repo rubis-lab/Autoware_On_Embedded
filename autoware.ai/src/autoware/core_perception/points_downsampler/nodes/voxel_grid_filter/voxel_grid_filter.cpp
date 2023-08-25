@@ -98,6 +98,7 @@ inline static void publish_filtered_cloud(const sensor_msgs::PointCloud2::ConstP
   filtered_points_pub.publish(filtered_msg);
 
   rubis_msgs::PointCloud2 rubis_filtered_msg;
+  rubis_filtered_msg.header = filtered_msg.header;
   rubis_filtered_msg.msg = filtered_msg;
   rubis_filtered_msg.instance = rubis::instance_;
   rubis_filtered_points_pub.publish(rubis_filtered_msg);

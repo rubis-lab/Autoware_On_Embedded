@@ -50,7 +50,15 @@
 #include "op_planner/BehaviorPrediction.h"
 #include "op_utility/DataRW.h"
 
+#include <message_filters/subscriber.h>
+#include <message_filters/synchronizer.h>
+#include <message_filters/sync_policies/approximate_time.h>
+
 #include "rubis_msgs/DetectedObjectArray.h"
+#include "rubis_msgs/PoseTwistStamped.h"
+
+typedef message_filters::sync_policies::ApproximateTime<rubis_msgs::DetectedObjectArray, rubis_msgs::PoseTwistStamped> SyncPolicy;
+typedef message_filters::Synchronizer<SyncPolicy> Sync;
 
 namespace MotionPredictorNS
 {
@@ -124,6 +132,10 @@ protected:
   ros::Subscriber sub_robot_odom      ;
   ros::Subscriber sub_can_info      ;
   ros::Subscriber sub_StepSignal;
+  
+  message_filters::Subscriber<rubis_msgs::DetectedObjectArray> svl_objects_sub_;
+  message_filters::Subscriber<rubis_msgs::PoseTwistStamped> pose_twist_sub_;    
+  boost::shared_ptr<Sync> sync_;
 
   rubis_msgs::DetectedObjectArray objects_msgs_;
 
@@ -136,6 +148,7 @@ protected:
   void callbackGetCANInfo(const autoware_can_msgs::CANInfoConstPtr &msg);
   void callbackGetRobotOdom(const nav_msgs::OdometryConstPtr& msg);
   void callbackGetStepForwardSignals(const geometry_msgs::TwistStampedConstPtr& msg);
+  void callbackSvl(const rubis_msgs::DetectedObjectArray::ConstPtr& objects_msg, const rubis_msgs::PoseTwistStamped::ConstPtr& pose_twist_msg);
 
   //Helper functions
   void VisualizePrediction();

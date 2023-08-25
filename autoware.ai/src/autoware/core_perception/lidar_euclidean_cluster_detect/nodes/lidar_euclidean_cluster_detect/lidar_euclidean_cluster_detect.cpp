@@ -162,7 +162,7 @@ tf::StampedTransform findTransform(const std::string &in_target_frame, const std
   }
   catch (tf::TransformException ex)
   {
-    ROS_ERROR("%s", ex.what());
+    ROS_ERROR("[lidar_euclidean_cluster_detect] %s", ex.what());
     return transform;
   }
 
@@ -228,8 +228,10 @@ void publishDetectedObjects(const autoware_msgs::CloudClusterArray &in_clusters)
   }
   _pub_detected_objects.publish(detected_objects);
 
+  rubis_detected_objects.header = in_clusters.header;
+  rubis_detected_objects.object_array.header = in_clusters.header;
   rubis_detected_objects.instance = rubis::instance_;
-  rubis_detected_objects.instance = rubis::obj_instance_;
+  rubis_detected_objects.obj_instance = rubis::obj_instance_;
   rubis_detected_objects.object_array = detected_objects;
   
   _pub_rubis_detected_objects.publish(rubis_detected_objects);

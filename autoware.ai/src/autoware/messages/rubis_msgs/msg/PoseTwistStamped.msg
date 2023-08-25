@@ -1,4 +1,3 @@
-
 std_msgs/Header header
 uint64 instance
 geometry_msgs/PoseStamped pose

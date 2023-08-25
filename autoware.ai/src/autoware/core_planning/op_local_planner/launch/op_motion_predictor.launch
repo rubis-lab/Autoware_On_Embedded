@@ -10,6 +10,7 @@
   <arg name="enableParticleFilterPrediction"   default="false" />
   <arg name="input_object_list" default="[/tracked_objects]" />
   <arg name="object_tf_list" default="[/velodyne]" />
+  <arg name="use_svl_sensing" default="false" />
   
   
   <node pkg="op_local_planner" type="op_motion_predictor" name="op_motion_predictor" output="screen" >
@@ -23,6 +24,7 @@
     <param name="enableParticleFilterPrediction"   value="$(arg enableParticleFilterPrediction)" />
     <param name="input_object_list" value="$(arg input_object_list)" />
     <param name="object_tf_list" value="$(arg object_tf_list)" />
+    <param name="use_svl_sensing" value="$(arg use_svl_sensing)" />
   </node>
 
   <node pkg="detected_objects_visualizer" type="visualize_detected_objects" name="predicted_objects_visualizer"

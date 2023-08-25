@@ -65,14 +65,15 @@ bool RayGroundFilter::TransformPointCloud(const std::string& in_target_frame,
   }
 
   geometry_msgs::TransformStamped transform_stamped;
+  
   try
   {
     transform_stamped = tf_buffer_.lookupTransform(in_target_frame, in_cloud_ptr->header.frame_id,
-                                                   in_cloud_ptr->header.stamp, ros::Duration(1.0));
+                                                   in_cloud_ptr->header.stamp, ros::Duration(0.1));
   }
   catch (tf2::TransformException& ex)
   {
-    ROS_WARN("%s", ex.what());
+    ROS_WARN("[ray_ground_filter] %s, %lld.%lld", ex.what(), in_cloud_ptr->header.stamp.sec, in_cloud_ptr->header.stamp.nsec);
     return false;
   }
   // tf2::doTransform(*in_cloud_ptr, *out_cloud_ptr, transform_stamped);
@@ -90,7 +91,7 @@ void RayGroundFilter::publish_rubis_cloud(const ros::Publisher& in_publisher,
   sensor_msgs::PointCloud2::Ptr trans_cloud_msg_ptr(new sensor_msgs::PointCloud2);
   pcl::toROSMsg(*in_cloud_to_publish_ptr, *cloud_msg_ptr);
   cloud_msg_ptr->header.frame_id = base_frame_;
-  cloud_msg_ptr->header.stamp = in_header.stamp;
+  cloud_msg_ptr->header.stamp = ros::Time::now();
   const bool succeeded = TransformPointCloud(in_header.frame_id, cloud_msg_ptr, trans_cloud_msg_ptr);
   if (!succeeded)
   {
@@ -100,6 +101,7 @@ void RayGroundFilter::publish_rubis_cloud(const ros::Publisher& in_publisher,
   }
 
   rubis_msgs::PointCloud2 msg;
+  msg.header = in_header;
   msg.instance = rubis::instance_;
   msg.msg = *trans_cloud_msg_ptr;
   in_publisher.publish(msg);
@@ -414,6 +416,7 @@ void RayGroundFilter::RubisCloudCallback(const rubis_msgs::PointCloud2ConstPtr i
   rubis::start_task_profiling();
   sensor_msgs::PointCloud2ConstPtr in_sensor_cloud = boost::make_shared<const sensor_msgs::PointCloud2>(in_rubis_cloud->msg);
   rubis::instance_ = in_rubis_cloud->instance;
+  rubis::obj_instance_ = in_rubis_cloud->instance;
   PublishFilteredClouds(in_sensor_cloud);
   rubis::stop_task_profiling(rubis::instance_, rubis::obj_instance_);
 }
@@ -504,6 +507,7 @@ void RayGroundFilter::Run()
 
   rubis::init_task_profiling(task_response_time_filename);
 
+  std::cout<<"Subscribe topic: "<<"/rubis_"+input_point_topic_.substr(1)<<std::endl;
   points_node_sub_ = node_handle_.subscribe("/rubis_"+input_point_topic_.substr(1), 1, &RayGroundFilter::RubisCloudCallback, this);
 
   ROS_INFO("Ready");

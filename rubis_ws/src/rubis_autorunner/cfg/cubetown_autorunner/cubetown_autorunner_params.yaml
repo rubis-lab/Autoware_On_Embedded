@@ -114,7 +114,7 @@ op_global_planner:
   multilap_flag: 1
 
 op_common_params:
-  rollOutDensity: 4
+  rollOutDensity: 5.5
   rollOutsNumber: 2
   maxVelocity: 7.5
   maxAcceleration: 7.5

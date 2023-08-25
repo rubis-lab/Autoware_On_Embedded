@@ -121,7 +121,7 @@ enum class MethodType
 static MethodType _method_type = MethodType::PCL_GENERIC;
 
 static pose initial_pose, predict_pose, predict_pose_imu, predict_pose_odom, predict_pose_imu_odom, previous_pose, previous_gnss_pose,
-    ndt_pose, current_pose, current_pose_imu, current_pose_odom, current_pose_imu_odom, localizer_pose, current_kalman_pose, previous_kalman_pose;
+    ndt_pose, current_pose, current_pose_imu, current_pose_odom, current_pose_imu_odom, localizer_pose;
 
 static double offset_x, offset_y, offset_z, offset_yaw;  // current_pos - previous_pose
 static double offset_imu_x, offset_imu_y, offset_imu_z, offset_imu_roll, offset_imu_pitch, offset_imu_yaw;
@@ -233,9 +233,6 @@ static double _previous_ins_stat_acc_x = 0.0, _previous_ins_stat_acc_y = 0.0;
 static double _previous_ins_stat_yaw = 0.0;
 static double _previous_ins_stat_linear_velocity = 0.0, _previous_ins_stat_linear_acceleration = 0.0, _previous_ins_stat_angular_velocity = 0.0;
 
-static ros::Publisher is_kalman_filter_on_pub, kalman_filtered_pose_pub;
-static bool _is_kalman_filter_on = false;
-static LKF linear_kalman_filter;
 static double _previous_success_score;
 static bool _is_matching_failed = false;
 
@@ -267,7 +264,6 @@ static bool _use_local_transform = false;
 static bool _use_svl_gnss = false;
 static bool _use_imu = false;
 static bool _use_odom = false;
-static bool _use_kalman_filter = false;
 static bool _imu_upside_down = false;
 static bool _output_log_data = false;
 
@@ -984,9 +980,9 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
 
   matching_start = std::chrono::system_clock::now();
 
-  static tf::TransformBroadcaster br, kalman_br;
-  tf::Transform transform, kalman_transform;
-  tf::Quaternion predict_q, ndt_q, current_q, localizer_q, kalman_q, gnss_q;
+  static tf::TransformBroadcaster br;
+  tf::Transform transform;
+  tf::Quaternion predict_q, ndt_q, current_q, localizer_q, gnss_q;
 
   pcl::PointXYZ p;
   pcl::PointCloud<pcl::PointXYZ> filtered_scan;
@@ -1277,74 +1273,6 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
     angular_velocity = current_gnss_angular_velocity;
   }
 
-  // Enable Kalman Filter
-  /*
-  if(!_is_kalman_filter_on && _use_kalman_filter && _is_init_match_finished && _is_ins_stat_received){
-    _is_kalman_filter_on = true;
-    linear_kalman_filter.set_init_pose(current_pose.x, current_pose.y);
-  }
-  */
-  // Run Kalman Filter
-  /*
-  if(_is_kalman_filter_on){
-    Eigen::Vector2f u_k, z_k;
-
-    u_k << _previous_ins_stat_vel_x + 0.5f * _previous_ins_stat_acc_x * diff_time, _previous_ins_stat_vel_y + 0.5f * _previous_ins_stat_acc_y * diff_time;
-    z_k << current_pose.x, current_pose.y;
-
-    Eigen::Vector2f kalman_filtered_pose = linear_kalman_filter.run(diff_time, u_k, z_k);
-
-    current_kalman_pose.x = kalman_filtered_pose(0);
-    current_kalman_pose.y = kalman_filtered_pose(1);
-    current_kalman_pose.z = current_pose.z;
-    current_kalman_pose.roll = 0.0;
-    current_kalman_pose.pitch = 0.0;
-    current_kalman_pose.yaw = _current_ins_stat_yaw*M_PI/180.0;
-
-    // Check ndt matching failure    
-    double ndt_kalman_pose_diff = sqrt(pow(current_pose.x - current_kalman_pose.x,2) + pow(current_pose.y - current_kalman_pose.y, 2));
-
-    // std::cout<<"## pose diff: "<<ndt_kalman_pose_diff<< " | score diff: "<< abs(previous_score - fitness_score)<<std::endl;
-    // std::cout<<"fail score threshold: "<< _failure_score_diff_threshold <<" | restore score threshold: "<<_recovery_score_diff_threshold<<std::endl;\
-    // std::cout<<"fail pose threshold: "<< _failure_pose_diff_threshold <<" | restore pose threshold: "<<_recovery_pose_diff_threshold<<std::endl;
-    static int success_cnt = 1;
-    if(!_is_matching_failed && (ndt_kalman_pose_diff > _failure_pose_diff_threshold || abs(previous_score - fitness_score) > _failure_score_diff_threshold)){ 
-      #ifdef DEBUG
-        std::cout<<"NDT matching is FAILED! || FAILED?"<<_is_matching_failed <<" | score diff: " << abs(previous_score - fitness_score) << "|| pose_diff: " << ndt_kalman_pose_diff <<std::endl;
-      #endif
-      
-      _is_matching_failed = true;
-      
-    }    
-    else if( _is_matching_failed && (ndt_kalman_pose_diff < _recovery_pose_diff_threshold && abs(_previous_success_score - fitness_score) < _recovery_score_diff_threshold)){ // Recover success
-      if(success_cnt-- < 0){
-        #ifdef DEBUG
-        std::cout<<"NDT matching is ON! || FAILED?"<<_is_matching_failed << " | current score: "<<fitness_score<<" || previous_success_score: "<<_previous_success_score<<" || pose_diff: "<<ndt_kalman_pose_diff<<std::endl;
-        #endif
-        
-        _is_matching_failed = false;
-        success_cnt = 1;
-        
-      }
-    }
-
-    if(_is_matching_failed){
-      linear_kalman_filter.restore();
-      kalman_filtered_pose = linear_kalman_filter.run_without_update(diff_time, u_k);
-
-      current_kalman_pose.x = kalman_filtered_pose(0);
-      current_kalman_pose.y = kalman_filtered_pose(1);
-      current_kalman_pose.z = 0.0;
-
-      std::cout<<"[Restore] pose_diff]: "<< ndt_kalman_pose_diff << " | score diff: "<< abs(previous_score - fitness_score) <<std::endl;
-
-      // current_kalman_pose.roll = 0.0;
-      // current_kalman_pose.pitch = 0.0;
-      // current_kalman_pose.yaw = _current_ins_stat_yaw*M_PI/180.0;
-    }
-  }
-  */
-
   // Set values for publishing pose
   predict_q.setRPY(predict_pose.roll, predict_pose.pitch, predict_pose.yaw);
   if (_use_local_transform == true)
@@ -1376,7 +1304,7 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
 
   // tf::Quaternion predict_q_imu;
   // predict_q_imu.setRPY(predict_pose_imu.roll, predict_pose_imu.pitch, predict_pose_imu.yaw);
-  // predict_pose_imu_msg.header.frame_id = "map";
+  // predict_pose_imu_msg.header.frame_id = "/map";
   // predict_pose_imu_msg.header.stamp = input->header.stamp;
   // predict_pose_imu_msg.pose.position.x = predict_pose_imu.x;
   // predict_pose_imu_msg.pose.position.y = predict_pose_imu.y;
@@ -1389,7 +1317,7 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
 
   // tf::Quaternion predict_q_odom;
   // predict_q_odom.setRPY(predict_pose_odom.roll, predict_pose_odom.pitch, predict_pose_odom.yaw);
-  // predict_pose_odom_msg.header.frame_id = "map";
+  // predict_pose_odom_msg.header.frame_id = "/map";
   // predict_pose_odom_msg.header.stamp = input->header.stamp;
   // predict_pose_odom_msg.pose.position.x = predict_pose_odom.x;
   // predict_pose_odom_msg.pose.position.y = predict_pose_odom.y;
@@ -1402,7 +1330,7 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
 
   // tf::Quaternion predict_q_imu_odom;
   // predict_q_imu_odom.setRPY(predict_pose_imu_odom.roll, predict_pose_imu_odom.pitch, predict_pose_imu_odom.yaw);
-  // predict_pose_imu_odom_msg.header.frame_id = "map";
+  // predict_pose_imu_odom_msg.header.frame_id = "/map";
   // predict_pose_imu_odom_msg.header.stamp = input->header.stamp;
   // predict_pose_imu_odom_msg.pose.position.x = predict_pose_imu_odom.x;
   // predict_pose_imu_odom_msg.pose.position.y = predict_pose_imu_odom.y;
@@ -1415,12 +1343,6 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
 
   ndt_q.setRPY(ndt_pose.roll, ndt_pose.pitch, ndt_pose.yaw);
   
-  /*
-  if(_is_kalman_filter_on){
-    kalman_q.setRPY(current_kalman_pose.roll, current_kalman_pose.pitch, current_kalman_pose.yaw);
-  }
-  */
-  
   if (_use_svl_gnss){
     gnss_q.setRPY(current_gnss_pose.roll, current_gnss_pose.pitch, current_gnss_pose.yaw);
     ndt_pose_msg.header.frame_id = "/map";
@@ -1432,17 +1354,6 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
     ndt_pose_msg.pose.orientation.y = gnss_q.y();
     ndt_pose_msg.pose.orientation.z = gnss_q.z();
     ndt_pose_msg.pose.orientation.w = gnss_q.w();
-  }
-  else if(_is_matching_failed && _is_kalman_filter_on){
-    ndt_pose_msg.header.frame_id = "/map";
-    ndt_pose_msg.header.stamp = current_scan_time;
-    ndt_pose_msg.pose.position.x = current_kalman_pose.x;
-    ndt_pose_msg.pose.position.y = current_kalman_pose.y;
-    ndt_pose_msg.pose.position.z = current_kalman_pose.z;
-    ndt_pose_msg.pose.orientation.x = kalman_q.x();
-    ndt_pose_msg.pose.orientation.y = kalman_q.y();
-    ndt_pose_msg.pose.orientation.z = kalman_q.z();
-    ndt_pose_msg.pose.orientation.w = kalman_q.w();
   }
   else if (_use_local_transform == true){
     tf::Vector3 v(ndt_pose.x, ndt_pose.y, ndt_pose.z);
@@ -1468,7 +1379,6 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
     ndt_pose_msg.pose.orientation.z = ndt_q.z();
     ndt_pose_msg.pose.orientation.w = ndt_q.w();    
   }
-
 
   current_q.setRPY(current_pose.roll, current_pose.pitch, current_pose.yaw);
   // current_pose is published by vel_pose_mux
@@ -1556,6 +1466,7 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
 
   ndt_stat_pub.publish(ndt_stat_msg);
 
+  rubis_pose_twist_msg.header.stamp = ros::Time::now();
   rubis_pose_twist_msg.instance = rubis::instance_;
   rubis_pose_twist_msg.pose = ndt_pose_msg;
   rubis_pose_twist_msg.twist = estimate_twist_msg;
@@ -1603,39 +1514,28 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
   offset_imu_odom_yaw = 0.0;
 
   // Send TF "/base_link" to "/map"
+  static int cnt = 0;
   if(_use_svl_gnss){
     transform.setOrigin(tf::Vector3(current_gnss_pose.x, current_gnss_pose.y, current_gnss_pose.z));
     transform.setRotation(gnss_q);
     br.sendTransform(tf::StampedTransform(transform, current_scan_time, "/map", "/base_link"));
   }
-  else if(!_is_matching_failed){
-    transform.setOrigin(tf::Vector3(current_pose.x, current_pose.y, current_pose.z));
-    transform.setRotation(current_q);
-    //    br.sendTransform(tf::StampedTransform(transform, current_scan_time, "/map", "/base_link"));
-    if (_use_local_transform == true)
-    {
-      br.sendTransform(tf::StampedTransform(local_transform * transform, current_scan_time, "/map", "/base_link"));
+  else{
+    if(!_is_matching_failed){
+      transform.setOrigin(tf::Vector3(current_pose.x, current_pose.y, current_pose.z));
+      transform.setRotation(current_q);
+      //    br.sendTransform(tf::StampedTransform(transform, current_scan_time, "/map", "/base_link"));
+      if (_use_local_transform == true)
+      {
+        br.sendTransform(tf::StampedTransform(local_transform * transform, current_scan_time, "/map", "/base_link"));
+      }
+      else
+      {
+        br.sendTransform(tf::StampedTransform(transform, current_scan_time, "/map", "/base_link"));
+      }
     }
-    else
-    {
-      br.sendTransform(tf::StampedTransform(transform, current_scan_time, "/map", "/base_link"));
-    }
-  }
-  else{ // When matching is failed
-    transform.setOrigin(tf::Vector3(current_kalman_pose.x, current_kalman_pose.y, current_kalman_pose.z));
-    current_q.setRPY(current_kalman_pose.roll, current_kalman_pose.pitch, current_kalman_pose.yaw);      
-    transform.setRotation(current_q);
-    br.sendTransform(tf::StampedTransform(transform, current_scan_time, "/map", "/base_link"));
-  }
-  
-  // Send TF "/kalman" to "/map"
-  if(_is_kalman_filter_on){
-    kalman_transform.setOrigin(tf::Vector3(current_kalman_pose.x, current_kalman_pose.y, current_kalman_pose.z));    
-    kalman_transform.setRotation(kalman_q);
-    kalman_br.sendTransform(tf::StampedTransform(kalman_transform, current_scan_time, "/map", "/kalman"));
   }
 
-  // Update previous_*** when kalman filter is not enabled
   previous_pose.x = current_pose.x;
   previous_pose.y = current_pose.y;
   previous_pose.z = current_pose.z;
@@ -1651,45 +1551,6 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
   previous_velocity_y = current_velocity_y;
   previous_velocity_z = current_velocity_z;
   previous_accel = current_accel;  
-
-  /*
-  if(_is_kalman_filter_on){
-    geometry_msgs::Quaternion q;
-    ToQuaternion(current_kalman_pose.yaw, current_kalman_pose.pitch, current_kalman_pose.roll, q);
-
-    geometry_msgs::PoseStamped kalman_filtered_pose_msg;
-    kalman_filtered_pose_msg.header = ndt_pose_msg.header;
-    kalman_filtered_pose_msg.pose.position.x = current_kalman_pose.x;
-    kalman_filtered_pose_msg.pose.position.y = current_kalman_pose.y;
-    kalman_filtered_pose_msg.pose.position.z = current_kalman_pose.z;
-    kalman_filtered_pose_msg.pose.orientation = q;
-    kalman_filtered_pose_pub.publish(kalman_filtered_pose_msg);
-
-    // Update previous by kalman filter output
-    previous_kalman_pose.x = current_kalman_pose.x;
-    previous_kalman_pose.y = current_kalman_pose.y;
-    previous_kalman_pose.z = current_kalman_pose.z;
-    previous_kalman_pose.roll = current_kalman_pose.roll;
-    previous_kalman_pose.pitch = current_kalman_pose.pitch;
-    previous_kalman_pose.yaw = current_kalman_pose.yaw;
-
-    if(_is_matching_failed) previous_pose = previous_kalman_pose;
-
-    _previous_ins_stat_vel_x = _current_ins_stat_vel_x;
-    _previous_ins_stat_vel_y = _current_ins_stat_vel_y;
-    _previous_ins_stat_acc_x = _current_ins_stat_acc_x;
-    _previous_ins_stat_acc_y = _current_ins_stat_acc_y;
-    _previous_ins_stat_yaw = _current_ins_stat_yaw;
-    _previous_ins_stat_linear_velocity = _current_ins_stat_linear_velocity;
-    _previous_ins_stat_linear_acceleration = _current_ins_stat_linear_acceleration;
-    _previous_ins_stat_angular_velocity = _current_ins_stat_angular_velocity;
-
-  }
-  
-  std_msgs::Bool is_kalman_filter_on_msgs;
-  is_kalman_filter_on_msgs.data = _is_kalman_filter_on;
-  is_kalman_filter_on_pub.publish(is_kalman_filter_on_msgs);
-  */
 }
 
 static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input){
@@ -1756,7 +1617,6 @@ int main(int argc, char** argv)
   private_nh.getParam("offset", _offset);
   private_nh.getParam("get_height", _get_height);
   private_nh.getParam("use_local_transform", _use_local_transform);
-  private_nh.getParam("use_kalman_filter", _use_kalman_filter);
   private_nh.getParam("use_svl_gnss", _use_svl_gnss);
   private_nh.getParam("use_odom", _use_odom);
   private_nh.getParam("use_odom", _use_odom);
@@ -1773,33 +1633,6 @@ int main(int argc, char** argv)
   nh.param<float>("/ndt_matching/recovery_score_diff_threshold", _recovery_score_diff_threshold, 1.0);  
   nh.param<float>("/ndt_matching/failure_pose_diff_threshold", _failure_pose_diff_threshold, 4.0);
   nh.param<float>("/ndt_matching/recovery_pose_diff_threshold", _recovery_pose_diff_threshold, 1.0);
-
-  if(_use_kalman_filter){
-    std::vector<float> H_k_vec, Q_k_vec, R_k_vec, P_k_vec;
-
-    if(!nh.getParam("/ndt_matching/H_k", H_k_vec)){
-      ROS_ERROR("Failed to get parameter H_k");
-      exit(1);
-    }
-    if(!nh.getParam("/ndt_matching/Q_k", Q_k_vec)){
-      ROS_ERROR("Failed to get parameter Q_k");
-      exit(1);
-    }
-    if(!nh.getParam("/ndt_matching/R_k", R_k_vec)){
-      ROS_ERROR("Failed to get parameter R_k");
-      exit(1);
-    }
-    if(!nh.getParam("/ndt_matching/P_k", P_k_vec)){
-      ROS_ERROR("Failed to get parameter P_k");
-      exit(1);
-    }
-    
-    Eigen::Matrix2f H_k = Eigen::Matrix2f(H_k_vec.data());
-    Eigen::Matrix2f Q_k = Eigen::Matrix2f(Q_k_vec.data());
-    Eigen::Matrix2f R_k = Eigen::Matrix2f(R_k_vec.data());
-    Eigen::Matrix2f P_k = Eigen::Matrix2f(P_k_vec.data());
-    linear_kalman_filter = LKF(H_k, Q_k, R_k, P_k);
-  }
 
   try
   {
@@ -1905,8 +1738,6 @@ int main(int argc, char** argv)
   predict_pose_imu_pub = nh.advertise<geometry_msgs::PoseStamped>("/predict_pose_imu", 10);
   predict_pose_odom_pub = nh.advertise<geometry_msgs::PoseStamped>("/predict_pose_odom", 10);
   predict_pose_imu_odom_pub = nh.advertise<geometry_msgs::PoseStamped>("/predict_pose_imu_odom", 10);
-  is_kalman_filter_on_pub = nh.advertise<std_msgs::Bool>("/is_kalman_filter_on", 10);
-  kalman_filtered_pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/kalman_filtered_pose", 10);
 
   rubis_pose_twist_pub = nh.advertise<rubis_msgs::PoseTwistStamped>("/rubis_current_pose_twist",10);
   

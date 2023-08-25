@@ -132,6 +132,7 @@ protected:
   ros::Subscriber sub_current_velocity;
   ros::Subscriber sub_can_info;
   ros::Subscriber sub_road_status_occupancy;
+  ros::Subscriber sub_pose_twist;
 
 public:
   GlobalPlanner();
@@ -151,6 +152,7 @@ private:
   void callbackGetCANInfo(const autoware_can_msgs::CANInfoConstPtr &msg);
   void callbackGetRobotOdom(const nav_msgs::OdometryConstPtr& msg);
   void callbackGetRoadStatusOccupancyGrid(const nav_msgs::OccupancyGridConstPtr& msg);
+  void callbackPoseTwist(const rubis_msgs::PoseTwistStampedConstPtr& msg);
 
   protected:
     PlannerHNS::RoadNetwork m_Map;
