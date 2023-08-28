@@ -172,9 +172,6 @@ void TrajectoryEval::callbackGetGlobalPlannerPath(const autoware_msgs::LaneArray
 
 void TrajectoryEval::_callbackGetLocalPlannerPath(const rubis_msgs::LaneArrayWithPoseTwistConstPtr& msg)
 {
-  rubis::instance_ = msg->instance;
-  rubis::obj_instance_ = 0;
-
   rubis_msgs::PlanningInfo planning_info_msg;
   planning_info_msg.header = msg->header;
   planning_info_msg.instance = rubis::instance_;
@@ -333,7 +330,6 @@ void TrajectoryEval::_callbackGetLocalPlannerPath(const rubis_msgs::LaneArrayWit
 void TrajectoryEval::callbackGetPredictedObjects(const rubis_msgs::DetectedObjectArrayConstPtr& msg)
 {  
   object_msg_ = msg->object_array;
-  rubis::obj_instance_ = msg->obj_instance;
   is_objects_updated_ = true;
   // _callbackGetPredictedObjects(object_msg_);
 }
