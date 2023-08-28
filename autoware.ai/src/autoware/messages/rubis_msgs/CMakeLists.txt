@@ -23,6 +23,7 @@ add_message_files(
     LaneWithPoseTwist.msg
     LaneArrayWithPoseTwist.msg
     DetectedObjectArray.msg
+    PlanningInfo.msg
 )
 
 generate_messages(

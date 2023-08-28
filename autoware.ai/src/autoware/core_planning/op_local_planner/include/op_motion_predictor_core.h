@@ -52,12 +52,12 @@
 
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
-#include <message_filters/sync_policies/approximate_time.h>
+#include <message_filters/sync_policies/exact_time.h>
 
 #include "rubis_msgs/DetectedObjectArray.h"
 #include "rubis_msgs/PoseTwistStamped.h"
 
-typedef message_filters::sync_policies::ApproximateTime<rubis_msgs::DetectedObjectArray, rubis_msgs::PoseTwistStamped> SyncPolicy;
+typedef message_filters::sync_policies::ExactTime<rubis_msgs::DetectedObjectArray, rubis_msgs::PoseTwistStamped> SyncPolicy;
 typedef message_filters::Synchronizer<SyncPolicy> Sync;
 
 namespace MotionPredictorNS

@@ -47,8 +47,8 @@ TrajectoryGen::TrajectoryGen()
 
   int bVelSource = 1;
   _nh.getParam("/op_trajectory_generator/velocitySource", bVelSource);
-  sub_GlobalPlannerPaths = nh.subscribe("/lane_waypoints_array", 1, &TrajectoryGen::callbackGetGlobalPlannerPath, this);
-  sub_pose_twist = nh.subscribe("/rubis_current_pose_twist", 1, &TrajectoryGen::callbackGetCurrentPoseTwist, this); // Def: 10
+  sub_GlobalPlannerPaths = nh.subscribe("/lane_waypoints_array", 10, &TrajectoryGen::callbackGetGlobalPlannerPath, this);
+  sub_pose_twist = nh.subscribe("/rubis_current_pose_twist", 10, &TrajectoryGen::callbackGetCurrentPoseTwist, this); // Def: 10
 }
 
 TrajectoryGen::~TrajectoryGen()
@@ -193,18 +193,21 @@ void TrajectoryGen::callbackGetCurrentPoseTwist(const rubis_msgs::PoseTwistStamp
       }
     }
 
+    local_lanes.header = msg->header;
     local_lanes.instance = rubis::instance_;
+    local_lanes.obj_instance = 0;
     local_lanes.pose = current_pose_;
     local_lanes.twist = current_twist_;
 
     pub_LocalTrajectoriesWithPoseTwist.publish(local_lanes);
-  }
-  else{
-    sub_GlobalPlannerPaths = nh.subscribe("/lane_waypoints_array",   1,    &TrajectoryGen::callbackGetGlobalPlannerPath,   this);
 
+    // Visualize generated local trajectories
     visualization_msgs::MarkerArray all_rollOuts;
     PlannerHNS::ROSHelpers::TrajectoriesToMarkers(m_RollOuts, all_rollOuts);
     pub_LocalTrajectoriesRviz.publish(all_rollOuts);
+  }
+  else{
+    sub_GlobalPlannerPaths = nh.subscribe("/lane_waypoints_array",   1,    &TrajectoryGen::callbackGetGlobalPlannerPath,   this);    
   }
   
   rubis::stop_task_profiling(rubis::instance_, rubis::obj_instance_);

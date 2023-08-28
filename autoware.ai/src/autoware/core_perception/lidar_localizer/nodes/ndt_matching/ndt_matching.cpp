@@ -76,7 +76,8 @@
 
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
-#include <message_filters/sync_policies/approximate_time.h>
+#include <message_filters/sync_policies/exact_time.h>
+
 
 #include <rubis_lib/sched.hpp>
 #include <rubis_msgs/PointCloud2.h>
@@ -97,7 +98,7 @@
 
 #define DEBUG
 
-typedef message_filters::sync_policies::ApproximateTime<rubis_msgs::PointCloud2, rubis_msgs::PoseTwistStamped> SyncPolicy;
+typedef message_filters::sync_policies::ExactTime<rubis_msgs::PointCloud2, rubis_msgs::PoseTwistStamped> SyncPolicy;
 typedef message_filters::Synchronizer<SyncPolicy> Sync;
 boost::shared_ptr<Sync> sync_;
 
@@ -1466,7 +1467,7 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr& input)
 
   ndt_stat_pub.publish(ndt_stat_msg);
 
-  rubis_pose_twist_msg.header.stamp = ros::Time::now();
+  rubis_pose_twist_msg.header.stamp = input->header.stamp;
   rubis_pose_twist_msg.instance = rubis::instance_;
   rubis_pose_twist_msg.pose = ndt_pose_msg;
   rubis_pose_twist_msg.twist = estimate_twist_msg;
@@ -1761,11 +1762,11 @@ int main(int argc, char** argv)
 
   message_filters::Subscriber<rubis_msgs::PointCloud2> filtered_points_sub;
   message_filters::Subscriber<rubis_msgs::PoseTwistStamped> svl_pose_twist_sub;
-  filtered_points_sub.subscribe(nh, "/rubis_filtered_points", 1);
-  svl_pose_twist_sub.subscribe(nh, "/svl_pose_twist", 1);
+  filtered_points_sub.subscribe(nh, "/rubis_filtered_points", 50);
+  svl_pose_twist_sub.subscribe(nh, "/svl_pose_twist", 50);
 
-  typedef message_filters::sync_policies::ApproximateTime<rubis_msgs::PointCloud2, rubis_msgs::PoseTwistStamped> SyncPolicy;
-  sync_.reset(new message_filters::Synchronizer<SyncPolicy>(SyncPolicy(10), filtered_points_sub, svl_pose_twist_sub));
+  typedef message_filters::sync_policies::ExactTime<rubis_msgs::PointCloud2, rubis_msgs::PoseTwistStamped> SyncPolicy;
+  sync_.reset(new message_filters::Synchronizer<SyncPolicy>(SyncPolicy(50), filtered_points_sub, svl_pose_twist_sub));
   sync_->registerCallback(boost::bind(&svl_callback, _1, _2));
 
   pthread_t thread;

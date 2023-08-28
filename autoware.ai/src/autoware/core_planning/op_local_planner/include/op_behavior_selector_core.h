@@ -63,6 +63,7 @@
 
 #include "rubis_msgs/LaneArrayWithPoseTwist.h"
 #include "rubis_msgs/LaneWithPoseTwist.h"
+#include "rubis_msgs/PlanningInfo.h"
 
 
 namespace BehaviorGeneratorNS
@@ -143,22 +144,13 @@ protected: //Planning Related variables
   ros::Publisher pub_currentState;
 
   // define subscribers.
-  ros::Subscriber sub_current_pose;
-  ros::Subscriber sub_current_velocity;
   ros::Subscriber sub_GlobalPlannerPaths;
-  ros::Subscriber sub_LocalPlannerPaths;
+  // ros::Subscriber sub_LocalPlannerPaths;
   ros::Subscriber sub_TrafficLightStatus;
   ros::Subscriber sub_TrafficLightSignals;
-  ros::Subscriber sub_Trajectory_Cost;
+  // ros::Subscriber sub_Trajectory_Cost;
 
-  ros::Subscriber sub_twist_cmd;
-  ros::Subscriber sub_twist_raw;
-  ros::Subscriber sub_ctrl_cmd;
-
-  //Added by PHY & HJW
-  ros::Subscriber sub_DistanceToPedestrian;
-  ros::Subscriber sub_SprintSwitch;
-  ros::Subscriber sub_IntersectionCondition;
+  ros::Subscriber sub_PlanningInfo;
 
   // Others
   timespec planningTimer;
@@ -166,18 +158,13 @@ protected: //Planning Related variables
 
   // Callback function for subscriber.
   void callbackGetGlobalPlannerPath(const autoware_msgs::LaneArrayConstPtr& msg);
-  void callbackGetLocalPlannerPath(const rubis_msgs::LaneArrayWithPoseTwistConstPtr& msg);
-  void callbackGetLocalTrajectoryCost(const autoware_msgs::LaneConstPtr& msg);
-  void callbackDistanceToPedestrian(const std_msgs::Float64& msg);
-  void _callbackDistanceToPedestrian();
-  void callbackIntersectionCondition(const autoware_msgs::IntersectionCondition& msg);
+  void callbackPlanningInfo(const rubis_msgs::PlanningInfoConstPtr& msg);
 
-  void callbackGetV2XTrafficLightSignals(const autoware_msgs::RUBISTrafficSignalArray& msg);
-  void callbackSprintSwitch(const std_msgs::Bool& msg);
+  // void callbackGetV2XTrafficLightSignals(const autoware_msgs::RUBISTrafficSignalArray& msg);
 
   //Helper Functions
   void UpdatePlanningParams(ros::NodeHandle& _nh);
-  void SendLocalPlanningTopics(const rubis_msgs::LaneArrayWithPoseTwistConstPtr& msg);
+  void SendLocalPlanningTopics(const rubis_msgs::PlanningInfoConstPtr& msg);
   void VisualizeLocalPlanner();
   void LogLocalPlanningInfo(double dt);
   bool GetBaseMapTF();  

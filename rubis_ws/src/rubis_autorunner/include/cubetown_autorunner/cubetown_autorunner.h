@@ -9,6 +9,7 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include <rubis_msgs/PointCloud2.h>
+#include <rubis_msgs/PoseTwistStamped.h>
 #define SLEEP_PERIOD 1
 
 class CubetownAutorunner : public AutorunnerBase{
@@ -19,7 +20,7 @@ private:
     virtual void register_subscribers();
 private:
     void points_raw_cb(const rubis_msgs::PointCloud2& msg);
-    void ndt_pose_cb(const geometry_msgs::PoseStamped& msg);
+    void pose_twist_cb(const rubis_msgs::PoseTwistStamped& msg);
     void detection_cb(const autoware_msgs::DetectedObjectArray& msg);
     void behavior_state_cb(const visualization_msgs::MarkerArray& msg);
 

@@ -1104,7 +1104,7 @@ int main(int argc, char **argv)
   _velodyne_transform_available = false;
 
   // Create a ROS subscriber for the input point cloud
-  ros::Subscriber sub = h.subscribe(points_topic, 1, velodyne_callback);
+  ros::Subscriber sub = h.subscribe(points_topic, 10, velodyne_callback);
   
   ros::spin();
 

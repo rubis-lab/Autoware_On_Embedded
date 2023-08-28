@@ -51,30 +51,30 @@ BehaviorGen::BehaviorGen()
   m_OriginPos.position.y  = transform.getOrigin().y();
   m_OriginPos.position.z  = transform.getOrigin().z();
 
-  pub_LocalPath = nh.advertise<autoware_msgs::Lane>("final_waypoints", 1,true);
+  // pub_LocalPath = nh.advertise<autoware_msgs::Lane>("final_waypoints", 1,true);
   pub_LocalPathWithPosePub = nh.advertise<rubis_msgs::LaneWithPoseTwist>("final_waypoints_with_pose_twist", 1,true);
-  pub_LocalBasePath = nh.advertise<autoware_msgs::Lane>("base_waypoints", 1,true);
+  // pub_LocalBasePath = nh.advertise<autoware_msgs::Lane>("base_waypoints", 1,true);
   pub_ClosestIndex = nh.advertise<std_msgs::Int32>("closest_waypoint", 1,true);
-  pub_BehaviorState = nh.advertise<geometry_msgs::TwistStamped>("current_behavior", 1);
+  // pub_BehaviorState = nh.advertise<geometry_msgs::TwistStamped>("current_behavior", 1);
   pub_SimuBoxPose    = nh.advertise<geometry_msgs::PoseArray>("sim_box_pose_ego", 1);
   pub_BehaviorStateRviz = nh.advertise<visualization_msgs::MarkerArray>("behavior_state", 1);
   pub_SelectedPathRviz = nh.advertise<visualization_msgs::MarkerArray>("local_selected_trajectory_rviz", 1);
-  pub_EmergencyStop = nh.advertise<std_msgs::Bool>("emergency_stop", 1);
+  // pub_EmergencyStop = nh.advertise<std_msgs::Bool>("emergency_stop", 1);
   pub_turnAngle = nh.advertise<std_msgs::Float64>("turn_angle", 1);
   pub_turnMarker = nh.advertise<visualization_msgs::MarkerArray>("turn_marker", 1);
-  pub_currentState = nh.advertise<std_msgs::Int32>("current_state", 1);
+  // pub_currentState = nh.advertise<std_msgs::Int32>("current_state", 1);
 
   // int bVelSource = 1;
   // _nh.getParam("/op_trajectory_evaluator/velocitySource", bVelSource);
 
   sub_GlobalPlannerPaths = nh.subscribe("/lane_waypoints_array", 1, &BehaviorGen::callbackGetGlobalPlannerPath, this);
-  sub_LocalPlannerPaths = nh.subscribe("/local_weighted_trajectories_with_pose_twist", 1, &BehaviorGen::callbackGetLocalPlannerPath, this);
-  sub_Trajectory_Cost = nh.subscribe("/local_trajectory_cost", 1, &BehaviorGen::callbackGetLocalTrajectoryCost, this);
-  // sub_TrafficLightSignals  = nh.subscribe("/v2x_traffic_signal", 1, &BehaviorGen::callbackGetV2XTrafficLightSignals, this);
+  // sub_LocalPlannerPaths = nh.subscribe("/local_weighted_trajectories_with_pose_twist", 1, &BehaviorGen::callbackGetLocalPlannerPath, this);
+  // sub_Trajectory_Cost = nh.subscribe("/local_trajectory_cost", 1, &BehaviorGen::callbackGetLocalTrajectoryCost, this);
 
-  sub_DistanceToPedestrian = nh.subscribe("/distance_to_pedestrian", 1, &BehaviorGen::callbackDistanceToPedestrian, this);
-  sub_IntersectionCondition = nh.subscribe("/intersection_condition", 1, &BehaviorGen::callbackIntersectionCondition, this);
-  sub_SprintSwitch = nh.subscribe("/sprint_switch", 1, &BehaviorGen::callbackSprintSwitch, this);
+  // sub_DistanceToPedestrian = nh.subscribe("/distance_to_pedestrian", 1, &BehaviorGen::callbackDistanceToPedestrian, this);
+  // sub_IntersectionCondition = nh.subscribe("/intersection_condition", 1, &BehaviorGen::callbackIntersectionCondition, this);
+  // sub_SprintSwitch = nh.subscribe("/sprint_switch", 1, &BehaviorGen::callbackSprintSwitch, this);
+  sub_PlanningInfo = nh.subscribe("/planning_info", 10, &BehaviorGen::callbackPlanningInfo, this);
 
   //Mapping Section
   sub_lanes = nh.subscribe("/vector_map_info/lane", 1, &BehaviorGen::callbackGetVMLanes,  this);
@@ -183,32 +183,6 @@ void BehaviorGen::UpdatePlanningParams(ros::NodeHandle& _nh)
   m_BehaviorGenerator.m_obstacleWaitingTimeinIntersection = m_obstacleWaitingTimeinIntersection;
 }
 
-void BehaviorGen::_callbackDistanceToPedestrian(){
-  if(distance_to_pdestrian_ < m_distanceToPedestrianThreshold){
-    m_PlanningParams.pedestrianAppearence = true;
-  }
-  else
-  {
-    m_PlanningParams.pedestrianAppearence = false;
-  }
-  m_BehaviorGenerator.UpdatePedestrianAppearence(m_PlanningParams.pedestrianAppearence);
-}
-
-void BehaviorGen::callbackDistanceToPedestrian(const std_msgs::Float64& msg){
-  distance_to_pdestrian_ = msg.data;
-}
-
-void BehaviorGen::callbackIntersectionCondition(const autoware_msgs::IntersectionCondition& msg){
-  m_BehaviorGenerator.m_isInsideIntersection = msg.isIntersection;
-  m_BehaviorGenerator.m_closestIntersectionDistance = msg.intersectionDistance;
-  m_BehaviorGenerator.m_riskyLeft = msg.riskyLeftTurn;
-  m_BehaviorGenerator.m_riskyRight = msg.riskyRightTurn;
-}
-
-void BehaviorGen::callbackSprintSwitch(const std_msgs::Bool& msg){
-  m_sprintSwitch = msg.data;
-}
-
 void BehaviorGen::callbackGetGlobalPlannerPath(const autoware_msgs::LaneArrayConstPtr& msg)
 {
   if(msg->lanes.size() > 0 && bMap)
@@ -284,34 +258,32 @@ void BehaviorGen::callbackGetGlobalPlannerPath(const autoware_msgs::LaneArrayCon
   }
 }
 
-void BehaviorGen::callbackGetLocalTrajectoryCost(const autoware_msgs::LaneConstPtr& msg)
-{
-  if(m_BehaviorGenerator.m_pCurrentBehaviorState->m_Behavior == PlannerHNS::INTERSECTION_STATE){
-    bBestCost = true;
-    m_TrajectoryBestCost.closest_obj_distance = msg->closest_object_distance;
-    m_TrajectoryBestCost.closest_obj_velocity = msg->closest_object_velocity;
-    return;
-  }
-  bBestCost = true;
-  m_TrajectoryBestCost.bBlocked = msg->is_blocked;
-  m_TrajectoryBestCost.index = msg->lane_index;
-  m_TrajectoryBestCost.cost = msg->cost;
-  m_TrajectoryBestCost.closest_obj_distance = msg->closest_object_distance;
-  m_TrajectoryBestCost.closest_obj_velocity = msg->closest_object_velocity;
-}
 
-void BehaviorGen::callbackGetLocalPlannerPath(const rubis_msgs::LaneArrayWithPoseTwistConstPtr& msg)
+
+
+void BehaviorGen::callbackPlanningInfo(const rubis_msgs::PlanningInfoConstPtr& msg)
 {
-  // Before spinOnce
   rubis::start_task_profiling();
   rubis::instance_ = msg->instance;
   rubis::obj_instance_ = msg->obj_instance;
-
-  // Callback for distance to pedestrian
-  _callbackDistanceToPedestrian();
-
   static double prev_x = 0.0, prev_y = 0.0, prev_speed = 0.0;
-  // Callback for current velocity
+
+  // distance to pedestrian
+  distance_to_pdestrian_ = msg->distance_to_pedestrian.data;
+  if(distance_to_pdestrian_ < m_distanceToPedestrianThreshold) m_PlanningParams.pedestrianAppearence = true;  
+  else m_PlanningParams.pedestrianAppearence = false;
+  m_BehaviorGenerator.UpdatePedestrianAppearence(m_PlanningParams.pedestrianAppearence);
+
+  // intersection condition
+  m_BehaviorGenerator.m_isInsideIntersection = msg->intersection_condition.isIntersection;
+  m_BehaviorGenerator.m_closestIntersectionDistance = msg->intersection_condition.intersectionDistance;
+  m_BehaviorGenerator.m_riskyLeft = msg->intersection_condition.riskyLeftTurn;
+  m_BehaviorGenerator.m_riskyRight = msg->intersection_condition.riskyRightTurn;
+
+  // sprint switch
+  m_sprintSwitch = msg->sprint_switch.data;
+
+  // current velocity
   if(prev_speed != msg->twist.twist.linear.x){
     m_VehicleStatus.speed = msg->twist.twist.linear.x;
     m_CurrentPos.v = m_VehicleStatus.speed;
@@ -322,7 +294,7 @@ void BehaviorGen::callbackGetLocalPlannerPath(const rubis_msgs::LaneArrayWithPos
     prev_speed = msg->twist.twist.linear.x;
   }
 
-  // Callback for current pose
+  // current pose
   if(prev_x != msg->pose.pose.position.x || prev_y != msg->pose.pose.position.y){
     m_CurrentPos = PlannerHNS::WayPoint(msg->pose.pose.position.x, msg->pose.pose.position.y, msg->pose.pose.position.z, tf::getYaw(msg->pose.pose.orientation));
     bNewCurrentPos = true;
@@ -330,7 +302,21 @@ void BehaviorGen::callbackGetLocalPlannerPath(const rubis_msgs::LaneArrayWithPos
     prev_y = msg->pose.pose.position.y;
   }
 
-  // Callback for local planner path
+  // trajectory cost
+  if(m_BehaviorGenerator.m_pCurrentBehaviorState->m_Behavior == PlannerHNS::INTERSECTION_STATE){
+    bBestCost = true;
+    m_TrajectoryBestCost.closest_obj_distance = msg->trajectory_cost.closest_object_distance;
+    m_TrajectoryBestCost.closest_obj_velocity = msg->trajectory_cost.closest_object_velocity;
+    return;
+  }
+  bBestCost = true;
+  m_TrajectoryBestCost.bBlocked = msg->trajectory_cost.is_blocked;
+  m_TrajectoryBestCost.index = msg->trajectory_cost.lane_index;
+  m_TrajectoryBestCost.cost = msg->trajectory_cost.cost;
+  m_TrajectoryBestCost.closest_obj_distance = msg->trajectory_cost.closest_object_distance;
+  m_TrajectoryBestCost.closest_obj_velocity = msg->trajectory_cost.closest_object_velocity;
+
+  // lane array
   if(msg->lane_array.lanes.size() > 0)
   {
     m_RollOuts.clear();
@@ -457,10 +443,10 @@ void BehaviorGen::callbackGetLocalPlannerPath(const rubis_msgs::LaneArrayWithPos
     
     m_BehaviorGenerator.m_sprintSwitch = m_sprintSwitch;
     m_CurrentBehavior = m_BehaviorGenerator.DoOneStep(dt, m_CurrentPos, m_VehicleStatus, 1, m_CurrTrafficLight, m_TrajectoryBestCost, 0);
-    std_msgs::Int32 curr_state_msg;
-    curr_state_msg.data = m_CurrentBehavior.state;
-
-    pub_currentState.publish(curr_state_msg);
+    
+    // std_msgs::Int32 curr_state_msg;
+    // curr_state_msg.data = m_CurrentBehavior.state;
+    // pub_currentState.publish(curr_state_msg);
 
     CalculateTurnAngle(m_BehaviorGenerator.m_turnWaypoint);
     m_BehaviorGenerator.m_turnAngle = m_turnAngle;
@@ -469,10 +455,10 @@ void BehaviorGen::callbackGetLocalPlannerPath(const rubis_msgs::LaneArrayWithPos
     turn_angle_msg.data = m_turnAngle;
     pub_turnAngle.publish(turn_angle_msg);
 
-    emergency_stop_msg.data = false;
-    if(m_CurrentBehavior.maxVelocity == -1)//Emergency Stop!
-      emergency_stop_msg.data = true;
-    pub_EmergencyStop.publish(emergency_stop_msg);
+    // emergency_stop_msg.data = false;
+    // if(m_CurrentBehavior.maxVelocity == -1)//Emergency Stop!
+    //   emergency_stop_msg.data = true;
+    // pub_EmergencyStop.publish(emergency_stop_msg);
 
     SendLocalPlanningTopics(msg);
     VisualizeLocalPlanner();
@@ -499,12 +485,15 @@ void BehaviorGen::callbackGetLocalPlannerPath(const rubis_msgs::LaneArrayWithPos
 
     pub_turnMarker.publish(turn_marker);
   }
-  else
+  else{
     sub_GlobalPlannerPaths = nh.subscribe("/lane_waypoints_array",   1,    &BehaviorGen::callbackGetGlobalPlannerPath,   this);
+  }
 
   rubis::stop_task_profiling(rubis::instance_, rubis::obj_instance_);
 }
 
+
+/*
 void BehaviorGen::callbackGetV2XTrafficLightSignals(const autoware_msgs::RUBISTrafficSignalArray& msg)
 {
   bNewLightSignal = true;
@@ -543,6 +532,7 @@ void BehaviorGen::callbackGetV2XTrafficLightSignals(const autoware_msgs::RUBISTr
 
   m_CurrTrafficLight = simulatedLights;
 }
+*/
 
 void BehaviorGen::VisualizeLocalPlanner()
 {
@@ -553,14 +543,14 @@ void BehaviorGen::VisualizeLocalPlanner()
   else if(m_BehaviorGenerator.m_pCurrentBehaviorState->GetCalcParams()->iCurrSafeTrajectory < m_BehaviorGenerator.m_pCurrentBehaviorState->GetCalcParams()->iCentralTrajectory)
     iDirection = -1;
   PlannerHNS::ROSHelpers::VisualizeBehaviorState(m_CurrentPos, m_CurrentBehavior, !m_BehaviorGenerator.m_pCurrentBehaviorState->GetCalcParams()->bTrafficIsRed , iDirection, behavior_rviz, "beh_state");
-  //pub_BehaviorStateRviz.publish(behavior_rviz);
 
   visualization_msgs::MarkerArray markerArray;
-
-  //PlannerHNS::ROSHelpers::GetIndicatorArrows(m_CurrentPos, m_CarInfo.width, m_CarInfo.length, m_CurrentBehavior.indicator, 0, markerArray);
+  behavior_rviz.scale.x = 5.0;
+  behavior_rviz.scale.y = 5.0;
+  behavior_rviz.scale.z = 5.0;
 
   markerArray.markers.push_back(behavior_rviz);
-
+  
   pub_BehaviorStateRviz.publish(markerArray);
 
   //To Test Synchronization Problem
@@ -574,27 +564,27 @@ void BehaviorGen::VisualizeLocalPlanner()
 //  pub_SelectedPathRviz.publish(selected_path);
 }
 
-void BehaviorGen::SendLocalPlanningTopics(const rubis_msgs::LaneArrayWithPoseTwistConstPtr& msg)
+void BehaviorGen::SendLocalPlanningTopics(const rubis_msgs::PlanningInfoConstPtr& msg)
 {
   //Send Behavior State
-  geometry_msgs::Twist t;
-  geometry_msgs::TwistStamped behavior;
-  t.linear.x = m_CurrentBehavior.bNewPlan;
-  t.linear.y = m_CurrentBehavior.followDistance;
-  t.linear.z = m_CurrentBehavior.followVelocity;
-  t.angular.x = (int)m_CurrentBehavior.indicator;
-  t.angular.y = (int)m_CurrentBehavior.state;
-  t.angular.z = m_CurrentBehavior.iTrajectory;
-  behavior.twist = t;
-  behavior.header.stamp = ros::Time::now();
-  pub_BehaviorState.publish(behavior);
+  // geometry_msgs::Twist t;
+  // geometry_msgs::TwistStamped behavior;
+  // t.linear.x = m_CurrentBehavior.bNewPlan;
+  // t.linear.y = m_CurrentBehavior.followDistance;
+  // t.linear.z = m_CurrentBehavior.followVelocity;
+  // t.angular.x = (int)m_CurrentBehavior.indicator;
+  // t.angular.y = (int)m_CurrentBehavior.state;
+  // t.angular.z = m_CurrentBehavior.iTrajectory;
+  // behavior.twist = t;
+  // behavior.header.stamp = msg->header.stamp;
+  // pub_BehaviorState.publish(behavior);
 
   //Send Ego Vehicle Simulation Pose Data
   geometry_msgs::PoseArray sim_data;
   geometry_msgs::Pose p_id, p_pose, p_box;
 
   sim_data.header.frame_id = "map";
-  sim_data.header.stamp = ros::Time();
+  sim_data.header.stamp = msg->header.stamp;
   p_id.position.x = 0;
   p_pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, UtilityHNS::UtilityH::SplitPositiveAngle(m_BehaviorGenerator.state.pos.a));
 
@@ -620,7 +610,8 @@ void BehaviorGen::SendLocalPlanningTopics(const rubis_msgs::LaneArrayWithPoseTwi
 
   closest_waypoint.data = 1;
   pub_ClosestIndex.publish(closest_waypoint);
-  pub_LocalBasePath.publish(m_CurrentTrajectoryToSend);
+  // m_CurrentTrajectoryToSend.header.stamp = msg->header.stamp;
+  // pub_LocalBasePath.publish(m_CurrentTrajectoryToSend);
 
   rubis_msgs::LaneWithPoseTwist final_waypoints_with_pose_twist_msg;
   final_waypoints_with_pose_twist_msg.instance = rubis::instance_;
@@ -629,8 +620,11 @@ void BehaviorGen::SendLocalPlanningTopics(const rubis_msgs::LaneArrayWithPoseTwi
   final_waypoints_with_pose_twist_msg.pose = msg->pose;
   final_waypoints_with_pose_twist_msg.twist = msg->twist;
 
+  final_waypoints_with_pose_twist_msg.header = msg->header;
   pub_LocalPathWithPosePub.publish(final_waypoints_with_pose_twist_msg);
-  pub_LocalPath.publish(m_CurrentTrajectoryToSend);
+
+  // m_CurrentTrajectoryToSend.header.stamp = msg->header.stamp;
+  // pub_LocalPath.publish(m_CurrentTrajectoryToSend);
 
   
 }

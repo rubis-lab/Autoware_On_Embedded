@@ -44,20 +44,15 @@ TrajectoryEval::TrajectoryEval()
   pub_CollisionPointsRviz = nh.advertise<visualization_msgs::MarkerArray>("dynamic_collision_points_rviz", 1);
   pub_LocalWeightedTrajectoriesRviz = nh.advertise<visualization_msgs::MarkerArray>("local_trajectories_eval_rviz", 1);
   // pub_LocalWeightedTrajectories = nh.advertise<rubis_msgs::LaneArrayWithPoseTwist>("local_weighted_trajectories", 1);
-  pub_LocalWeightedTrajectoriesWithPoseTwist = nh.advertise<rubis_msgs::LaneArrayWithPoseTwist>("local_weighted_trajectories_with_pose_twist", 1);
-  pub_TrajectoryCost = nh.advertise<autoware_msgs::Lane>("local_trajectory_cost", 1);
+  // pub_LocalWeightedTrajectoriesWithPoseTwist = nh.advertise<rubis_msgs::LaneArrayWithPoseTwist>("local_weighted_trajectories_with_pose_twist", 1);
+  // pub_TrajectoryCost = nh.advertise<autoware_msgs::Lane>("local_trajectory_cost", 1);
   pub_SafetyBorderRviz = nh.advertise<visualization_msgs::Marker>("safety_border", 1);
-  pub_DistanceToPedestrian = nh.advertise<std_msgs::Float64>("distance_to_pedestrian", 1);
-  pub_IntersectionCondition = nh.advertise<autoware_msgs::IntersectionCondition>("intersection_condition", 1);
-  pub_SprintSwitch = nh.advertise<std_msgs::Bool>("sprint_switch", 1);
-
+  // pub_DistanceToPedestrian = nh.advertise<std_msgs::Float64>("distance_to_pedestrian", 1);
+  // pub_IntersectionCondition = nh.advertise<autoware_msgs::IntersectionCondition>("intersection_condition", 1);
+  // pub_SprintSwitch = nh.advertise<std_msgs::Bool>("sprint_switch", 1);
+  pub_PlanningInfo = nh.advertise<rubis_msgs::PlanningInfo>("planning_info", 10);
   
   sub_GlobalPlannerPaths = nh.subscribe("/lane_waypoints_array", 1, &TrajectoryEval::callbackGetGlobalPlannerPath, this);
-
-  trajectories_sub_.subscribe(nh, "/local_trajectories_with_pose_twist", 10);
-	objects_sub_.subscribe(nh, "/rubis_predicted_objects", 10);
-	sync_.reset(new message_filters::Synchronizer<SyncPolicy>(SyncPolicy(10), trajectories_sub_, objects_sub_));
-	sync_->registerCallback(boost::bind(&TrajectoryEval::callback, this, _1, _2));
 
   PlannerHNS::ROSHelpers::InitCollisionPointsMarkers(50, m_CollisionsDummy);
 
@@ -65,6 +60,12 @@ TrajectoryEval::TrajectoryEval()
     if(UpdateTf() == true)
       break;
   }
+
+  typedef message_filters::sync_policies::ExactTime<rubis_msgs::LaneArrayWithPoseTwist, rubis_msgs::DetectedObjectArray> SyncPolicy;
+  trajectories_sub_.subscribe(nh, "/local_trajectories_with_pose_twist", 50);
+	objects_sub_.subscribe(nh, "/detection/lidar_detector/rubis_objects_center", 50);  
+	sync_.reset(new message_filters::Synchronizer<SyncPolicy>(SyncPolicy(50), trajectories_sub_, objects_sub_));
+	sync_->registerCallback(boost::bind(&TrajectoryEval::callback, this, _1, _2));
 }
 
 TrajectoryEval::~TrajectoryEval()
@@ -129,6 +130,7 @@ void TrajectoryEval::UpdatePlanningParams(ros::NodeHandle& _nh)
   _nh.param("/op_trajectory_evaluator/SprintDecisionTime", m_SprintDecisionTime, 5.0);
   
   
+  
   m_VehicleImageWidthThreshold = m_VehicleImageWidthThreshold * m_ImageWidth;
   m_PedestrianRightThreshold *= -1;
 
@@ -170,6 +172,14 @@ void TrajectoryEval::callbackGetGlobalPlannerPath(const autoware_msgs::LaneArray
 
 void TrajectoryEval::_callbackGetLocalPlannerPath(const rubis_msgs::LaneArrayWithPoseTwistConstPtr& msg)
 {
+  rubis::instance_ = msg->instance;
+  rubis::obj_instance_ = 0;
+
+  rubis_msgs::PlanningInfo planning_info_msg;
+  planning_info_msg.header = msg->header;
+  planning_info_msg.instance = rubis::instance_;
+  planning_info_msg.obj_instance = rubis::obj_instance_;  
+
   // Before spin
   UpdateMyParams();
   UpdateTf();
@@ -241,6 +251,9 @@ void TrajectoryEval::_callbackGetLocalPlannerPath(const rubis_msgs::LaneArrayWit
       m_GlobalPathSections.push_back(t_centerTrajectorySmoothed);
     }
 
+    autoware_msgs::IntersectionCondition intersection_condition;
+    intersection_condition.header = msg->header;
+    
     if(m_GlobalPathSections.size()>0)
     {      
       tc = m_TrajectoryCostsCalculator.DoOneStepStatic(m_GeneratedRollOuts, m_GlobalPathSections.at(0), m_CurrentPos,  m_PlanningParams,  m_CarInfo,m_VehicleStatus, m_PredictedObjects, m_CurrentBehavior.state);
@@ -251,7 +264,7 @@ void TrajectoryEval::_callbackGetLocalPlannerPath(const rubis_msgs::LaneArrayWit
       l.cost = tc.cost;
       l.is_blocked = tc.bBlocked;
       l.lane_index = tc.index;
-      pub_TrajectoryCost.publish(l);
+      planning_info_msg.trajectory_cost = l;
 
       // hjw added : Check if ego is on intersection and obstacles are in risky area 
       int intersectionID = -1;
@@ -261,21 +274,16 @@ void TrajectoryEval::_callbackGetLocalPlannerPath(const rubis_msgs::LaneArrayWit
       bool riskyRightTurn = false;
 
       PlannerHNS::PlanningHelpers::GetIntersectionCondition(m_CurrentPos, intersection_list_, m_PredictedObjects, intersectionID, closestIntersectionDistance, isInsideIntersection, riskyLeftTurn, riskyRightTurn);
-
-      autoware_msgs::IntersectionCondition ic_msg;
-      ic_msg.intersectionID = intersectionID;
-      ic_msg.intersectionDistance = closestIntersectionDistance;
-      ic_msg.isIntersection = isInsideIntersection;
-      ic_msg.riskyLeftTurn = riskyLeftTurn;
-      ic_msg.riskyRightTurn = riskyRightTurn;
       
-      pub_IntersectionCondition.publish(ic_msg);
-
+      intersection_condition.intersectionID = intersectionID;
+      intersection_condition.intersectionDistance = closestIntersectionDistance;
+      intersection_condition.isIntersection = isInsideIntersection;
+      intersection_condition.riskyLeftTurn = riskyLeftTurn;
+      intersection_condition.riskyRightTurn = riskyRightTurn;
     }
 
     if(m_TrajectoryCostsCalculator.m_TrajectoryCosts.size() == m_GeneratedRollOuts.size())
-    {
-      rubis_msgs::LaneArrayWithPoseTwist local_lanes;
+    { 
       for(unsigned int i=0; i < m_GeneratedRollOuts.size(); i++)
       {
         autoware_msgs::Lane lane;
@@ -285,28 +293,27 @@ void TrajectoryEval::_callbackGetLocalPlannerPath(const rubis_msgs::LaneArrayWit
         lane.cost = m_TrajectoryCostsCalculator.m_TrajectoryCosts.at(i).cost;
         lane.is_blocked = m_TrajectoryCostsCalculator.m_TrajectoryCosts.at(i).bBlocked;
         lane.lane_index = i;
-        local_lanes.lane_array.lanes.push_back(lane);
+        planning_info_msg.lane_array.lanes.push_back(lane);
       }
+      
+      planning_info_msg.pose = msg->pose;
+      planning_info_msg.twist = msg->twist;      
+      planning_info_msg.sprint_switch = m_sprint_switch;
+      planning_info_msg.intersection_condition = intersection_condition;
+      planning_info_msg.distance_to_pedestrian = m_distance_to_pedestrian;      
 
-      rubis::instance_ = msg->instance;      
-      local_lanes.instance = rubis::instance_;
-      local_lanes.obj_instance = rubis::obj_instance_;
-      local_lanes.pose = msg->pose;
-      local_lanes.twist = msg->twist;
-
-      pub_LocalWeightedTrajectoriesWithPoseTwist.publish(local_lanes);
-      // pub_LocalWeightedTrajectories.publish(local_lanes.lane_array);
+      pub_PlanningInfo.publish(planning_info_msg);      
     }
     else
-    {
+    {     
       ROS_ERROR("m_TrajectoryCosts.size() Not Equal m_GeneratedRollOuts.size()");
     }
 
     if(m_TrajectoryCostsCalculator.m_TrajectoryCosts.size()>0)
     {
-      // visualization_msgs::MarkerArray all_rollOuts;
-      // PlannerHNS::ROSHelpers::TrajectoriesToColoredMarkers(m_GeneratedRollOuts, m_TrajectoryCostsCalculator.m_TrajectoryCosts, m_CurrentBehavior.iTrajectory, all_rollOuts);
-      // pub_LocalWeightedTrajectoriesRviz.publish(all_rollOuts);
+      visualization_msgs::MarkerArray all_rollOuts;
+      PlannerHNS::ROSHelpers::TrajectoriesToColoredMarkers(m_GeneratedRollOuts, m_TrajectoryCostsCalculator.m_TrajectoryCosts, m_CurrentBehavior.iTrajectory, all_rollOuts);
+      pub_LocalWeightedTrajectoriesRviz.publish(all_rollOuts);
 
       PlannerHNS::ROSHelpers::ConvertCollisionPointsMarkers(m_TrajectoryCostsCalculator.m_CollisionPoints, m_CollisionsActual, m_CollisionsDummy);
       pub_CollisionPointsRviz.publish(m_CollisionsActual);
@@ -317,10 +324,9 @@ void TrajectoryEval::_callbackGetLocalPlannerPath(const rubis_msgs::LaneArrayWit
       pub_SafetyBorderRviz.publish(safety_box);
     }
   }
-  else
+  else{
     sub_GlobalPlannerPaths = nh.subscribe("/lane_waypoints_array",   1,    &TrajectoryEval::callbackGetGlobalPlannerPath,   this);
-
-
+  }
   
 }
 
@@ -336,12 +342,12 @@ void TrajectoryEval::_callbackGetPredictedObjects(const autoware_msgs::DetectedO
   m_PredictedObjects.clear();
   // ROS_WARN("callbackGetPredictedObjects Called");
   bPredictedObjects = true;
-  double distance_to_pedestrian = 1000;
   int image_person_detection_range_left = m_ImageWidth/2 - m_ImageWidth*m_PedestrianImageDetectionRange/2;
   int image_person_detection_range_right = m_ImageWidth/2 + m_ImageWidth*m_PedestrianImageDetectionRange/2;
   int image_vehicle_detection_range_left = m_ImageWidth/2 - m_ImageWidth*m_VehicleImageDetectionRange/2;
   int image_vehicle_detection_range_right = m_ImageWidth/2 + m_ImageWidth*m_VehicleImageDetectionRange/2;
   int vehicle_cnt = 0;
+  double distance_to_pedestrian = 1000;
 
   PlannerHNS::DetectedObject obj;  
   for(unsigned int i = 0 ; i <objects_msg.objects.size(); i++)
@@ -426,26 +432,19 @@ void TrajectoryEval::_callbackGetPredictedObjects(const autoware_msgs::DetectedO
     }
   }
 
-  // Publish Sprint Switch
-  std_msgs::Bool sprint_switch_msg;
+  m_distance_to_pedestrian.data = distance_to_pedestrian;
 
   if(vehicle_cnt != 0){
     m_noVehicleCnt = 0;
-    sprint_switch_msg.data = false;
+    m_sprint_switch.data = false;
   }
   else{ // No vehicle is exist in front of the car
     if(m_noVehicleCnt < m_SprintDecisionTime*10) {
       m_noVehicleCnt +=1;
-      sprint_switch_msg.data = false;
+      m_sprint_switch.data = false;
     }
-    else if (m_noVehicleCnt >= 5) sprint_switch_msg.data = true;
+    else if (m_noVehicleCnt >= 5) m_sprint_switch.data = true;
   }  
-
-  pub_SprintSwitch.publish(sprint_switch_msg);
-
-  std_msgs::Float64 distanceToPedestrianMsg; 
-  distanceToPedestrianMsg.data = distance_to_pedestrian;
-  pub_DistanceToPedestrian.publish(distanceToPedestrianMsg);
 }
 
 void TrajectoryEval::callback(const rubis_msgs::LaneArrayWithPoseTwist::ConstPtr& trajectories_msg, const rubis_msgs::DetectedObjectArray::ConstPtr& objects_msg){
@@ -479,6 +478,7 @@ void TrajectoryEval::UpdateMyParams()
   _nh.getParam("/op_trajectory_evaluator/weightTransition", m_PlanningParams.weightTransition);
   _nh.getParam("/op_trajectory_evaluator/weightLong", m_PlanningParams.weightLong);
   _nh.getParam("/op_trajectory_evaluator/weightLat", m_PlanningParams.weightLat);
+  _nh.param("/op_trajectory_evaluator/blockThreshold", m_PlanningParams.blockThreshold, 2.0);
   _nh.getParam("/op_trajectory_evaluator/LateralSkipDistance", m_PlanningParams.LateralSkipDistance);
 
   _nh.getParam("/op_trajectory_evaluator/lateralBlockingThreshold", m_PlanningParams.lateralBlockingThreshold);

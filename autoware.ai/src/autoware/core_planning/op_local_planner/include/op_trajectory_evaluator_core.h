@@ -42,13 +42,16 @@
 #include "op_planner/PlannerCommonDef.h"
 #include "op_planner/TrajectoryDynamicCosts.h"
 #include "rubis_msgs/DetectedObjectArray.h"
+#include "rubis_msgs/PlanningInfo.h"
 
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
-#include <message_filters/sync_policies/approximate_time.h>
+#include <message_filters/sync_policies/exact_time.h>
+#include <message_filters/time_synchronizer.h>
 
 
-typedef message_filters::sync_policies::ApproximateTime<rubis_msgs::LaneArrayWithPoseTwist, rubis_msgs::DetectedObjectArray> SyncPolicy;
+
+typedef message_filters::sync_policies::ExactTime<rubis_msgs::LaneArrayWithPoseTwist, rubis_msgs::DetectedObjectArray> SyncPolicy;
 typedef message_filters::Synchronizer<SyncPolicy> Sync;
 
 namespace TrajectoryEvaluatorNS
@@ -101,6 +104,8 @@ protected:
   double m_VehicleImageDetectionRange;
   double m_VehicleImageWidthThreshold;
   int m_noVehicleCnt;
+  std_msgs::Bool m_sprint_switch;
+  std_msgs::Float64 m_distance_to_pedestrian;
 
   //ROS messages (topics)
   ros::NodeHandle nh;
@@ -109,13 +114,14 @@ protected:
   ros::Publisher pub_CollisionPointsRviz;
   ros::Publisher pub_LocalWeightedTrajectoriesRviz;
   ros::Publisher pub_LocalWeightedTrajectories;
-  ros::Publisher pub_LocalWeightedTrajectoriesWithPoseTwist;
-  ros::Publisher pub_TrajectoryCost;
+  // ros::Publisher pub_LocalWeightedTrajectoriesWithPoseTwist;
+  // ros::Publisher pub_TrajectoryCost;
   ros::Publisher pub_SafetyBorderRviz;
-  ros::Publisher pub_DistanceToPedestrian;
-  ros::Publisher pub_IntersectionCondition;
-  ros::Publisher pub_SprintSwitch;
+  // ros::Publisher pub_DistanceToPedestrian;
+  // ros::Publisher pub_IntersectionCondition;
+  // ros::Publisher pub_SprintSwitch;
   ros::Publisher pub_currentTraj;
+  ros::Publisher pub_PlanningInfo;
 
   // define subscribers.
   ros::Subscriber sub_current_pose;

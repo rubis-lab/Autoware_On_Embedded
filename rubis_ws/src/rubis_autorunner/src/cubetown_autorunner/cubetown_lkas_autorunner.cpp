@@ -21,7 +21,7 @@ void CubetownAutorunner::register_subscribers(){
 
     // Set the check function(subscriber)
     sub_v_[STEP(1)] = nh_.subscribe("/rubis_points_raw", 1, &CubetownAutorunner::points_raw_cb, this);   
-    sub_v_[STEP(2)] = nh_.subscribe("/ndt_pose", 1, &CubetownAutorunner::ndt_pose_cb, this);   
+    sub_v_[STEP(2)] = nh_.subscribe("/rubis_current_pose_twist", 1, &CubetownAutorunner::pose_twist_cb, this);   
     sub_v_[STEP(3)] = nh_.subscribe("/behavior_state", 1, &CubetownAutorunner::behavior_state_cb, this); 
 
     initial_pose_pub_ = nh_.advertise< geometry_msgs::PoseWithCovarianceStamped>("initialpose", 1);
@@ -35,7 +35,7 @@ void CubetownAutorunner::register_subscribers(){
     }
  }
 
- void CubetownAutorunner::ndt_pose_cb(const geometry_msgs::PoseStamped& msg){
+ void CubetownAutorunner::pose_twist_cb(const rubis_msgs::PoseTwistStamped& msg){
     static int failure_cnt = 0, success_cnt = 0;
     failure_cnt++;    
 
@@ -54,8 +54,8 @@ void CubetownAutorunner::register_subscribers(){
         failure_cnt = 0;
     }
 
-    if(msg.pose.position.x <= 57.0 && msg.pose.position.x >= 55.0 &&        
-        msg.pose.position.y >= -1.0 && msg.pose.position.y <= 1.00 &&
+    if(msg.pose.pose.position.x <= 57.0 && msg.pose.pose.position.x >= 55.0 &&        
+        msg.pose.pose.position.y >= -1.0 && msg.pose.pose.position.y <= 1.00 &&
         !ros_autorunner_.step_info_list_[STEP(3)].is_prepared){
         success_cnt++;
         if(success_cnt < 3) return;

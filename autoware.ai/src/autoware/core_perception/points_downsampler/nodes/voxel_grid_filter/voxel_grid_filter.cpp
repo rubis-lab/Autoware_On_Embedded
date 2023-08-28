@@ -210,7 +210,7 @@ int main(int argc, char** argv)
   // ros::Subscriber scan_sub = nh.subscribe(input_topic_name_, 10, scan_callback);
   ros::Subscriber scan_sub;
   
-  scan_sub = nh.subscribe("/rubis_"+input_topic_name_, 1, rubis_scan_callback); // Def: 10
+  scan_sub = nh.subscribe("/rubis_"+input_topic_name_, 10, rubis_scan_callback); // Def: 10
 
   ros::spin();
 

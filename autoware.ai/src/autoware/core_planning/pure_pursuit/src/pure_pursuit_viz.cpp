@@ -60,9 +60,9 @@ visualization_msgs::Marker displayNextTarget(geometry_msgs::Point target)
   green.r = 0.0;
   green.g = 1.0;
   marker.color = green;
-  marker.scale.x = 1.0;
-  marker.scale.y = 1.0;
-  marker.scale.z = 1.0;
+  marker.scale.x = 3.0;
+  marker.scale.y = 3.0;
+  marker.scale.z = 3.0;
   marker.frame_locked = true;
   return marker;
 }

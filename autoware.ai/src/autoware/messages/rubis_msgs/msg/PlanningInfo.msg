@@ -1,0 +1,10 @@
+std_msgs/Header header
+uint64 instance
+uint64 obj_instance
+autoware_msgs/LaneArray lane_array
+geometry_msgs/PoseStamped pose
+geometry_msgs/TwistStamped twist
+autoware_msgs/Lane trajectory_cost
+std_msgs/Bool sprint_switch
+autoware_msgs/IntersectionCondition intersection_condition
+std_msgs/Float64 distance_to_pedestrian

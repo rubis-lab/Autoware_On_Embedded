@@ -9,17 +9,16 @@ Panels:
         - /System1/TF1/Frames1
         - /Map1/Vector Map1
         - /Sensing1
-        - /Sensing1/Points Raw1
         - /Sensing1/Points Raw1/Status1
-        - /Localization1
         - /Perception1
-        - /Perception1/Clustered Points1
-        - /Perception1/Clustered Points1/Status1
+        - /Perception1/Lidar Objects1
         - /Planning1
-        - /Planning1/Saved Waypoints1
         - /Planning1/OP Planner1
+        - /Planning1/OP Planner1/GlobalPathAnimation1
         - /Planning1/OP Planner1/Local Rollouts1
         - /Planning1/OP Planner1/Global Path1/Status1
+        - /Planning1/Next Traget1
+        - /Planning1/Behavior State1
       Splitter Ratio: 0.22158685326576233
     Tree Height: 1726
   - Class: rviz/Selection
@@ -347,7 +346,7 @@ Visualization Manager:
           Marker Topic: /vector_map_center_lines_rviz
           Name: Vector Map
           Namespaces:
-            {}
+            road_network_vector_map: true
           Queue Size: 100
           Value: true
       Enabled: true
@@ -410,69 +409,10 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: false
-      Enabled: true
+      Enabled: false
       Name: Sensing
     - Class: rviz/Group
       Displays:
-        - Alpha: 1
-          Axes Length: 1
-          Axes Radius: 0.10000000149011612
-          Class: rviz/Pose
-          Color: 255; 170; 255
-          Enabled: false
-          Head Length: 2
-          Head Radius: 2
-          Name: Current Pose
-          Shaft Length: 2
-          Shaft Radius: 1
-          Shape: Arrow
-          Topic: /current_pose
-          Unreliable: false
-          Value: false
-        - Alpha: 1
-          Axes Length: 1
-          Axes Radius: 0.10000000149011612
-          Class: rviz/Pose
-          Color: 255; 255; 0
-          Enabled: false
-          Head Length: 2
-          Head Radius: 1
-          Name: EKF Pose
-          Shaft Length: 2
-          Shaft Radius: 0.5
-          Shape: Arrow
-          Topic: /ekf_pose
-          Unreliable: false
-          Value: false
-        - Alpha: 1
-          Axes Length: 1
-          Axes Radius: 0.10000000149011612
-          Class: rviz/Pose
-          Color: 0; 255; 255
-          Enabled: false
-          Head Length: 2
-          Head Radius: 1
-          Name: NDT Pose
-          Shaft Length: 2
-          Shaft Radius: 0.5
-          Shape: Arrow
-          Topic: /ndt_pose
-          Unreliable: false
-          Value: false
-      Enabled: false
-      Name: Localization
-    - Class: rviz/Group
-      Displays:
-        - Alpha: 0.699999988079071
-          Class: rviz/Map
-          Color Scheme: map
-          Draw Behind: true
-          Enabled: false
-          Name: Occupancy Grid Map
-          Topic: /semantics/costmap_generator/occupancy_grid
-          Unreliable: false
-          Use Timestamp: false
-          Value: false
         - Alpha: 1
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
@@ -485,7 +425,7 @@ Visualization Manager:
           Color: 255; 255; 255
           Color Transformer: RGB8
           Decay Time: 0
-          Enabled: true
+          Enabled: false
           Invert Rainbow: false
           Max Color: 255; 255; 255
           Min Color: 0; 0; 0
@@ -500,51 +440,21 @@ Visualization Manager:
           Unreliable: false
           Use Fixed Frame: true
           Use rainbow: true
-          Value: true
-        - Class: rviz/MarkerArray
-          Enabled: false
-          Marker Topic: /detection/lidar_detector/objects_markers_center
-          Name: Predicted Path
-          Namespaces:
-            {}
-          Queue Size: 100
           Value: false
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /detection/lidar_detector/objects_markers_center
+          Name: Lidar Objects
+          Namespaces:
+            /detection/lidar_detector/centroid_markers2: true
+            /detection/lidar_detector/hull_markers2: true
+            /detection/lidar_detector/label_markers2: true
+          Queue Size: 100
+          Value: true
       Enabled: true
       Name: Perception
     - Class: rviz/Group
       Displays:
-        - Class: rviz/MarkerArray
-          Enabled: false
-          Marker Topic: /local_trajectories_eval_rviz
-          Name: Saved Waypoints
-          Namespaces:
-            {}
-          Queue Size: 100
-          Value: false
-        - Class: rviz/MarkerArray
-          Enabled: false
-          Marker Topic: /global_waypoints_mark
-          Name: Global Waypoints
-          Namespaces:
-            {}
-          Queue Size: 100
-          Value: false
-        - Class: rviz/MarkerArray
-          Enabled: false
-          Marker Topic: /local_waypoints_mark
-          Name: Local Waypoints
-          Namespaces:
-            {}
-          Queue Size: 100
-          Value: false
-        - Class: rviz/MarkerArray
-          Enabled: false
-          Marker Topic: /detection_range
-          Name: Detection Range
-          Namespaces:
-            {}
-          Queue Size: 100
-          Value: false
         - Class: rviz/Group
           Displays:
             - Class: rviz/Marker
@@ -552,7 +462,7 @@ Visualization Manager:
               Marker Topic: /safety_border
               Name: Safety Box
               Namespaces:
-                {}
+                global_lane_array_marker: true
               Queue Size: 100
               Value: true
             - Class: jsk_rviz_plugin/BoundingBoxArray
@@ -593,22 +503,38 @@ Visualization Manager:
               Value: false
             - Class: rviz/MarkerArray
               Enabled: true
-              Marker Topic: /local_trajectories_gen_rviz
+              Marker Topic: /local_trajectories_eval_rviz
               Name: Local Rollouts
               Namespaces:
-                {}
+                local_lane_array_marker_colored: true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
-              Enabled: true
+              Enabled: false
               Marker Topic: /global_waypoints_rviz
               Name: Global Path
               Namespaces:
                 {}
               Queue Size: 100
-              Value: true
+              Value: false
           Enabled: true
           Name: OP Planner
+        - Class: rviz/Marker
+          Enabled: true
+          Marker Topic: /next_target_mark
+          Name: Next Traget
+          Namespaces:
+            next_target_marker: true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /behavior_state
+          Name: Behavior State
+          Namespaces:
+            beh_state: true
+          Queue Size: 100
+          Value: true
       Enabled: true
       Name: Planning
     - Class: rviz/Group
@@ -674,7 +600,7 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Angle: 1.6200013160705566
+      Angle: 1.300126314163208e-6
       Class: rviz/TopDownOrtho
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
@@ -684,11 +610,11 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 21.55168342590332
+      Scale: 13.06907844543457
       Target Frame: map
       Value: TopDownOrtho (rviz)
-      X: -53.3781852722168
-      Y: -1.2257715463638306
+      X: 2.5199878215789795
+      Y: 4.277388572692871
     Saved: ~
 Window Geometry:
   DecisionMakerPanel:

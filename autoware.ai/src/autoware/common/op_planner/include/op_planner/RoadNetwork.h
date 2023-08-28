@@ -916,11 +916,12 @@ public:
   double frontLongitudinalBlockingThreshold;
   double rearLongitudinalBlockingThreshold;
 
-  // Added by HJW for make traj eval parameter
+  // Added by HJW and HYP for make traj eval parameter
   double weightPriority;
   double weightTransition;
   double weightLong;
   double weightLat;
+  double blockThreshold;
   double LateralSkipDistance;
   
   // Added by HJW for traffic signal parameter

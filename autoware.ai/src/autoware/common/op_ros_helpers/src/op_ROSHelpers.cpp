@@ -670,6 +670,9 @@ void ROSHelpers::TrajectoriesToColoredMarkers(const std::vector<std::vector<Plan
   lane_waypoint_marker.color.g = 1.0;
   lane_waypoint_marker.color.b = 1.0;
   lane_waypoint_marker.frame_locked = false;
+  lane_waypoint_marker.scale.x = 1.0;
+  lane_waypoint_marker.scale.y = 1.0;
+  lane_waypoint_marker.scale.z = 1.0;
 
   int count = 0;
   for (unsigned int i = 0; i < paths.size(); i++)
