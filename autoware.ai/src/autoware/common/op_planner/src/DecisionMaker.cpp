@@ -191,19 +191,22 @@ void DecisionMaker::InitBehaviorStates()
   if(pValues->iPrevSafeTrajectory < 0)
     pValues->iPrevSafeTrajectory = pValues->iCentralTrajectory;
 
-   pValues->stoppingDistances.clear();
-   pValues->currentVelocity     = car_state.speed;
-   pValues->bTrafficIsRed       = false;
-   pValues->currentTrafficLightID   = -1;
-   pValues->bFullyBlock       = false;
+  pValues->stoppingDistances.clear();
+  pValues->currentVelocity     = car_state.speed;
+  pValues->bTrafficIsRed       = false;
+  pValues->currentTrafficLightID   = -1;
+  pValues->bFullyBlock       = false;
 
-   pValues->distanceToNext = bestTrajectory.closest_obj_distance;
-   pValues->velocityOfNext = bestTrajectory.closest_obj_velocity;
+  pValues->distanceToNext = bestTrajectory.closest_obj_distance;
+  pValues->velocityOfNext = bestTrajectory.closest_obj_velocity;
 
-   if(bestTrajectory.index >=0 &&  bestTrajectory.index < (int)m_RollOuts.size())
-     pValues->iCurrSafeTrajectory = bestTrajectory.index;
-   else
-     pValues->iCurrSafeTrajectory = pValues->iCentralTrajectory;
+  if(bestTrajectory.index >=0 &&  bestTrajectory.index < (int)m_RollOuts.size()){
+    pValues->iCurrSafeTrajectory = bestTrajectory.index;    
+  }
+  else{
+    pValues->iCurrSafeTrajectory = pValues->iCentralTrajectory;
+  }
+
 
   pValues->bFullyBlock = bestTrajectory.bBlocked;
 
@@ -393,22 +396,24 @@ bool DecisionMaker::SelectSafeTrajectory()
 
   if(!preCalcPrams || m_RollOuts.size() == 0) return bNewTrajectory;
 
-  int currIndex = PlannerHNS::PlanningHelpers::GetClosestNextPointIndexFast(m_Path, state);
-  int index_limit = 0;
-  if(index_limit<=0)
-    index_limit =  m_Path.size()/2.0;
-  if(currIndex > index_limit
+  // int currIndex = PlannerHNS::PlanningHelpers::GetClosestNextPointIndexFast(m_Path, state);
+  // int index_limit = 0;
+  // if(index_limit<=0)
+  //   index_limit =  m_Path.size()/2.0;
+
+  if(preCalcPrams->iCurrSafeTrajectory != m_prevSafeTrajectory
       || preCalcPrams->bRePlan
       || preCalcPrams->bNewGlobalPath)
   {
-    std::cout << "New Local Plan !! " << currIndex << ", "<< preCalcPrams->bRePlan << ", " << preCalcPrams->bNewGlobalPath  << ", " <<  m_TotalOriginalPath.at(0).size() << ", PrevLocal: " << m_Path.size();
-    m_Path = m_RollOuts.at(preCalcPrams->iCurrSafeTrajectory);
-    std::cout << ", NewLocal: " << m_Path.size() << std::endl;
+    // m_Path = m_RollOuts.at(preCalcPrams->iCurrSafeTrajectory);
 
     preCalcPrams->bNewGlobalPath = false;
     preCalcPrams->bRePlan = false;
     bNewTrajectory = true;
   }
+
+  m_Path = m_RollOuts.at(preCalcPrams->iCurrSafeTrajectory);
+  m_prevSafeTrajectory = preCalcPrams->iCurrSafeTrajectory;
 
   return bNewTrajectory;
  }

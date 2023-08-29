@@ -53,6 +53,7 @@ public:
   bool m_sprintSwitch;
   double m_obstacleWaitingTimeinIntersection;
   int m_remainObstacleWaitingTime;
+  int m_prevSafeTrajectory;
 
   int m_prevTrafficLightID;
   PlannerHNS::TrafficLightState m_prevTrafficLightSignal;

@@ -8,7 +8,7 @@
   <!-- <arg name="intersectionFile" default="crossing_test/crossing_intersection.yaml" /> -->
   
       
-  <node pkg="op_local_planner" type="op_behavior_selector" name="op_behavior_selector" output="log">
+  <node pkg="op_local_planner" type="op_behavior_selector" name="op_behavior_selector" output="screen">
     <rosparam command="load" file="$(find rubis_pkg)/cfg/$(arg trafficLightFile)"/>
     <rosparam command="load" file="$(find rubis_pkg)/cfg/$(arg stopLineFile)"/>
     <!-- <rosparam command="load" file="$(find rubis_pkg)/cfg/$(arg intersectionFile)"/> -->

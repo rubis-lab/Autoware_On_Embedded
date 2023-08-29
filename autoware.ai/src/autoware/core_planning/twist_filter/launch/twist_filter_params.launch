@@ -25,8 +25,8 @@
     <param name="max_stop_count" value="$(arg max_stop_count)" />
   </node>
 
-  <node pkg="twist_gate" type="twist_gate" name="twist_gate">
+  <!-- <node pkg="twist_gate" type="twist_gate" name="twist_gate">
     <param name="loop_rate" value="$(arg loop_rate)" />
     <param name="use_decision_maker" value="$(arg use_decision_maker)" />
-  </node>
+  </node> -->
 </launch>

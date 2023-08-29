@@ -6,8 +6,8 @@ SvlSensing::SvlSensing()
 	odom_sub_.subscribe(nh_, "/odom", 1);
 	sync_.reset(new message_filters::Synchronizer<SyncPolicy>(SyncPolicy(10), lidar_sub_, odom_sub_));
 	sync_->registerCallback(boost::bind(&SvlSensing::callback, this, _1, _2));
-	lidar_pub_ = nh_.advertise<rubis_msgs::PointCloud2>("/rubis_points_raw", 1);
-	pose_twist_pub_ = nh_.advertise<rubis_msgs::PoseTwistStamped>("/svl_pose_twist", 1);
+	lidar_pub_ = nh_.advertise<rubis_msgs::PointCloud2>("/rubis_points_raw", 10);
+	pose_twist_pub_ = nh_.advertise<rubis_msgs::PoseTwistStamped>("/svl_pose_twist", 10);
 
 	std::string node_name = ros::this_node::getName();
   	std::string task_response_time_filename;

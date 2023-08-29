@@ -168,7 +168,6 @@ void PurePursuitNode::initForROS()
 
 
   // setup subscriber
-  pose_twist_sub_ = nh_.subscribe("/rubis_current_pose_twist", 10, &PurePursuitNode::CallbackTwistPose, this);
   final_waypoints_with_pose_twist_sub = nh_.subscribe("/final_waypoints_with_pose_twist", 1, &PurePursuitNode::CallbackFinalWaypointsWithPoseTwist, this); // Def: 10
 
   sub3_ = nh_.subscribe("config/waypoint_follower", 10,
@@ -176,9 +175,7 @@ void PurePursuitNode::initForROS()
   
   // setup publisher
   twist_pub_ = nh_.advertise<geometry_msgs::TwistStamped>("twist_raw", 10);
-  rubis_twist_pub_ = nh_.advertise<rubis_msgs::TwistStamped>("rubis_twist_raw", 10);
-
-  pub2_ = nh_.advertise<autoware_msgs::ControlCommandStamped>("ctrl_raw", 10);
+  pure_pursuit_output_pub_ = nh_.advertise<rubis_msgs::PurePursuitOutput>("pure_pursuit_output", 10);
   pub11_ = nh_.advertise<visualization_msgs::Marker>("next_waypoint_mark", 0);
   pub12_ = nh_.advertise<visualization_msgs::Marker>("next_target_mark", 0);
   pub13_ = nh_.advertise<visualization_msgs::Marker>("search_circle_mark", 0);
@@ -224,8 +221,8 @@ void PurePursuitNode::run()
 }
 
 
-void PurePursuitNode::publishTwistStamped(
-  const bool& can_get_curvature, const double& kappa) const
+geometry_msgs::TwistStamped PurePursuitNode::calculateTwistStamped(
+    const bool& can_get_curvature, const double& kappa) const
 {
   static bool is_started = false;
   geometry_msgs::TwistStamped ts;
@@ -237,38 +234,32 @@ void PurePursuitNode::publishTwistStamped(
   if(!is_started){
     if(wait_until_reaching_max_velocity_ && ts.twist.linear.x < max_velocity_){
       ts.twist.linear.x = 0.0;    
-      return;
+      return ts;
     }
     else{
       is_started = true;
     }
   }
 
-  twist_pub_.publish(ts);
-
-  rubis_msgs::TwistStamped rubis_ts;
-  rubis_ts.instance = rubis::instance_;
-  rubis_ts.obj_instance = rubis::obj_instance_;
-  rubis_ts.msg = ts;
-  rubis_twist_pub_.publish(rubis_ts);
+  return ts;
 }
 
-void PurePursuitNode::publishControlCommandStamped(
+autoware_msgs::ControlCommandStamped PurePursuitNode::calculateControlCommandStamped(
   const bool& can_get_curvature, const double& kappa) const
 {
+  autoware_msgs::ControlCommandStamped ccs;
+
   if (!publishes_for_steering_robot_)
   {
-    return;
+    return ccs;
   }
-
-  autoware_msgs::ControlCommandStamped ccs;
-  ccs.header.stamp = ros::Time::now();
+  
   ccs.cmd.linear_velocity = can_get_curvature ? computeCommandVelocity() : 0;
   ccs.cmd.linear_acceleration = can_get_curvature ? computeCommandAccel() : 0;
   ccs.cmd.steering_angle =
     can_get_curvature ? convertCurvatureToSteeringAngle(wheel_base_, kappa) : 0;
 
-  pub2_.publish(ccs);
+  return ccs;
 }
 
 double PurePursuitNode::computeLookaheadDistance() const
@@ -439,10 +430,14 @@ double PurePursuitNode::findWayPointVelocity(autoware_msgs::Waypoint msg){
   return way_points_velocity_[idx];
 }
 
-void PurePursuitNode::CallbackTwistPose(const rubis_msgs::PoseTwistStampedConstPtr& msg)
-{
+void PurePursuitNode::CallbackFinalWaypointsWithPoseTwist(const rubis_msgs::LaneWithPoseTwistConstPtr& msg)
+{ 
   rubis::start_task_profiling();
   rubis::instance_ = msg->instance;
+  rubis::obj_instance_ = msg->obj_instance;
+
+  // Update waypoints (lane)
+  lane_ = msg->lane;
 
   // Update pose
   geometry_msgs::PoseStampedConstPtr pose_ptr(new geometry_msgs::PoseStamped(msg->pose));
@@ -453,7 +448,10 @@ void PurePursuitNode::CallbackTwistPose(const rubis_msgs::PoseTwistStampedConstP
   pp_.setCurrentVelocity(current_linear_velocity_);
   is_velocity_set_ = true;
 
-  if(lane_.waypoints.size() < 1) return;
+  if(lane_.waypoints.size() < 1){
+    std::cout<<"[Pure Pursuit] No input trajectory"<<std::endl;
+    return;
+  }
 
   if(use_algorithm_){
     command_linear_velocity_ = findWayPointVelocity(lane_.waypoints.at(0));
@@ -475,8 +473,30 @@ void PurePursuitNode::CallbackTwistPose(const rubis_msgs::PoseTwistStampedConstP
 
   angle_diff_ = angle_diff;
 
-  // Update waypoints
-  _CallbackFinalWaypointsWithPoseTwist();
+  if(dynamic_param_flag_){
+    setLookaheadParamsByVel();
+  }
+  
+  if (add_virtual_end_waypoints_)
+  {
+    const LaneDirection solved_dir = getLaneDirection(lane_);
+    direction_ = (solved_dir != LaneDirection::Error) ? solved_dir : direction_;
+    autoware_msgs::Lane expanded_lane(lane_);
+    expand_size_ = -expanded_lane.waypoints.size();
+    connectVirtualLastWaypoints(&expanded_lane, direction_);
+    expand_size_ += expanded_lane.waypoints.size();
+
+    pp_.setCurrentWaypoints(expanded_lane.waypoints);
+  }
+  else
+  {
+    pp_.setCurrentWaypoints(lane_.waypoints);    
+  }
+  is_waypoint_set_ = true;
+
+  #ifdef USE_WAYPOINT_ORIENTATION
+    waypoint_pose_ = lane_.waypoints[0].pose;
+  #endif
 
   // After spinOnce
   pp_.setLookaheadDistance(computeLookaheadDistance());
@@ -485,8 +505,15 @@ void PurePursuitNode::CallbackTwistPose(const rubis_msgs::PoseTwistStampedConstP
   double kappa = 0;
   bool can_get_curvature = pp_.canGetCurvature(&kappa);
 
-  publishTwistStamped(can_get_curvature, kappa);
-  publishControlCommandStamped(can_get_curvature, kappa);
+  rubis_msgs::PurePursuitOutput pure_pursuit_output_msg;
+  pure_pursuit_output_msg.instance = rubis::instance_;
+  pure_pursuit_output_msg.obj_instance = rubis::obj_instance_;
+  pure_pursuit_output_msg.header = msg->header;
+  pure_pursuit_output_msg.twist = calculateTwistStamped(can_get_curvature, kappa);
+  pure_pursuit_output_msg.twist.header = msg->header;
+  pure_pursuit_output_msg.ctrl = calculateControlCommandStamped(can_get_curvature, kappa);
+  pure_pursuit_output_msg.ctrl.header = msg->header;
+  
   // for visualization with Rviz
   pub11_.publish(displayNextWaypoint(pp_.getPoseOfNextWaypoint()));
   pub13_.publish(displaySearchRadius(
@@ -511,43 +538,9 @@ void PurePursuitNode::CallbackTwistPose(const rubis_msgs::PoseTwistStampedConstP
   is_pose_set_ = false;
   is_velocity_set_ = false;
   is_waypoint_set_ = false;
-
-  rubis::stop_task_profiling(rubis::instance_, rubis::obj_instance_);
-
-}
-
-void PurePursuitNode::_CallbackFinalWaypointsWithPoseTwist()
-{
-  if(dynamic_param_flag_){
-    setLookaheadParamsByVel();
-  }
   
-  if (add_virtual_end_waypoints_)
-  {
-    const LaneDirection solved_dir = getLaneDirection(lane_);
-    direction_ = (solved_dir != LaneDirection::Error) ? solved_dir : direction_;
-    autoware_msgs::Lane expanded_lane(lane_);
-    expand_size_ = -expanded_lane.waypoints.size();
-    connectVirtualLastWaypoints(&expanded_lane, direction_);
-    expand_size_ += expanded_lane.waypoints.size();
-
-    pp_.setCurrentWaypoints(expanded_lane.waypoints);
-  }
-  else
-  {
-    pp_.setCurrentWaypoints(lane_.waypoints);
-  }
-  is_waypoint_set_ = true;
-
-#ifdef USE_WAYPOINT_ORIENTATION
-  waypoint_pose_ = lane_.waypoints[0].pose;
-#endif
-}
-
-void PurePursuitNode::CallbackFinalWaypointsWithPoseTwist(const rubis_msgs::LaneWithPoseTwistConstPtr& msg)
-{   
-  rubis::obj_instance_ = msg->obj_instance;
-  lane_ = msg->lane;
+  pure_pursuit_output_pub_.publish(pure_pursuit_output_msg);
+  rubis::stop_task_profiling(rubis::instance_, rubis::obj_instance_);
 }
 
 void PurePursuitNode::connectVirtualLastWaypoints(

@@ -46,6 +46,7 @@
 #include <XmlRpcException.h>
 
 #include "rubis_msgs/LaneWithPoseTwist.h"
+#include "rubis_msgs/PurePursuitOutput.h"
 
 #ifdef IONIC
 #include <can_data_msgs/Car_ctrl_output.h>
@@ -96,7 +97,7 @@ private:
   PurePursuit pp_;
 
   // publisher
-  ros::Publisher twist_pub_, rubis_twist_pub_, pub2_,
+  ros::Publisher twist_pub_, pure_pursuit_output_pub_, pub2_,
     pub11_, pub12_, pub13_, pub14_, pub15_, pub16_, pub17_, pub18_;
 
   // subscriber
@@ -133,10 +134,7 @@ private:
 
   // callbacks
   void callbackFromConfig(const autoware_config_msgs::ConfigWaypointFollowerConstPtr& config);
-  void callbackFromWayPoints(const autoware_msgs::LaneConstPtr& msg);
-  void CallbackTwistPose(const rubis_msgs::PoseTwistStampedConstPtr& msg);
   void CallbackFinalWaypointsWithPoseTwist(const rubis_msgs::LaneWithPoseTwistConstPtr& msg);
-  void _CallbackFinalWaypointsWithPoseTwist();
 
   #ifdef IONIC
   void callbackCtrlOutput(const can_data_msgs::Car_ctrl_output::ConstPtr &msg);
@@ -152,9 +150,9 @@ private:
   void initForROS();
 
   // functions
-  void publishTwistStamped(
+  geometry_msgs::TwistStamped calculateTwistStamped(
     const bool& can_get_curvature, const double& kappa) const;
-  void publishControlCommandStamped(
+  autoware_msgs::ControlCommandStamped calculateControlCommandStamped(
     const bool& can_get_curvature, const double& kappa) const;
   void publishDeviationCurrentPosition(
     const geometry_msgs::Point& point,

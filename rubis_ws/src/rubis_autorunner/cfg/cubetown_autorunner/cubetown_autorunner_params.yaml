@@ -9,15 +9,14 @@
 #rate = hz
 # other time unut = ns
 
-# Lane Keeping
-gnss_localizer:
+svl_sensing:
   task_scheduling_configs:
     policy: "NONE"
     priority: 20
     exec_time: 1_000_000
     deadline: 2_000_000
     period: 2_000_000
-  task_response_time_filename: "~/Documents/profiling/response_time/gnss_localizer.csv"  
+  task_response_time_filename: "~/Documents/profiling/response_time/svl_sensing.csv"  
 
 lidar_republisher:
   task_scheduling_configs:

@@ -34,14 +34,14 @@ TwistFilterNode::TwistFilterNode() : nh_(), private_nh_("~")
   current_stop_count_ = 0;
 
   // Subscribe
-  rubis_twist_sub_ = nh_.subscribe("rubis_twist_raw", 1, &TwistFilterNode::rubisTwistCmdCallback, this);
-  ctrl_sub_ = nh_.subscribe("ctrl_raw", 1, &TwistFilterNode::ctrlCmdCallback, this);
+  pure_pursuit_output_sub_ = nh_.subscribe("pure_pursuit_output", 1, &TwistFilterNode::purePursuitOutputCallback, this);
   config_sub_ = nh_.subscribe("config/twist_filter", 10, &TwistFilterNode::configCallback, this);
   emergency_stop_sub_ = nh_.subscribe("emergency_stop", 1 ,&TwistFilterNode::emergencyStopCallback, this);
 
   // Publish
   twist_pub_ = nh_.advertise<geometry_msgs::TwistStamped>("twist_cmd", 5);
   rubis_twist_pub_ = nh_.advertise<rubis_msgs::TwistStamped>("rubis_twist_cmd", 5);
+  vehicle_cmd_pub_ = nh_.advertise<autoware_msgs::VehicleCmd>("vehicle_cmd", 5);
   ctrl_pub_ = nh_.advertise<autoware_msgs::ControlCommandStamped>("ctrl_cmd", 5);
   twist_lacc_limit_debug_pub_ = private_nh_.advertise<std_msgs::Float32>("limitation_debug/twist/lateral_accel", 5);
   twist_ljerk_limit_debug_pub_ = private_nh_.advertise<std_msgs::Float32>("limitation_debug/twist/lateral_jerk", 5);
@@ -65,9 +65,9 @@ void TwistFilterNode::configCallback(const autoware_config_msgs::ConfigTwistFilt
   twist_filter_ptr_->setConfiguration(twist_filter_config);
 }
 
-inline void TwistFilterNode::publishTwist(const geometry_msgs::TwistStampedConstPtr& msg){
+inline geometry_msgs::TwistStamped TwistFilterNode::calculateTwist(const geometry_msgs::TwistStampedConstPtr& msg){
   const twist_filter::Twist twist = { msg->twist.linear.x, msg->twist.angular.z };
-  ros::Time current_time = ros::Time::now();
+  ros::Time current_time = msg->header.stamp;
 
   static ros::Time last_callback_time = current_time;
   static twist_filter::Twist twist_prev = twist;
@@ -114,12 +114,6 @@ inline void TwistFilterNode::publishTwist(const geometry_msgs::TwistStampedConst
     out_msg.twist.linear.x = 0;
     out_msg.twist.angular.z = 0;
   }
-  twist_pub_.publish(out_msg);
-  rubis_msgs::TwistStamped rubis_out_msg;
-  rubis_out_msg.instance = rubis::instance_;
-  rubis_out_msg.obj_instance = rubis::obj_instance_;
-  rubis_out_msg.msg = out_msg;
-  rubis_twist_pub_.publish(rubis_out_msg);
 
   // Publish lateral accel and jerk after smoothing
   auto lacc_smoothed_result = twist_filter_ptr_->calcLaccWithAngularZ(twist_out);
@@ -140,40 +134,67 @@ inline void TwistFilterNode::publishTwist(const geometry_msgs::TwistStampedConst
   // Preserve value and time
   twist_prev = twist_out;
   last_callback_time = current_time;
+
+  out_msg.header = msg->header;
+  return out_msg;
 }
 
-void TwistFilterNode::rubisTwistCmdCallback(const rubis_msgs::TwistStampedConstPtr& _msg){
+void TwistFilterNode::purePursuitOutputCallback(const rubis_msgs::PurePursuitOutputConstPtr& msg){
+  static ros::Time previous_time = msg->header.stamp; 
+  static double previous_target_velocity = 0.0;
+  static double previous_target_accel = 0.0;
+  static bool is_current_time_changed = false;
+
   // Before spin
   rubis::start_task_profiling();
+  rubis::instance_ = msg->instance;
+  rubis::obj_instance_ = msg->obj_instance;
+  ros::Time current_time = msg->header.stamp;
 
-  // Callback
+  if(current_time == previous_time){
+    previous_time = current_time;
+    rubis::stop_task_profiling(rubis::instance_, rubis::obj_instance_);
+    return;
+  }
+
+  // Handle emergency stop
   _emergencyStopCallback();
-  _ctrlCmdCallback(ctrl_cmd_ptr_);
 
-  geometry_msgs::TwistStampedConstPtr msg = boost::make_shared<const geometry_msgs::TwistStamped>(_msg-> msg);
-  rubis::instance_ = _msg->instance;
-  rubis::obj_instance_ = _msg->obj_instance;
-  publishTwist(msg);
+  // Handle ctrl_cmd
+  auto ctrl_cmd_ptr = boost::make_shared<autoware_msgs::ControlCommandStamped const>(msg->ctrl);
+  _ctrlCmdCallback(ctrl_cmd_ptr);
+
+  // Filter twist
+  geometry_msgs::TwistStampedConstPtr twist_ptr = boost::make_shared<const geometry_msgs::TwistStamped>(msg->twist);  
+  geometry_msgs::TwistStamped filtered_twist = calculateTwist(twist_ptr);
+
+  // Calculate vehicle cmd
+  double diff_time = (current_time - previous_time).toSec();
+  double current_target_velocity = 0.0, current_target_accel = 0.0;
+
+  current_target_velocity = filtered_twist.twist.linear.x;
+  current_target_accel = (diff_time > 0) ? ((current_target_velocity - previous_target_velocity) / diff_time) : previous_target_accel;
+
+  if(is_current_time_changed){
+    previous_time = current_time;
+    previous_target_velocity = current_target_velocity;
+    previous_target_accel = current_target_accel;
+    is_current_time_changed = false;    
+  }
+
+  autoware_msgs::VehicleCmd vehicle_cmd_msg;
+  vehicle_cmd_msg.ctrl_cmd.linear_acceleration = current_target_accel;
+  vehicle_cmd_msg.ctrl_cmd.linear_velocity = current_target_velocity;
+  vehicle_cmd_msg.twist_cmd = filtered_twist;
+  vehicle_cmd_pub_.publish(vehicle_cmd_msg);
 
   // After spin
   rubis::stop_task_profiling(rubis::instance_, rubis::obj_instance_);
 }
 
-
-void TwistFilterNode::twistCmdCallback(const geometry_msgs::TwistStampedConstPtr& msg)
-{
-  rubis::instance_ = 0;
-  publishTwist(msg);
-}
-
-void TwistFilterNode::ctrlCmdCallback(const autoware_msgs::ControlCommandStampedConstPtr& msg)
-{
-  ctrl_cmd_ptr_ = boost::make_shared<autoware_msgs::ControlCommandStamped const>(*msg);
-}
-
 void TwistFilterNode::_ctrlCmdCallback(const autoware_msgs::ControlCommandStampedConstPtr& msg)
 {
-  if(ctrl_cmd_ptr_ == NULL) return;
+  if(msg == NULL) return;
   const twist_filter::Ctrl ctrl = { msg->cmd.linear_velocity, msg->cmd.steering_angle };
   ros::Time current_time = ros::Time::now();
 

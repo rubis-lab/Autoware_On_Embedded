@@ -24,6 +24,7 @@ add_message_files(
     LaneArrayWithPoseTwist.msg
     DetectedObjectArray.msg
     PlanningInfo.msg
+    PurePursuitOutput.msg
 )
 
 generate_messages(
