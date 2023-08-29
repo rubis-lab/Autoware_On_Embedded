@@ -238,15 +238,6 @@ void TwistFilterNode::_ctrlCmdCallback(const autoware_msgs::ControlCommandStampe
   // Smoothing
   ctrl_out = twist_filter_ptr_->smoothCtrl(ctrl_out);
 
-  // Smoothed value publish
-  autoware_msgs::ControlCommandStamped out_msg = *msg;
-  out_msg.cmd.linear_velocity = ctrl_out.lv;
-  out_msg.cmd.steering_angle = ctrl_out.sa;
-
-  if(emergency_stop_) out_msg.cmd.linear_velocity = -1000;
-
-  ctrl_pub_.publish(out_msg);
-
   // Publish lateral accel and jerk after smoothing
   auto lacc_smoothed_result = twist_filter_ptr_->calcLaccWithSteeringAngle(ctrl_out);
   if (lacc_smoothed_result)
