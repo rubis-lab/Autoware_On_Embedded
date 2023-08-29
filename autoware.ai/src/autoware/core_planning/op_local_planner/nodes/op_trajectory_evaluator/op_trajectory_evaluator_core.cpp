@@ -62,8 +62,8 @@ TrajectoryEval::TrajectoryEval()
   }
 
   typedef message_filters::sync_policies::ExactTime<rubis_msgs::LaneArrayWithPoseTwist, rubis_msgs::DetectedObjectArray> SyncPolicy;
-  trajectories_sub_.subscribe(nh, "/local_trajectories_with_pose_twist", 50);
-	objects_sub_.subscribe(nh, "/detection/lidar_detector/rubis_objects_center", 50);  
+  trajectories_sub_.subscribe(nh, "/local_trajectories_with_pose_twist", 200);
+	objects_sub_.subscribe(nh, "/detection/lidar_detector/rubis_objects_center", 200);  
 	sync_.reset(new message_filters::Synchronizer<SyncPolicy>(SyncPolicy(50), trajectories_sub_, objects_sub_));
 	sync_->registerCallback(boost::bind(&TrajectoryEval::callback, this, _1, _2));
 }

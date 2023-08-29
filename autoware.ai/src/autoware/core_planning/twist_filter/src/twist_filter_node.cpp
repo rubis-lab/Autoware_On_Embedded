@@ -39,10 +39,10 @@ TwistFilterNode::TwistFilterNode() : nh_(), private_nh_("~")
   emergency_stop_sub_ = nh_.subscribe("emergency_stop", 1 ,&TwistFilterNode::emergencyStopCallback, this);
 
   // Publish
-  twist_pub_ = nh_.advertise<geometry_msgs::TwistStamped>("twist_cmd", 5);
-  rubis_twist_pub_ = nh_.advertise<rubis_msgs::TwistStamped>("rubis_twist_cmd", 5);
+  // twist_pub_ = nh_.advertise<geometry_msgs::TwistStamped>("twist_cmd", 5);
+  // rubis_twist_pub_ = nh_.advertise<rubis_msgs::TwistStamped>("rubis_twist_cmd", 5);
   vehicle_cmd_pub_ = nh_.advertise<autoware_msgs::VehicleCmd>("vehicle_cmd", 5);
-  ctrl_pub_ = nh_.advertise<autoware_msgs::ControlCommandStamped>("ctrl_cmd", 5);
+  // ctrl_pub_ = nh_.advertise<autoware_msgs::ControlCommandStamped>("ctrl_cmd", 5);
   twist_lacc_limit_debug_pub_ = private_nh_.advertise<std_msgs::Float32>("limitation_debug/twist/lateral_accel", 5);
   twist_ljerk_limit_debug_pub_ = private_nh_.advertise<std_msgs::Float32>("limitation_debug/twist/lateral_jerk", 5);
   ctrl_lacc_limit_debug_pub_ = private_nh_.advertise<std_msgs::Float32>("limitation_debug/ctrl/lateral_accel", 5);
@@ -69,12 +69,14 @@ inline geometry_msgs::TwistStamped TwistFilterNode::calculateTwist(const geometr
   const twist_filter::Twist twist = { msg->twist.linear.x, msg->twist.angular.z };
   ros::Time current_time = msg->header.stamp;
 
+  std::cout<<"in_twist: "<<msg->twist.linear.x<<std::endl;
+
   static ros::Time last_callback_time = current_time;
   static twist_filter::Twist twist_prev = twist;
 
   double time_elapsed = (current_time - last_callback_time).toSec();
 
-  twist_filter::Twist twist_out = twist;
+  twist_filter::Twist twist_out = twist;  
 
   // Apply lateral limit
   auto twist_limit_result = twist_filter_ptr_->lateralLimitTwist(twist, twist_prev, time_elapsed);
@@ -104,16 +106,19 @@ inline geometry_msgs::TwistStamped TwistFilterNode::calculateTwist(const geometr
 
   // Smoothed value publish
   geometry_msgs::TwistStamped out_msg = *msg;
-  if(emergency_stop_ == false){
-    // out_msg.twist.linear.x = twist_out.lx;
-    // out_msg.twist.angular.z = twist_out.az;
-    out_msg.twist.linear.x = twist_out.lx;
-    out_msg.twist.angular.z = twist_out.az;
-  }
-  else{
-    out_msg.twist.linear.x = 0;
-    out_msg.twist.angular.z = 0;
-  }
+  // if(emergency_stop_ == false){
+  //   // out_msg.twist.linear.x = twist_out.lx;
+  //   // out_msg.twist.angular.z = twist_out.az;
+  //   out_msg.twist.linear.x = twist_out.lx;
+  //   out_msg.twist.angular.z = twist_out.az;
+  // }
+  // else{
+  //   out_msg.twist.linear.x = 0;
+  //   out_msg.twist.angular.z = 0;
+  // }
+
+  out_msg.twist.linear.x = twist_out.lx;
+  out_msg.twist.angular.z = twist_out.az;
 
   // Publish lateral accel and jerk after smoothing
   auto lacc_smoothed_result = twist_filter_ptr_->calcLaccWithAngularZ(twist_out);
@@ -136,6 +141,9 @@ inline geometry_msgs::TwistStamped TwistFilterNode::calculateTwist(const geometr
   last_callback_time = current_time;
 
   out_msg.header = msg->header;
+
+  std::cout<<"out twist: "<<out_msg.twist.linear.x<<std::endl;
+
   return out_msg;
 }
 
@@ -175,12 +183,9 @@ void TwistFilterNode::purePursuitOutputCallback(const rubis_msgs::PurePursuitOut
   current_target_velocity = filtered_twist.twist.linear.x;
   current_target_accel = (diff_time > 0) ? ((current_target_velocity - previous_target_velocity) / diff_time) : previous_target_accel;
 
-  if(is_current_time_changed){
-    previous_time = current_time;
-    previous_target_velocity = current_target_velocity;
-    previous_target_accel = current_target_accel;
-    is_current_time_changed = false;    
-  }
+  previous_time = current_time;
+  previous_target_velocity = current_target_velocity;
+  previous_target_accel = current_target_accel;
 
   autoware_msgs::VehicleCmd vehicle_cmd_msg;
   vehicle_cmd_msg.ctrl_cmd.linear_acceleration = current_target_accel;
