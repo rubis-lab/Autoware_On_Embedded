@@ -1559,17 +1559,6 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input){
   ndt_matching(input);
 }
 
-static void rubis_points_callback(const rubis_msgs::PointCloud2::ConstPtr& _input){
-  rubis::start_task_profiling();
-
-  sensor_msgs::PointCloud2::ConstPtr input = boost::make_shared<const sensor_msgs::PointCloud2>(_input->msg);
-  rubis::instance_ = _input->instance;
-  ndt_matching(input);
-  // std::cout<<"Finish ndt_matching"<<std::endl;
-
-  rubis::stop_task_profiling(rubis::instance_, rubis::obj_instance_);
-}
-
 void* thread_func(void* args)
 {
   ros::NodeHandle nh_map;
@@ -1758,15 +1747,14 @@ int main(int argc, char** argv)
   ros::Subscriber initialpose_sub = nh.subscribe("initialpose", 10, initialpose_callback); 
 
   // ros::Subscriber points_sub;
-  // points_sub = nh.subscribe("rubis_filtered_points", 1, rubis_points_callback);
 
   message_filters::Subscriber<rubis_msgs::PointCloud2> filtered_points_sub;
   message_filters::Subscriber<rubis_msgs::PoseTwistStamped> svl_pose_twist_sub;
-  filtered_points_sub.subscribe(nh, "/rubis_filtered_points", 50);
-  svl_pose_twist_sub.subscribe(nh, "/svl_pose_twist", 50);
+  filtered_points_sub.subscribe(nh, "/rubis_filtered_points", 1);
+  svl_pose_twist_sub.subscribe(nh, "/svl_pose_twist", 1);
 
   typedef message_filters::sync_policies::ExactTime<rubis_msgs::PointCloud2, rubis_msgs::PoseTwistStamped> SyncPolicy;
-  sync_.reset(new message_filters::Synchronizer<SyncPolicy>(SyncPolicy(50), filtered_points_sub, svl_pose_twist_sub));
+  sync_.reset(new message_filters::Synchronizer<SyncPolicy>(SyncPolicy(10), filtered_points_sub, svl_pose_twist_sub));
   sync_->registerCallback(boost::bind(&svl_callback, _1, _2));
 
   pthread_t thread;

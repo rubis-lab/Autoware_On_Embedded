@@ -69,8 +69,6 @@ inline geometry_msgs::TwistStamped TwistFilterNode::calculateTwist(const geometr
   const twist_filter::Twist twist = { msg->twist.linear.x, msg->twist.angular.z };
   ros::Time current_time = msg->header.stamp;
 
-  std::cout<<"in_twist: "<<msg->twist.linear.x<<std::endl;
-
   static ros::Time last_callback_time = current_time;
   static twist_filter::Twist twist_prev = twist;
 
@@ -141,8 +139,6 @@ inline geometry_msgs::TwistStamped TwistFilterNode::calculateTwist(const geometr
   last_callback_time = current_time;
 
   out_msg.header = msg->header;
-
-  std::cout<<"out twist: "<<out_msg.twist.linear.x<<std::endl;
 
   return out_msg;
 }
