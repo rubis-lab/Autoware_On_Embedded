@@ -4,10 +4,12 @@ SvlSensing::SvlSensing()
 {
 	lidar_sub_.subscribe(nh_, "/points_raw_origin", 1);
 	odom_sub_.subscribe(nh_, "/odom", 1);
-	sync_.reset(new message_filters::Synchronizer<SyncPolicy>(SyncPolicy(10), lidar_sub_, odom_sub_));
-	sync_->registerCallback(boost::bind(&SvlSensing::callback, this, _1, _2));
+	image_sub_.subscribe(nh_, "/image_raw", 1);
+	sync_.reset(new message_filters::Synchronizer<SyncPolicy>(SyncPolicy(10), lidar_sub_, odom_sub_, image_sub_));
+	sync_->registerCallback(boost::bind(&SvlSensing::callback, this, _1, _2, _3));
 	lidar_pub_ = nh_.advertise<rubis_msgs::PointCloud2>("/rubis_points_raw", 10);
 	pose_twist_pub_ = nh_.advertise<rubis_msgs::PoseTwistStamped>("/svl_pose_twist", 10);
+	image_pub_ = nh_.advertise<rubis_msgs::Image>("/image", 10);
 
 	std::string node_name = ros::this_node::getName();
   	std::string task_response_time_filename;
@@ -31,7 +33,7 @@ SvlSensing::~SvlSensing()
 {
 }
 
-void SvlSensing::callback(const sensor_msgs::PointCloud2::ConstPtr& lidar_msg, const nav_msgs::Odometry::ConstPtr& odom_msg)
+void SvlSensing::callback(const sensor_msgs::PointCloud2::ConstPtr& lidar_msg, const nav_msgs::Odometry::ConstPtr& odom_msg, const sensor_msgs::Image::ConstPtr& image_msg)
 {
 	rubis::start_task_profiling_at_initial_node(std::max(lidar_msg->header.stamp.sec, odom_msg->header.stamp.sec), std::max(lidar_msg->header.stamp.nsec, odom_msg->header.stamp.nsec));
 
@@ -56,8 +58,15 @@ void SvlSensing::callback(const sensor_msgs::PointCloud2::ConstPtr& lidar_msg, c
 	out_pose_twist_msg.twist.header.stamp = cur_time;
 	out_pose_twist_msg.twist.twist = odom_msg->twist.twist;
 
+	rubis_msgs::Image out_image_msg;
+	out_image_msg.header = odom_msg->header;
+	out_image_msg.header.stamp = cur_time;
+	out_image_msg.instance = rubis::instance_;
+	out_image_msg.msg = *image_msg;
+
 	lidar_pub_.publish(out_lidar_msg);
 	pose_twist_pub_.publish(out_pose_twist_msg);
+	image_pub_.publish(out_image_msg);
 
 	rubis::stop_task_profiling(rubis::instance_++, rubis::obj_instance_++);
 	return;

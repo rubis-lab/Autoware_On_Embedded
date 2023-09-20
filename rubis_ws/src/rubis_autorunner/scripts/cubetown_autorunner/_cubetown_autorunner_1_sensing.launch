@@ -26,6 +26,7 @@
   </include>
 
   <!-- Redundant nodes --> 
+  <node name="image_redundant1" type="republish" pkg="image_transport" output="screen" args="compressed in:=/simulator/camera_node/image raw out:=/image_raw" />
   <!-- <node name="image_redundant1" type="republish" pkg="image_transport" output="screen" args="compressed in:=/simulator/camera_node/image raw out:=/image_raw"  />
   <node name="image_redundant2" type="republish" pkg="image_transport" output="screen" args="compressed in:=/simulator/camera_node/image raw out:=/image_raw"  />
 

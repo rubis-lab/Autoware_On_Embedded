@@ -11,6 +11,8 @@
 
 #include <sensor_msgs/PointCloud2.h>
 #include <rubis_msgs/PointCloud2.h>
+#include <sensor_msgs/Image.h>
+#include <rubis_msgs/Image.h>
 #include <nav_msgs/Odometry.h>
 #include <rubis_msgs/PoseTwistStamped.h>
 #include <geometry_msgs/TwistStamped.h>
@@ -18,7 +20,7 @@
 #include <tf/tf.h>
 #include <tf/transform_listener.h>
 
-typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::PointCloud2, nav_msgs::Odometry> SyncPolicy;
+typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::PointCloud2, nav_msgs::Odometry, sensor_msgs::Image> SyncPolicy;
 typedef message_filters::Synchronizer<SyncPolicy> Sync;
 
 class SvlSensing
@@ -32,12 +34,13 @@ private:
         
     message_filters::Subscriber<sensor_msgs::PointCloud2> lidar_sub_;
     message_filters::Subscriber<nav_msgs::Odometry> odom_sub_;    
+    message_filters::Subscriber<sensor_msgs::Image> image_sub_;
     boost::shared_ptr<Sync> sync_;
 
-    ros::Publisher lidar_pub_, pose_twist_pub_; 
+    ros::Publisher lidar_pub_, pose_twist_pub_, image_pub_; 
 
 
-    void callback(const sensor_msgs::PointCloud2::ConstPtr& lidar_msg, const nav_msgs::Odometry::ConstPtr& odom_msg);
+    void callback(const sensor_msgs::PointCloud2::ConstPtr& lidar_msg, const nav_msgs::Odometry::ConstPtr& odom_msg, const sensor_msgs::Image::ConstPtr& image_msg);
     
 
 };
