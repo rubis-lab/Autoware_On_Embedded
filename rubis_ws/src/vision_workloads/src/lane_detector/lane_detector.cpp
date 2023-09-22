@@ -10,8 +10,6 @@ LaneDetector::LaneDetector()
     private_nh.param<bool>(node_name+"/debug", debug_, false);
     image_sub_ = nh_.subscribe(input_topic, 1, &LaneDetector::imageCallback, this);    
 
-    std::cout<<"########################### debug:"<<debug_<<std::endl;
-
     return;
 }
 
