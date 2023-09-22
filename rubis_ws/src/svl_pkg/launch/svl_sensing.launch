@@ -1,5 +1,18 @@
 <launch>
+  <arg name="lidar_topic" default="/points_raw_origin" />
+  <arg name="odom_topic" default="/odom"/>
+  <arg name="image_topic_1" default="none" />
+  <arg name="image_topic_2" default="none" />
+  <arg name="image_topic_3" default="none" />
+  <arg name="image_topic_4" default="none" />
+
   <node pkg="svl_pkg" type="svl_sensing" name="svl_sensing" output="screen">
+    <param name="lidar_topic" value="$(arg lidar_topic)" />
+    <param name="odom_topic" value="$(arg odom_topic)" />
+    <param name="image_topic_1" value="$(arg image_topic_1)" />
+    <param name="image_topic_2" value="$(arg image_topic_2)" />
+    <param name="image_topic_3" value="$(arg image_topic_3)" />
+    <param name="image_topic_4" value="$(arg image_topic_4)" />
   </node>
 
 </launch>

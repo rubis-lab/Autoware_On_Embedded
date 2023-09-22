@@ -16,6 +16,7 @@ public:
     LaneDetector();
     void run();
 private:
+    bool debug_;
     ros::NodeHandle nh_;
     ros::Publisher lane_pub_;
     ros::Subscriber image_sub_; 

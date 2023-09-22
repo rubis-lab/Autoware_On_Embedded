@@ -7,7 +7,10 @@ LaneDetector::LaneDetector()
     std::string input_topic;
 
     private_nh.param<std::string>(node_name+"/input_topic", input_topic, "/svl_image_raw");
+    private_nh.param<bool>(node_name+"/debug", debug_, false);
     image_sub_ = nh_.subscribe(input_topic, 1, &LaneDetector::imageCallback, this);    
+
+    std::cout<<"########################### debug:"<<debug_<<std::endl;
 
     return;
 }
@@ -65,7 +68,8 @@ void LaneDetector::imageCallback(const rubis_msgs::Image& image){
     // Detect straight lines and draw the lanes if possible
     std::vector<Vec4i> linesP = houghLines(maskedIMG, frame.clone(), false);
     Mat lanes = drawLanes(frame, linesP);
-    imshow("Lanes", lanes);
+    
+    if(debug_) imshow("Lanes", lanes);
     waitKey(1);
 
 }

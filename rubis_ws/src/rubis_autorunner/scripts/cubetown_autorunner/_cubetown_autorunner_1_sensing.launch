@@ -22,14 +22,44 @@
     <arg name="path_pcd" value="$(env USER_HOME)/autoware.ai/autoware_files/points_map/CubeTown.pcd"/>
   </include>
 
+  <node name="svl_camera_top" type="republish" pkg="image_transport" output="screen" args="compressed in:=/svl_image_top raw out:=/republished_image_top"  />
+  <node name="svl_camera_right" type="republish" pkg="image_transport" output="screen" args="compressed in:=/svl_image_right raw out:=/republished_image_right"  />
+  <node name="svl_camera_left" type="republish" pkg="image_transport" output="screen" args="compressed in:=/svl_image_left raw out:=/republished_image_left"  />
+  <node name="svl_camera_rear" type="republish" pkg="image_transport" output="screen" args="compressed in:=/svl_image_rear raw out:=/republished_image_rear"  />
+
   <include file="$(find svl_pkg)/launch/svl_sensing.launch">
+    <arg name="lidar_topic" value="/points_raw_origin" />
+    <arg name="odom_topic" value="/odom" />
+    <arg name="image_topic_1" value="/republished_image_top" />
+    <arg name="image_topic_2" value="/republished_image_right" />
+    <arg name="image_topic_3" value="/republished_image_left" />
+    <arg name="image_topic_4" value="/republished_image_rear" />
   </include>
 
-  <!-- Redundant nodes --> 
-  <node name="image_redundant1" type="republish" pkg="image_transport" output="screen" args="compressed in:=/simulator/camera_node/image raw out:=/image_raw" />
-  <!-- <node name="image_redundant1" type="republish" pkg="image_transport" output="screen" args="compressed in:=/simulator/camera_node/image raw out:=/image_raw"  />
-  <node name="image_redundant2" type="republish" pkg="image_transport" output="screen" args="compressed in:=/simulator/camera_node/image raw out:=/image_raw"  />
+  <include file="$(find vision_workloads)/launch/lane_detector.launch">
+    <arg name="debug" value="false" />
+    <arg name="node_name" value="lane_detector_top"/>
+    <arg name="input_topic" value="/image_raw1"/>
+  </include>
 
+  <include file="$(find vision_workloads)/launch/lane_detector.launch">
+    <arg name="debug" value="false" />
+    <arg name="node_name" value="lane_detector_right"/>
+    <arg name="input_topic" value="/image_raw2"/>
+  </include>
+
+  <include file="$(find vision_workloads)/launch/lane_detector.launch">
+    <arg name="debug" value="false" />
+    <arg name="node_name" value="lane_detector_left"/>
+    <arg name="input_topic" value="/image_raw3"/>
+  </include>
+
+  <include file="$(find vision_workloads)/launch/lane_detector.launch">
+    <arg name="debug" value="false" />
+    <arg name="node_name" value="lane_detector_rear"/>
+    <arg name="input_topic" value="/image_raw4"/>
+  </include>
+  <!--
   <include file="$(find rubis_pkg)/launch/lidar_republisher_params.launch">
     <arg name="input_topic" value="$(arg lidar_input_topic)" />
     <arg name="output_topic" value="$(arg lidar_output_topic_redundant)" />

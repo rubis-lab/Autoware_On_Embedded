@@ -1,7 +1,9 @@
-<launch>
+<launch>    
     <arg name="node_name" default="lane_detector" />
     <arg name="input_topic" default="/svl_image_raw"/>
+    <arg name="debug" default="false" />
     <node pkg="vision_workloads" type="lane_detector" name="$(arg node_name)" output="screen">
         <param name="input_topic" value="$(arg input_topic)" />
+        <param name="debug" value="$(arg debug)" />
     </node>
 </launch>
