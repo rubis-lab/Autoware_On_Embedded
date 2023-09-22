@@ -18,9 +18,10 @@
   <build_export_depend>std_msgs</build_export_depend>
   <exec_depend>autoware_msgs</exec_depend>
   <exec_depend>roscpp</exec_depend>
-  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>std_msgs</exec_depend>  
   <depend>visualization_msgs</depend>
   <depend>nmea_msgs</depend>
+  <depend>rubis_msgs</depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->
