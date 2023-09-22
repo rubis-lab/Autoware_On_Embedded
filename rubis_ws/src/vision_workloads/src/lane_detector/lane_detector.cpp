@@ -1,8 +1,13 @@
 #include "lane_detector.hpp"
 
 LaneDetector::LaneDetector()
-{
-    image_sub_ = nh_.subscribe("/image", 1, &LaneDetector::imageCallback, this);
+{   
+    ros::NodeHandle private_nh("~");
+    std::string node_name = ros::this_node::getName();
+    std::string input_topic;
+
+    private_nh.param<std::string>(node_name+"/input_topic", input_topic, "/svl_image_raw");
+    image_sub_ = nh_.subscribe(input_topic, 1, &LaneDetector::imageCallback, this);    
 
     return;
 }
