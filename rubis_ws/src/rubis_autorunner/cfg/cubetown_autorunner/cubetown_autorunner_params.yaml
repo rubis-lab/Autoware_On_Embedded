@@ -25,7 +25,7 @@ lane_detector_top:
     exec_time: 1_000_000
     deadline: 2_000_000
     period: 2_000_000
-  task_response_time_filename: "~/Documents/profiling/response_time/svl_sensing_top.csv"  
+  task_response_time_filename: "~/Documents/profiling/response_time/lane_detector_top.csv"  
 
 lane_detector_right:
   task_scheduling_configs:
@@ -34,7 +34,7 @@ lane_detector_right:
     exec_time: 1_000_000
     deadline: 2_000_000
     period: 2_000_000
-  task_response_time_filename: "~/Documents/profiling/response_time/svl_sensing_right.csv"  
+  task_response_time_filename: "~/Documents/profiling/response_time/lane_detector_right.csv"  
 
 lane_detector_left:
   task_scheduling_configs:
@@ -43,7 +43,7 @@ lane_detector_left:
     exec_time: 1_000_000
     deadline: 2_000_000
     period: 2_000_000
-  task_response_time_filename: "~/Documents/profiling/response_time/svl_sensing_left.csv"  
+  task_response_time_filename: "~/Documents/profiling/response_time/lane_detector_left.csv"  
 
 lane_detector_rear:
   task_scheduling_configs:
@@ -52,7 +52,7 @@ lane_detector_rear:
     exec_time: 1_000_000
     deadline: 2_000_000
     period: 2_000_000
-  task_response_time_filename: "~/Documents/profiling/response_time/svl_sensing_rear.csv"  
+  task_response_time_filename: "~/Documents/profiling/response_time/lane_detector_rear.csv"  
 
 lidar_republisher:
   task_scheduling_configs:
