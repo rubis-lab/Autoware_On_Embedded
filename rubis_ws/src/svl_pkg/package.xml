@@ -15,12 +15,14 @@
 <build_depend>std_msgs</build_depend>
 <build_depend>jsk_recognition_msgs</build_depend>
 <build_depend>rubis_msgs</build_depend>
+<build_depend>nav_msgs</build_depend>
 <build_export_depend>rospy</build_export_depend>
 <build_export_depend>geometry_msgs</build_export_depend>
 <build_export_depend>autoware_msgs</build_export_depend>
 <build_export_depend>std_msgs</build_export_depend>
 <build_export_depend>jsk_recognition_msgs</build_export_depend>
 <build_export_depend>rubis_msgs</build_export_depend>
+<build_export_depend>nav_msgs</build_export_depend>
 <exec_depend>rospy</exec_depend>
 <exec_depend>geometry_msgs</exec_depend>
 <exec_depend>nmea_msgs</exec_depend>
@@ -28,10 +30,12 @@
 <exec_depend>std_msgs</exec_depend>
 <exec_depend>jsk_recognition_msgs</exec_depend>
 <exec_depend>rubis_msgs</exec_depend>
+<exec_depend>nav_msgs</exec_depend>
 <depend>roscpp</depend>
 <depend>tf</depend>
 <depend>gnss</depend>
 <depend>rubis_lib</depend>
 <depend>visualization_msgs</depend>
+<depend>nav_msgs</depend>
 
 </package>
