@@ -18,6 +18,42 @@ svl_sensing:
     period: 2_000_000
   task_response_time_filename: "~/Documents/profiling/response_time/svl_sensing.csv"  
 
+lane_detector_top:
+  task_scheduling_configs:
+    policy: "NONE"
+    priority: 20
+    exec_time: 1_000_000
+    deadline: 2_000_000
+    period: 2_000_000
+  task_response_time_filename: "~/Documents/profiling/response_time/svl_sensing_top.csv"  
+
+lane_detector_right:
+  task_scheduling_configs:
+    policy: "NONE"
+    priority: 20
+    exec_time: 1_000_000
+    deadline: 2_000_000
+    period: 2_000_000
+  task_response_time_filename: "~/Documents/profiling/response_time/svl_sensing_right.csv"  
+
+lane_detector_left:
+  task_scheduling_configs:
+    policy: "NONE"
+    priority: 20
+    exec_time: 1_000_000
+    deadline: 2_000_000
+    period: 2_000_000
+  task_response_time_filename: "~/Documents/profiling/response_time/svl_sensing_left.csv"  
+
+lane_detector_rear:
+  task_scheduling_configs:
+    policy: "NONE"
+    priority: 20
+    exec_time: 1_000_000
+    deadline: 2_000_000
+    period: 2_000_000
+  task_response_time_filename: "~/Documents/profiling/response_time/svl_sensing_rear.csv"  
+
 lidar_republisher:
   task_scheduling_configs:
     policy: "NONE"

@@ -42,6 +42,8 @@ void LaneDetector::run()
 }
 
 void LaneDetector::imageCallback(const rubis_msgs::Image& image){
+    rubis::start_task_profiling();
+
     cv_bridge::CvImagePtr cv_image = cv_bridge::toCvCopy(image.msg, "bgr8");
     Mat frame = cv_image->image;
 
@@ -67,9 +69,12 @@ void LaneDetector::imageCallback(const rubis_msgs::Image& image){
     std::vector<Vec4i> linesP = houghLines(maskedIMG, frame.clone(), false);
     Mat lanes = drawLanes(frame, linesP);
     
-    if(debug_) imshow("Lanes", lanes);
-    waitKey(1);
+    // if(debug_) imshow("Lanes", lanes);
+    // waitKey(1);
 
+    rubis::instance_ = image.instance;
+    rubis::obj_instance_ = image.obj_instance;
+    rubis::stop_task_profiling(rubis::instance_++, rubis::obj_instance_++);
 }
 
 Mat LaneDetector::applyGrayscale(Mat source)
