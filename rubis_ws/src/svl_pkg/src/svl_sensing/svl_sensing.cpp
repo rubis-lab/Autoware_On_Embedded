@@ -49,30 +49,40 @@ SvlSensing::SvlSensing()
 		image_sub_4_.subscribe(nh_, image_topic_4, 1);
 		image_topic_cnt++;
 	}
-
-	if(image_topic_cnt == 1){
+	
+	if(image_topic_cnt == 0){
+		sync0_.reset(new message_filters::Synchronizer<SyncPolicyNoImage>(SyncPolicyNoImage(10), lidar_sub_, odom_sub_));
+		sync0_->registerCallback(boost::bind(&SvlSensing::callback_no_image, this, _1, _2));
+	}
+	else if(image_topic_cnt == 1){
 		sync1_.reset(new message_filters::Synchronizer<SyncPolicyImage1>(SyncPolicyImage1(10), lidar_sub_, odom_sub_, image_sub_1_));
 		sync1_->registerCallback(boost::bind(&SvlSensing::callback_image1, this, _1, _2, _3));
+		image_pub1_ = nh_.advertise<rubis_msgs::Image>("/image_raw1", 1);
 	}
 	else if(image_topic_cnt == 2){
 		sync2_.reset(new message_filters::Synchronizer<SyncPolicyImage2>(SyncPolicyImage2(10), lidar_sub_, odom_sub_, image_sub_1_, image_sub_2_));
 		sync2_->registerCallback(boost::bind(&SvlSensing::callback_image2, this, _1, _2, _3, _4));
+		image_pub1_ = nh_.advertise<rubis_msgs::Image>("/image_raw1", 1);
+		image_pub2_ = nh_.advertise<rubis_msgs::Image>("/image_raw2", 1);
 	}
 	else if(image_topic_cnt == 3){
 		sync3_.reset(new message_filters::Synchronizer<SyncPolicyImage3>(SyncPolicyImage3(10), lidar_sub_, odom_sub_, image_sub_1_, image_sub_2_, image_sub_3_));
 		sync3_->registerCallback(boost::bind(&SvlSensing::callback_image3, this, _1, _2, _3, _4, _5));
+		image_pub1_ = nh_.advertise<rubis_msgs::Image>("/image_raw1", 1);
+		image_pub2_ = nh_.advertise<rubis_msgs::Image>("/image_raw2", 1);
+		image_pub3_ = nh_.advertise<rubis_msgs::Image>("/image_raw3", 1);
 	}
 	else if(image_topic_cnt == 4){
 		sync4_.reset(new message_filters::Synchronizer<SyncPolicyImage4>(SyncPolicyImage4(10), lidar_sub_, odom_sub_, image_sub_1_, image_sub_2_, image_sub_3_, image_sub_4_));
 		sync4_->registerCallback(boost::bind(&SvlSensing::callback_image4, this, _1, _2, _3, _4, _5, _6));
+		image_pub1_ = nh_.advertise<rubis_msgs::Image>("/image_raw1", 1);
+		image_pub2_ = nh_.advertise<rubis_msgs::Image>("/image_raw2", 1);
+		image_pub3_ = nh_.advertise<rubis_msgs::Image>("/image_raw3", 1);
+		image_pub4_ = nh_.advertise<rubis_msgs::Image>("/image_raw4", 1);
 	}
-	
+
 	lidar_pub_ = nh_.advertise<rubis_msgs::PointCloud2>("/rubis_points_raw", 10);
 	pose_twist_pub_ = nh_.advertise<rubis_msgs::PoseTwistStamped>("/svl_pose_twist", 10);
-	image_pub1_ = nh_.advertise<rubis_msgs::Image>("/image_raw1", 1);
-	image_pub2_ = nh_.advertise<rubis_msgs::Image>("/image_raw2", 1);
-	image_pub3_ = nh_.advertise<rubis_msgs::Image>("/image_raw3", 1);
-	image_pub4_ = nh_.advertise<rubis_msgs::Image>("/image_raw4", 1);
 
   	std::string task_response_time_filename;
   	nh_.param<std::string>(node_name+"/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/svl_sensing.csv");
@@ -94,6 +104,39 @@ SvlSensing::SvlSensing()
 SvlSensing::~SvlSensing()
 {
 }
+
+void SvlSensing::callback_no_image(const sensor_msgs::PointCloud2::ConstPtr& lidar_msg, const nav_msgs::Odometry::ConstPtr& odom_msg)
+{
+	rubis::start_task_profiling_at_initial_node(std::max(lidar_msg->header.stamp.sec, odom_msg->header.stamp.sec), std::max(lidar_msg->header.stamp.nsec, odom_msg->header.stamp.nsec));
+
+	auto cur_time = ros::Time::now();
+	rubis_msgs::PointCloud2 out_lidar_msg;	
+	out_lidar_msg.header = lidar_msg->header;	
+	out_lidar_msg.header.stamp = cur_time;
+	out_lidar_msg.instance = rubis::instance_;
+	out_lidar_msg.msg = *lidar_msg;
+	out_lidar_msg.msg.header.stamp = cur_time;
+	out_lidar_msg.msg.fields.at(3).datatype = 7;
+
+	rubis_msgs::PoseTwistStamped out_pose_twist_msg;
+	out_pose_twist_msg.header = odom_msg->header;
+	out_pose_twist_msg.header.stamp = cur_time;
+	out_pose_twist_msg.instance = rubis::instance_;
+	out_pose_twist_msg.pose.header = odom_msg->header;	
+	out_pose_twist_msg.pose.header.stamp = cur_time;
+	out_pose_twist_msg.pose.header.frame_id = "/map";	
+	out_pose_twist_msg.pose.pose = odom_msg->pose.pose;
+	out_pose_twist_msg.twist.header.frame_id = "/map";
+	out_pose_twist_msg.twist.header.stamp = cur_time;
+	out_pose_twist_msg.twist.twist = odom_msg->twist.twist;
+
+	lidar_pub_.publish(out_lidar_msg);
+	pose_twist_pub_.publish(out_pose_twist_msg);
+
+	rubis::stop_task_profiling(rubis::instance_++, rubis::obj_instance_++);
+	return;
+}
+
 
 void SvlSensing::callback_image1(const sensor_msgs::PointCloud2::ConstPtr& lidar_msg, const nav_msgs::Odometry::ConstPtr& odom_msg, const sensor_msgs::Image::ConstPtr& image_msg1)
 {

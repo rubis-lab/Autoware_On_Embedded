@@ -5,9 +5,12 @@ LaneDetector::LaneDetector()
     ros::NodeHandle private_nh("~");
     std::string node_name = ros::this_node::getName();
     std::string input_topic;
+    std::string output_topic;
+    output_topic = node_name + std::string("_lane");
 
     private_nh.param<std::string>(node_name+"/input_topic", input_topic, "/svl_image_raw");
     private_nh.param<bool>(node_name+"/debug", debug_, false);
+    lane_pub_ = nh_.advertise<std_msgs::Bool>(output_topic.c_str(), 1);
     image_sub_ = nh_.subscribe(input_topic, 1, &LaneDetector::imageCallback, this);    
 
     return;
@@ -71,6 +74,8 @@ void LaneDetector::imageCallback(const rubis_msgs::Image& image){
     
     // if(debug_) imshow("Lanes", lanes);
     // waitKey(1);
+
+    lane_pub_.publish(std_msgs::Bool());
 
     rubis::instance_ = image.instance;
     rubis::obj_instance_ = image.obj_instance;

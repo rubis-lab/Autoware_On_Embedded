@@ -7,6 +7,7 @@
 #include <cv_bridge/cv_bridge.h>
 #include <rubis_lib/sched.hpp>
 #include <rubis_msgs/Image.h>
+#include <std_msgs/Bool.h>
 
 using namespace cv;
 

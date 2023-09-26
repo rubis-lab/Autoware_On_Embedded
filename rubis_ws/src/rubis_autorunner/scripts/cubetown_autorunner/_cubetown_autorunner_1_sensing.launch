@@ -31,9 +31,9 @@
     <arg name="lidar_topic" value="/points_raw_origin" />
     <arg name="odom_topic" value="/odom" />
     <arg name="image_topic_1" value="/republished_image_top" />
-    <arg name="image_topic_2" value="/republished_image_right" />
+    <!-- <arg name="image_topic_2" value="/republished_image_right" />
     <arg name="image_topic_3" value="/republished_image_left" />
-    <arg name="image_topic_4" value="/republished_image_rear" />
+    <arg name="image_topic_4" value="/republished_image_rear" /> -->
   </include>
 
   <include file="$(find vision_workloads)/launch/lane_detector.launch">
@@ -42,7 +42,7 @@
     <arg name="input_topic" value="/image_raw1"/>
   </include>
 
-  <include file="$(find vision_workloads)/launch/lane_detector.launch">
+  <!-- <include file="$(find vision_workloads)/launch/lane_detector.launch">
     <arg name="debug" value="false" />
     <arg name="node_name" value="lane_detector_right"/>
     <arg name="input_topic" value="/image_raw2"/>
@@ -58,7 +58,7 @@
     <arg name="debug" value="false" />
     <arg name="node_name" value="lane_detector_rear"/>
     <arg name="input_topic" value="/image_raw4"/>
-  </include>
+  </include> -->
   <!--
   <include file="$(find rubis_pkg)/launch/lidar_republisher_params.launch">
     <arg name="input_topic" value="$(arg lidar_input_topic)" />
