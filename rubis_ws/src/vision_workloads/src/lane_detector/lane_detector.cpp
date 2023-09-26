@@ -10,6 +10,11 @@ LaneDetector::LaneDetector()
 
     private_nh.param<std::string>(node_name+"/input_topic", input_topic, "/svl_image_raw");
     private_nh.param<bool>(node_name+"/debug", debug_, false);
+    private_nh.param<bool>(node_name+"/filter_image", filter_image_, false);
+    private_nh.param<bool>(node_name+"/gray_scale", gray_scale_, false);
+    private_nh.param<bool>(node_name+"/gaussian_blur", gaussian_blur_, false);
+    private_nh.param<bool>(node_name+"/canny", canny_, false);
+    private_nh.param<bool>(node_name+"/roi", roi_, false);
     lane_pub_ = nh_.advertise<std_msgs::Bool>(output_topic.c_str(), 1);
     image_sub_ = nh_.subscribe(input_topic, 1, &LaneDetector::imageCallback, this);    
 
@@ -51,28 +56,41 @@ void LaneDetector::imageCallback(const rubis_msgs::Image& image){
     Mat frame = cv_image->image;
 
     // Determine if video is taken during daytime or not
-        bool isDay = isDayTime(frame);
+    bool isDay = isDayTime(frame);
 
     // Filter image 
-    Mat filteredIMG = filterColors(frame, isDay);
+    Mat filteredIMG;
+    if(filter_image_) filteredIMG = filterColors(frame, isDay);
+    else filteredIMG = frame;
 
     // Apply grayscale
-    Mat gray = applyGrayscale(filteredIMG);
-
+    Mat gray;
+    if(gray_scale_) gray = applyGrayscale(frame);
+    else gray = filteredIMG;
+    
     // Apply Gaussian blur
-    Mat gBlur = applyGaussianBlur(gray);
+    Mat gBlur;
+    if(gaussian_blur_) gBlur = applyGaussianBlur(gray);
+    else gBlur = gray;
 
     // Find edges
-    Mat edges = applyCanny(gBlur);
+    Mat edges;
+    if(canny_) edges = applyCanny(gBlur);
+    else edges = gBlur;
 
     // Create mask (Region of Interest)
-    Mat maskedIMG = RegionOfInterest(edges);
+    Mat maskedIMG;
+    if(roi_) maskedIMG = RegionOfInterest(edges);
+    else maskedIMG = edges;
     
     // Detect straight lines and draw the lanes if possible
     std::vector<Vec4i> linesP = houghLines(maskedIMG, frame.clone(), false);
+
+    // Draw lines
     Mat lanes = drawLanes(frame, linesP);
     
-    // if(debug_) imshow("Lanes", lanes);
+    // cv::resize(lanes, lanes, cv::Size(640, 480));
+    // imshow("Lanes", lanes);
     // waitKey(1);
 
     lane_pub_.publish(std_msgs::Bool());

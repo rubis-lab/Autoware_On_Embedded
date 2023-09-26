@@ -37,9 +37,14 @@
   </include>
 
   <include file="$(find vision_workloads)/launch/lane_detector.launch">
-    <arg name="debug" value="false" />
+    <arg name="debug" value="true" />
     <arg name="node_name" value="lane_detector_top"/>
     <arg name="input_topic" value="/image_raw1"/>
+    <arg name="filter_image" value="false" />
+    <arg name="gray_scale" value="true" />
+    <arg name="gaussian_blur" value="false" />
+    <arg name="canny" value="true" />
+    <arg name="roi" value="true" />
   </include>
 
   <!-- <include file="$(find vision_workloads)/launch/lane_detector.launch">

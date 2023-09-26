@@ -1,9 +1,20 @@
 <launch>    
+    <arg name="debug" default="false" />
     <arg name="node_name" default="lane_detector" />
     <arg name="input_topic" default="/svl_image_raw"/>
-    <arg name="debug" default="false" />
+    <arg name="filter_image" default="true" />
+    <arg name="gray_scale" default="true" />
+    <arg name="gaussian_blur" default="true" />
+    <arg name="canny" default="true" />
+    <arg name="roi" default="true" />
+    
     <node pkg="vision_workloads" type="lane_detector" name="$(arg node_name)" output="screen">
         <param name="input_topic" value="$(arg input_topic)" />
         <param name="debug" value="$(arg debug)" />
+        <param name="filter_image" value="$(arg filter_image)" />
+        <param name="gray_scale" value="$(arg gray_scale)" />
+        <param name="gaussian_blur" value="$(arg gaussian_blur)" />
+        <param name="canny" value="$(arg canny)" />
+        <param name="roi" value="$(arg roi)" />
     </node>
 </launch>

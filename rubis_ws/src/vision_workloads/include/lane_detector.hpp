@@ -8,6 +8,7 @@
 #include <rubis_lib/sched.hpp>
 #include <rubis_msgs/Image.h>
 #include <std_msgs/Bool.h>
+#include <chrono>
 
 using namespace cv;
 
@@ -17,7 +18,7 @@ public:
     LaneDetector();
     void run();
 private:
-    bool debug_;
+    bool debug_, filter_image_, gray_scale_, gaussian_blur_, canny_, roi_;
     ros::NodeHandle nh_;
     ros::Publisher lane_pub_;
     ros::Subscriber image_sub_; 
