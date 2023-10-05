@@ -673,7 +673,7 @@ static void svl_callback(const rubis_msgs::PointCloud2::ConstPtr&points_msg, con
   rubis::start_task_profiling();
 
   rubis::instance_ = points_msg->instance;
-  rubis::obj_instance_ = 0;
+  rubis::lidar_instance_ = 0;
 
   tf::Quaternion gnss_q(pose_twist_msg->pose.pose.orientation.x,
                         pose_twist_msg->pose.pose.orientation.y,
@@ -694,7 +694,7 @@ static void svl_callback(const rubis_msgs::PointCloud2::ConstPtr&points_msg, con
   sensor_msgs::PointCloud2::ConstPtr input = boost::make_shared<const sensor_msgs::PointCloud2>(points_msg->msg);
   ndt_matching(input);
 
-  rubis::stop_task_profiling(rubis::instance_, rubis::obj_instance_);
+  rubis::stop_task_profiling(rubis::instance_, rubis::lidar_instance_, rubis::vision_instance_);
 }
 
 static void initialpose_callback(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& input)

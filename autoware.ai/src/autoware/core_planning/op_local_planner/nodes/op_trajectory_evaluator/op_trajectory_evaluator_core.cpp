@@ -15,524 +15,524 @@
  */
 
 #include "op_trajectory_evaluator_core.h"
-#include "op_ros_helpers/op_ROSHelpers.h"
 #include "op_planner/MappingHelpers.h"
+#include "op_ros_helpers/op_ROSHelpers.h"
 #include <rubis_lib/sched.hpp>
 
-namespace TrajectoryEvaluatorNS
-{
-
-TrajectoryEval::TrajectoryEval()
-{
-  bNewCurrentPos = false;
-  bVehicleStatus = false;
-  bWayGlobalPath = false;
-  bWayGlobalPathToUse = false;
-  m_bUseMoveingObjectsPrediction = false;
-  m_noVehicleCnt = 0;
-  is_objects_updated_ = false;
-
-  ros::NodeHandle _nh;
-  UpdatePlanningParams(_nh);
-
-  tf::StampedTransform transform;
-  PlannerHNS::ROSHelpers::GetTransformFromTF("map", "world", transform);
-  m_OriginPos.position.x  = transform.getOrigin().x();
-  m_OriginPos.position.y  = transform.getOrigin().y();
-  m_OriginPos.position.z  = transform.getOrigin().z();
-
-  pub_CollisionPointsRviz = nh.advertise<visualization_msgs::MarkerArray>("dynamic_collision_points_rviz", 1);
-  pub_LocalWeightedTrajectoriesRviz = nh.advertise<visualization_msgs::MarkerArray>("local_trajectories_eval_rviz", 1);
-  // pub_LocalWeightedTrajectories = nh.advertise<rubis_msgs::LaneArrayWithPoseTwist>("local_weighted_trajectories", 1);
-  // pub_LocalWeightedTrajectoriesWithPoseTwist = nh.advertise<rubis_msgs::LaneArrayWithPoseTwist>("local_weighted_trajectories_with_pose_twist", 1);
-  // pub_TrajectoryCost = nh.advertise<autoware_msgs::Lane>("local_trajectory_cost", 1);
-  pub_SafetyBorderRviz = nh.advertise<visualization_msgs::Marker>("safety_border", 1);
-  // pub_DistanceToPedestrian = nh.advertise<std_msgs::Float64>("distance_to_pedestrian", 1);
-  // pub_IntersectionCondition = nh.advertise<autoware_msgs::IntersectionCondition>("intersection_condition", 1);
-  // pub_SprintSwitch = nh.advertise<std_msgs::Bool>("sprint_switch", 1);
-  pub_PlanningInfo = nh.advertise<rubis_msgs::PlanningInfo>("planning_info", 10);
-  
-  sub_GlobalPlannerPaths = nh.subscribe("/lane_waypoints_array", 1, &TrajectoryEval::callbackGetGlobalPlannerPath, this);
-
-  PlannerHNS::ROSHelpers::InitCollisionPointsMarkers(50, m_CollisionsDummy);
-
-  while(1){
-    if(UpdateTf() == true)
-      break;
-  }
-
-  typedef message_filters::sync_policies::ExactTime<rubis_msgs::LaneArrayWithPoseTwist, rubis_msgs::DetectedObjectArray> SyncPolicy;
-  trajectories_sub_.subscribe(nh, "/local_trajectories_with_pose_twist", 200);
-	objects_sub_.subscribe(nh, "/detection/lidar_detector/rubis_objects_center", 200);  
-	sync_.reset(new message_filters::Synchronizer<SyncPolicy>(SyncPolicy(50), trajectories_sub_, objects_sub_));
-	sync_->registerCallback(boost::bind(&TrajectoryEval::callback, this, _1, _2));
-}
-
-TrajectoryEval::~TrajectoryEval()
-{
-}
-
-void TrajectoryEval::UpdatePlanningParams(ros::NodeHandle& _nh)
-{
-  _nh.getParam("/op_trajectory_evaluator/enablePrediction", m_bUseMoveingObjectsPrediction);
-
-  _nh.getParam("/op_common_params/horizontalSafetyDistance", m_PlanningParams.horizontalSafetyDistancel);
-  _nh.getParam("/op_common_params/verticalSafetyDistance", m_PlanningParams.verticalSafetyDistance);
-  _nh.getParam("/op_common_params/enableSwerving", m_PlanningParams.enableSwerving);
-  if(m_PlanningParams.enableSwerving)
-    m_PlanningParams.enableFollowing = true;
-  else
-    _nh.getParam("/op_common_params/enableFollowing", m_PlanningParams.enableFollowing);
-
-  _nh.getParam("/op_common_params/enableTrafficLightBehavior", m_PlanningParams.enableTrafficLightBehavior);
-  _nh.getParam("/op_common_params/enableStopSignBehavior", m_PlanningParams.enableStopSignBehavior);
-
-  _nh.getParam("/op_common_params/maxVelocity", m_PlanningParams.maxSpeed);
-  _nh.getParam("/op_common_params/minVelocity", m_PlanningParams.minSpeed);
-  _nh.getParam("/op_common_params/maxLocalPlanDistance", m_PlanningParams.microPlanDistance);
-
-  _nh.getParam("/op_common_params/pathDensity", m_PlanningParams.pathDensity);
-
-  _nh.getParam("/op_common_params/rollOutDensity", m_PlanningParams.rollOutDensity);
-  if(m_PlanningParams.enableSwerving)
-    _nh.getParam("/op_common_params/rollOutsNumber", m_PlanningParams.rollOutNumber);
-  else
-    m_PlanningParams.rollOutNumber = 0;
-
-  std::cout << "Rolls Number: " << m_PlanningParams.rollOutNumber << std::endl;
-
-  _nh.getParam("/op_common_params/horizonDistance", m_PlanningParams.horizonDistance);
-  _nh.getParam("/op_common_params/minFollowingDistance", m_PlanningParams.minFollowingDistance);
-  _nh.getParam("/op_common_params/minDistanceToAvoid", m_PlanningParams.minDistanceToAvoid);
-  _nh.getParam("/op_common_params/maxDistanceToAvoid", m_PlanningParams.maxDistanceToAvoid);
-  _nh.getParam("/op_common_params/speedProfileFactor", m_PlanningParams.speedProfileFactor);
-
-  _nh.getParam("/op_common_params/enableLaneChange", m_PlanningParams.enableLaneChange);
-
-  _nh.getParam("/op_common_params/width", m_CarInfo.width);
-  _nh.getParam("/op_common_params/length", m_CarInfo.length);
-  _nh.getParam("/op_common_params/wheelBaseLength", m_CarInfo.wheel_base);
-  _nh.getParam("/op_common_params/turningRadius", m_CarInfo.turning_radius);
-  _nh.getParam("/op_common_params/maxSteerAngle", m_CarInfo.max_steer_angle);
-  _nh.getParam("/op_common_params/maxAcceleration", m_CarInfo.max_acceleration);
-  _nh.getParam("/op_common_params/maxDeceleration", m_CarInfo.max_deceleration);
-  m_CarInfo.max_speed_forward = m_PlanningParams.maxSpeed;
-  m_CarInfo.min_speed_forward = m_PlanningParams.minSpeed;
-
-  _nh.param("/op_trajectory_evaluator/PedestrianRightThreshold", m_PedestrianRightThreshold, 7.0);
-  _nh.param("/op_trajectory_evaluator/PedestrianLeftThreshold", m_PedestrianLeftThreshold, 2.0);
-  _nh.param("/op_trajectory_evaluator/PedestrianImageDetectionRange", m_PedestrianImageDetectionRange, 0.7);
-  _nh.param("/op_trajectory_evaluator/PedestrianStopImgHeightThreshold", m_pedestrian_stop_img_height_threshold, 120);
-  _nh.param("/op_trajectory_evaluator/ImageWidth", m_ImageWidth, 1920);
-  _nh.param("/op_trajectory_evaluator/ImageHeight", m_ImageHeight, 1080);
-  _nh.param("/op_trajectory_evaluator/VehicleImageDetectionRange", m_VehicleImageDetectionRange, 0.3);
-  _nh.param("/op_trajectory_evaluator/VehicleImageWidthThreshold", m_VehicleImageWidthThreshold, 0.05);
-  _nh.param("/op_trajectory_evaluator/SprintDecisionTime", m_SprintDecisionTime, 5.0);
-  
-  
-  
-  m_VehicleImageWidthThreshold = m_VehicleImageWidthThreshold * m_ImageWidth;
-  m_PedestrianRightThreshold *= -1;
-
-}
-
-void TrajectoryEval::callbackGetGlobalPlannerPath(const autoware_msgs::LaneArrayConstPtr& msg)
-{
-  if(msg->lanes.size() > 0)
-  {
-
-    bool bOldGlobalPath = m_GlobalPaths.size() == msg->lanes.size();
-
-    m_GlobalPaths.clear();
-
-    for(unsigned int i = 0 ; i < msg->lanes.size(); i++)
-    {
-      PlannerHNS::ROSHelpers::ConvertFromAutowareLaneToLocalLane(msg->lanes.at(i), m_temp_path);
-
-      PlannerHNS::PlanningHelpers::CalcAngleAndCost(m_temp_path);
-      m_GlobalPaths.push_back(m_temp_path);
-
-      if(bOldGlobalPath)
-      {
-        bOldGlobalPath = PlannerHNS::PlanningHelpers::CompareTrajectories(m_temp_path, m_GlobalPaths.at(i));
-      }
-    }
-
-    if(!bOldGlobalPath)
-    {
-      bWayGlobalPath = true;
-      std::cout << "Received New Global Path Evaluator! " << std::endl;
-    }
-    else
-    {
-      m_GlobalPaths.clear();
-    }
-  }
-}
-
-void TrajectoryEval::_callbackGetLocalPlannerPath(const rubis_msgs::LaneArrayWithPoseTwistConstPtr& msg)
-{
-  rubis_msgs::PlanningInfo planning_info_msg;
-  planning_info_msg.header = msg->header;
-  planning_info_msg.instance = rubis::instance_;
-  planning_info_msg.obj_instance = rubis::obj_instance_;  
-
-  // Before spin
-  UpdateMyParams();
-  UpdateTf();
-
-  static double prev_x = 0.0, prev_y = 0.0, prev_speed = 0.0;
-  
-  // callback for current pose
-  if(prev_x != msg->pose.pose.position.x || prev_y != msg->pose.pose.position.y){
-    m_CurrentPos = PlannerHNS::WayPoint(msg->pose.pose.position.x, msg->pose.pose.position.y, msg->pose.pose.position.z, tf::getYaw(msg->pose.pose.orientation));
-    bNewCurrentPos = true;
-    prev_x = msg->pose.pose.position.x;
-    prev_y = msg->pose.pose.position.y;
-  }
-
-  // callback for vehicle status
-  if(prev_speed != msg->twist.twist.linear.x){
-    m_VehicleStatus.speed = msg->twist.twist.linear.x;
-    m_CurrentPos.v = m_VehicleStatus.speed;
-    if(fabs(msg->twist.twist.linear.x) > 0.25)
-      m_VehicleStatus.steer = atan(m_CarInfo.wheel_base * msg->twist.twist.angular.z/msg->twist.twist.linear.x);
-    UtilityHNS::UtilityH::GetTickCount(m_VehicleStatus.tStamp);
-    bVehicleStatus = true;      
-    prev_speed = msg->twist.twist.linear.x;
-  }
-
-
-  // callback for local planner path
-  if(msg->lane_array.lanes.size() > 0)
-  {
-    m_GeneratedRollOuts.clear();
-    int globalPathId_roll_outs = -1;
-
-    for(unsigned int i = 0 ; i < msg->lane_array.lanes.size(); i++)
-    {
-      std::vector<PlannerHNS::WayPoint> path;
-      PlannerHNS::ROSHelpers::ConvertFromAutowareLaneToLocalLane(msg->lane_array.lanes.at(i), path);
-      m_GeneratedRollOuts.push_back(path);
-      if(path.size() > 0)
-        globalPathId_roll_outs = path.at(0).gid;
-    }
-
-    if(bWayGlobalPath && m_GlobalPaths.size() > 0 && m_GlobalPaths.at(0).size() > 0)
-    {
-      int globalPathId = m_GlobalPaths.at(0).at(0).gid;
-      std::cout << "Before Synchronization At Trajectory Evaluator: GlobalID: " <<  globalPathId << ", LocalID: " << globalPathId_roll_outs << std::endl;
-
-      if(globalPathId_roll_outs == globalPathId)
-      {
-        bWayGlobalPath = false;
-        m_GlobalPathsToUse = m_GlobalPaths;
-        std::cout << "Synchronization At Trajectory Evaluator: GlobalID: " <<  globalPathId << ", LocalID: " << globalPathId_roll_outs << std::endl;
-      }
-    }
-
-    bRollOuts = true;
-  }
-
-  // After spin
-  PlannerHNS::TrajectoryCost tc;
-
-  if(bNewCurrentPos && m_GlobalPaths.size()>0)
-  {
-    m_GlobalPathSections.clear();
-
-    for(unsigned int i = 0; i < m_GlobalPathsToUse.size(); i++)
-    {
-      t_centerTrajectorySmoothed.clear();
-      PlannerHNS::PlanningHelpers::ExtractPartFromPointToDistanceDirectionFast(m_GlobalPathsToUse.at(i), m_CurrentPos, m_PlanningParams.horizonDistance , m_PlanningParams.pathDensity ,t_centerTrajectorySmoothed);
-      m_GlobalPathSections.push_back(t_centerTrajectorySmoothed);
-    }
-
-    autoware_msgs::IntersectionCondition intersection_condition;
-    intersection_condition.header = msg->header;
-    
-    if(m_GlobalPathSections.size()>0)
-    {      
-      tc = m_TrajectoryCostsCalculator.DoOneStepStatic(m_GeneratedRollOuts, m_GlobalPathSections.at(0), m_CurrentPos,  m_PlanningParams,  m_CarInfo,m_VehicleStatus, m_PredictedObjects, m_CurrentBehavior.state);
-
-      autoware_msgs::Lane l;
-      l.closest_object_distance = tc.closest_obj_distance;
-      l.closest_object_velocity = tc.closest_obj_velocity;
-      l.cost = tc.cost;
-      l.is_blocked = tc.bBlocked;
-      l.lane_index = tc.index;
-      planning_info_msg.trajectory_cost = l;
-
-      // hjw added : Check if ego is on intersection and obstacles are in risky area 
-      int intersectionID = -1;
-      double closestIntersectionDistance = -1;
-      bool isInsideIntersection = false;
-      bool riskyLeftTurn = false;
-      bool riskyRightTurn = false;
-
-      PlannerHNS::PlanningHelpers::GetIntersectionCondition(m_CurrentPos, intersection_list_, m_PredictedObjects, intersectionID, closestIntersectionDistance, isInsideIntersection, riskyLeftTurn, riskyRightTurn);
-      
-      intersection_condition.intersectionID = intersectionID;
-      intersection_condition.intersectionDistance = closestIntersectionDistance;
-      intersection_condition.isIntersection = isInsideIntersection;
-      intersection_condition.riskyLeftTurn = riskyLeftTurn;
-      intersection_condition.riskyRightTurn = riskyRightTurn;
-    }
-
-    if(m_TrajectoryCostsCalculator.m_TrajectoryCosts.size() == m_GeneratedRollOuts.size())
-    { 
-      for(unsigned int i=0; i < m_GeneratedRollOuts.size(); i++)
-      {
-        autoware_msgs::Lane lane;
-        PlannerHNS::ROSHelpers::ConvertFromLocalLaneToAutowareLane(m_GeneratedRollOuts.at(i), lane);
-        lane.closest_object_distance = m_TrajectoryCostsCalculator.m_TrajectoryCosts.at(i).closest_obj_distance;
-        lane.closest_object_velocity = m_TrajectoryCostsCalculator.m_TrajectoryCosts.at(i).closest_obj_velocity;
-        lane.cost = m_TrajectoryCostsCalculator.m_TrajectoryCosts.at(i).cost;
-        lane.is_blocked = m_TrajectoryCostsCalculator.m_TrajectoryCosts.at(i).bBlocked;
-        lane.lane_index = i;
-        planning_info_msg.lane_array.lanes.push_back(lane);
-      }
-      
-      planning_info_msg.pose = msg->pose;
-      planning_info_msg.twist = msg->twist;      
-      planning_info_msg.sprint_switch = m_sprint_switch;
-      planning_info_msg.intersection_condition = intersection_condition;
-      planning_info_msg.distance_to_pedestrian = m_distance_to_pedestrian;      
-
-      pub_PlanningInfo.publish(planning_info_msg);      
-    }
-    else
-    {     
-      ROS_ERROR("m_TrajectoryCosts.size() Not Equal m_GeneratedRollOuts.size()");
-    }
-
-    if(m_TrajectoryCostsCalculator.m_TrajectoryCosts.size()>0)
-    {
-      visualization_msgs::MarkerArray all_rollOuts;
-      PlannerHNS::ROSHelpers::TrajectoriesToColoredMarkers(m_GeneratedRollOuts, m_TrajectoryCostsCalculator.m_TrajectoryCosts, m_CurrentBehavior.iTrajectory, all_rollOuts);
-      pub_LocalWeightedTrajectoriesRviz.publish(all_rollOuts);
-
-      PlannerHNS::ROSHelpers::ConvertCollisionPointsMarkers(m_TrajectoryCostsCalculator.m_CollisionPoints, m_CollisionsActual, m_CollisionsDummy);
-      pub_CollisionPointsRviz.publish(m_CollisionsActual);
-
-      //Visualize Safety Box
-      visualization_msgs::Marker safety_box;
-      PlannerHNS::ROSHelpers::ConvertFromPlannerHRectangleToAutowareRviz(m_TrajectoryCostsCalculator.m_SafetyBorder.points, safety_box);
-      pub_SafetyBorderRviz.publish(safety_box);
-    }
-  }
-  else{
-    sub_GlobalPlannerPaths = nh.subscribe("/lane_waypoints_array",   1,    &TrajectoryEval::callbackGetGlobalPlannerPath,   this);
-  }
-  
-}
-
-void TrajectoryEval::callbackGetPredictedObjects(const rubis_msgs::DetectedObjectArrayConstPtr& msg)
-{  
-  object_msg_ = msg->object_array;
-  is_objects_updated_ = true;
-  // _callbackGetPredictedObjects(object_msg_);
-}
-
-void TrajectoryEval::_callbackGetPredictedObjects(const autoware_msgs::DetectedObjectArray& objects_msg){
-  m_PredictedObjects.clear();
-  // ROS_WARN("callbackGetPredictedObjects Called");
-  bPredictedObjects = true;
-  int image_person_detection_range_left = m_ImageWidth/2 - m_ImageWidth*m_PedestrianImageDetectionRange/2;
-  int image_person_detection_range_right = m_ImageWidth/2 + m_ImageWidth*m_PedestrianImageDetectionRange/2;
-  int image_vehicle_detection_range_left = m_ImageWidth/2 - m_ImageWidth*m_VehicleImageDetectionRange/2;
-  int image_vehicle_detection_range_right = m_ImageWidth/2 + m_ImageWidth*m_VehicleImageDetectionRange/2;
-  int vehicle_cnt = 0;
-  double distance_to_pedestrian = 1000;
-
-  PlannerHNS::DetectedObject obj;  
-  for(unsigned int i = 0 ; i <objects_msg.objects.size(); i++)
-  {    
-    if(objects_msg.objects.at(i).pose.position.y < -20 || objects_msg.objects.at(i).pose.position.y > 20)
-      continue;    
-      
-    if(objects_msg.objects.at(i).pose.position.z > 1 || objects_msg.objects.at(i).pose.position.z < -1.5)
-      continue;
-
-    autoware_msgs::DetectedObject msg_obj = objects_msg.objects.at(i);     
-
-    if(msg_obj.label == "car" || msg_obj.label == "truck" || msg_obj.label == "bus"){
-      vehicle_cnt += 1;
-    }
-
-    PlannerHNS::ROSHelpers::ConvertFromAutowareDetectedObjectToOpenPlannerDetectedObject(objects_msg.objects.at(i), obj);
-    geometry_msgs::PoseStamped pose_in_map;
-    pose_in_map.header = msg_obj.header;
-    pose_in_map.pose = msg_obj.pose;
-    while(1){
-      try{
-        m_vtom_listener.transformPose("/map", pose_in_map, pose_in_map);
-        break;
-      }
-      catch(tf::TransformException& ex)
-      {
-        // ROS_ERROR("Cannot transform object pose: %s", ex.what());
-        continue;
-      }
-    }
-    // msg_obj.header.frame_id = "map";
-    obj.center.pos.x = pose_in_map.pose.position.x;
-    obj.center.pos.y = pose_in_map.pose.position.y;
-    obj.center.pos.z = pose_in_map.pose.position.z;
-
-    // transform contour into map frame
-    for(unsigned int j = 0; j < msg_obj.convex_hull.polygon.points.size(); j++){
-      geometry_msgs::PoseStamped contour_point_in_map;
-      contour_point_in_map.header = msg_obj.header;
-      contour_point_in_map.pose.position.x = msg_obj.convex_hull.polygon.points.at(j).x;
-      contour_point_in_map.pose.position.y = msg_obj.convex_hull.polygon.points.at(j).y;
-      contour_point_in_map.pose.position.z = msg_obj.convex_hull.polygon.points.at(j).z;
-
-      // For resolve TF malform, set orientation w to 1
-      contour_point_in_map.pose.orientation.w = 1;
-
-      for(int i = 0; i < 1000; i++){
-        try{
-          m_vtom_listener.transformPose("/map", contour_point_in_map, contour_point_in_map);
-          break;
-        }
-        catch(tf::TransformException& ex){
-          // ROS_ERROR("Cannot transform contour pose: %s", ex.what());
-          continue;
-        }
-      }      
-
-      obj.contour.at(j).x = contour_point_in_map.pose.position.x;
-      obj.contour.at(j).y = contour_point_in_map.pose.position.y;
-      obj.contour.at(j).z = contour_point_in_map.pose.position.z;
-    }
-
-    msg_obj.header.frame_id = "map";
-
-    m_PredictedObjects.push_back(obj);
-
-    int image_obj_center_x = msg_obj.x+msg_obj.width/2;
-    int image_obj_center_y = msg_obj.y+msg_obj.height/2;
-    if (msg_obj.label == "person"){// If person is detected only in image
-      ROS_WARN("==========================================");
-      ROS_WARN("person detected!");
-      ROS_WARN("==========================================");
-      if(image_obj_center_x >= image_person_detection_range_left && image_obj_center_x <= image_person_detection_range_right){ 
-        double temp_x_distance = 1000;
-        if(msg_obj.height >= m_pedestrian_stop_img_height_threshold) temp_x_distance = 10;
-        if(abs(temp_x_distance) < abs(distance_to_pedestrian)) distance_to_pedestrian = temp_x_distance;
-      }
-      ROS_WARN("==========================================");
-      ROS_WARN("distance_to_pedestrian: %lf", distance_to_pedestrian);
-      ROS_WARN("==========================================");
-    }
-  }
-
-  m_distance_to_pedestrian.data = distance_to_pedestrian;
-
-  if(vehicle_cnt != 0){
+namespace TrajectoryEvaluatorNS {
+
+TrajectoryEval::TrajectoryEval() {
+    bNewCurrentPos = false;
+    bVehicleStatus = false;
+    bWayGlobalPath = false;
+    bWayGlobalPathToUse = false;
+    m_bUseMoveingObjectsPrediction = false;
     m_noVehicleCnt = 0;
-    m_sprint_switch.data = false;
-  }
-  else{ // No vehicle is exist in front of the car
-    if(m_noVehicleCnt < m_SprintDecisionTime*10) {
-      m_noVehicleCnt +=1;
-      m_sprint_switch.data = false;
+    is_objects_updated_ = false;
+
+    ros::NodeHandle _nh;
+    UpdatePlanningParams(_nh);
+
+    tf::StampedTransform transform;
+    PlannerHNS::ROSHelpers::GetTransformFromTF("map", "world", transform);
+    m_OriginPos.position.x = transform.getOrigin().x();
+    m_OriginPos.position.y = transform.getOrigin().y();
+    m_OriginPos.position.z = transform.getOrigin().z();
+
+    pub_CollisionPointsRviz = nh.advertise<visualization_msgs::MarkerArray>("dynamic_collision_points_rviz", 1);
+    pub_LocalWeightedTrajectoriesRviz = nh.advertise<visualization_msgs::MarkerArray>("local_trajectories_eval_rviz", 1);
+    // pub_LocalWeightedTrajectories =
+    // nh.advertise<rubis_msgs::LaneArrayWithPoseTwist>("local_weighted_trajectories",
+    // 1); pub_LocalWeightedTrajectoriesWithPoseTwist =
+    // nh.advertise<rubis_msgs::LaneArrayWithPoseTwist>("local_weighted_trajectories_with_pose_twist",
+    // 1); pub_TrajectoryCost =
+    // nh.advertise<autoware_msgs::Lane>("local_trajectory_cost", 1);
+    pub_SafetyBorderRviz = nh.advertise<visualization_msgs::Marker>("safety_border", 1);
+    // pub_DistanceToPedestrian =
+    // nh.advertise<std_msgs::Float64>("distance_to_pedestrian", 1);
+    // pub_IntersectionCondition =
+    // nh.advertise<autoware_msgs::IntersectionCondition>("intersection_condition",
+    // 1); pub_SprintSwitch = nh.advertise<std_msgs::Bool>("sprint_switch", 1);
+    pub_PlanningInfo = nh.advertise<rubis_msgs::PlanningInfo>("planning_info", 10);
+
+    sub_GlobalPlannerPaths = nh.subscribe("/lane_waypoints_array", 1, &TrajectoryEval::callbackGetGlobalPlannerPath, this);
+
+    PlannerHNS::ROSHelpers::InitCollisionPointsMarkers(50, m_CollisionsDummy);
+
+    while (1) {
+        if (UpdateTf() == true)
+            break;
     }
-    else if (m_noVehicleCnt >= 5) m_sprint_switch.data = true;
-  }  
+
+    typedef message_filters::sync_policies::ExactTime<rubis_msgs::LaneArrayWithPoseTwist, rubis_msgs::DetectedObjectArray> SyncPolicy;
+    trajectories_sub_.subscribe(nh, "/local_trajectories_with_pose_twist", 200);
+    objects_sub_.subscribe(nh, "/detection/lidar_detector/rubis_objects_center", 200);
+
+    if (m_LaneTopic == "None") {
+        sync_.reset(new message_filters::Synchronizer<SyncPolicy>(SyncPolicy(50), trajectories_sub_, objects_sub_));
+        sync_->registerCallback(boost::bind(&TrajectoryEval::callback, this, _1, _2));
+    } else {
+        lane_sub_.subscribe(nh, m_LaneTopic, 10);
+        lane_sync_.reset(new message_filters::Synchronizer<LaneSyncPolicy>(LaneSyncPolicy(50), trajectories_sub_, objects_sub_, lane_sub_));
+        lane_sync_->registerCallback(boost::bind(&TrajectoryEval::callbackWithLane, this, _1, _2, _3));
+    }
 }
 
-void TrajectoryEval::callback(const rubis_msgs::LaneArrayWithPoseTwist::ConstPtr& trajectories_msg, const rubis_msgs::DetectedObjectArray::ConstPtr& objects_msg){
-  rubis::start_task_profiling();
+TrajectoryEval::~TrajectoryEval() {}
 
-  rubis::instance_ = trajectories_msg->instance;
-  rubis::obj_instance_ = objects_msg->obj_instance;
+void TrajectoryEval::UpdatePlanningParams(ros::NodeHandle &_nh) {
+    _nh.getParam("/op_trajectory_evaluator/enablePrediction", m_bUseMoveingObjectsPrediction);
 
-  _callbackGetPredictedObjects(objects_msg->object_array);
+    _nh.getParam("/op_common_params/horizontalSafetyDistance", m_PlanningParams.horizontalSafetyDistancel);
+    _nh.getParam("/op_common_params/verticalSafetyDistance", m_PlanningParams.verticalSafetyDistance);
+    _nh.getParam("/op_common_params/enableSwerving", m_PlanningParams.enableSwerving);
+    if (m_PlanningParams.enableSwerving)
+        m_PlanningParams.enableFollowing = true;
+    else
+        _nh.getParam("/op_common_params/enableFollowing", m_PlanningParams.enableFollowing);
 
-  rubis_msgs::LaneArrayWithPoseTwist::ConstPtr input = boost::make_shared<const rubis_msgs::LaneArrayWithPoseTwist>(*trajectories_msg);
-  _callbackGetLocalPlannerPath(input);
+    _nh.getParam("/op_common_params/enableTrafficLightBehavior", m_PlanningParams.enableTrafficLightBehavior);
+    _nh.getParam("/op_common_params/enableStopSignBehavior", m_PlanningParams.enableStopSignBehavior);
 
-  rubis::stop_task_profiling(rubis::instance_, rubis::obj_instance_);  
+    _nh.getParam("/op_common_params/maxVelocity", m_PlanningParams.maxSpeed);
+    _nh.getParam("/op_common_params/minVelocity", m_PlanningParams.minSpeed);
+    _nh.getParam("/op_common_params/maxLocalPlanDistance", m_PlanningParams.microPlanDistance);
+
+    _nh.getParam("/op_common_params/pathDensity", m_PlanningParams.pathDensity);
+
+    _nh.getParam("/op_common_params/rollOutDensity", m_PlanningParams.rollOutDensity);
+    if (m_PlanningParams.enableSwerving)
+        _nh.getParam("/op_common_params/rollOutsNumber", m_PlanningParams.rollOutNumber);
+    else
+        m_PlanningParams.rollOutNumber = 0;
+
+    std::cout << "Rolls Number: " << m_PlanningParams.rollOutNumber << std::endl;
+
+    _nh.getParam("/op_common_params/horizonDistance", m_PlanningParams.horizonDistance);
+    _nh.getParam("/op_common_params/minFollowingDistance", m_PlanningParams.minFollowingDistance);
+    _nh.getParam("/op_common_params/minDistanceToAvoid", m_PlanningParams.minDistanceToAvoid);
+    _nh.getParam("/op_common_params/maxDistanceToAvoid", m_PlanningParams.maxDistanceToAvoid);
+    _nh.getParam("/op_common_params/speedProfileFactor", m_PlanningParams.speedProfileFactor);
+
+    _nh.getParam("/op_common_params/enableLaneChange", m_PlanningParams.enableLaneChange);
+
+    _nh.getParam("/op_common_params/width", m_CarInfo.width);
+    _nh.getParam("/op_common_params/length", m_CarInfo.length);
+    _nh.getParam("/op_common_params/wheelBaseLength", m_CarInfo.wheel_base);
+    _nh.getParam("/op_common_params/turningRadius", m_CarInfo.turning_radius);
+    _nh.getParam("/op_common_params/maxSteerAngle", m_CarInfo.max_steer_angle);
+    _nh.getParam("/op_common_params/maxAcceleration", m_CarInfo.max_acceleration);
+    _nh.getParam("/op_common_params/maxDeceleration", m_CarInfo.max_deceleration);
+    m_CarInfo.max_speed_forward = m_PlanningParams.maxSpeed;
+    m_CarInfo.min_speed_forward = m_PlanningParams.minSpeed;
+
+    _nh.param("/op_trajectory_evaluator/PedestrianRightThreshold", m_PedestrianRightThreshold, 7.0);
+    _nh.param("/op_trajectory_evaluator/PedestrianLeftThreshold", m_PedestrianLeftThreshold, 2.0);
+    _nh.param("/op_trajectory_evaluator/PedestrianImageDetectionRange", m_PedestrianImageDetectionRange, 0.7);
+    _nh.param("/op_trajectory_evaluator/PedestrianStopImgHeightThreshold", m_pedestrian_stop_img_height_threshold, 120);
+    _nh.param("/op_trajectory_evaluator/ImageWidth", m_ImageWidth, 1920);
+    _nh.param("/op_trajectory_evaluator/ImageHeight", m_ImageHeight, 1080);
+    _nh.param("/op_trajectory_evaluator/VehicleImageDetectionRange", m_VehicleImageDetectionRange, 0.3);
+    _nh.param("/op_trajectory_evaluator/VehicleImageWidthThreshold", m_VehicleImageWidthThreshold, 0.05);
+    _nh.param("/op_trajectory_evaluator/SprintDecisionTime", m_SprintDecisionTime, 5.0);
+
+    _nh.param("/op_trajectory_evaluator/laneTopic", m_LaneTopic, std::string("None"));
+
+    m_VehicleImageWidthThreshold = m_VehicleImageWidthThreshold * m_ImageWidth;
+    m_PedestrianRightThreshold *= -1;
 }
 
-void TrajectoryEval::callbackGetBehaviorState(const geometry_msgs::TwistStampedConstPtr& msg)
-{
-  m_CurrentBehavior.iTrajectory = msg->twist.angular.z;
+void TrajectoryEval::callbackGetGlobalPlannerPath(const autoware_msgs::LaneArrayConstPtr &msg) {
+    if (msg->lanes.size() > 0) {
+
+        bool bOldGlobalPath = m_GlobalPaths.size() == msg->lanes.size();
+
+        m_GlobalPaths.clear();
+
+        for (unsigned int i = 0; i < msg->lanes.size(); i++) {
+            PlannerHNS::ROSHelpers::ConvertFromAutowareLaneToLocalLane(msg->lanes.at(i), m_temp_path);
+
+            PlannerHNS::PlanningHelpers::CalcAngleAndCost(m_temp_path);
+            m_GlobalPaths.push_back(m_temp_path);
+
+            if (bOldGlobalPath) {
+                bOldGlobalPath = PlannerHNS::PlanningHelpers::CompareTrajectories(m_temp_path, m_GlobalPaths.at(i));
+            }
+        }
+
+        if (!bOldGlobalPath) {
+            bWayGlobalPath = true;
+            std::cout << "Received New Global Path Evaluator! " << std::endl;
+        } else {
+            m_GlobalPaths.clear();
+        }
+    }
 }
 
-void TrajectoryEval::callbackGetCurrentState(const std_msgs::Int32 & msg)
-{
-  m_CurrentBehavior.state = static_cast<PlannerHNS::STATE_TYPE>(msg.data);
+void TrajectoryEval::_callbackGetLocalPlannerPath(const rubis_msgs::LaneArrayWithPoseTwistConstPtr &msg) {
+    rubis_msgs::PlanningInfo planning_info_msg;
+    planning_info_msg.header = msg->header;
+    planning_info_msg.instance = rubis::instance_;
+    planning_info_msg.lidar_instance = rubis::lidar_instance_;
+
+    // Before spin
+    UpdateMyParams();
+    UpdateTf();
+
+    static double prev_x = 0.0, prev_y = 0.0, prev_speed = 0.0;
+
+    // callback for current pose
+    if (prev_x != msg->pose.pose.position.x || prev_y != msg->pose.pose.position.y) {
+        m_CurrentPos = PlannerHNS::WayPoint(msg->pose.pose.position.x, msg->pose.pose.position.y, msg->pose.pose.position.z,
+                                            tf::getYaw(msg->pose.pose.orientation));
+        bNewCurrentPos = true;
+        prev_x = msg->pose.pose.position.x;
+        prev_y = msg->pose.pose.position.y;
+    }
+
+    // callback for vehicle status
+    if (prev_speed != msg->twist.twist.linear.x) {
+        m_VehicleStatus.speed = msg->twist.twist.linear.x;
+        m_CurrentPos.v = m_VehicleStatus.speed;
+        if (fabs(msg->twist.twist.linear.x) > 0.25)
+            m_VehicleStatus.steer = atan(m_CarInfo.wheel_base * msg->twist.twist.angular.z / msg->twist.twist.linear.x);
+        UtilityHNS::UtilityH::GetTickCount(m_VehicleStatus.tStamp);
+        bVehicleStatus = true;
+        prev_speed = msg->twist.twist.linear.x;
+    }
+
+    // callback for local planner path
+    if (msg->lane_array.lanes.size() > 0) {
+        m_GeneratedRollOuts.clear();
+        int globalPathId_roll_outs = -1;
+
+        for (unsigned int i = 0; i < msg->lane_array.lanes.size(); i++) {
+            std::vector<PlannerHNS::WayPoint> path;
+            PlannerHNS::ROSHelpers::ConvertFromAutowareLaneToLocalLane(msg->lane_array.lanes.at(i), path);
+            m_GeneratedRollOuts.push_back(path);
+            if (path.size() > 0)
+                globalPathId_roll_outs = path.at(0).gid;
+        }
+
+        if (bWayGlobalPath && m_GlobalPaths.size() > 0 && m_GlobalPaths.at(0).size() > 0) {
+            int globalPathId = m_GlobalPaths.at(0).at(0).gid;
+            std::cout << "Before Synchronization At Trajectory Evaluator: GlobalID: " << globalPathId << ", LocalID: " << globalPathId_roll_outs
+                      << std::endl;
+
+            if (globalPathId_roll_outs == globalPathId) {
+                bWayGlobalPath = false;
+                m_GlobalPathsToUse = m_GlobalPaths;
+                std::cout << "Synchronization At Trajectory Evaluator: GlobalID: " << globalPathId << ", LocalID: " << globalPathId_roll_outs
+                          << std::endl;
+            }
+        }
+
+        bRollOuts = true;
+    }
+
+    // After spin
+    PlannerHNS::TrajectoryCost tc;
+
+    if (bNewCurrentPos && m_GlobalPaths.size() > 0) {
+        m_GlobalPathSections.clear();
+
+        for (unsigned int i = 0; i < m_GlobalPathsToUse.size(); i++) {
+            t_centerTrajectorySmoothed.clear();
+            PlannerHNS::PlanningHelpers::ExtractPartFromPointToDistanceDirectionFast(
+                m_GlobalPathsToUse.at(i), m_CurrentPos, m_PlanningParams.horizonDistance, m_PlanningParams.pathDensity, t_centerTrajectorySmoothed);
+            m_GlobalPathSections.push_back(t_centerTrajectorySmoothed);
+        }
+
+        autoware_msgs::IntersectionCondition intersection_condition;
+        intersection_condition.header = msg->header;
+
+        if (m_GlobalPathSections.size() > 0) {
+            tc = m_TrajectoryCostsCalculator.DoOneStepStatic(m_GeneratedRollOuts, m_GlobalPathSections.at(0), m_CurrentPos, m_PlanningParams,
+                                                             m_CarInfo, m_VehicleStatus, m_PredictedObjects, m_CurrentBehavior.state);
+
+            autoware_msgs::Lane l;
+            l.closest_object_distance = tc.closest_obj_distance;
+            l.closest_object_velocity = tc.closest_obj_velocity;
+            l.cost = tc.cost;
+            l.is_blocked = tc.bBlocked;
+            l.lane_index = tc.index;
+            planning_info_msg.trajectory_cost = l;
+
+            // hjw added : Check if ego is on intersection and obstacles are in
+            // risky area
+            int intersectionID = -1;
+            double closestIntersectionDistance = -1;
+            bool isInsideIntersection = false;
+            bool riskyLeftTurn = false;
+            bool riskyRightTurn = false;
+
+            PlannerHNS::PlanningHelpers::GetIntersectionCondition(m_CurrentPos, intersection_list_, m_PredictedObjects, intersectionID,
+                                                                  closestIntersectionDistance, isInsideIntersection, riskyLeftTurn, riskyRightTurn);
+
+            intersection_condition.intersectionID = intersectionID;
+            intersection_condition.intersectionDistance = closestIntersectionDistance;
+            intersection_condition.isIntersection = isInsideIntersection;
+            intersection_condition.riskyLeftTurn = riskyLeftTurn;
+            intersection_condition.riskyRightTurn = riskyRightTurn;
+        }
+
+        if (m_TrajectoryCostsCalculator.m_TrajectoryCosts.size() == m_GeneratedRollOuts.size()) {
+            for (unsigned int i = 0; i < m_GeneratedRollOuts.size(); i++) {
+                autoware_msgs::Lane lane;
+                PlannerHNS::ROSHelpers::ConvertFromLocalLaneToAutowareLane(m_GeneratedRollOuts.at(i), lane);
+                lane.closest_object_distance = m_TrajectoryCostsCalculator.m_TrajectoryCosts.at(i).closest_obj_distance;
+                lane.closest_object_velocity = m_TrajectoryCostsCalculator.m_TrajectoryCosts.at(i).closest_obj_velocity;
+                lane.cost = m_TrajectoryCostsCalculator.m_TrajectoryCosts.at(i).cost;
+                lane.is_blocked = m_TrajectoryCostsCalculator.m_TrajectoryCosts.at(i).bBlocked;
+                lane.lane_index = i;
+                planning_info_msg.lane_array.lanes.push_back(lane);
+            }
+
+            planning_info_msg.pose = msg->pose;
+            planning_info_msg.twist = msg->twist;
+            planning_info_msg.sprint_switch = m_sprint_switch;
+            planning_info_msg.intersection_condition = intersection_condition;
+            planning_info_msg.distance_to_pedestrian = m_distance_to_pedestrian;
+
+            pub_PlanningInfo.publish(planning_info_msg);
+        } else {
+            ROS_ERROR("m_TrajectoryCosts.size() Not Equal "
+                      "m_GeneratedRollOuts.size()");
+        }
+
+        if (m_TrajectoryCostsCalculator.m_TrajectoryCosts.size() > 0) {
+            visualization_msgs::MarkerArray all_rollOuts;
+            PlannerHNS::ROSHelpers::TrajectoriesToColoredMarkers(m_GeneratedRollOuts, m_TrajectoryCostsCalculator.m_TrajectoryCosts,
+                                                                 m_CurrentBehavior.iTrajectory, all_rollOuts);
+            pub_LocalWeightedTrajectoriesRviz.publish(all_rollOuts);
+
+            PlannerHNS::ROSHelpers::ConvertCollisionPointsMarkers(m_TrajectoryCostsCalculator.m_CollisionPoints, m_CollisionsActual,
+                                                                  m_CollisionsDummy);
+            pub_CollisionPointsRviz.publish(m_CollisionsActual);
+
+            // Visualize Safety Box
+            visualization_msgs::Marker safety_box;
+            PlannerHNS::ROSHelpers::ConvertFromPlannerHRectangleToAutowareRviz(m_TrajectoryCostsCalculator.m_SafetyBorder.points, safety_box);
+            pub_SafetyBorderRviz.publish(safety_box);
+        }
+    } else {
+        sub_GlobalPlannerPaths = nh.subscribe("/lane_waypoints_array", 1, &TrajectoryEval::callbackGetGlobalPlannerPath, this);
+    }
 }
 
-void TrajectoryEval::UpdateMyParams()
-{
-  ros::NodeHandle _nh;
-  _nh.getParam("/op_trajectory_evaluator/weightPriority", m_PlanningParams.weightPriority);
-  _nh.getParam("/op_trajectory_evaluator/weightTransition", m_PlanningParams.weightTransition);
-  _nh.getParam("/op_trajectory_evaluator/weightLong", m_PlanningParams.weightLong);
-  _nh.getParam("/op_trajectory_evaluator/weightLat", m_PlanningParams.weightLat);
-  _nh.param("/op_trajectory_evaluator/blockThreshold", m_PlanningParams.blockThreshold, 2.0);
-  _nh.getParam("/op_trajectory_evaluator/LateralSkipDistance", m_PlanningParams.LateralSkipDistance);
-
-  _nh.getParam("/op_trajectory_evaluator/lateralBlockingThreshold", m_PlanningParams.lateralBlockingThreshold);
-  _nh.getParam("/op_trajectory_evaluator/frontLongitudinalBlockingThreshold", m_PlanningParams.frontLongitudinalBlockingThreshold);
-  _nh.getParam("/op_trajectory_evaluator/rearLongitudinalBlockingThreshold", m_PlanningParams.rearLongitudinalBlockingThreshold);
-  _nh.getParam("/op_trajectory_evaluator/enableDebug", m_PlanningParams.enableDebug);
+void TrajectoryEval::callbackGetPredictedObjects(const rubis_msgs::DetectedObjectArrayConstPtr &msg) {
+    object_msg_ = msg->object_array;
+    is_objects_updated_ = true;
+    // _callbackGetPredictedObjects(object_msg_);
 }
 
-bool TrajectoryEval::UpdateTf()
-{
-  try{
-    m_vtob_listener.waitForTransform("/velodyne", "/base_link", ros::Time(0), ros::Duration(0.001));
-    m_vtob_listener.lookupTransform("/velodyne", "/base_link", ros::Time(0), m_velodyne_to_base_link);
+void TrajectoryEval::_callbackGetPredictedObjects(const autoware_msgs::DetectedObjectArray &objects_msg) {
+    m_PredictedObjects.clear();
+    // ROS_WARN("callbackGetPredictedObjects Called");
+    bPredictedObjects = true;
+    int image_person_detection_range_left = m_ImageWidth / 2 - m_ImageWidth * m_PedestrianImageDetectionRange / 2;
+    int image_person_detection_range_right = m_ImageWidth / 2 + m_ImageWidth * m_PedestrianImageDetectionRange / 2;
+    int image_vehicle_detection_range_left = m_ImageWidth / 2 - m_ImageWidth * m_VehicleImageDetectionRange / 2;
+    int image_vehicle_detection_range_right = m_ImageWidth / 2 + m_ImageWidth * m_VehicleImageDetectionRange / 2;
+    int vehicle_cnt = 0;
+    double distance_to_pedestrian = 1000;
 
-    m_vtom_listener.waitForTransform("/velodyne", "/map", ros::Time(0), ros::Duration(0.001));
-    m_vtom_listener.lookupTransform("/velodyne", "/map", ros::Time(0), m_velodyne_to_map);
-    return true;
-  }
-  catch(tf::TransformException& ex){
-    if(TF_DEBUG)
-      ROS_ERROR("%s", ex.what());
-    return false;
-  }
+    PlannerHNS::DetectedObject obj;
+    for (unsigned int i = 0; i < objects_msg.objects.size(); i++) {
+        if (objects_msg.objects.at(i).pose.position.y < -20 || objects_msg.objects.at(i).pose.position.y > 20)
+            continue;
+
+        if (objects_msg.objects.at(i).pose.position.z > 1 || objects_msg.objects.at(i).pose.position.z < -1.5)
+            continue;
+
+        autoware_msgs::DetectedObject msg_obj = objects_msg.objects.at(i);
+
+        if (msg_obj.label == "car" || msg_obj.label == "truck" || msg_obj.label == "bus") {
+            vehicle_cnt += 1;
+        }
+
+        PlannerHNS::ROSHelpers::ConvertFromAutowareDetectedObjectToOpenPlannerDetectedObject(objects_msg.objects.at(i), obj);
+        geometry_msgs::PoseStamped pose_in_map;
+        pose_in_map.header = msg_obj.header;
+        pose_in_map.pose = msg_obj.pose;
+        while (1) {
+            try {
+                m_vtom_listener.transformPose("/map", pose_in_map, pose_in_map);
+                break;
+            } catch (tf::TransformException &ex) {
+                // ROS_ERROR("Cannot transform object pose: %s", ex.what());
+                continue;
+            }
+        }
+        // msg_obj.header.frame_id = "map";
+        obj.center.pos.x = pose_in_map.pose.position.x;
+        obj.center.pos.y = pose_in_map.pose.position.y;
+        obj.center.pos.z = pose_in_map.pose.position.z;
+
+        // transform contour into map frame
+        for (unsigned int j = 0; j < msg_obj.convex_hull.polygon.points.size(); j++) {
+            geometry_msgs::PoseStamped contour_point_in_map;
+            contour_point_in_map.header = msg_obj.header;
+            contour_point_in_map.pose.position.x = msg_obj.convex_hull.polygon.points.at(j).x;
+            contour_point_in_map.pose.position.y = msg_obj.convex_hull.polygon.points.at(j).y;
+            contour_point_in_map.pose.position.z = msg_obj.convex_hull.polygon.points.at(j).z;
+
+            // For resolve TF malform, set orientation w to 1
+            contour_point_in_map.pose.orientation.w = 1;
+
+            for (int i = 0; i < 1000; i++) {
+                try {
+                    m_vtom_listener.transformPose("/map", contour_point_in_map, contour_point_in_map);
+                    break;
+                } catch (tf::TransformException &ex) {
+                    // ROS_ERROR("Cannot transform contour pose: %s",
+                    // ex.what());
+                    continue;
+                }
+            }
+
+            obj.contour.at(j).x = contour_point_in_map.pose.position.x;
+            obj.contour.at(j).y = contour_point_in_map.pose.position.y;
+            obj.contour.at(j).z = contour_point_in_map.pose.position.z;
+        }
+
+        msg_obj.header.frame_id = "map";
+
+        m_PredictedObjects.push_back(obj);
+
+        int image_obj_center_x = msg_obj.x + msg_obj.width / 2;
+        int image_obj_center_y = msg_obj.y + msg_obj.height / 2;
+        if (msg_obj.label == "person") { // If person is detected only in image
+            ROS_WARN("==========================================");
+            ROS_WARN("person detected!");
+            ROS_WARN("==========================================");
+            if (image_obj_center_x >= image_person_detection_range_left && image_obj_center_x <= image_person_detection_range_right) {
+                double temp_x_distance = 1000;
+                if (msg_obj.height >= m_pedestrian_stop_img_height_threshold)
+                    temp_x_distance = 10;
+                if (abs(temp_x_distance) < abs(distance_to_pedestrian))
+                    distance_to_pedestrian = temp_x_distance;
+            }
+            ROS_WARN("==========================================");
+            ROS_WARN("distance_to_pedestrian: %lf", distance_to_pedestrian);
+            ROS_WARN("==========================================");
+        }
+    }
+
+    m_distance_to_pedestrian.data = distance_to_pedestrian;
+
+    if (vehicle_cnt != 0) {
+        m_noVehicleCnt = 0;
+        m_sprint_switch.data = false;
+    } else { // No vehicle is exist in front of the car
+        if (m_noVehicleCnt < m_SprintDecisionTime * 10) {
+            m_noVehicleCnt += 1;
+            m_sprint_switch.data = false;
+        } else if (m_noVehicleCnt >= 5)
+            m_sprint_switch.data = true;
+    }
 }
 
-void TrajectoryEval::MainLoop()
-{
-  ros::NodeHandle private_nh("~");
+void TrajectoryEval::callback(const rubis_msgs::LaneArrayWithPoseTwist::ConstPtr &trajectories_msg,
+                              const rubis_msgs::DetectedObjectArray::ConstPtr &objects_msg) {
+    rubis::start_task_profiling();
 
-  // Scheduling & Profiling Setup
-  std::string node_name = ros::this_node::getName();
-  std::string task_response_time_filename;
-  private_nh.param<std::string>(node_name+"/task_response_time_filename", task_response_time_filename, "~/Documents/profiling/response_time/op_trajectory_evaluator.csv");
+    rubis::instance_ = trajectories_msg->instance;
+    rubis::lidar_instance_ = objects_msg->lidar_instance;
 
-  int rate;
-  private_nh.param<int>(node_name+"/rate", rate, 10);
+    _callbackGetPredictedObjects(objects_msg->object_array);
 
-  struct rubis::sched_attr attr;
-  std::string policy;
-  int priority, exec_time ,deadline, period;
-    
-  private_nh.param(node_name+"/task_scheduling_configs/policy", policy, std::string("NONE"));    
-  private_nh.param(node_name+"/task_scheduling_configs/priority", priority, 99);
-  private_nh.param(node_name+"/task_scheduling_configs/exec_time", exec_time, 0);
-  private_nh.param(node_name+"/task_scheduling_configs/deadline", deadline, 0);
-  private_nh.param(node_name+"/task_scheduling_configs/period", period, 0);
-  attr = rubis::create_sched_attr(priority, exec_time, deadline, period);    
-  rubis::init_task_scheduling(policy, attr);
+    rubis_msgs::LaneArrayWithPoseTwist::ConstPtr input = boost::make_shared<const rubis_msgs::LaneArrayWithPoseTwist>(*trajectories_msg);
+    _callbackGetLocalPlannerPath(input);
 
-  rubis::init_task_profiling(task_response_time_filename);
-
-  PlannerHNS::WayPoint prevState, state_change;
-
-  // Add Crossing Info from yaml file
-  XmlRpc::XmlRpcValue intersection_xml;  
-  nh.getParam("/op_trajectory_evaluator/intersection_list", intersection_xml);
-  PlannerHNS::MappingHelpers::ConstructIntersection_RUBIS(intersection_list_, intersection_xml);
-
-  ros::spin();
+    rubis::stop_task_profiling(rubis::instance_, rubis::lidar_instance_, rubis::vision_instance_);
 }
+
+void TrajectoryEval::callbackWithLane(const rubis_msgs::LaneArrayWithPoseTwist::ConstPtr &trajectories_msg,
+                                      const rubis_msgs::DetectedObjectArray::ConstPtr &objects_msg, const rubis_msgs::Bool::ConstPtr &lane_msg) {
+    rubis::start_task_profiling();
+
+    rubis::instance_ = trajectories_msg->instance;
+    rubis::lidar_instance_ = objects_msg->lidar_instance;
+    rubis::vision_instance_ = lane_msg->instance;
+
+    _callbackGetPredictedObjects(objects_msg->object_array);
+
+    rubis_msgs::LaneArrayWithPoseTwist::ConstPtr input = boost::make_shared<const rubis_msgs::LaneArrayWithPoseTwist>(*trajectories_msg);
+    _callbackGetLocalPlannerPath(input);
+
+    rubis::stop_task_profiling(rubis::instance_, rubis::lidar_instance_, rubis::vision_instance_);
 }
+
+void TrajectoryEval::callbackGetBehaviorState(const geometry_msgs::TwistStampedConstPtr &msg) {
+    m_CurrentBehavior.iTrajectory = msg->twist.angular.z;
+}
+
+void TrajectoryEval::callbackGetCurrentState(const std_msgs::Int32 &msg) { m_CurrentBehavior.state = static_cast<PlannerHNS::STATE_TYPE>(msg.data); }
+
+void TrajectoryEval::UpdateMyParams() {
+    ros::NodeHandle _nh;
+    _nh.getParam("/op_trajectory_evaluator/weightPriority", m_PlanningParams.weightPriority);
+    _nh.getParam("/op_trajectory_evaluator/weightTransition", m_PlanningParams.weightTransition);
+    _nh.getParam("/op_trajectory_evaluator/weightLong", m_PlanningParams.weightLong);
+    _nh.getParam("/op_trajectory_evaluator/weightLat", m_PlanningParams.weightLat);
+    _nh.param("/op_trajectory_evaluator/blockThreshold", m_PlanningParams.blockThreshold, 2.0);
+    _nh.getParam("/op_trajectory_evaluator/LateralSkipDistance", m_PlanningParams.LateralSkipDistance);
+
+    _nh.getParam("/op_trajectory_evaluator/lateralBlockingThreshold", m_PlanningParams.lateralBlockingThreshold);
+    _nh.getParam("/op_trajectory_evaluator/frontLongitudinalBlockingThreshold", m_PlanningParams.frontLongitudinalBlockingThreshold);
+    _nh.getParam("/op_trajectory_evaluator/rearLongitudinalBlockingThreshold", m_PlanningParams.rearLongitudinalBlockingThreshold);
+    _nh.getParam("/op_trajectory_evaluator/enableDebug", m_PlanningParams.enableDebug);
+}
+
+bool TrajectoryEval::UpdateTf() {
+    try {
+        m_vtob_listener.waitForTransform("/velodyne", "/base_link", ros::Time(0), ros::Duration(0.001));
+        m_vtob_listener.lookupTransform("/velodyne", "/base_link", ros::Time(0), m_velodyne_to_base_link);
+
+        m_vtom_listener.waitForTransform("/velodyne", "/map", ros::Time(0), ros::Duration(0.001));
+        m_vtom_listener.lookupTransform("/velodyne", "/map", ros::Time(0), m_velodyne_to_map);
+        return true;
+    } catch (tf::TransformException &ex) {
+        if (TF_DEBUG)
+            ROS_ERROR("%s", ex.what());
+        return false;
+    }
+}
+
+void TrajectoryEval::MainLoop() {
+    ros::NodeHandle private_nh("~");
+
+    // Scheduling & Profiling Setup
+    std::string node_name = ros::this_node::getName();
+    std::string task_response_time_filename;
+    private_nh.param<std::string>(node_name + "/task_response_time_filename", task_response_time_filename,
+                                  "~/Documents/profiling/response_time/op_trajectory_evaluator.csv");
+
+    int rate;
+    private_nh.param<int>(node_name + "/rate", rate, 10);
+
+    struct rubis::sched_attr attr;
+    std::string policy;
+    int priority, exec_time, deadline, period;
+
+    private_nh.param(node_name + "/task_scheduling_configs/policy", policy, std::string("NONE"));
+    private_nh.param(node_name + "/task_scheduling_configs/priority", priority, 99);
+    private_nh.param(node_name + "/task_scheduling_configs/exec_time", exec_time, 0);
+    private_nh.param(node_name + "/task_scheduling_configs/deadline", deadline, 0);
+    private_nh.param(node_name + "/task_scheduling_configs/period", period, 0);
+    attr = rubis::create_sched_attr(priority, exec_time, deadline, period);
+    rubis::init_task_scheduling(policy, attr);
+
+    rubis::init_task_profiling(task_response_time_filename);
+
+    PlannerHNS::WayPoint prevState, state_change;
+
+    // Add Crossing Info from yaml file
+    XmlRpc::XmlRpcValue intersection_xml;
+    nh.getParam("/op_trajectory_evaluator/intersection_list", intersection_xml);
+    PlannerHNS::MappingHelpers::ConstructIntersection_RUBIS(intersection_list_, intersection_xml);
+
+    ros::spin();
+}
+} // namespace TrajectoryEvaluatorNS

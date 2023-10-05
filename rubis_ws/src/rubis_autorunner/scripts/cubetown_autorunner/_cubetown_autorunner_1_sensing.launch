@@ -1,87 +1,64 @@
 <launch>
-  <rosparam command="load" file="$(env USER_HOME)/rubis_ws/src/rubis_autorunner/cfg/cubetown_autorunner/cubetown_autorunner_params.yaml" />
-  <arg name="lidar_input_topic" default="/points_raw_origin"/>
-  <arg name="lidar_output_topic" default="/points_raw"/>
-  <arg name="node_name" default="lidar_republisher"/>
-  <arg name="lidar_output_topic_redundant" default="/points_raw_redundant"/>
+  <rosparam command="load"
+    file="$(env USER_HOME)/rubis_ws/src/rubis_autorunner/cfg/cubetown_autorunner/cubetown_autorunner_params.yaml" />
+  <arg name="lidar_input_topic" default="/points_raw_origin" />
+  <arg name="lidar_output_topic" default="/points_raw" />
+  <arg name="node_name" default="lidar_republisher" />
+  <arg name="lidar_output_topic_redundant" default="/points_raw_redundant" />
 
-  <!-- Map TF Publisher -->	
-	<include file="$(env USER_HOME)/autoware.ai/autoware_files/data/tf/tf.launch" />
-  
+  <!-- Map TF Publisher -->
+  <include file="$(env USER_HOME)/autoware.ai/autoware_files/data/tf/tf.launch" />
+
   <!-- Vector Map Loader -->
-	<node pkg="map_file" type="vector_map_loader" name="vector_map_loader" args="
+  <node pkg="map_file" type="vector_map_loader" name="vector_map_loader"
+    args="
 	    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/cubetown_circle/dtlane.csv 
 	    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/cubetown_circle/idx.csv 
 	    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/cubetown_circle/lane.csv 
 	    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/cubetown_circle/node.csv 
-	    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/cubetown_circle/point.csv"/>
+	    $(env USER_HOME)/autoware.ai/autoware_files/vector_map/cubetown_circle/point.csv" />
 
   <!-- Point Map Loader -->
-	<include file="$(find map_file)/launch/points_map_loader.launch">
+  <include file="$(find map_file)/launch/points_map_loader.launch">
     <arg name="scene_num" value="noupdate" />
-    <arg name="path_pcd" value="$(env USER_HOME)/autoware.ai/autoware_files/points_map/CubeTown.pcd"/>
+    <arg name="path_pcd" value="$(env USER_HOME)/autoware.ai/autoware_files/points_map/CubeTown.pcd" />
   </include>
 
-  <node name="svl_camera_top" type="republish" pkg="image_transport" output="screen" args="compressed in:=/svl_image_top raw out:=/republished_image_top"  />
-  <node name="svl_camera_right" type="republish" pkg="image_transport" output="screen" args="compressed in:=/svl_image_right raw out:=/republished_image_right"  />
-  <node name="svl_camera_left" type="republish" pkg="image_transport" output="screen" args="compressed in:=/svl_image_left raw out:=/republished_image_left"  />
-  <node name="svl_camera_rear" type="republish" pkg="image_transport" output="screen" args="compressed in:=/svl_image_rear raw out:=/republished_image_rear"  />
+  <node name="svl_camera_top" type="republish" pkg="image_transport" output="screen"
+    args="compressed in:=/svl_image_top raw out:=/republished_image_top" />
+  <!-- <node name="svl_camera_right" type="republish" pkg="image_transport" output="screen"
+  args="compressed in:=/svl_image_right raw out:=/republished_image_right"  />
+  <node name="svl_camera_left" type="republish" pkg="image_transport" output="screen"
+  args="compressed in:=/svl_image_left raw out:=/republished_image_left"  />
+  <node name="svl_camera_rear" type="republish" pkg="image_transport" output="screen"
+  args="compressed in:=/svl_image_rear raw out:=/republished_image_rear"  /> -->
 
   <include file="$(find svl_pkg)/launch/svl_sensing.launch">
     <arg name="lidar_topic" value="/points_raw_origin" />
     <arg name="odom_topic" value="/odom" />
     <arg name="image_topic_1" value="/republished_image_top" />
-    <!-- <arg name="image_topic_2" value="/republished_image_right" />
-    <arg name="image_topic_3" value="/republished_image_left" />
-    <arg name="image_topic_4" value="/republished_image_rear" /> -->
+    <!-- <arg name="image_topic_2" value="/republished_image_right" /> -->
+    <!-- <arg name="image_topic_3" value="/republished_image_left" /> -->
+    <!-- <arg name="image_topic_4" value="/republished_image_rear" /> -->
   </include>
 
-  <include file="$(find vision_workloads)/launch/lane_detector.launch">
-    <arg name="debug" value="true" />
-    <arg name="node_name" value="lane_detector_top"/>
-    <arg name="input_topic" value="/image_raw1"/>
+  <!-- <include file="$(find vision_workloads)/launch/lane_detector.launch">
+    <arg name="debug" value="false" />
+    <arg name="node_name" value="lane_detector_rear"/>
+    <arg name="input_topic" value="/image_raw4"/>
     <arg name="filter_image" value="false" />
     <arg name="gray_scale" value="true" />
     <arg name="gaussian_blur" value="false" />
     <arg name="canny" value="true" />
     <arg name="roi" value="true" />
-  </include>
-
-  <!-- <include file="$(find vision_workloads)/launch/lane_detector.launch">
-    <arg name="debug" value="false" />
-    <arg name="node_name" value="lane_detector_right"/>
-    <arg name="input_topic" value="/image_raw2"/>
-  </include>
-
-  <include file="$(find vision_workloads)/launch/lane_detector.launch">
-    <arg name="debug" value="false" />
-    <arg name="node_name" value="lane_detector_left"/>
-    <arg name="input_topic" value="/image_raw3"/>
-  </include>
-
-  <include file="$(find vision_workloads)/launch/lane_detector.launch">
-    <arg name="debug" value="false" />
-    <arg name="node_name" value="lane_detector_rear"/>
-    <arg name="input_topic" value="/image_raw4"/>
   </include> -->
-  <!--
-  <include file="$(find rubis_pkg)/launch/lidar_republisher_params.launch">
-    <arg name="input_topic" value="$(arg lidar_input_topic)" />
-    <arg name="output_topic" value="$(arg lidar_output_topic_redundant)" />
-    <arg name="node_name" value="lidar_republisher_redundant1" />
-    <arg name="task_response_time_filename" value="~/Documents/profiling/response_time/lidar_republisher_redundant.csv" />
-  </include>
 
-  <include file="$(find rubis_pkg)/launch/lidar_republisher_params.launch">
-    <arg name="input_topic" value="$(arg lidar_input_topic)" />
-    <arg name="output_topic" value="$(arg lidar_output_topic_redundant)" />
-    <arg name="node_name" value="lidar_republisher_redundant2" />
-    <arg name="task_response_time_filename" value="~/Documents/profiling/response_time/lidar_republisher_redundant.csv" />
-  </include> -->
-  
-  <node pkg="tf" type="static_transform_publisher" name="base_link_to_velodyne" args="1.2 0 2.0 0 0 0 base_link velodyne 10"/>
-  <!-- <node pkg="tf" type="static_transform_publisher" name="gps_to_base_link" args="0 0 0 0 0 0 gps base_link 10"/> -->
-  <node pkg="tf" type="static_transform_publisher" name="lidar_to_camera" args="0.029 -0.574 -1.820 4.712 0.009 -1.883 velodyne camera 10" />
+
+  <node pkg="tf" type="static_transform_publisher" name="base_link_to_velodyne"
+    args="1.2 0 2.0 0 0 0 base_link velodyne 10" />
+  <!-- <node pkg="tf" type="static_transform_publisher" name="gps_to_base_link" args="0 0 0 0 0 0
+  gps base_link 10"/> -->
+  <node pkg="tf" type="static_transform_publisher" name="lidar_to_camera"
+    args="0.029 -0.574 -1.820 4.712 0.009 -1.883 velodyne camera 10" />
 
 </launch>
-

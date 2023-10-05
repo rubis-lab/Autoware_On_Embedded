@@ -152,12 +152,12 @@ void TwistFilterNode::purePursuitOutputCallback(const rubis_msgs::PurePursuitOut
   // Before spin
   rubis::start_task_profiling();
   rubis::instance_ = msg->instance;
-  rubis::obj_instance_ = msg->obj_instance;
+  rubis::lidar_instance_ = msg->lidar_instance;
   ros::Time current_time = msg->header.stamp;
 
   if(current_time == previous_time){
     previous_time = current_time;
-    rubis::stop_task_profiling(rubis::instance_, rubis::obj_instance_);
+    rubis::stop_task_profiling(rubis::instance_, rubis::lidar_instance_, rubis::vision_instance_);
     return;
   }
 
@@ -190,7 +190,7 @@ void TwistFilterNode::purePursuitOutputCallback(const rubis_msgs::PurePursuitOut
   vehicle_cmd_pub_.publish(vehicle_cmd_msg);
 
   // After spin
-  rubis::stop_task_profiling(rubis::instance_, rubis::obj_instance_);
+  rubis::stop_task_profiling(rubis::instance_, rubis::lidar_instance_, rubis::vision_instance_);
 }
 
 void TwistFilterNode::_ctrlCmdCallback(const autoware_msgs::ControlCommandStampedConstPtr& msg)

@@ -205,7 +205,7 @@ void TwistGate::_autoCmdRubisTwistCmdCallback(const rubis_msgs::TwistStamped::Co
     is_current_time_changed_ = true;
   }
   rubis::instance_ = input_msg->instance;  
-  rubis::obj_instance_ = input_msg->obj_instance;  
+  rubis::lidar_instance_ = input_msg->lidar_instance;  
   geometry_msgs::TwistStamped::ConstPtr _input_msg = boost::make_shared<const geometry_msgs::TwistStamped>(input_msg->msg);
   updateTwistGateMsg(_input_msg); 
 }
@@ -356,7 +356,7 @@ void TwistGate::timerCallback(const ros::TimerEvent& e)
 {
   rubis::start_task_profiling();
   if(rubis_twist_cmd_ptr_ == NULL){
-    rubis::stop_task_profiling(rubis::instance_, rubis::obj_instance_);
+    rubis::stop_task_profiling(rubis::instance_, rubis::lidar_instance_, rubis::vision_instance_);
     return;
   }
   
@@ -392,7 +392,7 @@ void TwistGate::timerCallback(const ros::TimerEvent& e)
     is_current_time_changed_ = false;    
   }
 
-  rubis::stop_task_profiling(rubis::instance_, rubis::obj_instance_);
+  rubis::stop_task_profiling(rubis::instance_, rubis::lidar_instance_, rubis::vision_instance_);
 }
 
 void TwistGate::configCallback(const autoware_config_msgs::ConfigTwistFilter& msg)

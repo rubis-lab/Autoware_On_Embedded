@@ -434,7 +434,7 @@ void PurePursuitNode::CallbackFinalWaypointsWithPoseTwist(const rubis_msgs::Lane
 { 
   rubis::start_task_profiling();
   rubis::instance_ = msg->instance;
-  rubis::obj_instance_ = msg->obj_instance;
+  rubis::lidar_instance_ = msg->lidar_instance;
 
   // Update waypoints (lane)
   lane_ = msg->lane;
@@ -507,7 +507,8 @@ void PurePursuitNode::CallbackFinalWaypointsWithPoseTwist(const rubis_msgs::Lane
 
   rubis_msgs::PurePursuitOutput pure_pursuit_output_msg;
   pure_pursuit_output_msg.instance = rubis::instance_;
-  pure_pursuit_output_msg.obj_instance = rubis::obj_instance_;
+  pure_pursuit_output_msg.lidar_instance = rubis::lidar_instance_;
+  pure_pursuit_output_msg.lidar_instance = rubis::vision_instance_;
   pure_pursuit_output_msg.header = msg->header;
   pure_pursuit_output_msg.twist = calculateTwistStamped(can_get_curvature, kappa);
   pure_pursuit_output_msg.twist.header = msg->header;
@@ -540,7 +541,7 @@ void PurePursuitNode::CallbackFinalWaypointsWithPoseTwist(const rubis_msgs::Lane
   is_waypoint_set_ = false;
   
   pure_pursuit_output_pub_.publish(pure_pursuit_output_msg);
-  rubis::stop_task_profiling(rubis::instance_, rubis::obj_instance_);
+  rubis::stop_task_profiling(rubis::instance_, rubis::lidar_instance_, rubis::vision_instance_);
 }
 
 void PurePursuitNode::connectVirtualLastWaypoints(
@@ -573,3 +574,4 @@ double convertCurvatureToSteeringAngle(
 }
 
 }  // namespace waypoint_follower
+

@@ -475,13 +475,13 @@ void MotionPrediction::callbackGetRubisTrackedObjects(const rubis_msgs::Detected
     UtilityHNS::UtilityH::GetTickCount(m_VisualizationTimer);
   }
 
-  rubis::stop_task_profiling(rubis::instance_, rubis::obj_instance_);
+  rubis::stop_task_profiling(rubis::instance_, rubis::lidar_instance_, rubis::vision_instance_);
 }
 
 void MotionPrediction::_callbackGetRubisTrackedObjects(rubis_msgs::DetectedObjectArray& objects_msg)
 {
   rubis::instance_ = objects_msg.instance;
-  rubis::obj_instance_ = objects_msg.obj_instance;
+  rubis::lidar_instance_ = objects_msg.lidar_instance;
 
   UtilityHNS::UtilityH::GetTickCount(m_SensingTimer);
   m_TrackedObjects.clear();
@@ -569,7 +569,7 @@ void MotionPrediction::_callbackGetRubisTrackedObjects(rubis_msgs::DetectedObjec
 
     rubis_msgs::DetectedObjectArray output_msg;
     output_msg.instance = rubis::instance_;
-    output_msg.obj_instance = rubis::obj_instance_;
+    output_msg.lidar_instance = rubis::lidar_instance_;
     output_msg.object_array = m_PredictedResultsResults;
     pub_rubis_predicted_objects_trajectories.publish(output_msg);
     
@@ -972,7 +972,7 @@ void MotionPrediction::callbackSvl(const rubis_msgs::DetectedObjectArray::ConstP
     VisualizePrediction();
     UtilityHNS::UtilityH::GetTickCount(m_VisualizationTimer);
   }
-  rubis::stop_task_profiling(rubis::instance_, rubis::obj_instance_);
+  rubis::stop_task_profiling(rubis::instance_, rubis::lidar_instance_, rubis::vision_instance_);
 }
 
 }

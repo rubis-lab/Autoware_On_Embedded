@@ -265,7 +265,8 @@ void BehaviorGen::callbackPlanningInfo(const rubis_msgs::PlanningInfoConstPtr& m
 {
   rubis::start_task_profiling();
   rubis::instance_ = msg->instance;
-  rubis::obj_instance_ = msg->obj_instance;
+  rubis::lidar_instance_ = msg->lidar_instance;
+  rubis::vision_instance_ = msg->vision_instance;
   static double prev_x = 0.0, prev_y = 0.0, prev_speed = 0.0;
 
   // distance to pedestrian
@@ -489,7 +490,7 @@ void BehaviorGen::callbackPlanningInfo(const rubis_msgs::PlanningInfoConstPtr& m
     sub_GlobalPlannerPaths = nh.subscribe("/lane_waypoints_array",   1,    &BehaviorGen::callbackGetGlobalPlannerPath,   this);
   }
 
-  rubis::stop_task_profiling(rubis::instance_, rubis::obj_instance_);
+  rubis::stop_task_profiling(rubis::instance_, rubis::lidar_instance_, rubis::vision_instance_);
 }
 
 
@@ -615,7 +616,8 @@ void BehaviorGen::SendLocalPlanningTopics(const rubis_msgs::PlanningInfoConstPtr
 
   rubis_msgs::LaneWithPoseTwist final_waypoints_with_pose_twist_msg;
   final_waypoints_with_pose_twist_msg.instance = rubis::instance_;
-  final_waypoints_with_pose_twist_msg.obj_instance = rubis::obj_instance_;
+  final_waypoints_with_pose_twist_msg.lidar_instance = rubis::lidar_instance_;
+  final_waypoints_with_pose_twist_msg.vision_instance = rubis::vision_instance_;
   final_waypoints_with_pose_twist_msg.lane = m_CurrentTrajectoryToSend;  
   final_waypoints_with_pose_twist_msg.pose = msg->pose;
   final_waypoints_with_pose_twist_msg.twist = msg->twist;

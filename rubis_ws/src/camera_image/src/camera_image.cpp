@@ -113,7 +113,7 @@ void CameraImage::sendImage(){
         // int ckey = cv::waitKey(1);
         // if(ckey == 27)break;
 
-        rubis::stop_task_profiling(0, 0);
+        rubis::stop_task_profiling(0, 0, 0);
 
         loop_rate.sleep();
     }

@@ -3,4 +3,4 @@ uint64 instance
 autoware_msgs/LaneArray lane_array
 geometry_msgs/PoseStamped pose
 geometry_msgs/TwistStamped twist
-uint64 obj_instance
+uint64 lidar_instance

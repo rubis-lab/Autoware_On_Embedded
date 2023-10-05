@@ -23,9 +23,9 @@ void points_cb(const sensor_msgs::PointCloud2ConstPtr& msg){
     rubis_msg_with_intensity.msg = msg_with_intensity;
     pub_rubis.publish(rubis_msg_with_intensity);
 
-    rubis::stop_task_profiling(rubis::instance_, rubis::obj_instance_);
+    rubis::stop_task_profiling(rubis::instance_, rubis::lidar_instance_, rubis::vision_instance_);
     rubis::instance_ = rubis::instance_+1;
-    rubis::obj_instance_ = rubis::obj_instance_+1;
+    rubis::lidar_instance_ = rubis::lidar_instance_+1;
 }
 
 std::string exec(const char* cmd) {

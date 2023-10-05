@@ -417,9 +417,9 @@ void RayGroundFilter::RubisCloudCallback(const rubis_msgs::PointCloud2ConstPtr i
   rubis::start_task_profiling();
   sensor_msgs::PointCloud2ConstPtr in_sensor_cloud = boost::make_shared<const sensor_msgs::PointCloud2>(in_rubis_cloud->msg);
   rubis::instance_ = in_rubis_cloud->instance;
-  rubis::obj_instance_ = in_rubis_cloud->instance;
+  rubis::lidar_instance_ = in_rubis_cloud->instance;
   PublishFilteredClouds(in_sensor_cloud);
-  rubis::stop_task_profiling(rubis::instance_, rubis::obj_instance_);
+  rubis::stop_task_profiling(rubis::instance_, rubis::lidar_instance_, rubis::vision_instance_);
 }
 
 RayGroundFilter::RayGroundFilter() : node_handle_("~"), tf_listener_(tf_buffer_)

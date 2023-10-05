@@ -1,6 +1,7 @@
 std_msgs/Header header
 uint64 instance
-uint64 obj_instance
+uint64 lidar_instance
+uint64 vision_instance
 autoware_msgs/LaneArray lane_array
 geometry_msgs/PoseStamped pose
 geometry_msgs/TwistStamped twist

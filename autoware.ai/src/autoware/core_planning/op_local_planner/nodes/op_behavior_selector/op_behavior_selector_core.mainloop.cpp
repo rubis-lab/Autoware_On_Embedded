@@ -759,7 +759,7 @@ void BehaviorGen::MainLoop()
     else
       sub_GlobalPlannerPaths = nh.subscribe("/lane_waypoints_array",   1,    &BehaviorGen::callbackGetGlobalPlannerPath,   this);
 
-    rubis::stop_task_profiling(0, 0);    
+    rubis::stop_task_profiling(0, 0, 0);    
     r.sleep();
   }
 }

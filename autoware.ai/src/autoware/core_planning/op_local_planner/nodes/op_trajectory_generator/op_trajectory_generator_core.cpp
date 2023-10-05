@@ -195,7 +195,7 @@ void TrajectoryGen::callbackGetCurrentPoseTwist(const rubis_msgs::PoseTwistStamp
 
     local_lanes.header = msg->header;
     local_lanes.instance = rubis::instance_;
-    local_lanes.obj_instance = 0;
+    local_lanes.lidar_instance = 0;
     local_lanes.pose = current_pose_;
     local_lanes.twist = current_twist_;
 
@@ -210,7 +210,7 @@ void TrajectoryGen::callbackGetCurrentPoseTwist(const rubis_msgs::PoseTwistStamp
     sub_GlobalPlannerPaths = nh.subscribe("/lane_waypoints_array",   1,    &TrajectoryGen::callbackGetGlobalPlannerPath,   this);    
   }
   
-  rubis::stop_task_profiling(rubis::instance_, rubis::obj_instance_);
+  rubis::stop_task_profiling(rubis::instance_, rubis::lidar_instance_, rubis::vision_instance_);
 }
 
 void TrajectoryGen::callbackGetGlobalPlannerPath(const autoware_msgs::LaneArrayConstPtr& msg)

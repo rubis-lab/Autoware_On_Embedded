@@ -1,5 +1,6 @@
 std_msgs/Header header
 uint64 instance
-uint64 obj_instance
+uint64 lidar_instance
+uint64 vision_instance
 geometry_msgs/TwistStamped twist
 autoware_msgs/ControlCommandStamped ctrl

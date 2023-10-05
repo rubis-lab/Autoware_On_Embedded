@@ -85,7 +85,7 @@ int main(int argc, char** argv)
       ros::spinOnce();
       
 
-      rubis::stop_task_profiling(0, 0);
+      rubis::stop_task_profiling(0, 0, 0);
 
       r.sleep();
     }
@@ -113,7 +113,7 @@ int main(int argc, char** argv)
       rubis::start_task_profiling();
       ros::spinOnce();
       
-      rubis::stop_task_profiling(0, 0);
+      rubis::stop_task_profiling(0, 0, 0);
       r.sleep();
     }
   }

@@ -25,6 +25,7 @@ add_message_files(
     DetectedObjectArray.msg
     PlanningInfo.msg
     PurePursuitOutput.msg
+    Bool.msg
 )
 
 generate_messages(

@@ -1,4 +1,4 @@
 std_msgs/Header header
 uint64 instance
-uint64 obj_instance
+uint64 lidar_instance
 geometry_msgs/TwistStamped msg
