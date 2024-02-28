@@ -5,6 +5,7 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Global Options1
+        - /Grid1
         - /System1/TF1
         - /System1/TF1/Frames1
         - /Map1/Vector Map1
@@ -14,7 +15,6 @@ Panels:
         - /Planning1
         - /Planning1/OP Planner1
         - /Planning1/OP Planner1/GlobalPathAnimation1
-        - /Planning1/OP Planner1/Local Rollouts1
         - /Planning1/Next Traget1
         - /Planning1/Behavior State1
       Splitter Ratio: 0.22158685326576233
@@ -69,8 +69,8 @@ Visualization Manager:
         Y: 0
         Z: 0
       Plane: XY
-      Plane Cell Count: 10
-      Reference Frame: base_link
+      Plane Cell Count: 20
+      Reference Frame: map
       Value: true
     - Class: rviz/Group
       Displays:
@@ -444,7 +444,9 @@ Visualization Manager:
           Marker Topic: /detection/lidar_detector/objects_markers_center
           Name: Lidar Objects
           Namespaces:
-            {}
+            /detection/lidar_detector/centroid_markers2: true
+            /detection/lidar_detector/hull_markers2: true
+            /detection/lidar_detector/label_markers2: true
           Queue Size: 100
           Value: true
       Enabled: true
@@ -453,12 +455,20 @@ Visualization Manager:
       Displays:
         - Class: rviz/Group
           Displays:
+            - Class: rviz/MarkerArray
+              Enabled: true
+              Marker Topic: /local_trajectories_eval_rviz
+              Name: Local Rollouts
+              Namespaces:
+                local_lane_array_marker_colored: true
+              Queue Size: 100
+              Value: true
             - Class: rviz/Marker
               Enabled: true
               Marker Topic: /safety_border
               Name: Safety Box
               Namespaces:
-                {}
+                global_lane_array_marker: true
               Queue Size: 100
               Value: true
             - Class: jsk_rviz_plugin/BoundingBoxArray
@@ -474,14 +484,13 @@ Visualization Manager:
               only edge: false
               show coords: false
             - Class: rviz/MarkerArray
-              Enabled: true
+              Enabled: false
               Marker Topic: /global_waypoints_rviz
               Name: GlobalPathAnimation
               Namespaces:
-                global_lane_array_marker: true
-                global_lane_waypoint_orientation_marker: true
+                {}
               Queue Size: 100
-              Value: true
+              Value: false
             - Class: rviz/Marker
               Enabled: false
               Marker Topic: /behavior_state
@@ -499,14 +508,6 @@ Visualization Manager:
               Queue Size: 100
               Value: false
             - Class: rviz/MarkerArray
-              Enabled: true
-              Marker Topic: /local_trajectories_eval_rviz
-              Name: Local Rollouts
-              Namespaces:
-                {}
-              Queue Size: 100
-              Value: true
-            - Class: rviz/MarkerArray
               Enabled: false
               Marker Topic: /global_waypoints_rviz
               Name: Global Path
@@ -521,7 +522,7 @@ Visualization Manager:
           Marker Topic: /next_target_mark
           Name: Next Traget
           Namespaces:
-            {}
+            next_target_marker: true
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
@@ -529,7 +530,7 @@ Visualization Manager:
           Marker Topic: /behavior_state
           Name: Behavior State
           Namespaces:
-            {}
+            beh_state: true
           Queue Size: 100
           Value: true
       Enabled: true
@@ -607,11 +608,11 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 13.06907844543457
+      Scale: 8.730535507202148
       Target Frame: map
       Value: TopDownOrtho (rviz)
-      X: 2.5199878215789795
-      Y: 4.277388572692871
+      X: -18.137195587158203
+      Y: 45.29766082763672
     Saved: ~
 Window Geometry:
   DecisionMakerPanel:
@@ -633,5 +634,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 3706
-  X: 3974
+  X: 134
   Y: 55

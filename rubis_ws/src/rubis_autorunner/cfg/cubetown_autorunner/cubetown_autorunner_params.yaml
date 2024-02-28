@@ -152,6 +152,7 @@ op_common_params:
   maxVelocity: 7.5
   maxAcceleration: 7.5
   maxDeceleration: -7.5
+  blockIdx: -1
 
 op_trajectory_generator:
   task_scheduling_configs:

@@ -115,6 +115,7 @@ void TrajectoryEval::UpdatePlanningParams(ros::NodeHandle &_nh) {
     _nh.getParam("/op_common_params/speedProfileFactor", m_PlanningParams.speedProfileFactor);
 
     _nh.getParam("/op_common_params/enableLaneChange", m_PlanningParams.enableLaneChange);
+    _nh.getParam("/op_common_params/blockIdx", m_PlanningParams.blockIdx);
 
     _nh.getParam("/op_common_params/width", m_CarInfo.width);
     _nh.getParam("/op_common_params/length", m_CarInfo.length);
@@ -292,6 +293,11 @@ void TrajectoryEval::_callbackGetLocalPlannerPath(const rubis_msgs::LaneArrayWit
             planning_info_msg.twist = msg->twist;
             planning_info_msg.sprint_switch = m_sprint_switch;
             planning_info_msg.intersection_condition = intersection_condition;
+
+            if (m_PlanningParams.enableStop) {
+                m_distance_to_pedestrian.data = 1.0;
+            }
+
             planning_info_msg.distance_to_pedestrian = m_distance_to_pedestrian;
 
             pub_PlanningInfo.publish(planning_info_msg);
