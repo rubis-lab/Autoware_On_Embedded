@@ -141,6 +141,8 @@ void TrajectoryEval::UpdatePlanningParams(ros::NodeHandle &_nh) {
 
     m_VehicleImageWidthThreshold = m_VehicleImageWidthThreshold * m_ImageWidth;
     m_PedestrianRightThreshold *= -1;
+
+    // m_PlanningParams.enableStop = false;
 }
 
 void TrajectoryEval::callbackGetGlobalPlannerPath(const autoware_msgs::LaneArrayConstPtr &msg) {

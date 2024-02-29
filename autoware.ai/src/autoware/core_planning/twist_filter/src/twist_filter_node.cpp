@@ -29,6 +29,7 @@ TwistFilterNode::TwistFilterNode() : nh_(), private_nh_("~") {
     nh_.param("twist_filter/max_stop_count", max_stop_count_, 30);
     twist_filter_ptr_ = std::make_shared<twist_filter::TwistFilter>(twist_filter_config);
     emergency_stop_ = false;
+    current_emergency_stop_ = false;
     current_stop_count_ = 0;
 
     // Subscribe
@@ -97,6 +98,7 @@ inline geometry_msgs::TwistStamped TwistFilterNode::calculateTwist(const geometr
 
     // Smoothed value publish
     geometry_msgs::TwistStamped out_msg = *msg;
+
     if (emergency_stop_ == false) {
         out_msg.twist.linear.x = twist_out.lx;
         out_msg.twist.angular.z = twist_out.az;
