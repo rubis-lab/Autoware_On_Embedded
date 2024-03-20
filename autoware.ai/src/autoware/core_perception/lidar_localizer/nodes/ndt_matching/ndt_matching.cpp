@@ -920,6 +920,15 @@ static inline void ndt_matching(const sensor_msgs::PointCloud2::ConstPtr &input)
         ndt_pose_msg.pose.orientation.z = gnss_q.z();
         ndt_pose_msg.pose.orientation.w = gnss_q.w();
 
+        estimate_twist_msg.header.stamp = current_scan_time;
+        estimate_twist_msg.header.frame_id = "/base_link";
+        estimate_twist_msg.twist.linear.x = current_velocity;
+        estimate_twist_msg.twist.linear.y = 0.0;
+        estimate_twist_msg.twist.linear.z = 0.0;
+        estimate_twist_msg.twist.angular.x = 0.0;
+        estimate_twist_msg.twist.angular.y = 0.0;
+        estimate_twist_msg.twist.angular.z = angular_velocity;
+
         transform.setOrigin(tf::Vector3(current_gnss_pose.x, current_gnss_pose.y, current_gnss_pose.z));
         transform.setRotation(gnss_q);
         br.sendTransform(tf::StampedTransform(transform, current_scan_time, "/map", "/base_link"));
