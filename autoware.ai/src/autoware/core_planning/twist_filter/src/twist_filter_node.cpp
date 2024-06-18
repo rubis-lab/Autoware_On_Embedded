@@ -174,10 +174,11 @@ void TwistFilterNode::purePursuitOutputCallback(const rubis_msgs::PurePursuitOut
     vehicle_cmd_msg.ctrl_cmd.linear_acceleration = current_target_accel;
     vehicle_cmd_msg.ctrl_cmd.linear_velocity = current_target_velocity;
     vehicle_cmd_msg.twist_cmd = filtered_twist;
-    vehicle_cmd_pub_.publish(vehicle_cmd_msg);
-
+    
     // After spin
     rubis::stop_task_profiling(rubis::instance_, rubis::lidar_instance_, rubis::vision_instance_);
+
+    vehicle_cmd_pub_.publish(vehicle_cmd_msg);
 }
 
 void TwistFilterNode::_ctrlCmdCallback(const autoware_msgs::ControlCommandStampedConstPtr &msg) {
