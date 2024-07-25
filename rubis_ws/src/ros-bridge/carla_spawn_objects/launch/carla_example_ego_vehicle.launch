@@ -8,7 +8,7 @@
     as many spawn_point as vehicles defined in objects_definition_file-->
   <!-- <arg name="spawn_point_ego_vehicle" default='390.0,-87.0,0.3,0.0,0.0,90.0'/> -->
   <arg name='role_name_obstacle' default='obstacle'/>
-  <!-- <arg name="spawn_point_ego_vehicle" default=''/> -->
+  <arg name="spawn_point_ego_vehicle" default=''/>
   <!-- <arg name='spawn_point_obstacle' default=''/>
   <arg name="spawn_point_walker" default=""/> -->
   <arg name="spawn_sensors_only" default="false"/>
@@ -18,8 +18,8 @@
   <include file="$(find carla_spawn_objects)/launch/carla_spawn_objects.launch">
     <arg name="objects_definition_file" value='$(arg objects_definition_file)'/>
     <arg name="spawn_points_file" value='$(arg spawn_points_file)'/>
-    <!-- <arg name="spawn_point_ego_vehicle" value="$(arg spawn_point_ego_vehicle)"/>
-    <arg name='spawn_point_obstacle' value='$(arg spawn_point_obstacle)'/>
+    <arg name="spawn_point_ego_vehicle" value="$(arg spawn_point_ego_vehicle)"/>
+    <!-- <arg name='spawn_point_obstacle' value='$(arg spawn_point_obstacle)'/>
     <arg name="spawn_point_walker" value="$(arg spawn_point_walker)"/>     -->
     <arg name="spawn_sensors_only" value="$(arg spawn_sensors_only)" />
   </include>

@@ -12,6 +12,7 @@ Class that handle communication between CARLA and ROS
 """
 
 import os
+import time
 import pkg_resources
 try:
     import queue
@@ -89,7 +90,9 @@ class CarlaRosBridge(CompatibleNode):
             self.loginfo("fixed_delta_seconds: {}".format(
                 self.parameters["fixed_delta_seconds"]))
             self.carla_settings.fixed_delta_seconds = self.parameters["fixed_delta_seconds"]
+            
             carla_world.apply_settings(self.carla_settings)
+            
 
         self.loginfo("Parameters:")
         for key in self.parameters:
@@ -264,6 +267,8 @@ class CarlaRosBridge(CompatibleNode):
 
             self.actor_factory.update_available_objects()
             frame = self.carla_world.tick()
+            time.sleep(0.05)
+            
 
             world_snapshot = self.carla_world.get_snapshot()
 

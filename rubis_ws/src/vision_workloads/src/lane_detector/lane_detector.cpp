@@ -110,8 +110,7 @@ void LaneDetector::imageCallback(const rubis_msgs::Image &image) {
 
     // cv::resize(lanes, lanes, cv::Size(640, 480));
     // imshow("Lanes", lanes);
-    // waitKey(1);
-
+    // waitKey(1);    
     rubis_msgs::Bool lane_msg;
     lane_msg.header = image.header;
     lane_msg.instance = rubis::instance_;
@@ -282,11 +281,10 @@ Mat LaneDetector::drawLanes(Mat source, std::vector<Vec4i> lines) {
         double slope;
 
         // Calculate slope
-        if (l[2] - l[0] == 0) // Avoid division by zero
-        {
-            slope = 999; // Basically infinte slope
+        if (l[2] - l[0] == 0) { // Avoid division by zero
+            slope = 999; // Basically infinite slope
         } else {
-            slope = (l[3] - l[1]) / (l[2] / l[0]);
+            slope = static_cast<double>(l[3] - l[1]) / (l[2] - l[0]);
         }
         if (abs(slope) > 0.5) {
             slopes.push_back(slope);
@@ -324,7 +322,7 @@ Mat LaneDetector::drawLanes(Mat source, std::vector<Vec4i> lines) {
     // We start with the right side points
     std::vector<int> rightLinesX;
     std::vector<int> rightLinesY;
-    double rightB1, rightB0; // Slope and intercept
+    double rightB1 = 1, rightB0 = 1;
 
     for (int i = 0; i < rightLines.size(); i++) {
         rightLinesX.push_back(rightLines[i][0]); // X of starting point of line
@@ -334,20 +332,23 @@ Mat LaneDetector::drawLanes(Mat source, std::vector<Vec4i> lines) {
     }
 
     if (rightLinesX.size() > 0) {
-        std::vector<double> coefRight = estimateCoefficients<int, double>(
-            rightLinesX, rightLinesY); // y = b1x + b0
-        rightB1 = coefRight[0];
-        rightB0 = coefRight[1];
+        try {
+            std::vector<double> coefRight = estimateCoefficients<int, double>(rightLinesX, rightLinesY);  // y = b1x + b0
+            rightB1 = coefRight[0];
+            rightB0 = coefRight[1];
+        } catch (const std::exception& e) {
+            std::cerr << "Error calculating right lane coefficients: " << e.what() << std::endl;
+            drawRightLane = false;
+        }
     } else {
-        rightB1 = 1;
-        rightB0 = 1;
         drawRightLane = false;
     }
 
     // Now the points at the left side
     std::vector<int> leftLinesX;
     std::vector<int> leftLinesY;
-    double leftB1, leftB0; // Slope and intercept
+    double leftB1 = 1, leftB0 = 1; // Slope and intercept
+
 
     for (int i = 0; i < leftLines.size(); i++) {
         leftLinesX.push_back(leftLines[i][0]); // X of starting point of line
@@ -357,13 +358,15 @@ Mat LaneDetector::drawLanes(Mat source, std::vector<Vec4i> lines) {
     }
 
     if (leftLinesX.size() > 0) {
-        std::vector<double> coefLeft = estimateCoefficients<int, double>(
-            leftLinesX, leftLinesY); // y = b1x + b0
-        leftB1 = coefLeft[0];
-        leftB0 = coefLeft[1];
+        try {
+            std::vector<double> coefLeft = estimateCoefficients<int, double>(leftLinesX, leftLinesY); // y = b1x + b0
+            leftB1 = coefLeft[0];
+            leftB0 = coefLeft[1];
+        } catch (const std::exception& e) {
+            std::cerr << "Error calculating left lane coefficients: " << e.what() << std::endl;
+            drawLeftLane = false;
+        }
     } else {
-        leftB1 = 1;
-        leftB0 = 1;
         drawLeftLane = false;
     }
 
@@ -377,26 +380,19 @@ Mat LaneDetector::drawLanes(Mat source, std::vector<Vec4i> lines) {
     the ending point below the trapezoid height (0.4) to draw shorter lanes. I
     think that looks nicer. */
 
-    int y2 =
-        source.rows *
-        (1 -
-         0.4); // Y coordinate of ending point of both the left and right lane
+    int y2 = static_cast<int>(source.rows * 0.6);  // Y coordinate of ending point of both the left and right lane
 
     // y = b1x + b0 --> x = (y - b0) / b1
-    int rightX1 = (y1 - rightB0) /
-                  rightB1; // X coordinate of starting point of right lane
-    int rightX2 =
-        (y2 - rightB0) / rightB1; // X coordinate of ending point of right lane
-
-    int leftX1 =
-        (y1 - leftB0) / leftB1; // X coordinate of starting point of left lane
-    int leftX2 =
-        (y2 - leftB0) / leftB1; // X coordinate of ending point of left lane
+    int rightX1 = static_cast<int>((y1 - rightB0) / rightB1); // X coordinate of starting point of right lane
+    int rightX2 = static_cast<int>((y2 - rightB0) / rightB1); // X coordinate of ending point of right lane
+    int leftX1 = static_cast<int>((y1 - leftB0) / leftB1); // X coordinate of starting point of left lane
+    int leftX2 = static_cast<int>((y2 - leftB0) / leftB1); // X coordinate of ending point of left lane
 
     /* If the ending point of the right lane is on the left side of the left
     lane (or vice versa), return source image without drawings, because this
     should not be happening in real life. */
     if (rightX2 < leftX2 || leftX2 > rightX2) {
+        std::cerr << "Lane lines crossed each other. Returning original image." << std::endl;
         return source;
     }
 
@@ -406,11 +402,9 @@ Mat LaneDetector::drawLanes(Mat source, std::vector<Vec4i> lines) {
     // Draw lines and fill poly made up of the four points described above if
     // both bools are true
     Mat dst; // Holds blended image
-    if (drawRightLane == true && drawLeftLane == true) {
-        line(source, Point(rightX1, y1), Point(rightX2, y2), Scalar(255, 0, 0),
-             7);
-        line(source, Point(leftX1, y1), Point(leftX2, y2), Scalar(255, 0, 0),
-             7);
+    if (drawRightLane && drawLeftLane) {
+        line(source, Point(rightX1, y1), Point(rightX2, y2), Scalar(255, 0, 0), 7);
+        line(source, Point(leftX1, y1), Point(leftX2, y2), Scalar(255, 0, 0), 7);
 
         Point pts[4] = {
             Point(leftX1, y1),  // Starting point left lane
@@ -419,8 +413,7 @@ Mat LaneDetector::drawLanes(Mat source, std::vector<Vec4i> lines) {
             Point(rightX1, y1)  // Starting point right lane
         };
 
-        fillConvexPoly(mask, pts, 4,
-                       Scalar(235, 229, 52)); // Color is light blue
+        fillConvexPoly(mask, pts, 4, Scalar(235, 229, 52)); // Color is light blue
 
         // Blend the mask and source image together
         addWeighted(source, 0.9, mask, 0.3, 0.0, dst);

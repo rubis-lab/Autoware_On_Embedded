@@ -3,6 +3,7 @@
 
 #include <cmath>
 #include "regression.hpp"
+#include <stdexcept>
 #include <ros/ros.h>
 #include <cv_bridge/cv_bridge.h>
 #include <rubis_lib/sched.hpp>

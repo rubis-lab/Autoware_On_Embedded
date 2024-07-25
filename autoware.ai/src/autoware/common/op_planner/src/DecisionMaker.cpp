@@ -581,9 +581,6 @@ double DecisionMaker::UpdateVelocityDirectlyToTrajectory(const BehaviorState &be
         double target_velocity = max_velocity;
         bool bSlowBecauseChange = false;
 
-        // std::cout << "curr Traj : " << beh.currTrajectory << ", curr Safe Traj : " << m_pCurrentBehaviorState->GetCalcParams()->iCurrSafeTrajectory
-        // << std::endl; if(m_pCurrentBehaviorState->GetCalcParams()->iCurrSafeTrajectory !=
-        // m_pCurrentBehaviorState->GetCalcParams()->iCentralTrajectory)
         if (beh.currTrajectory != m_pCurrentBehaviorState->GetCalcParams()->iCurrSafeTrajectory) {
             // target_velocity /= fabs(beh.currTrajectory - m_pCurrentBehaviorState->GetCalcParams()->iCurrSafeTrajectory);
             target_velocity *= 0.5;
@@ -614,26 +611,12 @@ double DecisionMaker::UpdateVelocityDirectlyToTrajectory(const BehaviorState &be
             if (angle_diff > 180) {
                 angle_diff = 360 - angle_diff;
             }
+            
+            if (angle_diff > 40) { // Slow down when angle is large
+                desiredVelocity = m_params.maxSpeed * (90-angle_diff)/90;
 
-            // std::cout << "curvature : " << angle_diff << std::endl;
-
-            if (angle_diff > 7) { // Slow down when angle is large
-                desiredVelocity = m_params.maxSpeed * 40 / (angle_diff + 33);
-                // desiredVelocity = m_params.maxSpeed * 17 / (angle_diff + 10);
-                if (desiredVelocity > previous_velocity) {
-                    desiredVelocity = previous_velocity;
-                }
                 curveSlowDownCount = 0;
             }
-            // if (angle_diff > 30){
-            //   desiredVelocity = m_params.maxSpeed * 0.8;
-            //   curveSlowDownCount = 0;
-            //   // desiredVelocity = max_velocity * 100 / (angle_diff + 90);
-            // }
-            // else if(angle_diff > 10){
-            //   desiredVelocity = m_params.maxSpeed * 0.6;
-            //   curveSlowDownCount = 0;
-            // }
             else if (curveSlowDownCount <
                      400) { // wait 4 sec when angle become less than 7 // TODO: Check its feasibility when pure pursuit is sufficiently tuned
                 desiredVelocity = previous_velocity + (m_params.maxSpeed - previous_velocity) / 100;
@@ -661,7 +644,7 @@ double DecisionMaker::UpdateVelocityDirectlyToTrajectory(const BehaviorState &be
             desiredVelocity = max_velocity;
         else if (desiredVelocity < m_params.minSpeed)
             desiredVelocity = 0;
-
+            
         return desiredVelocity;
     } else if (beh.state == OBSTACLE_AVOIDANCE_STATE) {
         double target_velocity = max_velocity;
@@ -733,6 +716,17 @@ PlannerHNS::BehaviorState DecisionMaker::DoOneStep(const double &dt, const Plann
     beh = GenerateBehaviorState(vehicleState);
 
     beh.bNewPlan = SelectSafeTrajectory();
+
+    // ADDED
+    if(!m_isTargetVelocityReady){
+        while(1){
+            beh.maxVelocity = UpdateVelocityDirectlyToTrajectory(beh, vehicleState, dt);
+            if (beh.maxVelocity > m_params.maxSpeed - 1) {
+                m_isTargetVelocityReady = true;
+                break;
+            }
+        }
+    }
 
     beh.maxVelocity = UpdateVelocityDirectlyToTrajectory(beh, vehicleState, dt);
 

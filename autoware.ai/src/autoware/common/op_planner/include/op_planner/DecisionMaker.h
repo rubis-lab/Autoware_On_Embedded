@@ -54,6 +54,7 @@ public:
   double m_obstacleWaitingTimeinIntersection;
   int m_remainObstacleWaitingTime;
   int m_prevSafeTrajectory;
+  bool m_isTargetVelocityReady = false;
 
   int m_prevTrafficLightID;
   PlannerHNS::TrafficLightState m_prevTrafficLightSignal;
