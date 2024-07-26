@@ -10,3 +10,6 @@ rospkg
 transforms3d
 opencv-python==4.2.0.32
 simple-pid
+ipywidgets==7.5.1
+widgetsnbextension==3.5.1
+
