@@ -69,7 +69,7 @@ bool RayGroundFilter::TransformPointCloud(const std::string& in_target_frame,
   try
   {
     transform_stamped = tf_buffer_.lookupTransform(in_target_frame, in_cloud_ptr->header.frame_id,
-                                                   in_cloud_ptr->header.stamp, ros::Duration(0.1));
+                                                   ros::Time(0), ros::Duration(0.1));
   }
   catch (tf2::TransformException& ex)
   {
