@@ -2,8 +2,8 @@
 #define LANE_DETECTOR_H
 
 #include <cmath>
+#include <CL/cl.h>
 #include "regression.hpp"
-#include <stdexcept>
 #include <ros/ros.h>
 #include <cv_bridge/cv_bridge.h>
 #include <rubis_lib/sched.hpp>
@@ -13,12 +13,28 @@
 
 using namespace cv;
 
+void printOpenCLInfo();
+Mat getImage();
+
 class LaneDetector
 {
 public:
     LaneDetector();
+    ~LaneDetector();
     void run();
 private:
+    cl_platform_id platform;
+    cl_device_id device;
+    cl_context context;
+    cl_command_queue queue;
+    cl_program program;
+    cl_kernel kernel;
+    cl_mem inputImageBuffer;
+    cl_mem outputImageBuffer;
+    cl_kernel sobelGradientKernel;  // Sobel 커널
+    cl_mem gradientImageBuffer;     // Gradient 결과 저장 버퍼
+    cl_mem gradientDirectionBuffer; // Gradient 방향 저장 버퍼
+
     bool debug_, filter_image_, gray_scale_, gaussian_blur_, canny_, roi_;
     ros::NodeHandle nh_;
     ros::Publisher lane_pub_;
@@ -33,6 +49,10 @@ private:
      * @return grayscale image
      */
     Mat applyGrayscale(Mat source);
+
+    Mat applyOpenCLGrayscale(Mat source);
+    void initializeOpenCL();
+    void releaseOpenCL();
 
     /**
      * @brief Apply Gaussian blur to image.
@@ -49,6 +69,7 @@ private:
      * @return image with detected edges
      */
     Mat applyCanny(Mat source);
+    Mat applyOpenCLCanny(Mat source);
 
     /**
      * @brief Filter source image so that only the white and yellow pixels remain.

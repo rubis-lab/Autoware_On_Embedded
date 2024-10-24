@@ -1,6 +1,32 @@
 #include "lane_detector.hpp"
 
+#include <CL/cl.h>
+#include <opencv2/opencv.hpp>
+#include <iostream>
+#include <chrono>
+
+#define CL_TARGET_OPENCL_VERSION 120
+
+#define MAX_WIDTH 1920
+#define MAX_HEIGHT 1080
+#define MAX_IMAGE_SIZE (MAX_WIDTH * MAX_HEIGHT * 3)  // 3채널 BGR 이미지 크기
+#define MAX_OUTPUT_SIZE (MAX_WIDTH * MAX_HEIGHT)     // 그레이스케일 이미지 크기
+
+const char* kernelSource = 
+"__kernel void grayscale(__global uchar* inputImage, __global uchar* outputImage, int width, int height) {"
+"    int x = get_global_id(0);"
+"    int y = get_global_id(1);"
+"    int idx = (y * width + x) * 3;"
+"    int gray_idx = y * width + x;"
+"    uchar r = inputImage[idx];"
+"    uchar g = inputImage[idx + 1];"
+"    uchar b = inputImage[idx + 2];"
+"    outputImage[gray_idx] = (uchar)(0.299f * r + 0.587f * g + 0.114f * b);"
+"}";
+
 LaneDetector::LaneDetector() {
+    initializeOpenCL();
+
     ros::NodeHandle private_nh("~");
     std::string node_name = ros::this_node::getName();
     std::string input_topic;
@@ -20,6 +46,56 @@ LaneDetector::LaneDetector() {
         nh_.subscribe(input_topic, 1, &LaneDetector::imageCallback, this);
 
     return;
+}
+
+LaneDetector::~LaneDetector() {
+    // OpenCL 자원 해제
+    releaseOpenCL();
+}
+
+Mat getImage() {
+    static Mat smallImage(64, 64, CV_8UC3);
+
+    static bool initialized = false;
+    if (!initialized) {
+        smallImage.at<Vec3b>(0, 0) = Vec3b(255, 0, 0);    
+        smallImage.at<Vec3b>(0, 1) = Vec3b(0, 255, 0);    
+        smallImage.at<Vec3b>(1, 0) = Vec3b(0, 0, 255);    
+        smallImage.at<Vec3b>(1, 1) = Vec3b(255, 255, 255);
+        initialized = true;
+    }
+
+    return smallImage;
+}
+
+void LaneDetector::initializeOpenCL() {
+    cl_int err;
+
+    // 플랫폼 및 장치 검색
+    err = clGetPlatformIDs(2, &platform, NULL);
+    err = clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 1, &device, NULL);
+
+    // 컨텍스트 및 명령 큐 생성
+    context = clCreateContext(NULL, 1, &device, NULL, NULL, &err);
+    queue = clCreateCommandQueueWithProperties(context, device, 0, &err);
+
+    // 프로그램 및 커널 생성
+    program = clCreateProgramWithSource(context, 1, (const char**)&kernelSource, NULL, &err);
+    clBuildProgram(program, 1, &device, NULL, NULL, NULL);
+    kernel = clCreateKernel(program, "grayscale", &err);
+
+    inputImageBuffer = clCreateBuffer(context, CL_MEM_READ_ONLY, MAX_IMAGE_SIZE, NULL, &err);
+    outputImageBuffer = clCreateBuffer(context, CL_MEM_WRITE_ONLY, MAX_OUTPUT_SIZE, NULL, &err);
+}
+
+void LaneDetector::releaseOpenCL() {
+    // OpenCL 자원 해제
+    clReleaseMemObject(inputImageBuffer);
+    clReleaseMemObject(outputImageBuffer);
+    clReleaseKernel(kernel);
+    clReleaseProgram(program);
+    clReleaseCommandQueue(queue);
+    clReleaseContext(context);
 }
 
 void LaneDetector::run() {
@@ -76,10 +152,13 @@ void LaneDetector::imageCallback(const rubis_msgs::Image &image) {
 
     // Apply grayscale
     Mat gray;
-    if (gray_scale_)
+    if (gray_scale_){
         gray = applyGrayscale(frame);
-    else
+        applyOpenCLGrayscale(getImage());
+    }
+    else{
         gray = filteredIMG;
+    }
 
     // Apply Gaussian blur
     Mat gBlur;
@@ -110,7 +189,8 @@ void LaneDetector::imageCallback(const rubis_msgs::Image &image) {
 
     // cv::resize(lanes, lanes, cv::Size(640, 480));
     // imshow("Lanes", lanes);
-    // waitKey(1);    
+    // waitKey(1);
+
     rubis_msgs::Bool lane_msg;
     lane_msg.header = image.header;
     lane_msg.instance = rubis::instance_;
@@ -125,6 +205,55 @@ Mat LaneDetector::applyGrayscale(Mat source) {
     cvtColor(source, dst, COLOR_BGR2GRAY);
 
     return dst;
+}
+
+Mat LaneDetector::applyOpenCLGrayscale(Mat source) {
+    cl_int err;
+    
+    // 이미지 크기 설정
+    int width = source.cols;
+    int height = source.rows;
+    size_t imageSize = width * height * 3 * sizeof(unsigned char);
+    size_t outputSize = width * height * sizeof(unsigned char);
+
+    // 입력 이미지를 GPU로 비동기적으로 복사
+    cl_event writeEvent;
+    clEnqueueWriteBuffer(queue, inputImageBuffer, CL_FALSE, 0, imageSize, source.data, 0, NULL, &writeEvent);
+
+    // 커널 매개변수 설정
+    clSetKernelArg(kernel, 0, sizeof(cl_mem), &inputImageBuffer);
+    clSetKernelArg(kernel, 1, sizeof(cl_mem), &outputImageBuffer);
+    clSetKernelArg(kernel, 2, sizeof(int), &width);
+    clSetKernelArg(kernel, 3, sizeof(int), &height);
+
+    // 글로벌 및 로컬 작업 크기 설정
+    size_t globalSize[2] = {width, height};
+    size_t localSize[2] = {16, 16};  // 워크 그룹 크기
+
+    // 커널 실행 (이벤트 기반 비동기 실행)
+    cl_event kernelEvent;
+    err = clEnqueueNDRangeKernel(queue, kernel, 2, NULL, globalSize, localSize, 1, &writeEvent, &kernelEvent);
+
+    // GPU 연산이 완료된 후 결과를 비동기적으로 CPU로 복사
+    unsigned char* outputImage = (unsigned char*)malloc(outputSize);
+    cl_event readEvent;
+    clEnqueueReadBuffer(queue, outputImageBuffer, CL_FALSE, 0, outputSize, outputImage, 1, &kernelEvent, &readEvent);
+
+    // GPU 연산이 끝나기를 기다림 (이벤트 기반 비동기 처리)
+    clWaitForEvents(1, &readEvent);
+
+    // OpenCV의 Mat 형식으로 출력 이미지 저장
+    Mat grayImage = Mat(height, width, CV_8UC1, outputImage);
+
+    // 이벤트 해제 (clean-up)
+    clReleaseEvent(writeEvent);
+    clReleaseEvent(kernelEvent);
+    clReleaseEvent(readEvent);
+
+    // 더 이상 메모리 해제가 필요하지 않으면 free 제거 가능
+    free(outputImage);
+
+    return grayImage;
 }
 
 Mat LaneDetector::applyGaussianBlur(Mat source) {
@@ -281,10 +410,11 @@ Mat LaneDetector::drawLanes(Mat source, std::vector<Vec4i> lines) {
         double slope;
 
         // Calculate slope
-        if (l[2] - l[0] == 0) { // Avoid division by zero
-            slope = 999; // Basically infinite slope
+        if (l[2] - l[0] == 0) // Avoid division by zero
+        {
+            slope = 999; // Basically infinte slope
         } else {
-            slope = static_cast<double>(l[3] - l[1]) / (l[2] - l[0]);
+            slope = (l[3] - l[1]) / (l[2] / l[0]);
         }
         if (abs(slope) > 0.5) {
             slopes.push_back(slope);
@@ -322,7 +452,7 @@ Mat LaneDetector::drawLanes(Mat source, std::vector<Vec4i> lines) {
     // We start with the right side points
     std::vector<int> rightLinesX;
     std::vector<int> rightLinesY;
-    double rightB1 = 1, rightB0 = 1;
+    double rightB1, rightB0; // Slope and intercept
 
     for (int i = 0; i < rightLines.size(); i++) {
         rightLinesX.push_back(rightLines[i][0]); // X of starting point of line
@@ -332,23 +462,20 @@ Mat LaneDetector::drawLanes(Mat source, std::vector<Vec4i> lines) {
     }
 
     if (rightLinesX.size() > 0) {
-        try {
-            std::vector<double> coefRight = estimateCoefficients<int, double>(rightLinesX, rightLinesY);  // y = b1x + b0
-            rightB1 = coefRight[0];
-            rightB0 = coefRight[1];
-        } catch (const std::exception& e) {
-            std::cerr << "Error calculating right lane coefficients: " << e.what() << std::endl;
-            drawRightLane = false;
-        }
+        std::vector<double> coefRight = estimateCoefficients<int, double>(
+            rightLinesX, rightLinesY); // y = b1x + b0
+        rightB1 = coefRight[0];
+        rightB0 = coefRight[1];
     } else {
+        rightB1 = 1;
+        rightB0 = 1;
         drawRightLane = false;
     }
 
     // Now the points at the left side
     std::vector<int> leftLinesX;
     std::vector<int> leftLinesY;
-    double leftB1 = 1, leftB0 = 1; // Slope and intercept
-
+    double leftB1, leftB0; // Slope and intercept
 
     for (int i = 0; i < leftLines.size(); i++) {
         leftLinesX.push_back(leftLines[i][0]); // X of starting point of line
@@ -358,15 +485,13 @@ Mat LaneDetector::drawLanes(Mat source, std::vector<Vec4i> lines) {
     }
 
     if (leftLinesX.size() > 0) {
-        try {
-            std::vector<double> coefLeft = estimateCoefficients<int, double>(leftLinesX, leftLinesY); // y = b1x + b0
-            leftB1 = coefLeft[0];
-            leftB0 = coefLeft[1];
-        } catch (const std::exception& e) {
-            std::cerr << "Error calculating left lane coefficients: " << e.what() << std::endl;
-            drawLeftLane = false;
-        }
+        std::vector<double> coefLeft = estimateCoefficients<int, double>(
+            leftLinesX, leftLinesY); // y = b1x + b0
+        leftB1 = coefLeft[0];
+        leftB0 = coefLeft[1];
     } else {
+        leftB1 = 1;
+        leftB0 = 1;
         drawLeftLane = false;
     }
 
@@ -380,19 +505,26 @@ Mat LaneDetector::drawLanes(Mat source, std::vector<Vec4i> lines) {
     the ending point below the trapezoid height (0.4) to draw shorter lanes. I
     think that looks nicer. */
 
-    int y2 = static_cast<int>(source.rows * 0.6);  // Y coordinate of ending point of both the left and right lane
+    int y2 =
+        source.rows *
+        (1 -
+         0.4); // Y coordinate of ending point of both the left and right lane
 
     // y = b1x + b0 --> x = (y - b0) / b1
-    int rightX1 = static_cast<int>((y1 - rightB0) / rightB1); // X coordinate of starting point of right lane
-    int rightX2 = static_cast<int>((y2 - rightB0) / rightB1); // X coordinate of ending point of right lane
-    int leftX1 = static_cast<int>((y1 - leftB0) / leftB1); // X coordinate of starting point of left lane
-    int leftX2 = static_cast<int>((y2 - leftB0) / leftB1); // X coordinate of ending point of left lane
+    int rightX1 = (y1 - rightB0) /
+                  rightB1; // X coordinate of starting point of right lane
+    int rightX2 =
+        (y2 - rightB0) / rightB1; // X coordinate of ending point of right lane
+
+    int leftX1 =
+        (y1 - leftB0) / leftB1; // X coordinate of starting point of left lane
+    int leftX2 =
+        (y2 - leftB0) / leftB1; // X coordinate of ending point of left lane
 
     /* If the ending point of the right lane is on the left side of the left
     lane (or vice versa), return source image without drawings, because this
     should not be happening in real life. */
     if (rightX2 < leftX2 || leftX2 > rightX2) {
-        std::cerr << "Lane lines crossed each other. Returning original image." << std::endl;
         return source;
     }
 
@@ -402,9 +534,11 @@ Mat LaneDetector::drawLanes(Mat source, std::vector<Vec4i> lines) {
     // Draw lines and fill poly made up of the four points described above if
     // both bools are true
     Mat dst; // Holds blended image
-    if (drawRightLane && drawLeftLane) {
-        line(source, Point(rightX1, y1), Point(rightX2, y2), Scalar(255, 0, 0), 7);
-        line(source, Point(leftX1, y1), Point(leftX2, y2), Scalar(255, 0, 0), 7);
+    if (drawRightLane == true && drawLeftLane == true) {
+        line(source, Point(rightX1, y1), Point(rightX2, y2), Scalar(255, 0, 0),
+             7);
+        line(source, Point(leftX1, y1), Point(leftX2, y2), Scalar(255, 0, 0),
+             7);
 
         Point pts[4] = {
             Point(leftX1, y1),  // Starting point left lane
@@ -413,7 +547,8 @@ Mat LaneDetector::drawLanes(Mat source, std::vector<Vec4i> lines) {
             Point(rightX1, y1)  // Starting point right lane
         };
 
-        fillConvexPoly(mask, pts, 4, Scalar(235, 229, 52)); // Color is light blue
+        fillConvexPoly(mask, pts, 4,
+                       Scalar(235, 229, 52)); // Color is light blue
 
         // Blend the mask and source image together
         addWeighted(source, 0.9, mask, 0.3, 0.0, dst);

@@ -18,6 +18,8 @@ find_package(catkin REQUIRED COMPONENTS
 )
 find_package(OpenCV REQUIRED)
 
+find_package(OpenCL REQUIRED)
+
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES rubis_pkg
@@ -45,6 +47,7 @@ add_dependencies(lane_detector ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPO
 target_link_libraries(lane_detector
   ${catkin_LIBRARIES}
   ${OpenCV_LIBRARIES}
+  OpenCL::OpenCL
 )
 
 install(
