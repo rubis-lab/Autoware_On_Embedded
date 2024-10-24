@@ -7,6 +7,7 @@
     <arg name="gaussian_blur" default="true" />
     <arg name="canny" default="true" />
     <arg name="roi" default="true" />
+    <arg name="opencl" default="false" />
     
     <node pkg="vision_workloads" type="lane_detector" name="$(arg node_name)" output="screen">
         <param name="input_topic" value="$(arg input_topic)" />
@@ -16,5 +17,6 @@
         <param name="gaussian_blur" value="$(arg gaussian_blur)" />
         <param name="canny" value="$(arg canny)" />
         <param name="roi" value="$(arg roi)" />
+        <param name="opencl" value="$(arg opencl)" />
     </node>
 </launch>

@@ -35,7 +35,7 @@ private:
     cl_mem gradientImageBuffer;     // Gradient 결과 저장 버퍼
     cl_mem gradientDirectionBuffer; // Gradient 방향 저장 버퍼
 
-    bool debug_, filter_image_, gray_scale_, gaussian_blur_, canny_, roi_;
+    bool debug_, filter_image_, gray_scale_, gaussian_blur_, canny_, roi_, opencl_;
     ros::NodeHandle nh_;
     ros::Publisher lane_pub_;
     ros::Subscriber image_sub_; 

@@ -7,8 +7,7 @@
   <arg name="image_topic_4" default="none" />
   <arg name="pose_twist_topic" default="/rubis_current_pose_twist" />
   <arg name="rate" default="5" />
-  <arg name="data_size_mb" default="32" />
-  <arg name="n" default="50" />
+  <arg name="n" default="0" />
 
   <node pkg="svl_pkg" type="svl_sensing" name="svl_sensing" output="screen">
     <param name="lidar_topic" value="$(arg lidar_topic)" />
@@ -19,7 +18,6 @@
     <param name="image_topic_4" value="$(arg image_topic_4)" />
     <param name="rate" value="$(arg rate)" />
     <param name="pose_twist_topic" value="$(arg pose_twist_topic)" /> 
-    <param name="data_size_mb" value="$(arg data_size_mb)" /> 
     <param name="n" value="$(arg n)" /> 
   </node>
 

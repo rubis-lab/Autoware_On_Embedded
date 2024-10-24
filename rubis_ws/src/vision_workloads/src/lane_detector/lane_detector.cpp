@@ -25,7 +25,7 @@ const char* kernelSource =
 "}";
 
 LaneDetector::LaneDetector() {
-    initializeOpenCL();
+    if(opencl_) initializeOpenCL();
 
     ros::NodeHandle private_nh("~");
     std::string node_name = ros::this_node::getName();
@@ -33,14 +33,14 @@ LaneDetector::LaneDetector() {
     std::string output_topic;
     output_topic = node_name + std::string("_lane");
 
-    private_nh.param<std::string>(node_name + "/input_topic", input_topic,
-                                  "/svl_image_raw");
+    private_nh.param<std::string>(node_name + "/input_topic", input_topic, "/svl_image_raw");
     private_nh.param<bool>(node_name + "/debug", debug_, false);
     private_nh.param<bool>(node_name + "/filter_image", filter_image_, false);
     private_nh.param<bool>(node_name + "/gray_scale", gray_scale_, false);
     private_nh.param<bool>(node_name + "/gaussian_blur", gaussian_blur_, false);
     private_nh.param<bool>(node_name + "/canny", canny_, false);
     private_nh.param<bool>(node_name + "/roi", roi_, false);
+    private_nh.param<bool>(node_name + "/opencl", opencl_, false);
     lane_pub_ = nh_.advertise<rubis_msgs::Bool>(output_topic.c_str(), 1);
     image_sub_ =
         nh_.subscribe(input_topic, 1, &LaneDetector::imageCallback, this);
@@ -49,8 +49,7 @@ LaneDetector::LaneDetector() {
 }
 
 LaneDetector::~LaneDetector() {
-    // OpenCL 자원 해제
-    releaseOpenCL();
+    if(opencl_) releaseOpenCL();
 }
 
 Mat getImage() {
@@ -154,7 +153,7 @@ void LaneDetector::imageCallback(const rubis_msgs::Image &image) {
     Mat gray;
     if (gray_scale_){
         gray = applyGrayscale(frame);
-        applyOpenCLGrayscale(getImage());
+        if(opencl_) applyOpenCLGrayscale(getImage());
     }
     else{
         gray = filteredIMG;
